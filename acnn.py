@@ -146,13 +146,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         inputs=attentions,
         units=10
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -164,13 +164,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         inputs=attentions,
         units=functools.reduce(operator.mul, shape[1:])
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     attentions = tf.reshape(
@@ -249,13 +249,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         inputs=inputs,
         units=1024
     )
-
+    '''
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -357,7 +357,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 1e-5
+            "attention_decay": 1e-6
         }
     )
 
