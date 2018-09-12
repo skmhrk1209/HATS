@@ -334,14 +334,12 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 def main(unused_argv):
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE),
+    train_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32),
                                          0., 255., 0., 1.) for filename in glob.glob("data/train/*")])
-    eval_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE),
+    eval_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32),
                                         0., 255., 0., 1.) for filename in glob.glob("data/eval/*")])
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
-
-    print(train_images.dtype)
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=functools.partial(
