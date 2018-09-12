@@ -35,7 +35,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
-    (-1, 28, 28, 1) -> (-1, 28, 28, 32)
+    (-1, 64, 64, 1) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = features["images"]
@@ -71,7 +71,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 2
-    (-1, 28, 28, 32) -> (-1, 28, 28, 64)
+    (-1, 64, 64, 32) -> (-1, 64, 64, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
@@ -340,19 +340,27 @@ def main(unused_argv):
 
     def preprocess(image):
 
-        translated = np.zeros(shape=[64, 64], dtype=np.float32)
+        translated = np.zeros(shape=[64, 64, 1], dtype=np.float32)
         translation = np.random.randint(low=0, high=36, size=2)
-        translated[translation[0]:translation[0]+28, translation[1]:translation[1]+28] += image.reshape([28, 28])
+        translated[translation[0]:translation[0]+28, translation[1]:translation[1]+28] += image.reshape([28, 28, 1])
 
         return translated
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.apply_along_axis(func1d=preprocess, axis=-1, arr=mnist.train.images)
-    eval_images = np.apply_along_axis(func1d=preprocess, axis=-1, arr=mnist.test.images)
+    train_images = mnist.train.images
+    eval_images = mnist.test.images
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
-    print(train_images.dtype)
+    for i, image in enumerate(train_images):
+
+        cv2.imwrite("data/train/" + str(i).zfill(5) + ".jpeg", preprocess(image) * 255.)
+
+    for i, image in enumerate(eval_images):
+
+        cv2.imwrite("data/eval/" + str(i).zfill(5) + ".jpeg", preprocess(image) * 255.)
+
+    return
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=functools.partial(
