@@ -338,7 +338,7 @@ def main(unused_argv):
 
     def preprocess(image):
 
-        translated = np.zeros([64, 64])
+        translated = np.zeros(shape=[64, 64], dtype=np.float32)
         translation = np.random.randint(low=0, high=36, size=2)
         translated[translation[0]:translation[0]+28, translation[1]:translation[1]+28] += image.reshape([28, 28])
 
