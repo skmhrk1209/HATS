@@ -58,13 +58,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -80,13 +80,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -102,13 +102,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -124,13 +124,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -191,13 +191,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -213,13 +213,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.sigmoid(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -336,16 +336,26 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
 def main(unused_argv):
 
+    def preprocess(image):
+
+        translated = np.zeros([64, 64])
+        translation = np.random.randint(low=0, high=36, size=2)
+        translated[translation[0]:translation[0]+28, translation[1]:translation[1]+28] += image.reshape([28, 28])
+
+        return translated
+
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = mnist.train.images
-    eval_images = mnist.test.images
+    train_images = np.apply_along_axis(func1d=preprocess, axis=-1, arr=mnist.train.images)
+    eval_images = np.apply_along_axis(func1d=preprocess, axis=-1, arr=mnist.test.images)
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
+
+    print(train_images.dtype)
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=functools.partial(
             acnn_model_fn,
-            size=[28, 28],
+            size=[64, 64],
             data_format="channels_last"
         ),
         model_dir=args.model,
