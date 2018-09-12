@@ -24,7 +24,7 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def acnn_model_fn(features, labels, mode, size, data_format):
+def acnn_model_fn(features, labels, mode, params, size, data_format):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for ACNN
 
