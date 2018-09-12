@@ -40,6 +40,8 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = features["images"]
 
+    inputs = tf.layers.flatten(inputs)
+
     inputs = utils.chunk_images(
         inputs=inputs,
         size=size,
