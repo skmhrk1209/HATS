@@ -255,6 +255,12 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     '''
     inputs = tf.nn.relu(inputs)
 
+    inputs = tf.layers.dropout(
+        inputs=inputs,
+        rate=0.4,
+        training=mode == tf.estimator.ModeKeys.TRAIN
+    )
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer 4
     (-1, 1024) -> (-1, 10)
@@ -333,11 +339,21 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
 def main(unused_argv):
 
+    def resize_with_pad(image, size):
+
+        diff_y = size[0] - image.shape[0]
+        diff_x = size[1] - image.shape[1]
+
+        pad_width_y = np.random.randint(low=0, high=diff_y)
+        pad_width_x = np.random.randint(low=0, high=diff_x)
+
+        return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x]], "constant")
+
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32),
-                                         0., 255., 0., 1.) for filename in glob.glob("data/train/*")])
-    eval_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32),
-                                        0., 255., 0., 1.) for filename in glob.glob("data/eval/*")])
+    train_images = np.array([resize_with_pad(image.reshape([28, 28]), size=[64, 64])
+                             for image in mnist.train.images])
+    eval_images = np.array([resize_with_pad(image.reshape([28, 28]), size=[64, 64])
+                            for image in mnist.test.images])
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
