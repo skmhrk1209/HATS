@@ -244,7 +244,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=128
+        units=1024
     )
     '''
     inputs = tf.layers.batch_normalization(
@@ -254,13 +254,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     )
     '''
     inputs = tf.nn.relu(inputs)
-    '''
+
     inputs = tf.layers.dropout(
         inputs=inputs,
         rate=0.4,
         training=mode == tf.estimator.ModeKeys.TRAIN
     )
-    '''
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer 4
     (-1, 1024) -> (-1, 10)
@@ -372,7 +372,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 1e-5
+            "attention_decay": 1e-6
         }
     )
 
@@ -434,12 +434,12 @@ def main(unused_argv):
 
             image = image.repeat(repeats=3, axis=-1)
 
-            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
             attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
+            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
 
             image[:, :, -1] += attention
 
-            cv2.imshow("image", image)
+            cv2.imshow("image", cv2.resize(image, (128, 128)))
 
             if cv2.waitKey(1000) == ord("q"):
 
