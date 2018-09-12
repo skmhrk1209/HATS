@@ -21894,6 +21894,313 @@ node {
   }
 }
 node {
+  name: "flatten_3/Shape"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 2
+          }
+        }
+        tensor_content: "d\000\000\000\020\003\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice/stack"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 0
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice/stack_1"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice/stack_2"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice"
+  op: "StridedSlice"
+  input: "flatten_3/Shape"
+  input: "flatten_3/strided_slice/stack"
+  input: "flatten_3/strided_slice/stack_1"
+  input: "flatten_3/strided_slice/stack_2"
+  attr {
+    key: "Index"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "flatten_3/Reshape/shape/1"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+        }
+        int_val: -1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/Reshape/shape"
+  op: "Pack"
+  input: "flatten_3/strided_slice"
+  input: "flatten_3/Reshape/shape/1"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "flatten_3/Reshape"
+  op: "Reshape"
+  input: "random_shuffle_queue_DequeueMany:1"
+  input: "flatten_3/Reshape/shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 784
+          }
+        }
+      }
+    }
+  }
+}
+node {
   name: "Reshape_4/shape"
   op: "Const"
   input: "^add"
@@ -21933,7 +22240,7 @@ node {
 node {
   name: "Reshape_4"
   op: "Reshape"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "flatten_3/Reshape"
   input: "Reshape_4/shape"
   attr {
     key: "T"
@@ -21963,6 +22270,313 @@ node {
           }
           dim {
             size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "flatten_4/Shape"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 3
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 3
+          }
+        }
+        tensor_content: "d\000\000\000\020\003\000\000\t\000\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "flatten_4/strided_slice/stack"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 0
+      }
+    }
+  }
+}
+node {
+  name: "flatten_4/strided_slice/stack_1"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_4/strided_slice/stack_2"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_4/strided_slice"
+  op: "StridedSlice"
+  input: "flatten_4/Shape"
+  input: "flatten_4/strided_slice/stack"
+  input: "flatten_4/strided_slice/stack_1"
+  input: "flatten_4/strided_slice/stack_2"
+  attr {
+    key: "Index"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "flatten_4/Reshape/shape/1"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+        }
+        int_val: -1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_4/Reshape/shape"
+  op: "Pack"
+  input: "flatten_4/strided_slice"
+  input: "flatten_4/Reshape/shape/1"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "flatten_4/Reshape"
+  op: "Reshape"
+  input: "Reshape_3"
+  input: "flatten_4/Reshape/shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 7056
           }
         }
       }
@@ -22001,7 +22615,7 @@ node {
             size: 4
           }
         }
-        tensor_content: "\377\377\377\377\034\000\000\000\034\000\000\000\001\000\000\000"
+        tensor_content: "\377\377\377\377\034\000\000\000\034\000\000\000\t\000\000\000"
       }
     }
   }
@@ -22009,7 +22623,7 @@ node {
 node {
   name: "Reshape_5"
   op: "Reshape"
-  input: "Reshape_3"
+  input: "flatten_4/Reshape"
   input: "Reshape_5/shape"
   attr {
     key: "T"
@@ -22029,7 +22643,7 @@ node {
       list {
         shape {
           dim {
-            size: 900
+            size: 100
           }
           dim {
             size: 28
@@ -22038,7 +22652,7 @@ node {
             size: 28
           }
           dim {
-            size: 1
+            size: 9
           }
         }
       }
@@ -23274,6 +23888,178 @@ node {
   }
 }
 node {
+  name: "Abs"
+  op: "Abs"
+  input: "Reshape_3"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 784
+          }
+          dim {
+            size: 9
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "Const"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 3
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 3
+          }
+        }
+        tensor_content: "\000\000\000\000\001\000\000\000\002\000\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "Sum"
+  op: "Sum"
+  input: "Abs"
+  input: "Const"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "mul/y"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_FLOAT
+        tensor_shape {
+        }
+        float_val: 9.999999747378752e-06
+      }
+    }
+  }
+}
+node {
+  name: "mul"
+  op: "Mul"
+  input: "Sum"
+  input: "mul/y"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "add_1"
+  op: "Add"
+  input: "sparse_softmax_cross_entropy_loss/value"
+  input: "mul"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
   name: "gradients/Shape"
   op: "Const"
   input: "^add"
@@ -23396,6 +24182,344 @@ node {
   }
 }
 node {
+  name: "gradients/add_1_grad/Shape"
+  op: "Const"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/Shape_1"
+  op: "Const"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/add_1_grad/Shape"
+  input: "gradients/add_1_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/Sum"
+  op: "Sum"
+  input: "gradients/Fill"
+  input: "gradients/add_1_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/add_1_grad/Sum"
+  input: "gradients/add_1_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Fill"
+  input: "gradients/add_1_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/add_1_grad/Sum_1"
+  input: "gradients/add_1_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/tuple/group_deps"
+  op: "NoOp"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  input: "^gradients/add_1_grad/Reshape"
+  input: "^gradients/add_1_grad/Reshape_1"
+}
+node {
+  name: "gradients/add_1_grad/tuple/control_dependency"
+  op: "Identity"
+  input: "gradients/add_1_grad/Reshape"
+  input: "^gradients/add_1_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/add_1_grad/Reshape"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_1_grad/tuple/control_dependency_1"
+  op: "Identity"
+  input: "gradients/add_1_grad/Reshape_1"
+  input: "^gradients/add_1_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/add_1_grad/Reshape_1"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
   name: "gradients/sparse_softmax_cross_entropy_loss/value_grad/zeros_like"
   op: "Const"
   input: "^add"
@@ -23448,7 +24572,7 @@ node {
   name: "gradients/sparse_softmax_cross_entropy_loss/value_grad/Select"
   op: "Select"
   input: "sparse_softmax_cross_entropy_loss/Greater"
-  input: "gradients/Fill"
+  input: "gradients/add_1_grad/tuple/control_dependency"
   input: "gradients/sparse_softmax_cross_entropy_loss/value_grad/zeros_like"
   attr {
     key: "T"
@@ -23471,7 +24595,7 @@ node {
   op: "Select"
   input: "sparse_softmax_cross_entropy_loss/Greater"
   input: "gradients/sparse_softmax_cross_entropy_loss/value_grad/zeros_like"
-  input: "gradients/Fill"
+  input: "gradients/add_1_grad/tuple/control_dependency"
   attr {
     key: "T"
     value {
@@ -23558,6 +24682,386 @@ node {
     value {
       list {
         s: "loc:@gradients/sparse_softmax_cross_entropy_loss/value_grad/Select_1"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/Shape"
+  op: "Const"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/Shape_1"
+  op: "Const"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/mul_grad/Shape"
+  input: "gradients/mul_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/mul"
+  op: "Mul"
+  input: "gradients/add_1_grad/tuple/control_dependency_1"
+  input: "mul/y"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/Sum"
+  op: "Sum"
+  input: "gradients/mul_grad/mul"
+  input: "gradients/mul_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/mul_grad/Sum"
+  input: "gradients/mul_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/mul_1"
+  op: "Mul"
+  input: "Sum"
+  input: "gradients/add_1_grad/tuple/control_dependency_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/mul_grad/mul_1"
+  input: "gradients/mul_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/mul_grad/Sum_1"
+  input: "gradients/mul_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/tuple/group_deps"
+  op: "NoOp"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  input: "^gradients/mul_grad/Reshape"
+  input: "^gradients/mul_grad/Reshape_1"
+}
+node {
+  name: "gradients/mul_grad/tuple/control_dependency"
+  op: "Identity"
+  input: "gradients/mul_grad/Reshape"
+  input: "^gradients/mul_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/mul_grad/Reshape"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/mul_grad/tuple/control_dependency_1"
+  op: "Identity"
+  input: "gradients/mul_grad/Reshape_1"
+  input: "^gradients/mul_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/mul_grad/Reshape_1"
       }
     }
   }
@@ -24032,6 +25536,188 @@ node {
   }
 }
 node {
+  name: "gradients/Sum_grad/Reshape/shape"
+  op: "Const"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 3
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 3
+          }
+        }
+        tensor_content: "\001\000\000\000\001\000\000\000\001\000\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Sum_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/mul_grad/tuple/control_dependency"
+  input: "gradients/Sum_grad/Reshape/shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+          dim {
+            size: 1
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Sum_grad/Tile/multiples"
+  op: "Const"
+  input: "^add"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 3
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 3
+          }
+        }
+        tensor_content: "d\000\000\000\020\003\000\000\t\000\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Sum_grad/Tile"
+  op: "Tile"
+  input: "gradients/Sum_grad/Reshape"
+  input: "gradients/Sum_grad/Tile/multiples"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tmultiples"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 784
+          }
+          dim {
+            size: 9
+          }
+        }
+      }
+    }
+  }
+}
+node {
   name: "gradients/sparse_softmax_cross_entropy_loss/Sum_1_grad/Reshape/shape"
   op: "Const"
   input: "^add"
@@ -24184,6 +25870,83 @@ node {
     value {
       list {
         shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Abs_grad/Sign"
+  op: "Sign"
+  input: "Reshape_3"
+  input: "^batch_normalization/AssignMovingAvg"
+  input: "^batch_normalization/AssignMovingAvg_1"
+  input: "^batch_normalization_2/AssignMovingAvg"
+  input: "^batch_normalization_2/AssignMovingAvg_1"
+  input: "^batch_normalization_3/AssignMovingAvg"
+  input: "^batch_normalization_3/AssignMovingAvg_1"
+  input: "^batch_normalization_4/AssignMovingAvg"
+  input: "^batch_normalization_4/AssignMovingAvg_1"
+  input: "^batch_normalization_5/AssignMovingAvg"
+  input: "^batch_normalization_5/AssignMovingAvg_1"
+  input: "^batch_normalization_6/AssignMovingAvg"
+  input: "^batch_normalization_6/AssignMovingAvg_1"
+  input: "^batch_normalization_7/AssignMovingAvg"
+  input: "^batch_normalization_7/AssignMovingAvg_1"
+  input: "^batch_normalization_8/AssignMovingAvg"
+  input: "^batch_normalization_8/AssignMovingAvg_1"
+  input: "^batch_normalization_9/AssignMovingAvg"
+  input: "^batch_normalization_9/AssignMovingAvg_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 784
+          }
+          dim {
+            size: 9
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Abs_grad/mul"
+  op: "Mul"
+  input: "gradients/Sum_grad/Tile"
+  input: "gradients/Abs_grad/Sign"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 784
+          }
+          dim {
+            size: 9
+          }
         }
       }
     }
@@ -31443,6 +33206,50 @@ node {
   }
 }
 node {
+  name: "gradients/AddN_2"
+  op: "AddN"
+  input: "gradients/Abs_grad/mul"
+  input: "gradients/MatMul_grad/tuple/control_dependency_1"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/Abs_grad/mul"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 784
+          }
+          dim {
+            size: 9
+          }
+        }
+      }
+    }
+  }
+}
+node {
   name: "gradients/Reshape_3_grad/Shape"
   op: "Const"
   input: "^add"
@@ -31500,7 +33307,7 @@ node {
 node {
   name: "gradients/Reshape_3_grad/Reshape"
   op: "Reshape"
-  input: "gradients/MatMul_grad/tuple/control_dependency_1"
+  input: "gradients/AddN_2"
   input: "gradients/Reshape_3_grad/Shape"
   attr {
     key: "T"
@@ -35047,7 +36854,7 @@ node {
   }
 }
 node {
-  name: "gradients/AddN_2"
+  name: "gradients/AddN_3"
   op: "AddN"
   input: "gradients/batch_normalization_6/batchnorm/mul_1_grad/tuple/control_dependency_1"
   input: "gradients/batch_normalization_6/batchnorm/mul_2_grad/tuple/control_dependency_1"
@@ -35226,7 +37033,7 @@ node {
 node {
   name: "gradients/batch_normalization_6/batchnorm/mul_grad/mul"
   op: "Mul"
-  input: "gradients/AddN_2"
+  input: "gradients/AddN_3"
   input: "batch_normalization_5/gamma/read"
   attr {
     key: "T"
@@ -35315,7 +37122,7 @@ node {
   name: "gradients/batch_normalization_6/batchnorm/mul_grad/mul_1"
   op: "Mul"
   input: "batch_normalization_6/batchnorm/Rsqrt"
-  input: "gradients/AddN_2"
+  input: "gradients/AddN_3"
   attr {
     key: "T"
     value {
@@ -38858,7 +40665,7 @@ node {
   }
 }
 node {
-  name: "gradients/AddN_3"
+  name: "gradients/AddN_4"
   op: "AddN"
   input: "gradients/batch_normalization_6/batchnorm/mul_1_grad/tuple/control_dependency"
   input: "gradients/batch_normalization_6/moments/SquaredDifference_grad/tuple/control_dependency"
@@ -38902,7 +40709,7 @@ node {
 node {
   name: "gradients/dense_2/BiasAdd_grad/BiasAddGrad"
   op: "BiasAddGrad"
-  input: "gradients/AddN_3"
+  input: "gradients/AddN_4"
   attr {
     key: "T"
     value {
@@ -38950,13 +40757,13 @@ node {
   input: "^batch_normalization_8/AssignMovingAvg_1"
   input: "^batch_normalization_9/AssignMovingAvg"
   input: "^batch_normalization_9/AssignMovingAvg_1"
-  input: "^gradients/AddN_3"
+  input: "^gradients/AddN_4"
   input: "^gradients/dense_2/BiasAdd_grad/BiasAddGrad"
 }
 node {
   name: "gradients/dense_2/BiasAdd_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/AddN_3"
+  input: "gradients/AddN_4"
   input: "^gradients/dense_2/BiasAdd_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -40868,7 +42675,7 @@ node {
   }
 }
 node {
-  name: "gradients/AddN_4"
+  name: "gradients/AddN_5"
   op: "AddN"
   input: "gradients/batch_normalization_5/batchnorm/mul_1_grad/tuple/control_dependency_1"
   input: "gradients/batch_normalization_5/batchnorm/mul_2_grad/tuple/control_dependency_1"
@@ -41047,7 +42854,7 @@ node {
 node {
   name: "gradients/batch_normalization_5/batchnorm/mul_grad/mul"
   op: "Mul"
-  input: "gradients/AddN_4"
+  input: "gradients/AddN_5"
   input: "batch_normalization_4/gamma/read"
   attr {
     key: "T"
@@ -41136,7 +42943,7 @@ node {
   name: "gradients/batch_normalization_5/batchnorm/mul_grad/mul_1"
   op: "Mul"
   input: "batch_normalization_5/batchnorm/Rsqrt"
-  input: "gradients/AddN_4"
+  input: "gradients/AddN_5"
   attr {
     key: "T"
     value {
@@ -44679,7 +46486,7 @@ node {
   }
 }
 node {
-  name: "gradients/AddN_5"
+  name: "gradients/AddN_6"
   op: "AddN"
   input: "gradients/batch_normalization_5/batchnorm/mul_1_grad/tuple/control_dependency"
   input: "gradients/batch_normalization_5/moments/SquaredDifference_grad/tuple/control_dependency"
@@ -44723,7 +46530,7 @@ node {
 node {
   name: "gradients/dense/BiasAdd_grad/BiasAddGrad"
   op: "BiasAddGrad"
-  input: "gradients/AddN_5"
+  input: "gradients/AddN_6"
   attr {
     key: "T"
     value {
@@ -44771,13 +46578,13 @@ node {
   input: "^batch_normalization_8/AssignMovingAvg_1"
   input: "^batch_normalization_9/AssignMovingAvg"
   input: "^batch_normalization_9/AssignMovingAvg_1"
-  input: "^gradients/AddN_5"
+  input: "^gradients/AddN_6"
   input: "^gradients/dense/BiasAdd_grad/BiasAddGrad"
 }
 node {
   name: "gradients/dense/BiasAdd_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/AddN_5"
+  input: "gradients/AddN_6"
   input: "^gradients/dense/BiasAdd_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -46867,7 +48674,7 @@ node {
   }
 }
 node {
-  name: "gradients/AddN_6"
+  name: "gradients/AddN_7"
   op: "AddN"
   input: "gradients/Reshape_2_grad/Reshape"
   input: "gradients/conv2d_3/Conv2D_grad/tuple/control_dependency"
@@ -46916,7 +48723,7 @@ node {
 node {
   name: "gradients/Relu_1_grad/ReluGrad"
   op: "ReluGrad"
-  input: "gradients/AddN_6"
+  input: "gradients/AddN_7"
   input: "Relu_1"
   attr {
     key: "T"
@@ -65409,7 +67216,7 @@ node {
   name: "loss"
   op: "ScalarSummary"
   input: "loss/tags"
-  input: "sparse_softmax_cross_entropy_loss/value"
+  input: "add_1"
   attr {
     key: "T"
     value {
@@ -75616,7 +77423,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_02ce5a79b61f4ea394106850e6a01041/part"
+        string_val: "_temp_cbbe146c14d441cea623ce91612ad514/part"
       }
     }
   }
