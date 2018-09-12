@@ -380,7 +380,7 @@ def main(unused_argv):
 
         mnist_classifier.train(
             input_fn=train_input_fn,
-            max_steps=args.steps,
+            steps=args.steps,
             hooks=[logging_hook]
         )
 
