@@ -9,6 +9,7 @@ import argparse
 import itertools
 import functools
 import operator
+import glob
 import utils
 
 parser = argparse.ArgumentParser()
@@ -40,17 +41,11 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = features["images"]
 
-    inputs = tf.layers.flatten(inputs)
-
     inputs = utils.chunk_images(
         inputs=inputs,
         size=size,
         data_format=data_format
     )
-
-    if data_format == "channels_first":
-
-        inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
@@ -93,7 +88,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 1
-    (-1, 28, 28, 64) -> (-1, 14, 14, 3)
+    (-1, 64, 64, 64) -> (-1, 32, 32, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d(
@@ -115,7 +110,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 2
-    (-1, 14, 14, 3) -> (-1, 7, 7, 3)
+    (-1, 32, 32, 3) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d(
@@ -137,7 +132,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 3
-    (-1, 7, 7, 3) -> (-1, 10)
+    (-1, 16, 16, 3) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = attentions.get_shape().as_list()
@@ -159,7 +154,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 4
-    (-1, 10) -> (-1, 7, 7, 3)
+    (-1, 10) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.dense(
@@ -182,7 +177,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 5
-    (-1, 7, 7, 3) -> (-1, 14, 14, 9)
+    (-1, 16, 16, 3) -> (-1, 32, 32, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -204,7 +199,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 6
-    (-1, 14, 14, 9) -> (-1, 28, 28, 9)
+    (-1, 32, 32, 9) -> (-1, 64, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -226,7 +221,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
-    (-1, 28, 28, 64), (-1, 28, 28, 9) -> (-1, 64, 9)
+    (-1, 64, 64, 64), (-1, 64, 64, 9) -> (-1, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = utils.flatten_images(inputs, data_format)
@@ -280,12 +275,12 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
             name="softmax_tensor"
         ),
         "images": utils.chunk_images(
-            inputs=tf.layers.flatten(features["images"]),
+            inputs=features["images"],
             size=size,
             data_format="channels_last"
         ),
         "attentions": utils.chunk_images(
-            inputs=tf.layers.flatten(attentions),
+            inputs=attentions,
             size=size,
             data_format="channels_last"
         )
@@ -338,29 +333,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
 def main(unused_argv):
 
-    def preprocess(image):
-
-        translated = np.zeros(shape=[64, 64, 1], dtype=np.float32)
-        translation = np.random.randint(low=0, high=36, size=2)
-        translated[translation[0]:translation[0]+28, translation[1]:translation[1]+28] += image.reshape([28, 28, 1])
-
-        return translated
-
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = mnist.train.images
-    eval_images = mnist.test.images
+    train_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE),
+                                         0., 255., 0., 1.) for filename in glob.glob("data/train/*")])
+    eval_images = np.array([utils.scale(cv2.imread(filename, cv2.IMREAD_GRAYSCALE),
+                                        0., 255., 0., 1.) for filename in glob.glob("data/eval/*")])
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
-
-    for i, image in enumerate(train_images):
-
-        cv2.imwrite("data/train/" + str(i).zfill(5) + ".jpeg", preprocess(image) * 255.)
-
-    for i, image in enumerate(eval_images):
-
-        cv2.imwrite("data/eval/" + str(i).zfill(5) + ".jpeg", preprocess(image) * 255.)
-
-    return
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=functools.partial(
