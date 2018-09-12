@@ -341,6 +341,8 @@ def main(unused_argv):
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
+    print(train_images.dtype)
+
     mnist_classifier = tf.estimator.Estimator(
         model_fn=functools.partial(
             acnn_model_fn,
