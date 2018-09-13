@@ -50,7 +50,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=32,
-        kernel_size=3,
+        kernel_size=5,
         strides=1,
         padding="same",
         data_format=data_format
@@ -72,7 +72,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
-        kernel_size=3,
+        kernel_size=5,
         strides=1,
         padding="same",
         data_format=data_format
@@ -244,7 +244,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=128
+        units=1024
     )
     '''
     inputs = tf.layers.batch_normalization(
@@ -254,6 +254,12 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     )
     '''
     inputs = tf.nn.relu(inputs)
+
+    inputs = tf.layers.dropout(
+        inputs=inputs,
+        rate=0.4,
+        training=mode == tf.estimator.ModeKeys.TRAIN
+    )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
@@ -433,8 +439,8 @@ def main(unused_argv):
 
             image = image.repeat(repeats=3, axis=-1)
 
-            attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
             attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
+            attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
 
             image[:, :, -1] += attention
 
