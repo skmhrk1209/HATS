@@ -14,6 +14,7 @@ import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--steps", type=int, default=10000, help="training steps")
+parser.add_argument("--epochs", type=int, default=100, help="training epochs")
 parser.add_argument("--batch", type=int, default=100, help="batch size")
 parser.add_argument("--model", type=str, default="mnist_acnn_model", help="model directory")
 parser.add_argument('--train', action="store_true", help="with training")
@@ -376,7 +377,7 @@ def main(unused_argv):
             x={"images": train_images},
             y=train_labels,
             batch_size=args.batch,
-            num_epochs=None,
+            num_epochs=args.epochs,
             shuffle=True
         )
 
@@ -389,7 +390,6 @@ def main(unused_argv):
 
         mnist_classifier.train(
             input_fn=train_input_fn,
-            steps=args.steps,
             hooks=[logging_hook]
         )
 
