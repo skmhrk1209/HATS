@@ -42,11 +42,9 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = features["images"]
 
-    inputs = utils.chunk_images(
-        inputs=inputs,
-        size=size,
-        data_format=data_format
-    )
+    if data_format == "channels_first":
+
+        inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
@@ -266,6 +264,16 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         units=10
     )
 
+    attentions = utils.chunk_images(
+        inputs=attentions,
+        size=size,
+        data_format=data_format
+    )
+
+    if data_format == "channels_first":
+
+        attentions = tf.transpose(attentions, [0, 2, 3, 1])
+
     predictions = {
         "classes": tf.argmax(
             input=logits,
@@ -275,16 +283,8 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
             logits=logits,
             name="softmax_tensor"
         ),
-        "images": utils.chunk_images(
-            inputs=features["images"],
-            size=size,
-            data_format="channels_last"
-        ),
-        "attentions": utils.chunk_images(
-            inputs=attentions,
-            size=size,
-            data_format="channels_last"
-        )
+        "images": features["images"],
+        "attentions": attentions
     }
 
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -342,12 +342,12 @@ def main(unused_argv):
         pad_width_y = np.random.randint(low=0, high=diff_y)
         pad_width_x = np.random.randint(low=0, high=diff_x)
 
-        return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x]], "constant")
+        return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x], [0, 0]], "constant")
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.array([resize_with_pad(image.reshape([28, 28]), size=[64, 64])
+    train_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[64, 64])
                              for image in mnist.train.images])
-    eval_images = np.array([resize_with_pad(image.reshape([28, 28]), size=[64, 64])
+    eval_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[64, 64])
                             for image in mnist.test.images])
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
