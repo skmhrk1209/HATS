@@ -425,7 +425,7 @@ def main(unused_argv):
         model_fn=functools.partial(
             svhn_model_fn,
             size=[56, 56],
-            data_format="channels_last"
+            data_format="channels_first"
         ),
         model_dir=args.model,
         config=tf.estimator.RunConfig().replace(
@@ -445,7 +445,7 @@ def main(unused_argv):
 
         train_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["train.tfrecords"],
+            filenames=["data/train.tfrecords"],
             training=True,
             num_epochs=args.epochs,
             batch_size=args.batch
@@ -469,7 +469,7 @@ def main(unused_argv):
 
         eval_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["test.tfrecords"],
+            filenames=["data/test.tfrecords"],
             training=False,
             num_epochs=1,
             batch_size=args.batch
