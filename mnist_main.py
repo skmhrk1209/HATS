@@ -265,6 +265,16 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         units=10
     )
 
+    attentions = utils.chunk_images(
+        inputs=attentions,
+        size=size,
+        data_format=data_format
+    )
+
+    if data_format == "channels_first":
+
+        attentions = tf.transpose(attentions, [0, 2, 3, 1])
+
     predictions = {
         "classes": tf.argmax(
             input=logits,
@@ -274,15 +284,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
             logits=logits,
             name="softmax"
         ),
-        "attentions": (lambda cond, func, inputs: func(inputs) if cond else inputs)(
-            cond=data_format == "channels_first",
-            func=functools.partial(tf.transpose, perm=[0, 2, 3, 1]),
-            inputs=utils.chunk_images(
-                inputs=attentions,
-                size=size,
-                data_format=data_format
-            )
-        )
+        "attentions": attentions
     }
 
     predictions.update(features)

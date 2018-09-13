@@ -461,56 +461,83 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
     (-1, 1024) -> (-1, 6), (-1, 11) * 5
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    length_logits = tf.layers.dense(
-        inputs=inputs,
-        units=6
-    )
-
-    digits_logits = [
+    multi_logits = [
+        tf.layers.dense(
+            inputs=inputs,
+            units=6
+        ),
         tf.layers.dense(
             inputs=inputs,
             units=11
-        )
-    ] * 5
+        ),
+        tf.layers.dense(
+            inputs=inputs,
+            units=11
+        ),
+        tf.layers.dense(
+            inputs=inputs,
+            units=11
+        ),
+        tf.layers.dense(
+            inputs=inputs,
+            units=11
+        ),
+        tf.layers.dense(
+            inputs=inputs,
+            units=11
+        ),
+    ]
+
+    attentions = utils.chunk_images(
+        inputs=attentions,
+        size=size,
+        data_format=data_format
+    )
+
+    if data_format == "channels_first":
+
+        attentions = tf.transpose(attentions, [0, 2, 3, 1])
 
     predictions = {
-        "length_classes": tf.argmax(
-            input=length_logits,
+        "length_classes": tf.stack(
+            values=[
+                tf.argmax(
+                    input=logits,
+                    axis=1
+                ) for logits in multi_logits[:1]
+            ],
             axis=1
-        ),
-        "length_probabilities": tf.nn.softmax(
-            logits=length_logits,
-            dim=1,
-            name="length_softmax"
         ),
         "digits_classes": tf.stack(
             values=[
                 tf.argmax(
-                    input=digit_logits,
+                    input=logits,
                     axis=1
-                ) for digit_logits in digits_logits
+                ) for logits in multi_logits[1:]
             ],
             axis=1
+        ),
+        "length_probabilities": tf.stack(
+            values=[
+                tf.nn.softmax(
+                    logits=logits,
+                    dim=1
+                ) for logits in multi_logits[:1]
+            ],
+            axis=1,
+            name="length_softmax"
         ),
         "digits_probabilities": tf.stack(
             values=[
                 tf.nn.softmax(
-                    logits=digit_logits,
+                    logits=logits,
                     dim=1
-                ) for digit_logits in digits_logits
+                ) for logits in multi_logits[1:]
             ],
             axis=1,
             name="digits_softmax"
         ),
-        "attentions": (lambda cond, func, inputs: func(inputs) if cond else inputs)(
-            cond=data_format == "channels_first",
-            func=functools.partial(tf.transpose, perm=[0, 2, 3, 1]),
-            inputs=utils.chunk_images(
-                inputs=attentions,
-                size=size,
-                data_format=data_format
-            )
-        )
+        "attentions": attentions
     }
 
     predictions.update(features)
@@ -522,22 +549,15 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
             predictions=predictions
         )
 
-    length_loss = tf.losses.sparse_softmax_cross_entropy(
-        labels=labels[:, 0],
-        logits=length_logits
-    )
-
-    digits_loss = tf.reduce_sum(
+    loss = tf.reduce_sum(
         input_tensor=[
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
-                logits=digit_logits
-            ) for i, digit_logits in enumerate(digits_logits, 1)
+                logits=logits
+            ) for i, logits in enumerate(multi_logits)
         ],
         axis=None
     )
-
-    loss = length_loss + digits_loss
 
     loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
 
