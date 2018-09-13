@@ -532,7 +532,7 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
                 logits=digit_logits
-            ) for i, digit_logits in enumerate(digits_logits)
+            ) for i, digit_logits in enumerate(digits_logits, 1)
         ],
         axis=None
     )
