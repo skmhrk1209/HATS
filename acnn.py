@@ -377,7 +377,7 @@ def main(unused_argv):
             x={"images": train_images},
             y=train_labels,
             batch_size=args.batch,
-            num_epochs=None,
+            num_epochs=args.epochs,
             shuffle=True
         )
 
@@ -390,8 +390,7 @@ def main(unused_argv):
 
         mnist_classifier.train(
             input_fn=train_input_fn,
-            hooks=[logging_hook],
-            steps=args.steps
+            hooks=[logging_hook]
         )
 
     if args.eval:
