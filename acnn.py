@@ -362,7 +362,8 @@ def main(unused_argv):
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
-                    visible_device_list=args.gpu
+                    visible_device_list=args.gpu,
+                    allow_growth=True
                 )
             )
         ),
