@@ -356,7 +356,7 @@ def main(unused_argv):
         model_fn=functools.partial(
             acnn_model_fn,
             size=[64, 64],
-            data_format="channels_first"
+            data_format="channels_last"
         ),
         model_dir=args.model,
         config=tf.estimator.RunConfig().replace(
@@ -378,7 +378,7 @@ def main(unused_argv):
             x={"images": train_images},
             y=train_labels,
             batch_size=args.batch,
-            num_epochs=args.epochs,
+            num_epochs=None,
             shuffle=True
         )
 
@@ -391,7 +391,8 @@ def main(unused_argv):
 
         mnist_classifier.train(
             input_fn=train_input_fn,
-            hooks=[logging_hook]
+            hooks=[logging_hook],
+            steps=args.steps
         )
 
     if args.eval:
