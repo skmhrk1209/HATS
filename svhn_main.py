@@ -104,13 +104,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -126,13 +126,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -148,13 +148,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -170,13 +170,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -192,13 +192,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -214,13 +214,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -236,13 +236,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -258,13 +258,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -280,13 +280,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -302,13 +302,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -324,13 +324,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         inputs=attentions,
         units=10
     )
-    '''
+
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -342,13 +342,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         inputs=attentions,
         units=functools.reduce(operator.mul, shape[1:])
     )
-    '''
+
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     attentions = tf.nn.relu(attentions)
 
     attentions = tf.reshape(
@@ -369,13 +369,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -391,13 +391,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-    '''
+
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     attentions = tf.nn.sigmoid(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -427,13 +427,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         inputs=inputs,
         units=4096
     )
-    '''
+
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -447,13 +447,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         inputs=inputs,
         units=4096
     )
-    '''
+
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-    '''
+
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
