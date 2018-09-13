@@ -244,7 +244,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024
+        units=128
     )
     '''
     inputs = tf.layers.batch_normalization(
