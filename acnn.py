@@ -264,23 +264,6 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         units=10
     )
 
-    loss = tf.losses.sparse_softmax_cross_entropy(
-        labels=labels,
-        logits=logits
-    )
-
-    loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
-
-    attentions = utils.chunk_images(
-        inputs=attentions,
-        size=size,
-        data_format=data_format
-    )
-
-    if data_format == "channels_first":
-
-        attentions = tf.transpose(attentions, [0, 2, 3, 1])
-
     predictions = {
         "classes": tf.argmax(
             input=logits,
@@ -290,9 +273,18 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
             logits=logits,
             name="softmax_tensor"
         ),
-        "images": features["images"],
-        "attentions": attentions
+        "attentions": (lambda cond, func, inputs: func(inputs) if cond else inputs)(
+            cond=data_format == "channels_first",
+            func=functools.partial(tf.transpose, perm=[0, 2, 3, 1]),
+            inputs=utils.chunk_images(
+                inputs=attentions,
+                size=size,
+                data_format=data_format
+            )
+        )
     }
+
+    predictions.update(features)
 
     if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -300,6 +292,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
             mode=mode,
             predictions=predictions
         )
+
+    loss = tf.losses.sparse_softmax_cross_entropy(
+        labels=labels,
+        logits=logits
+    )
+
+    loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
 
     if mode == tf.estimator.ModeKeys.EVAL:
 
