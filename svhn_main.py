@@ -394,7 +394,13 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         eval_metric_ops = {
             "accuracy": tf.metrics.accuracy(
                 labels=labels,
-                predictions=predictions["classes"]
+                predictions=tf.concat(
+                    values=[
+                        predictions["length_classes"],
+                        predictions["digits_classes"]
+                    ],
+                    axis=1
+                )
             )
         }
 
@@ -426,7 +432,7 @@ def main(unused_argv):
         model_fn=functools.partial(
             svhn_model_fn,
             size=[56, 56],
-            data_format="channels_first"
+            data_format=args.data_format
         ),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(

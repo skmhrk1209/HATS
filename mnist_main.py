@@ -356,7 +356,7 @@ def main(unused_argv):
         model_fn=functools.partial(
             acnn_model_fn,
             size=[64, 64],
-            data_format="channels_first"
+            data_format=args.data_format
         ),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
