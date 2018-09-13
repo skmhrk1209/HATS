@@ -85,59 +85,191 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
     mode:       enum { TRAIN, EVAL, REDICT }
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 1
-    (-1, 56, 56, 1) -> (-1, 56, 56, 32)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
     inputs = features["images"]
 
     if data_format == "channels_first":
 
         inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=32,
-        kernel_size=5,
-        strides=1,
-        padding="same",
-        data_format=data_format
-    )
-
-    inputs = utils.batch_normalization(data_format)(
-        inputs=inputs,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 2
-    (-1, 56, 56, 32) -> (-1, 56, 56, 64)
+    convolutional layer 1
+    (-1, 64, 64, 1) -> (-1, 64, 64, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
-        kernel_size=5,
+        kernel_size=3,
         strides=1,
         padding="same",
         data_format=data_format
     )
-
+    '''
     inputs = utils.batch_normalization(data_format)(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
+    '''
+    inputs = tf.nn.relu(inputs)
 
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 2
+    (-1, 64, 64, 64) -> (-1, 64, 64, 64)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=64,
+        kernel_size=3,
+        strides=1,
+        padding="same",
+        data_format=data_format
+    )
+    '''
+    inputs = utils.batch_normalization(data_format)(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
+    inputs = tf.nn.relu(inputs)
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 3
+    (-1, 64, 64, 64) -> (-1, 64, 64, 128)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=128,
+        kernel_size=3,
+        strides=1,
+        padding="same",
+        data_format=data_format
+    )
+    '''
+    inputs = utils.batch_normalization(data_format)(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
+    inputs = tf.nn.relu(inputs)
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 4
+    (-1, 64, 64, 128) -> (-1, 64, 64, 128)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=128,
+        kernel_size=3,
+        strides=1,
+        padding="same",
+        data_format=data_format
+    )
+    '''
+    inputs = utils.batch_normalization(data_format)(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
+    inputs = tf.nn.relu(inputs)
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 5
+    (-1, 64, 64, 128) -> (-1, 64, 64, 256)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=256,
+        kernel_size=3,
+        strides=1,
+        padding="same",
+        data_format=data_format
+    )
+    '''
+    inputs = utils.batch_normalization(data_format)(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
+    inputs = tf.nn.relu(inputs)
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 6
+    (-1, 64, 64, 256) -> (-1, 64, 64, 256)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=256,
+        kernel_size=3,
+        strides=1,
+        padding="same",
+        data_format=data_format
+    )
+    '''
+    inputs = utils.batch_normalization(data_format)(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
+    inputs = tf.nn.relu(inputs)
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 7
+    (-1, 64, 64, 256) -> (-1, 64, 64, 512)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=512,
+        kernel_size=3,
+        strides=1,
+        padding="same",
+        data_format=data_format
+    )
+    '''
+    inputs = utils.batch_normalization(data_format)(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
+    inputs = tf.nn.relu(inputs)
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 8
+    (-1, 64, 64, 512) -> (-1, 64, 64, 512)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=512,
+        kernel_size=3,
+        strides=1,
+        padding="same",
+        data_format=data_format
+    )
+    '''
+    inputs = utils.batch_normalization(data_format)(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 1
-    (-1, 56, 56, 64) -> (-1, 28, 28, 3)
+    (-1, 64, 64, 512) -> (-1, 32, 32, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d(
@@ -148,18 +280,18 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 2
-    (-1, 28, 28, 3) -> (-1, 14, 14, 3)
+    (-1, 32, 32, 3) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d(
@@ -170,18 +302,18 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 3
-    (-1, 14, 14, 3) -> (-1, 10)
+    (-1, 16, 16, 3) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = attentions.get_shape().as_list()
@@ -192,31 +324,31 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         inputs=attentions,
         units=10
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 4
-    (-1, 10) -> (-1, 14, 14, 3)
+    (-1, 10) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.dense(
         inputs=attentions,
         units=functools.reduce(operator.mul, shape[1:])
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     attentions = tf.reshape(
@@ -226,7 +358,7 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 5
-    (-1, 14, 14, 3) -> (-1, 28, 28, 9)
+    (-1, 16, 16, 3) -> (-1, 32, 32, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -237,18 +369,18 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 6
-    (-1, 28, 28, 9) -> (-1, 56, 56, 9)
+    (-1, 32, 32, 9) -> (-1, 64, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -259,18 +391,18 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         padding="same",
         data_format=data_format
     )
-
+    '''
     attentions = utils.batch_normalization(data_format)(
         inputs=attentions,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.sigmoid(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
-    (-1, 56, 56, 64), (-1, 56, 56, 9) -> (-1, 64, 9)
+    (-1, 64, 64, 512), (-1, 64, 64, 9) -> (-1, 512, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = utils.flatten_images(inputs, data_format)
@@ -285,28 +417,48 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 3
-    (-1, 64, 9) -> (-1, 1024)
+    dense layer 1
+    (-1, 512, 9) -> (-1, 4096)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024
+        units=4096
     )
-
+    '''
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    logits layer 4
-    (-1, 1024) -> (-1, 10)
+    dense layer 2
+    (-1, 4096) -> (-1, 4096)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.flatten(inputs)
+
+    inputs = tf.layers.dense(
+        inputs=inputs,
+        units=4096
+    )
+    '''
+    inputs = tf.layers.batch_normalization(
+        inputs=inputs,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+    '''
+    inputs = tf.nn.relu(inputs)
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    logits layer
+    (-1, 1024) -> (-1, 6), (-1, 11) * 5
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     length_logits = tf.layers.dense(

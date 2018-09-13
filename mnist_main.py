@@ -36,16 +36,16 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     mode:       enum { TRAIN, EVAL, REDICT }
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 1
-    (-1, 64, 64, 1) -> (-1, 64, 64, 32)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
     inputs = features["images"]
 
     if data_format == "channels_first":
 
         inputs = tf.transpose(inputs, [0, 3, 1, 2])
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    convolutional layer 1
+    (-1, 64, 64, 1) -> (-1, 64, 64, 32)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
@@ -236,8 +236,8 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 3
-    (-1, 64, 9) -> (-1, 1024)
+    dense layer 1
+    (-1, 512, 9) -> (-1, 1024)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
@@ -256,7 +256,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    logits layer 4
+    logits layer
     (-1, 1024) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
