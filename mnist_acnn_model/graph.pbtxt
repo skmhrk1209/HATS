@@ -982,6 +982,82 @@ node {
   }
 }
 node {
+  name: "transpose/perm"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 4
+          }
+        }
+        tensor_content: "\000\000\000\000\003\000\000\000\001\000\000\000\002\000\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "transpose"
+  op: "Transpose"
+  input: "random_shuffle_queue_DequeueMany:1"
+  input: "transpose/perm"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tperm"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 1
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
+          }
+        }
+      }
+    }
+  }
+}
+node {
   name: "conv2d/kernel/Initializer/random_uniform/shape"
   op: "Const"
   attr {
@@ -1644,9 +1720,8 @@ node {
 node {
   name: "conv2d/Conv2D"
   op: "Conv2D"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "transpose"
   input: "conv2d/kernel/read"
-  input: "^add"
   attr {
     key: "T"
     value {
@@ -1662,13 +1737,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -1677,7 +1752,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -1724,13 +1799,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -1739,7 +1814,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -2518,13 +2593,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
         shape {
@@ -2553,7 +2628,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -2887,13 +2962,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -3595,7 +3670,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -3657,7 +3732,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -4471,7 +4546,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -5498,13 +5573,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -5513,7 +5588,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -5527,9 +5602,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -5560,13 +5635,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -5575,7 +5650,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -6354,13 +6429,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
         shape {
@@ -6389,7 +6464,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -6723,13 +6798,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -7416,13 +7491,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -7431,7 +7506,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -7445,9 +7520,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -7478,13 +7553,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -7493,7 +7568,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -8272,13 +8347,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
         shape {
@@ -8307,7 +8382,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -8641,13 +8716,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -8686,7 +8761,7 @@ node {
             size: 4
           }
         }
-        tensor_content: "d\000\000\000\020\000\000\000\020\000\000\000\003\000\000\000"
+        tensor_content: "d\000\000\000\003\000\000\000\020\000\000\000\020\000\000\000"
       }
     }
   }
@@ -13225,7 +13300,7 @@ node {
             size: 4
           }
         }
-        tensor_content: "\377\377\377\377\020\000\000\000\020\000\000\000\003\000\000\000"
+        tensor_content: "\377\377\377\377\003\000\000\000\020\000\000\000\020\000\000\000"
       }
     }
   }
@@ -13256,13 +13331,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -13924,7 +13999,7 @@ node {
             size: 4
           }
         }
-        tensor_content: "d\000\000\000\020\000\000\000\020\000\000\000\003\000\000\000"
+        tensor_content: "d\000\000\000\003\000\000\000\020\000\000\000\020\000\000\000"
       }
     }
   }
@@ -14131,7 +14206,7 @@ node {
             size: 1
           }
         }
-        int_val: 1
+        int_val: 2
       }
     }
   }
@@ -14168,7 +14243,7 @@ node {
             size: 1
           }
         }
-        int_val: 2
+        int_val: 3
       }
     }
   }
@@ -14301,7 +14376,7 @@ node {
             size: 1
           }
         }
-        int_val: 2
+        int_val: 3
       }
     }
   }
@@ -14338,7 +14413,7 @@ node {
             size: 1
           }
         }
-        int_val: 3
+        int_val: 4
       }
     }
   }
@@ -14544,7 +14619,7 @@ node {
   }
 }
 node {
-  name: "conv2d_transpose/stack/3"
+  name: "conv2d_transpose/stack/1"
   op: "Const"
   input: "^add"
   attr {
@@ -14578,9 +14653,9 @@ node {
   name: "conv2d_transpose/stack"
   op: "Pack"
   input: "conv2d_transpose/strided_slice"
+  input: "conv2d_transpose/stack/1"
   input: "conv2d_transpose/mul"
   input: "conv2d_transpose/mul_1"
-  input: "conv2d_transpose/stack/3"
   attr {
     key: "N"
     value {
@@ -14633,13 +14708,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -14648,7 +14723,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -14662,9 +14737,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -14695,13 +14770,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -14710,7 +14785,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -15489,13 +15564,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
         shape {
@@ -15524,7 +15599,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -15858,13 +15933,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -16526,7 +16601,7 @@ node {
             size: 4
           }
         }
-        tensor_content: "d\000\000\000 \000\000\000 \000\000\000\t\000\000\000"
+        tensor_content: "d\000\000\000\t\000\000\000 \000\000\000 \000\000\000"
       }
     }
   }
@@ -16733,7 +16808,7 @@ node {
             size: 1
           }
         }
-        int_val: 1
+        int_val: 2
       }
     }
   }
@@ -16770,7 +16845,7 @@ node {
             size: 1
           }
         }
-        int_val: 2
+        int_val: 3
       }
     }
   }
@@ -16903,7 +16978,7 @@ node {
             size: 1
           }
         }
-        int_val: 2
+        int_val: 3
       }
     }
   }
@@ -16940,7 +17015,7 @@ node {
             size: 1
           }
         }
-        int_val: 3
+        int_val: 4
       }
     }
   }
@@ -17146,7 +17221,7 @@ node {
   }
 }
 node {
-  name: "conv2d_transpose_2/stack/3"
+  name: "conv2d_transpose_2/stack/1"
   op: "Const"
   input: "^add"
   attr {
@@ -17180,9 +17255,9 @@ node {
   name: "conv2d_transpose_2/stack"
   op: "Pack"
   input: "conv2d_transpose_2/strided_slice"
+  input: "conv2d_transpose_2/stack/1"
   input: "conv2d_transpose_2/mul"
   input: "conv2d_transpose_2/mul_1"
-  input: "conv2d_transpose_2/stack/3"
   attr {
     key: "N"
     value {
@@ -17235,13 +17310,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -17250,7 +17325,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -17264,9 +17339,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -17297,13 +17372,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -17312,7 +17387,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -18091,13 +18166,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
         shape {
@@ -18126,7 +18201,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -18460,13 +18535,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -18505,7 +18580,7 @@ node {
             size: 3
           }
         }
-        tensor_content: "\377\377\377\377\000\020\000\000@\000\000\000"
+        tensor_content: "\377\377\377\377@\000\000\000\000\020\000\000"
       }
     }
   }
@@ -18536,10 +18611,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 64
           }
           dim {
-            size: 64
+            size: 4096
           }
         }
       }
@@ -18578,7 +18653,7 @@ node {
             size: 3
           }
         }
-        tensor_content: "\377\377\377\377\000\020\000\000\t\000\000\000"
+        tensor_content: "\377\377\377\377\t\000\000\000\000\020\000\000"
       }
     }
   }
@@ -18609,10 +18684,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -18651,13 +18726,13 @@ node {
   attr {
     key: "adj_x"
     value {
-      b: true
+      b: false
     }
   }
   attr {
     key: "adj_y"
     value {
-      b: false
+      b: true
     }
   }
 }
@@ -21738,6 +21813,558 @@ node {
   }
 }
 node {
+  name: "ArgMax/dimension"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "ArgMax"
+  op: "ArgMax"
+  input: "dense_4/BiasAdd"
+  input: "ArgMax/dimension"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "output_type"
+    value {
+      type: DT_INT64
+    }
+  }
+}
+node {
+  name: "softmax_tensor"
+  op: "Softmax"
+  input: "dense_4/BiasAdd"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 10
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/Shape"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 3
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 3
+          }
+        }
+        tensor_content: "d\000\000\000\t\000\000\000\000\020\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice/stack"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 0
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice/stack_1"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice/stack_2"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/strided_slice"
+  op: "StridedSlice"
+  input: "flatten_3/Shape"
+  input: "flatten_3/strided_slice/stack"
+  input: "flatten_3/strided_slice/stack_1"
+  input: "flatten_3/strided_slice/stack_2"
+  attr {
+    key: "Index"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "flatten_3/Reshape/shape/1"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+        }
+        int_val: -1
+      }
+    }
+  }
+}
+node {
+  name: "flatten_3/Reshape/shape"
+  op: "Pack"
+  input: "flatten_3/strided_slice"
+  input: "flatten_3/Reshape/shape/1"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "flatten_3/Reshape"
+  op: "Reshape"
+  input: "Reshape_2"
+  input: "flatten_3/Reshape/shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 36864
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "Reshape_3/shape"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 4
+          }
+        }
+        tensor_content: "\377\377\377\377\t\000\000\000@\000\000\000@\000\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "Reshape_3"
+  op: "Reshape"
+  input: "flatten_3/Reshape"
+  input: "Reshape_3/shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "transpose_1/perm"
+  op: "Const"
+  input: "^add"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 4
+          }
+        }
+        tensor_content: "\000\000\000\000\002\000\000\000\003\000\000\000\001\000\000\000"
+      }
+    }
+  }
+}
+node {
+  name: "transpose_1"
+  op: "Transpose"
+  input: "Reshape_3"
+  input: "transpose_1/perm"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tperm"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 100
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 9
+          }
+        }
+      }
+    }
+  }
+}
+node {
   name: "sparse_softmax_cross_entropy_loss/Const"
   op: "Const"
   input: "^add"
@@ -22984,10 +23611,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -23132,482 +23759,6 @@ node {
     value {
       list {
         shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "ArgMax/dimension"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "ArgMax"
-  op: "ArgMax"
-  input: "dense_4/BiasAdd"
-  input: "ArgMax/dimension"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "Tidx"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 100
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "output_type"
-    value {
-      type: DT_INT64
-    }
-  }
-}
-node {
-  name: "softmax_tensor"
-  op: "Softmax"
-  input: "dense_4/BiasAdd"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 100
-          }
-          dim {
-            size: 10
-          }
-        }
-      }
-    }
-  }
-}
-node {
-  name: "flatten_3/Shape"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 3
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 3
-          }
-        }
-        tensor_content: "d\000\000\000\000\020\000\000\t\000\000\000"
-      }
-    }
-  }
-}
-node {
-  name: "flatten_3/strided_slice/stack"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 0
-      }
-    }
-  }
-}
-node {
-  name: "flatten_3/strided_slice/stack_1"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "flatten_3/strided_slice/stack_2"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "flatten_3/strided_slice"
-  op: "StridedSlice"
-  input: "flatten_3/Shape"
-  input: "flatten_3/strided_slice/stack"
-  input: "flatten_3/strided_slice/stack_1"
-  input: "flatten_3/strided_slice/stack_2"
-  attr {
-    key: "Index"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "begin_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "ellipsis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "end_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "new_axis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "shrink_axis_mask"
-    value {
-      i: 1
-    }
-  }
-}
-node {
-  name: "flatten_3/Reshape/shape/1"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-        }
-        int_val: -1
-      }
-    }
-  }
-}
-node {
-  name: "flatten_3/Reshape/shape"
-  op: "Pack"
-  input: "flatten_3/strided_slice"
-  input: "flatten_3/Reshape/shape/1"
-  attr {
-    key: "N"
-    value {
-      i: 2
-    }
-  }
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 2
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "axis"
-    value {
-      i: 0
-    }
-  }
-}
-node {
-  name: "flatten_3/Reshape"
-  op: "Reshape"
-  input: "Reshape_2"
-  input: "flatten_3/Reshape/shape"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "Tshape"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 100
-          }
-          dim {
-            size: 36864
-          }
-        }
-      }
-    }
-  }
-}
-node {
-  name: "Reshape_3/shape"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 4
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\377\377\377\377@\000\000\000@\000\000\000\t\000\000\000"
-      }
-    }
-  }
-}
-node {
-  name: "Reshape_3"
-  op: "Reshape"
-  input: "flatten_3/Reshape"
-  input: "Reshape_3/shape"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "Tshape"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 100
-          }
-          dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
-            size: 9
-          }
         }
       }
     }
@@ -25230,7 +25381,7 @@ node {
             size: 3
           }
         }
-        tensor_content: "d\000\000\000\000\020\000\000\t\000\000\000"
+        tensor_content: "d\000\000\000\t\000\000\000\000\020\000\000"
       }
     }
   }
@@ -25261,10 +25412,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -25466,10 +25617,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -25496,10 +25647,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -32483,8 +32634,8 @@ node {
 node {
   name: "gradients/MatMul_grad/MatMul"
   op: "BatchMatMul"
-  input: "Reshape_2"
   input: "gradients/flatten_2/Reshape_grad/Reshape"
+  input: "Reshape_2"
   attr {
     key: "T"
     value {
@@ -32500,10 +32651,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 64
           }
           dim {
-            size: 64
+            size: 4096
           }
         }
       }
@@ -32518,15 +32669,15 @@ node {
   attr {
     key: "adj_y"
     value {
-      b: true
+      b: false
     }
   }
 }
 node {
   name: "gradients/MatMul_grad/MatMul_1"
   op: "BatchMatMul"
-  input: "Reshape_1"
   input: "gradients/flatten_2/Reshape_grad/Reshape"
+  input: "Reshape_1"
   attr {
     key: "T"
     value {
@@ -32542,10 +32693,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -32554,7 +32705,7 @@ node {
   attr {
     key: "adj_x"
     value {
-      b: false
+      b: true
     }
   }
   attr {
@@ -32617,10 +32768,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 64
           }
           dim {
-            size: 64
+            size: 4096
           }
         }
       }
@@ -32655,10 +32806,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -32793,10 +32944,10 @@ node {
             size: 100
           }
           dim {
-            size: 4096
+            size: 9
           }
           dim {
-            size: 9
+            size: 4096
           }
         }
       }
@@ -32853,7 +33004,7 @@ node {
             size: 4
           }
         }
-        tensor_content: "d\000\000\000@\000\000\000@\000\000\000\t\000\000\000"
+        tensor_content: "d\000\000\000\t\000\000\000@\000\000\000@\000\000\000"
       }
     }
   }
@@ -32884,13 +33035,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -32917,13 +33068,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -33117,13 +33268,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
         shape {
@@ -33150,7 +33301,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -33218,13 +33369,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -33382,7 +33533,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -33439,13 +33590,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -33575,7 +33726,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -33589,9 +33740,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -33622,13 +33773,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -33637,7 +33788,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -33651,9 +33802,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -33758,13 +33909,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -33791,13 +33942,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -33991,13 +34142,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
         shape {
@@ -34024,7 +34175,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -34092,13 +34243,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -34256,7 +34407,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -34313,13 +34464,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 9
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -34449,7 +34600,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -34463,9 +34614,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -34496,13 +34647,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -34511,7 +34662,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -34525,9 +34676,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -34632,13 +34783,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -46425,7 +46576,7 @@ node {
             size: 4
           }
         }
-        tensor_content: "d\000\000\000\020\000\000\000\020\000\000\000\003\000\000\000"
+        tensor_content: "d\000\000\000\003\000\000\000\020\000\000\000\020\000\000\000"
       }
     }
   }
@@ -46456,13 +46607,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -46489,13 +46640,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -46689,13 +46840,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
         shape {
@@ -46722,7 +46873,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -46790,13 +46941,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -46954,7 +47105,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -47011,13 +47162,13 @@ node {
             size: 100
           }
           dim {
-            size: 16
-          }
-          dim {
-            size: 16
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 16
+          }
+          dim {
+            size: 16
           }
         }
       }
@@ -47151,7 +47302,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -47165,9 +47316,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -47214,7 +47365,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -47228,9 +47379,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -47294,13 +47445,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -47368,13 +47519,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -47568,13 +47719,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
         shape {
@@ -47601,7 +47752,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -47669,13 +47820,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -47833,7 +47984,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -47890,13 +48041,13 @@ node {
             size: 100
           }
           dim {
-            size: 32
-          }
-          dim {
-            size: 32
-          }
-          dim {
             size: 3
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
           }
         }
       }
@@ -48030,7 +48181,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -48044,9 +48195,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -48093,7 +48244,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -48107,9 +48258,9 @@ node {
     value {
       list {
         i: 1
-        i: 2
-        i: 2
         i: 1
+        i: 2
+        i: 2
       }
     }
   }
@@ -48527,7 +48678,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -48759,7 +48910,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -48956,7 +49107,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -49019,7 +49170,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -49099,13 +49250,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -49173,13 +49324,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -49373,13 +49524,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
         shape {
@@ -49406,7 +49557,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -49474,13 +49625,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -49638,7 +49789,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
 }
@@ -49695,13 +49846,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 32
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -49743,9 +49894,8 @@ node {
 node {
   name: "gradients/conv2d/Conv2D_grad/ShapeN"
   op: "ShapeN"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "transpose"
   input: "conv2d/kernel/read"
-  input: "^add"
   input: "^batch_normalization/AssignMovingAvg"
   input: "^batch_normalization/AssignMovingAvg_1"
   input: "^batch_normalization_2/AssignMovingAvg"
@@ -49836,7 +49986,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -49866,7 +50016,7 @@ node {
 node {
   name: "gradients/conv2d/Conv2D_grad/Conv2DBackpropFilter"
   op: "Conv2DBackpropFilter"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "transpose"
   input: "gradients/conv2d/Conv2D_grad/ShapeN:1"
   input: "gradients/conv2d/BiasAdd_grad/tuple/control_dependency"
   attr {
@@ -49899,7 +50049,7 @@ node {
   attr {
     key: "data_format"
     value {
-      s: "NHWC"
+      s: "NCHW"
     }
   }
   attr {
@@ -49979,13 +50129,13 @@ node {
             size: 100
           }
           dim {
-            size: 64
-          }
-          dim {
-            size: 64
-          }
-          dim {
             size: 1
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
           }
         }
       }
@@ -76978,7 +77128,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_fe6125b4cb444b0ab7d33dab9204266c/part"
+        string_val: "_temp_9818cd75d6c542aa8067abb1cb9a7851/part"
       }
     }
   }
