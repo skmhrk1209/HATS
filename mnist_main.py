@@ -50,7 +50,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=32,
-        kernel_size=5,
+        kernel_size=3,
         strides=1,
         padding="same",
         data_format=data_format
@@ -72,7 +72,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
-        kernel_size=5,
+        kernel_size=3,
         strides=1,
         padding="same",
         data_format=data_format
@@ -244,7 +244,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024
+        units=128
     )
     '''
     inputs = tf.layers.batch_normalization(
