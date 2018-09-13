@@ -13,20 +13,21 @@ import glob
 import utils
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--steps", type=int, default=10000, help="training steps")
-parser.add_argument("--epochs", type=int, default=100, help="training epochs")
-parser.add_argument("--batch", type=int, default=100, help="batch size")
-parser.add_argument("--model", type=str, default="svhn_acnn_model", help="model directory")
+parser.add_argument("--num_steps", type=int, default=10000, help="number of training steps")
+parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
+parser.add_argument("--batch_size", type=int, default=100, help="batch size")
+parser.add_argument("--model_dir", type=str, default="mnist_acnn_model", help="model directory")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument('--predict', action="store_true", help="with prediction")
 parser.add_argument('--gpu', type=str, default="0", help="gpu id")
+parser.add_argument('--data_format', type=str, default="channels_first", help="data_format")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def svhn_input_fn(filenames, training, num_epochs=1, batch_size=1):
+def svhn_input_fn(filenames, training, batch_size, num_epochs):
 
     def preprocess(image, training):
 
@@ -427,7 +428,7 @@ def main(unused_argv):
             size=[56, 56],
             data_format="channels_first"
         ),
-        model_dir=args.model,
+        model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
@@ -447,8 +448,8 @@ def main(unused_argv):
             svhn_input_fn,
             filenames=["data/train.tfrecords"],
             training=True,
-            num_epochs=args.epochs,
-            batch_size=args.batch
+            batch_size=args.batch_size,
+            num_epochs=args.num_epochs
         )
 
         logging_hook = tf.train.LoggingTensorHook(
@@ -461,8 +462,7 @@ def main(unused_argv):
 
         svhn_classifier.train(
             input_fn=train_input_fn,
-            hooks=[logging_hook],
-            steps=args.steps
+            hooks=[logging_hook]
         )
 
     if args.eval:
@@ -471,8 +471,8 @@ def main(unused_argv):
             svhn_input_fn,
             filenames=["data/test.tfrecords"],
             training=False,
-            num_epochs=1,
-            batch_size=args.batch
+            batch_size=args.batch_size,
+            num_epochs=1
         )
 
         eval_results = svhn_classifier.evaluate(
@@ -487,8 +487,8 @@ def main(unused_argv):
             svhn_input_fn,
             filenames=["test.tfrecords"],
             training=False,
-            num_epochs=1,
-            batch_size=args.batch
+            batch_size=args.batch_size,
+            num_epochs=1
         )
 
         predict_results = svhn_classifier.predict(
