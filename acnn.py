@@ -237,7 +237,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 3
-    (-1, 64, 9) -> (-1, 1024)
+    (-1, 64, 9) -> (-1, 128)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
