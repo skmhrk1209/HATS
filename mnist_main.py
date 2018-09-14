@@ -288,7 +288,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         ),
         "probabilities": tf.nn.softmax(
             logits=logits,
-            dim=1
+            dim=1,
             name="softmax"
         )
     })
