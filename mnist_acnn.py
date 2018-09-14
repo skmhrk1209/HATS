@@ -264,8 +264,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024,
-        activation=tf.nn.relu
+        units=1024
     )
 
     inputs = tf.layers.batch_normalization(
@@ -454,7 +453,7 @@ def main(unused_argv):
 
             attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
 
-            attention = utils.scale(attention, attention.min(), attention.max(), 0, 1)
+            attention = scale(attention, attention.min(), attention.max(), 0, 1)
 
             attention = cv2.resize(attention, (64, 64))
 

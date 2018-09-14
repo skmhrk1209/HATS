@@ -2,18 +2,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
 import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as ani
 import cv2
 import argparse
 import itertools
 import functools
 import operator
-import glob
-import utils
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--num_steps", type=int, default=10000, help="number of training steps")
+parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--model_dir", type=str, default="svhn_acnn_model", help="model directory")
@@ -21,10 +21,14 @@ parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument('--predict', action="store_true", help="with prediction")
 parser.add_argument('--gpu', type=str, default="0", help="gpu id")
-parser.add_argument('--data_format', type=str, default="channels_first", help="data_format")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
+
+
+def scale(input, input_min, input_max, output_min, output_max):
+
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
 
 def svhn_input_fn(filenames, training, batch_size, num_epochs):
@@ -76,37 +80,36 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
     return dataset.make_one_shot_iterator().get_next()
 
 
-def svhn_model_fn(features, labels, mode, params, size, data_format):
+def svhn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for ACNN
 
     features:   batch of features from input_fn
     labels:     batch of labels from input_fn
-    mode:       enum { TRAIN, EVAL, REDICT }
+    mode:       enum { TRAIN, EVAL, PREDICT }
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    inputs = features["images"]
-
-    if data_format == "channels_first":
-
-        inputs = tf.transpose(inputs, [0, 3, 1, 2])
+    predictions = {}
+    predictions.update(features)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
     (-1, 64, 64, 1) -> (-1, 64, 64, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+    inputs = features["images"]
+
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -123,12 +126,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=64,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -145,12 +148,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=128,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -167,12 +170,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=128,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -189,12 +192,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=256,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -211,12 +214,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=256,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -233,12 +236,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=512,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -255,12 +258,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=512,
         kernel_size=3,
         strides=1,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    inputs = utils.batch_normalization(data_format)(
+    inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -269,20 +272,22 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 1
-    (-1, 64, 64, 512) -> (-1, 32, 32, 3)
+    (-1, 64, 64, 64) -> (-1, 32, 32, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+    attentions = inputs
+
     attentions = tf.layers.conv2d(
-        inputs=inputs,
+        inputs=attentions,
         filters=3,
         kernel_size=9,
         strides=2,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    attentions = utils.batch_normalization(data_format)(
+    attentions = tf.layers.batch_normalization(
         inputs=attentions,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -300,11 +305,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         kernel_size=9,
         strides=2,
         padding="same",
-        data_format=data_format
+        activation=tf.nn.relu
     )
 
-    attentions = utils.batch_normalization(data_format)(
+    attentions = tf.layers.batch_normalization(
         inputs=attentions,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -327,6 +333,7 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
 
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
+        axis=1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -345,6 +352,7 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
 
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
+        axis=1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -366,12 +374,12 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=9,
         kernel_size=3,
         strides=2,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    attentions = utils.batch_normalization(data_format)(
+    attentions = tf.layers.batch_normalization(
         inputs=attentions,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
@@ -388,36 +396,48 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         filters=9,
         kernel_size=3,
         strides=2,
-        padding="same",
-        data_format=data_format
+        padding="same"
     )
 
-    attentions = utils.batch_normalization(data_format)(
+    attentions = tf.layers.batch_normalization(
         inputs=attentions,
+        axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
 
     attentions = tf.nn.sigmoid(attentions)
 
+    predictions["attentions"] = attentions
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
     (-1, 64, 64, 512), (-1, 64, 64, 9) -> (-1, 512, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    inputs = utils.flatten_images(inputs, data_format)
+    shape = inputs.get_shape().as_list()
 
-    attentions = utils.flatten_images(attentions, data_format)
+    inputs = tf.reshape(
+        tensor=inputs,
+        shape=[-1, functools.reduce(operator.mul, shape[1:3]), shape[3]]
+    )
+
+    shape = attentions.get_shape().as_list()
+
+    attentions = tf.reshape(
+        tensor=attentions,
+        shape=[-1, functools.reduce(operator.mul, shape[1:3]), shape[3]]
+    )
 
     inputs = tf.matmul(
         a=inputs,
         b=attentions,
-        transpose_a=False if data_format == "channels_first" else True,
-        transpose_b=True if data_format == "channels_first" else False
+        transpose_a=True,
+        transpose_b=False
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 1
+    dense layer 9
     (-1, 512, 9) -> (-1, 4096)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -430,18 +450,23 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
 
     inputs = tf.nn.relu(inputs)
 
+    inputs = tf.layers.dropout(
+        inputs=inputs,
+        rate=0.4,
+        training=mode == tf.estimator.ModeKeys.TRAIN
+    )
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 2
+    dense layer 10
     (-1, 4096) -> (-1, 4096)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
@@ -450,15 +475,22 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
+        axis=1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
 
     inputs = tf.nn.relu(inputs)
 
+    inputs = tf.layers.dropout(
+        inputs=inputs,
+        rate=0.4,
+        training=mode == tf.estimator.ModeKeys.TRAIN
+    )
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 1024) -> (-1, 6), (-1, 11) * 5
+    (-1, 4096) -> (-1, 6), (-1, 11) * 5
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     multi_logits = [
@@ -488,17 +520,7 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         ),
     ]
 
-    attentions = utils.chunk_images(
-        inputs=attentions,
-        size=size,
-        data_format=data_format
-    )
-
-    if data_format == "channels_first":
-
-        attentions = tf.transpose(attentions, [0, 2, 3, 1])
-
-    predictions = {
+    predictions.update({
         "length_classes": tf.stack(
             values=[
                 tf.argmax(
@@ -536,11 +558,8 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
             ],
             axis=1,
             name="digits_softmax"
-        ),
-        "attentions": attentions
-    }
-
-    predictions.update(features)
+        )
+    })
 
     if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -559,6 +578,9 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
         axis=None
     )
 
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    IMPORTANT !!!
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
 
     if mode == tf.estimator.ModeKeys.EVAL:
@@ -601,11 +623,7 @@ def svhn_model_fn(features, labels, mode, params, size, data_format):
 def main(unused_argv):
 
     svhn_classifier = tf.estimator.Estimator(
-        model_fn=functools.partial(
-            svhn_model_fn,
-            size=[56, 56],
-            data_format=args.data_format
-        ),
+        model_fn=svhn_model_fn,
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
@@ -673,24 +691,27 @@ def main(unused_argv):
             input_fn=predict_input_fn
         )
 
+        figure = plt.figure()
+        images = []
+
         for predict_result in predict_results:
 
             image = predict_result["images"]
             attention = predict_result["attentions"]
-            digits_classes = predict_result["digits_classes"]
 
-            attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
             attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
 
-            image[:, :, -1] += attention
+            attention = scale(attention, attention.min(), attention.max(), 0, 1)
 
-            cv2.imshow("image", cv2.resize(image, (112, 112)))
+            attention = cv2.resize(attention, (56, 56))
 
-            print(digits_classes)
+            image[:, :, 0] += attention
 
-            if cv2.waitKey(1000) == ord("q"):
+            images.append([plt.imshow(image, animated=True)])
 
-                break
+        animation = ani.ArtistAnimation(figure, images, interval=1000, repeat=True)
+
+        plt.show()
 
 
 if __name__ == "__main__":
