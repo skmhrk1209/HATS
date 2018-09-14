@@ -271,13 +271,6 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         units=10
     )
 
-    loss = tf.losses.sparse_softmax_cross_entropy(
-        labels=labels,
-        logits=logits
-    )
-
-    loss += tf.reduce_mean(tf.reduce_sum(tf.abs(attentions), axis=1)) * params["attention_decay"]
-
     attentions = utils.chunk_images(
         inputs=attentions,
         size=size,
@@ -308,6 +301,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
             mode=mode,
             predictions=predictions
         )
+
+    loss = tf.losses.sparse_softmax_cross_entropy(
+        labels=labels,
+        logits=logits
+    )
+
+    loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
 
     if mode == tf.estimator.ModeKeys.EVAL:
 
