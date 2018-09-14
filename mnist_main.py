@@ -36,6 +36,10 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     mode:       enum { TRAIN, EVAL, REDICT }
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+    predictions = {}
+
+    predictions.update(features)
+
     inputs = features["images"]
 
     if data_format == "channels_first":
@@ -50,7 +54,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=32,
-        kernel_size=5,
+        kernel_size=3,
         strides=1,
         padding="same",
         data_format=data_format
@@ -72,8 +76,8 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
-        kernel_size=5,
-        strides=1,
+        kernel_size=3,
+        strides=2,
         padding="same",
         data_format=data_format
     )
@@ -219,6 +223,12 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     '''
     attentions = tf.nn.sigmoid(attentions)
 
+    predictions["attentions"] = attentions
+
+    if data_format == "channels_first":
+
+        predictions["attentions"] = tf.transpose(predictions["attentions"], [0, 2, 3, 1])
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
     (-1, 64, 64, 64), (-1, 64, 64, 9) -> (-1, 64, 9)
@@ -244,7 +254,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024
+        units=128
     )
     '''
     inputs = tf.layers.batch_normalization(
@@ -254,13 +264,13 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
     )
     '''
     inputs = tf.nn.relu(inputs)
-
+    '''
     inputs = tf.layers.dropout(
         inputs=inputs,
         rate=0.4,
         training=mode == tf.estimator.ModeKeys.TRAIN
     )
-
+    '''
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
     (-1, 1024) -> (-1, 10)
@@ -271,29 +281,17 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
         units=10
     )
 
-    attentions = utils.chunk_images(
-        inputs=attentions,
-        size=size,
-        data_format=data_format
-    )
-
-    if data_format == "channels_first":
-
-        attentions = tf.transpose(attentions, [0, 2, 3, 1])
-
-    predictions = {
+    predictions.update({
         "classes": tf.argmax(
             input=logits,
             axis=1
         ),
         "probabilities": tf.nn.softmax(
             logits=logits,
+            dim=1
             name="softmax"
-        ),
-        "attentions": attentions
-    }
-
-    predictions.update(features)
+        )
+    })
 
     if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -376,7 +374,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 0.00001
+            "attention_decay": 1e-6
         }
     )
 
@@ -439,8 +437,8 @@ def main(unused_argv):
 
             image = image.repeat(repeats=3, axis=-1)
 
-            attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
             attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
+            attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
 
             image[:, :, -1] += attention
 
