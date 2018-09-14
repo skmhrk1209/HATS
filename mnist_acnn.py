@@ -307,7 +307,7 @@ def main(unused_argv):
     if args.train:
 
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": train_data},
+            x={"images": train_images},
             y=train_labels,
             batch_size=args.batch_size,
             num_epochs=None,
@@ -330,7 +330,7 @@ def main(unused_argv):
     if args.eval:
 
         eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_data},
+            x={"images": eval_images},
             y=eval_labels,
             batch_size=args.batch_size,
             num_epochs=1,
@@ -346,7 +346,7 @@ def main(unused_argv):
     if args.predict:
 
         predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_data[:10]},
+            x={"images": eval_images[:10]},
             y=eval_labels[:10],
             batch_size=args.batch_size,
             num_epochs=1,
