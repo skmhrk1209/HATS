@@ -304,8 +304,7 @@ def svhn_model_fn(features, labels, mode, params):
         filters=3,
         kernel_size=9,
         strides=2,
-        padding="same",
-        activation=tf.nn.relu
+        padding="same"
     )
 
     attentions = tf.layers.batch_normalization(
@@ -481,12 +480,6 @@ def svhn_model_fn(features, labels, mode, params):
     )
 
     inputs = tf.nn.relu(inputs)
-
-    inputs = tf.layers.dropout(
-        inputs=inputs,
-        rate=0.4,
-        training=mode == tf.estimator.ModeKeys.TRAIN
-    )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
