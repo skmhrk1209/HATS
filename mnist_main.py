@@ -237,7 +237,7 @@ def acnn_model_fn(features, labels, mode, params, size, data_format):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 1
-    (-1, 512, 9) -> (-1, 1024)
+    (-1, 64, 9) -> (-1, 1024)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
@@ -376,7 +376,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 1e-6
+            "attention_decay": 0.00001
         }
     )
 
@@ -439,8 +439,8 @@ def main(unused_argv):
 
             image = image.repeat(repeats=3, axis=-1)
 
-            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
             attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
+            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
 
             image[:, :, -1] += attention
 
