@@ -366,17 +366,13 @@ def main(unused_argv):
 
         for predict_result in predict_results:
 
-            image = predict_result["images"]
             attention = predict_result["attentions"]
-
-            image = image.repeat(repeats=3, axis=-1)
-
-            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
-
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
-
+            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
             attention = cv2.resize(attention, (64, 64))
 
+            image = predict_result["images"]
+            image = image.repeat(repeats=3, axis=-1)
             image[:, :, 0] += attention
 
             images.append([plt.imshow(image, animated=True)])
