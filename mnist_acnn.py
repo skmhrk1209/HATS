@@ -43,7 +43,7 @@ def acnn_model_fn(features, labels, mode, params):
     (-1, 64, 64, 1) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    inputs = features["x"]
+    inputs = features["images"]
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
