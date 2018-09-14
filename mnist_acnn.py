@@ -2,27 +2,36 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as ani
-import tensorflow as tf
-import argparse
 import cv2
+import argparse
+import itertools
+import functools
+import operator
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str,
-                    default="mnist_acnn_model", help="model directory")
-parser.add_argument("--batch", type=int, default=100, help="batch size")
-parser.add_argument("--steps", type=int, default=10000, help="training steps")
-parser.add_argument('--train', action='store_true', help='with training')
-parser.add_argument('--eval', action='store_true', help='with evaluation')
-parser.add_argument('--predict', action='store_true', help='with prediction')
+parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
+parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
+parser.add_argument("--batch_size", type=int, default=100, help="batch size")
+parser.add_argument("--model_dir", type=str, default="mnist_acnn_model", help="model directory")
+parser.add_argument('--train', action="store_true", help="with training")
+parser.add_argument('--eval', action="store_true", help="with evaluation")
+parser.add_argument('--predict', action="store_true", help="with prediction")
+parser.add_argument('--gpu', type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def acnn_model_fn(features, labels, mode):
+def scale(input, input_min, input_max, output_min, output_max):
+
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+
+def acnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for ACNN
 
@@ -31,172 +40,190 @@ def acnn_model_fn(features, labels, mode):
     mode:       enum { TRAIN, EVAL, PREDICT }
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+    predictions = {}
+    predictions.update(features)
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
     (-1, 64, 64, 1) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    conv1 = tf.layers.conv2d(
-        inputs=features["x"],
+    inputs = features["images"]
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
         filters=32,
-        kernel_size=(3, 3),
-        strides=(1, 1),
+        kernel_size=3,
+        strides=1,
         padding="same",
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 2
-    (-1, 64, 64, 32) -> (-1, 32, 32, 64)
+    (-1, 64, 64, 32) -> (-1, 64, 64, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    conv2 = tf.layers.conv2d(
-        inputs=conv1,
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
         filters=64,
-        kernel_size=(3, 3),
-        strides=(2, 2),
+        kernel_size=3,
+        strides=1,
         padding="same",
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention convolutional layer 3
-    (-1, 32, 32, 64) -> (-1, 16, 16, 3)
+    attention convolutional layer 1
+    (-1, 64, 64, 64) -> (-1, 32, 32, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    conv3 = tf.layers.conv2d(
-        inputs=conv2,
+    attentions = inputs
+
+    attentions = tf.layers.conv2d(
+        inputs=attentions,
         filters=3,
-        kernel_size=(9, 9),
-        strides=(2, 2),
+        kernel_size=9,
+        strides=2,
         padding="same",
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention convolutional layer 4
-    (-1, 16, 16, 3) -> (-1, 8, 8, 3)
+    attention convolutional layer 2
+    (-1, 32, 32, 3) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    conv4 = tf.layers.conv2d(
-        inputs=conv3,
+    attentions = tf.layers.conv2d(
+        inputs=attentions,
         filters=3,
-        kernel_size=(9, 9),
-        strides=(2, 2),
+        kernel_size=9,
+        strides=2,
         padding="same",
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention dense layer 5
-    (-1, 8, 8, 3) -> (-1, 10)
+    attention dense layer 3
+    (-1, 16, 16, 3) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    dense5 = tf.layers.dense(
-        inputs=tf.reshape(
-            tensor=conv4,
-            shape=(-1, 8 * 8 * 3)
-        ),
+    shape = attentions.get_shape().as_list()
+
+    attentions = tf.layers.flatten(attentions)
+
+    attentions = tf.layers.dense(
+        inputs=attentions,
         units=10,
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention dense layer 6
-    (-1, 10) -> (-1, 8, 8, 3)
+    attention dense layer 4
+    (-1, 10) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    dense6 = tf.layers.dense(
-        inputs=dense5,
-        units=8 * 8 * 3,
+    attentions = tf.layers.dense(
+        inputs=attentions,
+        units=functools.reduce(operator.mul, shape[1:]),
         activation=tf.nn.relu
     )
 
+    attentions = tf.reshape(
+        tensor=attentions,
+        shape=[-1] + shape[1:]
+    )
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention deconvolutional layer 7
-    (-1, 8, 8, 3) -> (-1, 16, 16, 9)
+    attention deconvolutional layer 5
+    (-1, 16, 16, 3) -> (-1, 32, 32, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    deconv7 = tf.layers.conv2d_transpose(
-        inputs=tf.reshape(
-            tensor=dense6,
-            shape=(-1, 8, 8, 3)
-        ),
+    attentions = tf.layers.conv2d_transpose(
+        inputs=attentions,
         filters=9,
-        kernel_size=(3, 3),
-        strides=(2, 2),
+        kernel_size=3,
+        strides=2,
         padding="same",
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention deconvolutional layer 8
-    (-1, 16, 16, 9) -> (-1, 32, 32, 9)
+    attention deconvolutional layer 6
+    (-1, 32, 32, 9) -> (-1, 64, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
-        inputs=deconv7,
+        inputs=attentions,
         filters=9,
-        kernel_size=(3, 3),
-        strides=(2, 2),
+        kernel_size=3,
+        strides=2,
         padding="same",
         activation=tf.nn.sigmoid
     )
 
+    predictions["attentions"] = attentions
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    extract layer 9
-    (-1, 32, 32, 64), (-1, 32, 32, 9) -> (-1, 64, 9)
+    extract layer
+    (-1, 64, 64, 64), (-1, 64, 64, 9) -> (-1, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    matmul9 = tf.matmul(
-        a=tf.reshape(
-            tensor=conv2,
-            shape=(-1, 32 * 32, 64)
-        ),
-        b=tf.reshape(
-            tensor=attentions,
-            shape=(-1, 32 * 32, 9)
-        ),
+    shape = inputs.get_shape().as_list()
+
+    inputs = tf.reshape(
+        tensor=inputs,
+        shape=[-1, functools.reduce(operator.mul, shape[1:3]), shape[3]]
+    )
+
+    shape = attentions.get_shape().as_list()
+
+    attentions = tf.reshape(
+        tensor=attentions,
+        shape=[-1, functools.reduce(operator.mul, shape[1:3]), shape[3]]
+    )
+
+    inputs = tf.matmul(
+        a=inputs,
+        b=attentions,
         transpose_a=True,
         transpose_b=False
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 10
+    dense layer 3
     (-1, 64, 9) -> (-1, 128)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    dense10 = tf.layers.dense(
-        inputs=tf.reshape(
-            tensor=matmul9,
-            shape=(-1, 64 * 9)
-        ),
+    inputs = tf.layers.flatten(inputs)
+
+    inputs = tf.layers.dense(
+        inputs=inputs,
         units=128,
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    logits layer 4
+    logits layer
     (-1, 128) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     logits = tf.layers.dense(
-        inputs=dense10,
+        inputs=inputs,
         units=10
     )
 
-    predictions = {
+    predictions.update({
         "classes": tf.argmax(
             input=logits,
-            axis=1
+            axis=-1
         ),
         "probabilities": tf.nn.softmax(
             logits=logits,
-            name="softmax_tensor"
-        ),
-        "images": features["x"],
-        "attentions": attentions
-    }
+            dim=-1,
+            name="softmax"
+        )
+    })
 
     if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -213,7 +240,7 @@ def acnn_model_fn(features, labels, mode):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     IMPORTANT !!!
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    loss += tf.reduce_sum(tf.abs(attentions)) * 1e-6
+    loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
 
     if mode == tf.estimator.ModeKeys.EVAL:
 
@@ -248,68 +275,68 @@ def acnn_model_fn(features, labels, mode):
 
 def main(unused_argv):
 
-    def scale(inVal, inMin, inMax, outMin, outMax): return outMin + \
-        (inVal - inMin) / (inMax - inMin) * (outMax - outMin)
+    def resize_with_pad(image, size):
+
+        diff_y = size[0] - image.shape[0]
+        diff_x = size[1] - image.shape[1]
+
+        pad_width_y = np.random.randint(low=0, high=diff_y)
+        pad_width_x = np.random.randint(low=0, high=diff_x)
+
+        return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x], [0, 0]], "constant")
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_data = np.zeros(
-        (mnist.train.images.shape[0], 64, 64, 1), dtype=np.float32)
-    eval_data = np.zeros(
-        (mnist.test.images.shape[0], 64, 64, 1), dtype=np.float32)
+    train_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[64, 64])
+                             for image in mnist.train.images])
+    eval_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[64, 64])
+                            for image in mnist.test.images])
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
-    for translated, raw in zip(train_data, mnist.train.images):
-
-        x = np.random.randint(36)
-        y = np.random.randint(36)
-
-        translated[y:y+28, x:x+28] = raw.reshape((28, 28, 1))
-
-    for translated, raw in zip(eval_data, mnist.test.images):
-
-        x = np.random.randint(36)
-        y = np.random.randint(36)
-
-        translated[y:y+28, x:x+28] = raw.reshape((28, 28, 1))
-
-    run_config = tf.estimator.RunConfig().replace(
-        session_config=tf.ConfigProto(device_count={'GPU': 1}))
-
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
-        model_dir=args.model,
-        config=run_config
+        model_dir=args.model_dir,
+        config=tf.estimator.RunConfig().replace(
+            session_config=tf.ConfigProto(
+                gpu_options=tf.GPUOptions(
+                    visible_device_list=args.gpu,
+                    allow_growth=True
+                )
+            )
+        ),
+        params={
+            "attention_decay": 1e-6
+        }
     )
 
     if args.train:
 
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"x": train_data},
+            x={"images": train_images},
             y=train_labels,
-            batch_size=args.batch,
-            num_epochs=None,
+            batch_size=args.batch_size,
+            num_epochs=args.num_epochs,
             shuffle=True
         )
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "probabilities": "softmax_tensor"
+                "probabilities": "softmax"
             },
             every_n_iter=100
         )
 
         mnist_classifier.train(
             input_fn=train_input_fn,
-            steps=args.steps,
             hooks=[logging_hook]
         )
 
     if args.eval:
 
         eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"x": eval_data},
+            x={"images": eval_images},
             y=eval_labels,
+            batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
         )
@@ -323,7 +350,9 @@ def main(unused_argv):
     if args.predict:
 
         predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"x": eval_data[:10]},
+            x={"images": eval_images[:10]},
+            y=eval_labels[:10],
+            batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
         )
@@ -337,13 +366,14 @@ def main(unused_argv):
 
         for predict_result in predict_results:
 
-            image = predict_result["images"].repeat(3, axis=-1)
+            image = predict_result["images"]
+            attention = predict_result["attentions"]
 
-            attention = np.apply_along_axis(
-                np.sum, axis=-1, arr=predict_result["attentions"])
+            image = image.repeat(repeats=3, axis=-1)
 
-            attention = scale(attention, attention.min(),
-                              attention.max(), 0, 1)
+            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
+
+            attention = scale(attention, attention.min(), attention.max(), 0, 1)
 
             attention = cv2.resize(attention, (64, 64))
 
@@ -351,8 +381,7 @@ def main(unused_argv):
 
             images.append([plt.imshow(image, animated=True)])
 
-        animation = ani.ArtistAnimation(
-            figure, images, interval=1000, repeat=False)
+        animation = ani.ArtistAnimation(figure, images, interval=1000, repeat=True)
 
         plt.show()
 
