@@ -57,7 +57,7 @@ def acnn_model_fn(features, labels, mode, params, data_format):
         kernel_size=3,
         strides=1,
         padding="same",
-        data_format=data_format
+        data_format=data_format,
         activation=tf.nn.relu
     )
 
@@ -72,7 +72,7 @@ def acnn_model_fn(features, labels, mode, params, data_format):
         kernel_size=3,
         strides=2,
         padding="same",
-        data_format=data_format
+        data_format=data_format,
         activation=tf.nn.relu
     )
 
@@ -87,7 +87,7 @@ def acnn_model_fn(features, labels, mode, params, data_format):
         kernel_size=9,
         strides=2,
         padding="same",
-        data_format=data_format
+        data_format=data_format,
         activation=tf.nn.relu
     )
 
@@ -102,7 +102,7 @@ def acnn_model_fn(features, labels, mode, params, data_format):
         kernel_size=9,
         strides=2,
         padding="same",
-        data_format=data_format
+        data_format=data_format,
         activation=tf.nn.relu
     )
 
@@ -148,7 +148,7 @@ def acnn_model_fn(features, labels, mode, params, data_format):
         kernel_size=3,
         strides=2,
         padding="same",
-        data_format=data_format
+        data_format=data_format,
         activation=tf.nn.relu
     )
 
@@ -163,7 +163,7 @@ def acnn_model_fn(features, labels, mode, params, data_format):
         kernel_size=3,
         strides=2,
         padding="same",
-        data_format=data_format
+        data_format=data_format,
         activation=tf.nn.sigmoid
     )
 
