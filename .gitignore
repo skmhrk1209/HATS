@@ -1,5 +1,3 @@
 data/
-mnist_acnn_model/
 svhn_acnn_model/
-mnist_acnn_model.tar.gz
 svhn_acnn_model.tar.gz
