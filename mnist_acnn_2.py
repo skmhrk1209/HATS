@@ -17,17 +17,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
-parser.add_argument("--model_dir", type=str, default="mnist_acnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="mnist_acnn_2_model", help="model directory")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument('--predict', action="store_true", help="with prediction")
 parser.add_argument('--gpu', type=str, default="0", help="gpu id")
+parser.add_argument('--data_format', type=str, default="channels_first", help="data_format")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def acnn_model_fn(features, labels, mode, params):
+def acnn_model_fn(features, labels, mode, params, data_format):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for ACNN
 
@@ -39,12 +40,16 @@ def acnn_model_fn(features, labels, mode, params):
     predictions = {}
     predictions.update(features)
 
+    inputs = features["images"]
+
+    if data_format == "channels_first":
+
+        inputs = tf.transpose(inputs, [0, 3, 1, 2])
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
     (-1, 64, 64, 1) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = features["images"]
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
@@ -52,6 +57,7 @@ def acnn_model_fn(features, labels, mode, params):
         kernel_size=3,
         strides=1,
         padding="same",
+        data_format=data_format
         activation=tf.nn.relu
     )
 
@@ -66,6 +72,7 @@ def acnn_model_fn(features, labels, mode, params):
         kernel_size=3,
         strides=2,
         padding="same",
+        data_format=data_format
         activation=tf.nn.relu
     )
 
@@ -74,14 +81,13 @@ def acnn_model_fn(features, labels, mode, params):
     (-1, 32, 32, 64) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    attentions = inputs
-
     attentions = tf.layers.conv2d(
-        inputs=attentions,
+        inputs=inputs,
         filters=3,
         kernel_size=9,
         strides=2,
         padding="same",
+        data_format=data_format
         activation=tf.nn.relu
     )
 
@@ -96,6 +102,7 @@ def acnn_model_fn(features, labels, mode, params):
         kernel_size=9,
         strides=2,
         padding="same",
+        data_format=data_format
         activation=tf.nn.relu
     )
 
@@ -125,15 +132,15 @@ def acnn_model_fn(features, labels, mode, params):
         activation=tf.nn.relu
     )
 
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention deconvolutional layer 5
-    (-1, 8, 8, 3) -> (-1, 16, 16, 9)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
     attentions = tf.reshape(
         tensor=attentions,
         shape=[-1] + shape[1:]
     )
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    attention deconvolutional layer 5
+    (-1, 8, 8, 3) -> (-1, 16, 16, 9)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
         inputs=attentions,
@@ -141,6 +148,7 @@ def acnn_model_fn(features, labels, mode, params):
         kernel_size=3,
         strides=2,
         padding="same",
+        data_format=data_format
         activation=tf.nn.relu
     )
 
@@ -155,10 +163,15 @@ def acnn_model_fn(features, labels, mode, params):
         kernel_size=3,
         strides=2,
         padding="same",
+        data_format=data_format
         activation=tf.nn.sigmoid
     )
 
     predictions["attentions"] = attentions
+
+    if data_format == "channels_first":
+
+        predictions["attentions"] = tf.transpose(predictions["attentions"], [0, 2, 3, 1])
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
@@ -169,21 +182,23 @@ def acnn_model_fn(features, labels, mode, params):
 
     inputs = tf.reshape(
         tensor=inputs,
-        shape=[-1, functools.reduce(operator.mul, shape[1:3]), shape[3]]
+        shape=([-1, shape[1], functools.reduce(operator.mul, shape[2:])] if data_format == "channels_first" else
+               [-1, functools.reduce(operator.mul, shape[1:3]), shape[3]])
     )
 
     shape = attentions.get_shape().as_list()
 
     attentions = tf.reshape(
         tensor=attentions,
-        shape=[-1, functools.reduce(operator.mul, shape[1:3]), shape[3]]
+        shape=([-1, shape[1], functools.reduce(operator.mul, shape[2:])] if data_format == "channels_first" else
+               [-1, functools.reduce(operator.mul, shape[1:3]), shape[3]])
     )
 
     inputs = tf.matmul(
         a=inputs,
         b=attentions,
-        transpose_a=True,
-        transpose_b=False
+        transpose_a=False if data_format == "channels_first" else True,
+        transpose_b=True if data_format == "channels_first" else False
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -290,7 +305,10 @@ def main(unused_argv):
     eval_labels = mnist.test.labels.astype(np.int32)
 
     mnist_classifier = tf.estimator.Estimator(
-        model_fn=acnn_model_fn,
+        model_fn=functools.partial(
+            acnn_model_fn,
+            data_format=args.data_format
+        ),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
