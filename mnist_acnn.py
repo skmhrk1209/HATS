@@ -53,7 +53,7 @@ def acnn_model_fn(features, labels, mode, params):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=32,
-        kernel_size=5,
+        kernel_size=3,
         strides=1,
         padding="same"
     )
@@ -75,7 +75,7 @@ def acnn_model_fn(features, labels, mode, params):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
-        kernel_size=5,
+        kernel_size=3,
         strides=1,
         padding="same"
     )
@@ -257,14 +257,14 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 3
-    (-1, 64, 9) -> (-1, 1024)
+    (-1, 64, 9) -> (-1, 128)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024
+        units=128
     )
 
     inputs = tf.layers.batch_normalization(
@@ -276,15 +276,9 @@ def acnn_model_fn(features, labels, mode, params):
 
     inputs = tf.nn.relu(inputs)
 
-    inputs = tf.layers.dropout(
-        inputs=inputs,
-        rate=0.4,
-        training=mode == tf.estimator.ModeKeys.TRAIN
-    )
-
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 1024) -> (-1, 10)
+    (-1, 128) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     logits = tf.layers.dense(
