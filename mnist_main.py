@@ -9,6 +9,7 @@ import argparse
 import itertools
 import functools
 import operator
+import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--num_steps", type=int, default=10000, help="number of training steps")

@@ -663,7 +663,7 @@ def main(unused_argv):
 
         predict_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["test.tfrecords"],
+            filenames=["data/test.tfrecords"],
             training=False,
             batch_size=args.batch_size,
             num_epochs=1
@@ -677,8 +677,7 @@ def main(unused_argv):
 
             image = predict_result["images"]
             attention = predict_result["attentions"]
-
-            image = image.repeat(repeats=3, axis=-1)
+            digits_classes = predict_result["digits_classes"]
 
             attention = utils.scale(attention, attention.min(), attention.max(), 0., 1.)
             attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
@@ -686,6 +685,8 @@ def main(unused_argv):
             image[:, :, -1] += attention
 
             cv2.imshow("image", cv2.resize(image, (112, 112)))
+
+            print(digits_classes)
 
             if cv2.waitKey(1000) == ord("q"):
 
