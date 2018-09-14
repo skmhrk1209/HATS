@@ -60,7 +60,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
-        axis=-1
+        axis=-1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
