@@ -11,7 +11,6 @@ import argparse
 import itertools
 import functools
 import operator
-import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
@@ -25,6 +24,11 @@ parser.add_argument('--gpu', type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
+
+
+def scale(input, input_min, input_max, output_min, output_max):
+
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
 
 def acnn_model_fn(features, labels, mode, params):
@@ -49,29 +53,45 @@ def acnn_model_fn(features, labels, mode, params):
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=32,
-        kernel_size=3,
+        kernel_size=5,
         strides=1,
-        padding="same",
-        activation=tf.nn.relu
+        padding="same"
     )
+
+    inputs = tf.layers.batch_normalization(
+        inputs=inputs,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 2
-    (-1, 64, 64, 32) -> (-1, 32, 32, 64)
+    (-1, 64, 64, 32) -> (-1, 64, 64, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
-        kernel_size=3,
-        strides=2,
-        padding="same",
-        activation=tf.nn.relu
+        kernel_size=5,
+        strides=1,
+        padding="same"
     )
+
+    inputs = tf.layers.batch_normalization(
+        inputs=inputs,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 1
-    (-1, 32, 32, 64) -> (-1, 16, 16, 3)
+    (-1, 64, 64, 64) -> (-1, 32, 32, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = inputs
@@ -81,13 +101,21 @@ def acnn_model_fn(features, labels, mode, params):
         filters=3,
         kernel_size=9,
         strides=2,
-        padding="same",
-        activation=tf.nn.relu
+        padding="same"
     )
+
+    attentions = tf.layers.batch_normalization(
+        inputs=attentions,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 2
-    (-1, 16, 16, 3) -> (-1, 8, 8, 3)
+    (-1, 32, 32, 3) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d(
@@ -99,9 +127,18 @@ def acnn_model_fn(features, labels, mode, params):
         activation=tf.nn.relu
     )
 
+    attentions = tf.layers.batch_normalization(
+        inputs=attentions,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    attentions = tf.nn.relu(attentions)
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 3
-    (-1, 8, 8, 3) -> (-1, 10)
+    (-1, 16, 16, 3) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = attentions.get_shape().as_list()
@@ -110,43 +147,67 @@ def acnn_model_fn(features, labels, mode, params):
 
     attentions = tf.layers.dense(
         inputs=attentions,
-        units=10,
-        activation=tf.nn.relu
+        units=10
     )
+
+    attentions = tf.layers.batch_normalization(
+        inputs=attentions,
+        axis=1,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 4
-    (-1, 10) -> (-1, 8, 8, 3)
+    (-1, 10) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.dense(
         inputs=attentions,
-        units=functools.reduce(operator.mul, shape[1:]),
-        activation=tf.nn.relu
+        units=functools.reduce(operator.mul, shape[1:])
     )
 
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    attention deconvolutional layer 5
-    (-1, 8, 8, 3) -> (-1, 16, 16, 9)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    attentions = tf.layers.batch_normalization(
+        inputs=attentions,
+        axis=1,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    attentions = tf.nn.relu(attentions)
 
     attentions = tf.reshape(
         tensor=attentions,
         shape=[-1] + shape[1:]
     )
 
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    attention deconvolutional layer 5
+    (-1, 16, 16, 3) -> (-1, 32, 32, 9)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
     attentions = tf.layers.conv2d_transpose(
         inputs=attentions,
         filters=9,
         kernel_size=3,
         strides=2,
-        padding="same",
-        activation=tf.nn.relu
+        padding="same"
     )
+
+    attentions = tf.layers.batch_normalization(
+        inputs=attentions,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 6
-    (-1, 16, 16, 9) -> (-1, 32, 32, 9)
+    (-1, 32, 32, 9) -> (-1, 64, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -154,15 +215,23 @@ def acnn_model_fn(features, labels, mode, params):
         filters=9,
         kernel_size=3,
         strides=2,
-        padding="same",
-        activation=tf.nn.sigmoid
+        padding="same"
     )
+
+    attentions = tf.layers.batch_normalization(
+        inputs=attentions,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    attentions = tf.nn.sigmoid(attentions)
 
     predictions["attentions"] = attentions
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
-    (-1, 32, 32, 64), (-1, 32, 32, 9) -> (-1, 64, 9)
+    (-1, 64, 64, 64), (-1, 64, 64, 9) -> (-1, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = inputs.get_shape().as_list()
@@ -188,20 +257,35 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 3
-    (-1, 64, 9) -> (-1, 128)
+    (-1, 64, 9) -> (-1, 1024)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=128,
+        units=1024,
         activation=tf.nn.relu
+    )
+
+    inputs = tf.layers.batch_normalization(
+        inputs=inputs,
+        axis=1,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    inputs = tf.nn.relu(inputs)
+
+    inputs = tf.layers.dropout(
+        inputs=inputs,
+        rate=0.4,
+        training=mode == tf.estimator.ModeKeys.TRAIN
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 128) -> (-1, 10)
+    (-1, 1024) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     logits = tf.layers.dense(
