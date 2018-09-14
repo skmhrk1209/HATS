@@ -57,14 +57,14 @@ def acnn_model_fn(features, labels, mode, params):
         strides=1,
         padding="same"
     )
-
+    '''
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
         axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -79,14 +79,14 @@ def acnn_model_fn(features, labels, mode, params):
         strides=1,
         padding="same"
     )
-
+    '''
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
         axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -103,14 +103,14 @@ def acnn_model_fn(features, labels, mode, params):
         strides=2,
         padding="same"
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -126,14 +126,14 @@ def acnn_model_fn(features, labels, mode, params):
         padding="same",
         activation=tf.nn.relu
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -149,14 +149,14 @@ def acnn_model_fn(features, labels, mode, params):
         inputs=attentions,
         units=10
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         axis=1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -168,14 +168,14 @@ def acnn_model_fn(features, labels, mode, params):
         inputs=attentions,
         units=functools.reduce(operator.mul, shape[1:])
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         axis=1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     attentions = tf.reshape(
@@ -195,14 +195,14 @@ def acnn_model_fn(features, labels, mode, params):
         strides=2,
         padding="same"
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.relu(attentions)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -217,14 +217,14 @@ def acnn_model_fn(features, labels, mode, params):
         strides=2,
         padding="same"
     )
-
+    '''
     attentions = tf.layers.batch_normalization(
         inputs=attentions,
         axis=3,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     attentions = tf.nn.sigmoid(attentions)
 
     predictions["attentions"] = attentions
@@ -266,14 +266,14 @@ def acnn_model_fn(features, labels, mode, params):
         inputs=inputs,
         units=128
     )
-
+    '''
     inputs = tf.layers.batch_normalization(
         inputs=inputs,
         axis=1,
         training=mode == tf.estimator.ModeKeys.TRAIN,
         fused=True
     )
-
+    '''
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
