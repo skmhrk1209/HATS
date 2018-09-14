@@ -423,8 +423,8 @@ def main(unused_argv):
     if args.predict:
 
         predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_images[:10]},
-            y=eval_labels[:10],
+            x={"images": eval_images[:100]},
+            y=eval_labels[:100],
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
