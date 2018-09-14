@@ -5,7 +5,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as ani
+import matplotlib.animation as animation
 import cv2
 import argparse
 import itertools
@@ -61,21 +61,21 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 2
-    (-1, 64, 64, 32) -> (-1, 64, 64, 64)
+    (-1, 64, 64, 32) -> (-1, 32, 32, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
         kernel_size=3,
-        strides=1,
+        strides=2,
         padding="same",
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 1
-    (-1, 64, 64, 64) -> (-1, 32, 32, 3)
+    (-1, 32, 32, 64) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = inputs
@@ -91,7 +91,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 2
-    (-1, 32, 32, 3) -> (-1, 16, 16, 3)
+    (-1, 16, 16, 3) -> (-1, 8, 8, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d(
@@ -105,7 +105,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 3
-    (-1, 16, 16, 3) -> (-1, 10)
+    (-1, 8, 8, 3) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = attentions.get_shape().as_list()
@@ -120,7 +120,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 4
-    (-1, 10) -> (-1, 16, 16, 3)
+    (-1, 10) -> (-1, 8, 8, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.dense(
@@ -136,7 +136,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 5
-    (-1, 16, 16, 3) -> (-1, 32, 32, 9)
+    (-1, 8, 8, 3) -> (-1, 16, 16, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -150,7 +150,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 6
-    (-1, 32, 32, 9) -> (-1, 64, 64, 9)
+    (-1, 16, 16, 9) -> (-1, 32, 32, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -166,7 +166,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
-    (-1, 64, 64, 64), (-1, 64, 64, 9) -> (-1, 64, 9)
+    (-1, 32, 32, 64), (-1, 32, 32, 9) -> (-1, 64, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = inputs.get_shape().as_list()
@@ -350,8 +350,8 @@ def main(unused_argv):
     if args.predict:
 
         predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_images[:10]},
-            y=eval_labels[:10],
+            x={"images": eval_images},
+            y=eval_labels,
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
@@ -362,24 +362,23 @@ def main(unused_argv):
         )
 
         figure = plt.figure()
-        images = []
+        artists = []
 
-        for predict_result in predict_results:
+        for predict_result in itertools.islice(predict_results, 10):
 
             attention = predict_result["attentions"]
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
-            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
+            attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
             attention = cv2.resize(attention, (64, 64))
 
             image = predict_result["images"]
-            image = image.repeat(repeats=3, axis=-1)
+            image = image.repeat(3, axis=-1)
             image[:, :, 0] += attention
 
-            images.append([plt.imshow(image, animated=True)])
+            artists.append([plt.imshow(image, animated=True)])
 
-        animation = ani.ArtistAnimation(figure, images, interval=1000, repeat=True)
-
-        plt.show()
+        anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
+        anim.save("mnist_attention.gif", writer="imagemagick")
 
 
 if __name__ == "__main__":

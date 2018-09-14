@@ -5,7 +5,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as ani
+import matplotlib.animation as animation
 import cv2
 import argparse
 import itertools
@@ -685,26 +685,22 @@ def main(unused_argv):
         )
 
         figure = plt.figure()
-        images = []
+        artists = []
 
-        for predict_result in predict_results:
+        for predict_result in itertools.islice(predict_results, 10):
 
-            image = predict_result["images"]
             attention = predict_result["attentions"]
-
-            attention = np.apply_along_axis(func1d=np.sum, axis=-1, arr=attention)
-
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
-
+            attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
             attention = cv2.resize(attention, (56, 56))
 
+            image = predict_result["images"]
             image[:, :, 0] += attention
 
-            images.append([plt.imshow(image, animated=True)])
+            artists.append([plt.imshow(image, animated=True)])
 
-        animation = ani.ArtistAnimation(figure, images, interval=1000, repeat=True)
-
-        plt.show()
+        ani = animation.ArtistAnimation(figure, artists, interval=1000, repeat=True)
+        anim.save("svhn_attention.gif", writer="imagemagick")
 
 
 if __name__ == "__main__":
