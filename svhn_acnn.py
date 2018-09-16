@@ -723,6 +723,8 @@ def main(unused_argv):
         anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
         anim.save("svhn_attention.gif", writer="imagemagick")
 
+        plt.show()
+
 
 if __name__ == "__main__":
     tf.app.run()
