@@ -35,7 +35,7 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
 
     def preprocess(image, training):
 
-        image = tf.image.resize_images(image, [128, 128])
+        image = tf.image.resize_images(image, [64, 64])
         image = tf.image.convert_image_dtype(image, tf.float32)
 
         return image
