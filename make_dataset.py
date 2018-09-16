@@ -79,7 +79,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                     feature={
                         "path": tf.train.Feature(
                             bytes_list=tf.train.BytesList(
-                                value=[struct["name"].encode("utf-8")]
+                                value=[os.path.join(os.path.dirname(args.struct), struct["name"]).encode("utf-8")]
                             )
                         ),
                         "length": tf.train.Feature(

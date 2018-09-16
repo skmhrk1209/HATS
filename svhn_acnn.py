@@ -657,7 +657,7 @@ def main(unused_argv):
 
         train_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["data/train.tfrecords"],
+            filenames=["train.tfrecords"],
             training=True,
             batch_size=args.batch_size,
             num_epochs=args.num_epochs
@@ -680,7 +680,7 @@ def main(unused_argv):
 
         eval_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["data/test.tfrecords"],
+            filenames=["test.tfrecords"],
             training=False,
             batch_size=args.batch_size,
             num_epochs=1
@@ -696,7 +696,7 @@ def main(unused_argv):
 
         predict_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["data/test.tfrecords"],
+            filenames=["test.tfrecords"],
             training=False,
             batch_size=args.batch_size,
             num_epochs=1
@@ -714,9 +714,8 @@ def main(unused_argv):
             attention = predict_result["attentions"]
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
             attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
-            attention = cv2.resize(attention, (56, 56))
 
-            image = predict_result["images"]
+            image = predict_result["images
             image[:, :, 0] += attention
 
             artists.append([plt.imshow(image, animated=True)])
