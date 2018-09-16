@@ -35,8 +35,7 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
 
     def preprocess(image, training):
 
-        image = tf.reshape(image, [64, 64, 3])
-        image = tf.random_crop(image, [56, 56, 3])
+        image = tf.image.resize_images(image, [128, 128])
         image = tf.image.convert_image_dtype(image, tf.float32)
 
         return image
@@ -46,7 +45,7 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
         features = tf.parse_single_example(
             serialized=example,
             features={
-                "image": tf.FixedLenFeature(
+                "path": tf.FixedLenFeature(
                     shape=[],
                     dtype=tf.string,
                     default_value=""
@@ -56,19 +55,42 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
                     dtype=tf.int64,
                     default_value=[0]
                 ),
-                "digits": tf.FixedLenFeature(
+                "label": tf.FixedLenFeature(
                     shape=[5],
                     dtype=tf.int64,
                     default_value=[10] * 5
+                ),
+                "top": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.int64,
+                    default_value=0
+                ),
+                "bottom": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.int64,
+                    default_value=0
+                ),
+                "left": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.int64,
+                    default_value=0
+                ),
+                "right": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.int64,
+                    default_value=0
                 )
             }
         )
 
-        image = preprocess(tf.decode_raw(features["image"], tf.uint8), training)
-        length = tf.cast(features['length'], tf.int32)
-        digits = tf.cast(features['digits'], tf.int32)
+        image = tf.read_file(features["path"])
+        image = tf.image.decode_png(image, 3)
+        image = preprocess(image, training)
 
-        return {"images": image}, tf.concat([length, digits], 0)
+        length = tf.cast(features["length"], tf.int32)
+        label = tf.cast(features["label"], tf.int32)
+
+        return {"images": image}, tf.concat([length, label], 0)
 
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.shuffle(30000)
@@ -699,7 +721,7 @@ def main(unused_argv):
 
             artists.append([plt.imshow(image, animated=True)])
 
-        ani = animation.ArtistAnimation(figure, artists, interval=1000, repeat=True)
+        anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
         anim.save("svhn_attention.gif", writer="imagemagick")
 
 
