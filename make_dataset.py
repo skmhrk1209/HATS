@@ -73,6 +73,10 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
             return list
 
+        if len(struct["label"]) > 5:
+
+            continue
+
         writer.write(
             record=tf.train.Example(
                 features=tf.train.Features(
