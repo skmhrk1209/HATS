@@ -566,7 +566,7 @@ def main(unused_argv):
             image = predict_result["images"]
             image[:, :, 0] += attention
 
-            artists.append([plt.imshow(image, animated=True)])
+            artists.append([plt.imshow(attention, animated=True)])
 
         anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
         anim.save("svhn_attention.gif", writer="imagemagick")
