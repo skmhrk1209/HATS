@@ -68,7 +68,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
             continue
 
-        def random_resize_with_pad(image, size, mode="constant"):
+        def random_resize_with_pad(image, size, mode):
 
             diff_y = size[0] - image.shape[0]
             diff_x = size[1] - image.shape[1]
@@ -92,7 +92,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
         image = random_resize_with_pad(image, size=[128, 128], mode="edge")
 
         label = np.array(struct["label"]).astype(np.int32) % 10
-        label = np.pad(label, [0, max_length - length], "constant", constant_values=10)
+        label = np.pad(label, pad_width=[0, max_length - length], mode="constant", constant_values=10)
 
         writer.write(
             record=tf.train.Example(
@@ -101,11 +101,6 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                         "image": tf.train.Feature(
                             bytes_list=tf.train.BytesList(
                                 value=[image.tobytes()]
-                            )
-                        ),
-                        "length": tf.train.Feature(
-                            int64_list=tf.train.Int64List(
-                                value=[length]
                             )
                         ),
                         "label": tf.train.Feature(

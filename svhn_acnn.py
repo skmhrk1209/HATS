@@ -43,11 +43,6 @@ def svhn_input_fn(filenames, batch_size, num_epochs):
                     dtype=tf.string,
                     default_value=""
                 ),
-                "length": tf.FixedLenFeature(
-                    shape=[1],
-                    dtype=tf.int64,
-                    default_value=[0]
-                ),
                 "label": tf.FixedLenFeature(
                     shape=[5],
                     dtype=tf.int64,
@@ -60,10 +55,9 @@ def svhn_input_fn(filenames, batch_size, num_epochs):
         image = tf.image.convert_image_dtype(image, tf.float32)
         image = tf.reshape(image, [128, 128, 3])
 
-        length = tf.cast(features["length"], tf.int32)
         label = tf.cast(features["label"], tf.int32)
 
-        return {"images": image}, tf.concat([length, label], 0)
+        return {"images": image}, label
 
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.shuffle(30000)
@@ -355,14 +349,10 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 1024) -> (-1, 6), (-1, 11) * 5
+    (-1, 1024) -> (-1, 11) * 5
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     multi_logits = [
-        tf.layers.dense(
-            inputs=inputs,
-            units=6
-        ),
         tf.layers.dense(
             inputs=inputs,
             units=11
@@ -386,43 +376,24 @@ def svhn_model_fn(features, labels, mode, params):
     ]
 
     predictions.update({
-        "length_classes": tf.stack(
+        "classes": tf.stack(
             values=[
                 tf.argmax(
                     input=logits,
                     axis=1
-                ) for logits in multi_logits[:1]
+                ) for logits in multi_logits
             ],
             axis=1
         ),
-        "digits_classes": tf.stack(
-            values=[
-                tf.argmax(
-                    input=logits,
-                    axis=1
-                ) for logits in multi_logits[1:]
-            ],
-            axis=1
-        ),
-        "length_probabilities": tf.stack(
+        "probabilities": tf.stack(
             values=[
                 tf.nn.softmax(
                     logits=logits,
                     dim=1
-                ) for logits in multi_logits[:1]
+                ) for logits in multi_logits
             ],
             axis=1,
-            name="length_softmax"
-        ),
-        "digits_probabilities": tf.stack(
-            values=[
-                tf.nn.softmax(
-                    logits=logits,
-                    dim=1
-                ) for logits in multi_logits[1:]
-            ],
-            axis=1,
-            name="digits_softmax"
+            name="softmax"
         )
     })
 
@@ -433,7 +404,7 @@ def svhn_model_fn(features, labels, mode, params):
             predictions=predictions
         )
 
-    loss = tf.reduce_sum(
+    loss = tf.reduce_mean(
         input_tensor=[
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
@@ -453,13 +424,7 @@ def svhn_model_fn(features, labels, mode, params):
         eval_metric_ops = {
             "accuracy": tf.metrics.accuracy(
                 labels=labels,
-                predictions=tf.concat(
-                    values=[
-                        predictions["length_classes"],
-                        predictions["digits_classes"]
-                    ],
-                    axis=1
-                )
+                predictions=predictions["classes"]
             )
         }
 
@@ -499,7 +464,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 1e-5
+            "attention_decay": 1e-6
         }
     )
 
@@ -514,8 +479,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "length_probabilities": "length_softmax",
-                "digits_probabilities": "digits_softmax"
+                "probabilities": "softmax"
             },
             every_n_iter=100
         )
@@ -566,9 +530,7 @@ def main(unused_argv):
             image = predict_result["images"]
             image[:, :, 0] += attention
 
-            print(attention)
-
-            artists.append([plt.imshow(attention, animated=True)])
+            artists.append([plt.imshow(image, animated=True)])
 
         anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
         anim.save("svhn_attention.gif", writer="imagemagick")
