@@ -36,7 +36,7 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
     def preprocess(image, training):
 
         image = tf.image.convert_image_dtype(image, tf.float32)
-        image = tf.image.resize_images(image, [128, 128])
+        image = tf.image.resize_images(image, [512, 512])
 
         return image
 
@@ -116,16 +116,16 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
-    (-1, 64, 64, 1) -> (-1, 64, 64, 64)
+    (-1, 512, 512, 3) -> (-1, 256, 256, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = features["images"]
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
-        filters=64,
+        filters=32,
         kernel_size=3,
-        strides=1,
+        strides=2,
         padding="same"
     )
 
@@ -140,14 +140,14 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 2
-    (-1, 64, 64, 64) -> (-1, 64, 64, 64)
+    (-1, 256, 256, 32) -> (-1, 128, 128, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=64,
         kernel_size=3,
-        strides=1,
+        strides=2,
         padding="same"
     )
 
@@ -162,29 +162,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 3
-    (-1, 64, 64, 64) -> (-1, 64, 64, 128)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=128,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 4
-    (-1, 64, 64, 128) -> (-1, 64, 64, 128)
+    (-1, 128, 128, 64) -> (-1, 64, 64, 128)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
@@ -205,79 +183,13 @@ def svhn_model_fn(features, labels, mode, params):
     inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 5
-    (-1, 64, 64, 128) -> (-1, 64, 64, 256)
+    convolutional layer 4
+    (-1, 64, 64, 128) -> (-1, 32, 32, 256)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
         filters=256,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 6
-    (-1, 64, 64, 256) -> (-1, 64, 64, 256)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=256,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 7
-    (-1, 64, 64, 256) -> (-1, 64, 64, 512)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=512,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 8
-    (-1, 64, 64, 512) -> (-1, 64, 64, 512)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=512,
         kernel_size=3,
         strides=2,
         padding="same"
@@ -294,7 +206,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 1
-    (-1, 64, 64, 64) -> (-1, 32, 32, 3)
+    (-1, 32, 32, 256) -> (-1, 16, 16, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = inputs
@@ -318,7 +230,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 2
-    (-1, 32, 32, 3) -> (-1, 16, 16, 3)
+    (-1, 16, 16, 3) -> (-1, 8, 8, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d(
@@ -340,7 +252,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 3
-    (-1, 16, 16, 3) -> (-1, 10)
+    (-1, 8, 8, 3) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = attentions.get_shape().as_list()
@@ -363,7 +275,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 4
-    (-1, 10) -> (-1, 16, 16, 3)
+    (-1, 10) -> (-1, 8, 8, 3)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.dense(
@@ -387,7 +299,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 5
-    (-1, 16, 16, 3) -> (-1, 32, 32, 9)
+    (-1, 8, 8, 3) -> (-1, 16, 16, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -409,7 +321,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention deconvolutional layer 6
-    (-1, 32, 32, 9) -> (-1, 64, 64, 9)
+    (-1, 16, 16, 9) -> (-1, 32, 32, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     attentions = tf.layers.conv2d_transpose(
@@ -433,7 +345,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
-    (-1, 64, 64, 512), (-1, 64, 64, 9) -> (-1, 512, 9)
+    (-1, 32, 32, 512), (-1, 32, 32, 9) -> (-1, 512, 9)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = inputs.get_shape().as_list()
@@ -458,34 +370,15 @@ def svhn_model_fn(features, labels, mode, params):
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 9
-    (-1, 512, 9) -> (-1, 4096)
+    dense layer 5
+    (-1, 512, 9) -> (-1, 1024)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=4096
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=1,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 10
-    (-1, 4096) -> (-1, 4096)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.dense(
-        inputs=inputs,
-        units=4096
+        units=1024
     )
 
     inputs = tf.layers.batch_normalization(
@@ -499,7 +392,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 4096) -> (-1, 6), (-1, 11) * 5
+    (-1, 1024) -> (-1, 6), (-1, 11) * 5
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     multi_logits = [
@@ -708,7 +601,7 @@ def main(unused_argv):
             attention = predict_result["attentions"]
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
             attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
-            attention = cv2.resize(attention, (128, 128))
+            attention = cv2.resize(attention, (512, 512))
 
             image = predict_result["images"]
             image[:, :, 0] += attention
