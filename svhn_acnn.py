@@ -374,14 +374,6 @@ def acnn_model_fn(features, labels, mode, params):
         )
     })
 
-    predictions.update({
-        "accuracy": tf.metrics.accuracy(
-            labels=labels,
-            predictions=predictions["classes"],
-            name="accuracy"
-        )
-    })
-
     if mode == tf.estimator.ModeKeys.PREDICT:
 
         return tf.estimator.EstimatorSpec(
@@ -406,6 +398,14 @@ def acnn_model_fn(features, labels, mode, params):
         ),
         axis=None
     ) * params["attention_decay"]
+
+    accuracy = tf.metrics.accuracy(
+        labels=labels,
+        predictions=predictions["classes"],
+        name="accuracy"
+    )
+
+    print(accuracy.name)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
 
