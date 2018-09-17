@@ -371,7 +371,10 @@ def acnn_model_fn(features, labels, mode, params):
             logits=multi_logits,
             dim=-1,
             name="softmax"
-        ),
+        )
+    })
+
+    predictions.update({
         "accuracy": tf.metrics.accuracy(
             labels=labels,
             predictions=predictions["classes"],
