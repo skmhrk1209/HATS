@@ -134,21 +134,6 @@ def cnn_model_fn(features, labels, mode, params):
         logits=logits
     )
 
-    if mode == tf.estimator.ModeKeys.EVAL:
-
-        eval_metric_ops = {
-            "accuracy": tf.metrics.accuracy(
-                labels=labels,
-                predictions=predictions["classes"]
-            )
-        }
-
-        return tf.estimator.EstimatorSpec(
-            mode=mode,
-            loss=loss,
-            eval_metric_ops=eval_metric_ops
-        )
-
     if mode == tf.estimator.ModeKeys.TRAIN:
 
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
@@ -162,6 +147,21 @@ def cnn_model_fn(features, labels, mode, params):
             mode=mode,
             loss=loss,
             train_op=train_op
+        )
+
+    if mode == tf.estimator.ModeKeys.EVAL:
+
+        eval_metric_ops = {
+            "accuracy": tf.metrics.accuracy(
+                labels=labels,
+                predictions=predictions["classes"]
+            )
+        }
+
+        return tf.estimator.EstimatorSpec(
+            mode=mode,
+            loss=loss,
+            eval_metric_ops=eval_metric_ops
         )
 
 

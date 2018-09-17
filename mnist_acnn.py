@@ -162,10 +162,7 @@ def acnn_model_fn(features, labels, mode, params):
         activation=tf.nn.sigmoid
     )
 
-    predictions["attentions"] = tf.identity(
-        input=attentions,
-        name="attentions"
-    )
+    predictions["attentions"] = attentions
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
@@ -240,25 +237,13 @@ def acnn_model_fn(features, labels, mode, params):
         logits=logits
     )
 
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    IMPORTANT !!!
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
-
-    if mode == tf.estimator.ModeKeys.EVAL:
-
-        eval_metric_ops = {
-            "accuracy": tf.metrics.accuracy(
-                labels=labels,
-                predictions=predictions["classes"]
-            )
-        }
-
-        return tf.estimator.EstimatorSpec(
-            mode=mode,
-            loss=loss,
-            eval_metric_ops=eval_metric_ops
-        )
+    loss += tf.reduce_mean(
+        input_tensor=tf.reduce_sum(
+            input_tensor=tf.abs(attentions),
+            axis=[1, 2]
+        ),
+        axis=None
+    ) * params["attention_decay"]
 
     if mode == tf.estimator.ModeKeys.TRAIN:
 
@@ -273,6 +258,21 @@ def acnn_model_fn(features, labels, mode, params):
             mode=mode,
             loss=loss,
             train_op=train_op
+        )
+
+    if mode == tf.estimator.ModeKeys.EVAL:
+
+        eval_metric_ops = {
+            "accuracy": tf.metrics.accuracy(
+                labels=labels,
+                predictions=predictions["classes"]
+            )
+        }
+
+        return tf.estimator.EstimatorSpec(
+            mode=mode,
+            loss=loss,
+            eval_metric_ops=eval_metric_ops
         )
 
 
@@ -333,8 +333,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "softmax": "softmax",
-                "attentions": "attentions"
+                "softmax": "softmax"
             },
             every_n_iter=100
         )
