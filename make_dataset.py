@@ -105,7 +105,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                                     array=map(int, struct["label"]),
                                     pad_width=[0, max_len - len(struct["label"])],
                                     mode="constant"
-                                )
+                                ).tolist()
                             )
                         )
                     }
