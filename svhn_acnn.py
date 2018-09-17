@@ -35,8 +35,8 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
 
     def preprocess(image, training):
 
-        image = tf.image.resize_images(image, [64, 64])
         image = tf.image.convert_image_dtype(image, tf.float32)
+        image = tf.image.resize_images(image, [128, 128])
 
         return image
 
@@ -191,7 +191,7 @@ def svhn_model_fn(features, labels, mode, params):
         inputs=inputs,
         filters=128,
         kernel_size=3,
-        strides=1,
+        strides=2,
         padding="same"
     )
 
@@ -279,7 +279,7 @@ def svhn_model_fn(features, labels, mode, params):
         inputs=inputs,
         filters=512,
         kernel_size=3,
-        strides=1,
+        strides=2,
         padding="same"
     )
 
@@ -477,12 +477,6 @@ def svhn_model_fn(features, labels, mode, params):
     )
 
     inputs = tf.nn.relu(inputs)
-
-    inputs = tf.layers.dropout(
-        inputs=inputs,
-        rate=0.4,
-        training=mode == tf.estimator.ModeKeys.TRAIN
-    )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 10
@@ -712,12 +706,12 @@ def main(unused_argv):
         for predict_result in itertools.islice(predict_results, 10):
 
             attention = predict_result["attentions"]
-            attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
+            attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
+            attention = cv2.resize(attention, (128, 128))
 
             image = predict_result["images"]
-            #image[:, :, 0] += attention
-            print(image.max())
+            image[:, :, 0] += attention
 
             artists.append([plt.imshow(image, animated=True)])
 
