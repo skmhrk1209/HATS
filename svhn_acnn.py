@@ -371,6 +371,11 @@ def acnn_model_fn(features, labels, mode, params):
             logits=multi_logits,
             dim=-1,
             name="softmax"
+        ),
+        "accuracy": tf.metrics.accuracy(
+            labels=labels,
+            predictions=predictions["classes"],
+            name="accuracy"
         )
     })
 
@@ -398,12 +403,6 @@ def acnn_model_fn(features, labels, mode, params):
         ),
         axis=None
     ) * params["attention_decay"]
-
-    accuracy = tf.metrics.accuracy(
-        labels=labels,
-        predictions=predictions["classes"],
-        name="accuracy"
-    )
 
     if mode == tf.estimator.ModeKeys.TRAIN:
 
