@@ -388,7 +388,7 @@ def svhn_model_fn(features, labels, mode, params):
         input_tensor=[
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
-                logits=logits[:, i, :]
+                logits=multi_logits[:, i, :]
             ) for i in range(5)
         ],
         axis=None
