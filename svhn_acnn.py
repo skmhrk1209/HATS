@@ -399,19 +399,6 @@ def acnn_model_fn(features, labels, mode, params):
         axis=None
     ) * params["attention_decay"]
 
-    accuracy, update_op = tf.metrics.accuracy(
-        labels=labels,
-        predictions=predictions["classes"]
-    )
-
-    accuracy = tf.identity(
-        input=accuracy,
-        name="accuracy"
-    )
-
-    print("********************************")
-    print(accuracy.name)
-
     if mode == tf.estimator.ModeKeys.TRAIN:
 
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
@@ -430,7 +417,10 @@ def acnn_model_fn(features, labels, mode, params):
     if mode == tf.estimator.ModeKeys.EVAL:
 
         eval_metric_ops = {
-            "accuracy": (accuracy, update_op)
+            "accuracy": tf.metrics.accuracy(
+                labels=labels,
+                predictions=predictions["classes"]
+            )
         }
 
         return tf.estimator.EstimatorSpec(
@@ -469,8 +459,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "softmax": "softmax",
-                "accuracy": "accuracy"
+                "softmax": "softmax"
             },
             every_n_iter=100
         )
