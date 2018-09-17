@@ -89,14 +89,14 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 3
-    (-1, 32, 32, 64) -> (-1, 1024)
+    (-1, 32, 32, 64) -> (-1, 128)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024,
+        units=128,
         activation=tf.nn.relu
     )
 
