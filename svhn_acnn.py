@@ -559,14 +559,14 @@ def main(unused_argv):
         for predict_result in itertools.islice(predict_results, 10):
 
             attention = predict_result["attentions"]
-            attention = scale(attention, attention.min(), attention.max(), 0, 1)
+            #attention = scale(attention, attention.min(), attention.max(), 0, 1)
             attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
             attention = cv2.resize(attention, (128, 128))
 
             image = predict_result["images"]
             image[:, :, 0] += attention
 
-            artists.append([plt.imshow(attention, animated=True)])
+            artists.append([plt.imshow(image, animated=True)])
 
         anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
         anim.save("svhn_attention.gif", writer="imagemagick")
