@@ -716,7 +716,7 @@ def main(unused_argv):
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
 
             image = predict_result["images"]
-            image[:, :, 0] += attention
+            #image[:, :, 0] += attention
 
             artists.append([plt.imshow(image, animated=True)])
 
