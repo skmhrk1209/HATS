@@ -2,15 +2,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
 import tensorflow as tf
-import functools
-import itertools
-import operator
+import numpy as np
 import argparse
-import glob
 import os
-import sys
 import cv2
 import h5py
 
@@ -63,57 +58,54 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     digit_struct = DigitStruct(args.struct)
 
+    max_len = 5
+
     for struct in digit_struct.get_all_structs():
 
-        def pad(list, length, value):
-
-            while len(list) < length:
-
-                list.append(value)
-
-            return list
-
-        if len(struct["label"]) > 5:
+        if len(struct["label"]) > max_len:
 
             continue
+
+        def random_resize_with_pad(image, size, mode="constant"):
+
+            diff_y = size[0] - image.shape[0]
+            diff_x = size[1] - image.shape[1]
+
+            pad_width_y = np.random.randint(low=0, high=diff_y)
+            pad_width_x = np.random.randint(low=0, high=diff_x)
+
+            return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x], [0, 0]], mode)
+
+        def non_negative(x):
+
+            return x if x > 0 else 0
+
+        top = int(non_negative(min([_top for _top in struct["top"]])))
+        bottom = int(non_negative(max([_top + _height for _top, _height in zip(struct["top"], struct["height"])])))
+
+        left = int(non_negative(min([_left for _left in struct["left"]])))
+        right = int(non_negative(max([_left + _width for _left, _width in zip(struct["left"], struct["width"])])))
+
+        image = cv2.imread(os.path.join(os.path.dirname(args.struct), struct["name"]))
+        image = cv2.resize(image[top:bottom, left:right, :], (28, 28))
+        image = random_resize_with_pad(image, size=[128, 128], mode="edge")
 
         writer.write(
             record=tf.train.Example(
                 features=tf.train.Features(
                     feature={
-                        "path": tf.train.Feature(
+                        "image": tf.train.Feature(
                             bytes_list=tf.train.BytesList(
-                                value=[os.path.join(os.path.dirname(args.struct), struct["name"]).encode("utf-8")]
-                            )
-                        ),
-                        "length": tf.train.Feature(
-                            int64_list=tf.train.Int64List(
-                                value=[len(struct["label"])]
+                                value=[image.tobytes()]
                             )
                         ),
                         "label": tf.train.Feature(
                             int64_list=tf.train.Int64List(
-                                value=pad(map(lambda label: int(label) % 10, struct["label"]), 5, 10)
-                            )
-                        ),
-                        "top": tf.train.Feature(
-                            int64_list=tf.train.Int64List(
-                                value=[int(min(struct["top"]))]
-                            )
-                        ),
-                        "bottom": tf.train.Feature(
-                            int64_list=tf.train.Int64List(
-                                value=[int(max([top + height for top, height in zip(struct["top"], struct["height"])]))]
-                            )
-                        ),
-                        "left": tf.train.Feature(
-                            int64_list=tf.train.Int64List(
-                                value=[int(min(struct["left"]))]
-                            )
-                        ),
-                        "right": tf.train.Feature(
-                            int64_list=tf.train.Int64List(
-                                value=[int(max([left + width for left, width in zip(struct["left"], struct["width"])]))]
+                                value=np.pad(
+                                    array=map(int, struct["label"]),
+                                    pad_width=[0, max_len - len(struct["label"])],
+                                    mode="constant"
+                                )
                             )
                         )
                     }

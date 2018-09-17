@@ -33,13 +33,6 @@ def scale(input, input_min, input_max, output_min, output_max):
 
 def svhn_input_fn(filenames, training, batch_size, num_epochs):
 
-    def preprocess(image, training):
-
-        image = tf.image.convert_image_dtype(image, tf.float32)
-        image = tf.image.resize_images(image, [512, 512])
-
-        return image
-
     def parse(example, training):
 
         features = tf.parse_single_example(
@@ -85,7 +78,7 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
 
         image = tf.read_file(features["path"])
         image = tf.image.decode_png(image, 3)
-        image = preprocess(image, training)
+        image = tf.image.convert_image_dtype(image, tf.float32)
 
         length = tf.cast(features["length"], tf.int32)
         label = tf.cast(features["label"], tf.int32)
@@ -116,10 +109,27 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
-    (-1, 512, 512, 3) -> (-1, 256, 256, 32)
+    (-1, 128, 128, 3) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = features["images"]
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=32,
+        kernel_size=3,
+        strides=1,
+        padding="same"
+    )
+
+    inputs = tf.layers.batch_normalization(
+        inputs=inputs,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    inputs = tf.nn.relu(inputs)
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
@@ -147,8 +157,25 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 2
-    (-1, 256, 256, 32) -> (-1, 128, 128, 64)
+    (-1, 64, 64, 32) -> (-1, 32, 32, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    inputs = tf.layers.conv2d(
+        inputs=inputs,
+        filters=64,
+        kernel_size=3,
+        strides=1,
+        padding="same"
+    )
+
+    inputs = tf.layers.batch_normalization(
+        inputs=inputs,
+        axis=3,
+        training=mode == tf.estimator.ModeKeys.TRAIN,
+        fused=True
+    )
+
+    inputs = tf.nn.relu(inputs)
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
@@ -175,66 +202,8 @@ def svhn_model_fn(features, labels, mode, params):
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 3
-    (-1, 128, 128, 64) -> (-1, 64, 64, 128)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=128,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    inputs = tf.layers.max_pooling2d(
-        inputs=inputs,
-        pool_size=2,
-        strides=2,
-        padding="same"
-    )
-
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    convolutional layer 4
-    (-1, 64, 64, 128) -> (-1, 32, 32, 256)
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=256,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    inputs = tf.layers.max_pooling2d(
-        inputs=inputs,
-        pool_size=2,
-        strides=2,
-        padding="same"
-    )
-
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    dense layer 5
-    (-1, 32, 32, 256) -> (-1, 1024)
+    dense layer 3
+    (-1, 32, 32, 64) -> (-1, 1024)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
@@ -399,7 +368,7 @@ def main(unused_argv):
 
         train_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["train.tfrecords"],
+            filenames=["data/train.tfrecords"],
             training=True,
             batch_size=args.batch_size,
             num_epochs=args.num_epochs
@@ -422,7 +391,7 @@ def main(unused_argv):
 
         eval_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["test.tfrecords"],
+            filenames=["data/test.tfrecords"],
             training=False,
             batch_size=args.batch_size,
             num_epochs=1
