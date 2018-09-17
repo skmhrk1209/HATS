@@ -355,47 +355,24 @@ def svhn_model_fn(features, labels, mode, params):
     (-1, 1024) -> (-1, 11) * 5
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    multi_logits = [
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-    ]
+    multi_logits = tf.stack(
+        values=[
+            tf.layers.dense(
+                inputs=inputs,
+                units=11
+            ) for i in range(5)
+        ],
+        axis=1
+    )
 
     predictions.update({
-        "classes": tf.stack(
-            values=[
-                tf.argmax(
-                    input=logits,
-                    axis=1
-                ) for logits in multi_logits
-            ],
-            axis=1
+        "classes": tf.argmax(
+            input=multi_logits,
+            axis=-1
         ),
-        "softmax": tf.stack(
-            values=[
-                tf.nn.softmax(
-                    logits=logits,
-                    dim=1
-                ) for logits in multi_logits
-            ],
-            axis=1,
+        "softmax": tf.nn.softmax(
+            logits=multi_logits,
+            dim=-1,
             name="softmax"
         )
     })
@@ -411,8 +388,8 @@ def svhn_model_fn(features, labels, mode, params):
         input_tensor=[
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
-                logits=logits
-            ) for i, logits in enumerate(multi_logits)
+                logits=logits[:, i, :]
+            ) for i in range(5)
         ],
         axis=None
     )
