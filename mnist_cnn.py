@@ -31,7 +31,7 @@ def scale(input, input_min, input_max, output_min, output_max):
     return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
 
-def acnn_model_fn(features, labels, mode, params):
+def cnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for CNN
 
@@ -195,7 +195,7 @@ def main(unused_argv):
     eval_labels = mnist.test.labels.astype(np.int32)
 
     mnist_classifier = tf.estimator.Estimator(
-        model_fn=acnn_model_fn,
+        model_fn=cnn_model_fn,
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
@@ -204,7 +204,8 @@ def main(unused_argv):
                     allow_growth=True
                 )
             )
-        )
+        ),
+        params={}
     )
 
     if args.train:
