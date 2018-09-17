@@ -409,6 +409,9 @@ def acnn_model_fn(features, labels, mode, params):
         name="accuracy"
     )
 
+    print("********************************")
+    print(accuracy.name)
+
     if mode == tf.estimator.ModeKeys.TRAIN:
 
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
