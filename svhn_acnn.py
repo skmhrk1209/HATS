@@ -561,7 +561,7 @@ def main(unused_argv):
             attention = predict_result["attentions"]
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
             attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
-            attention = cv2.resize(attention, (512, 512))
+            attention = cv2.resize(attention, (128, 128))
 
             image = predict_result["images"]
             image[:, :, 0] += attention
