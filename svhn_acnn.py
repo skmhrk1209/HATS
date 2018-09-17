@@ -463,7 +463,7 @@ def main(unused_argv):
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
                 "softmax": "softmax",
-                #"accuracy": "accuracy"
+                "accuracy": "accuracy"
             },
             every_n_iter=100
         )
