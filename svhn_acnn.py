@@ -69,7 +69,7 @@ def svhn_input_fn(filenames, batch_size, num_epochs):
     return dataset.make_one_shot_iterator().get_next()
 
 
-def svhn_model_fn(features, labels, mode, params):
+def acnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for ACNN
 
@@ -298,10 +298,7 @@ def svhn_model_fn(features, labels, mode, params):
 
     attentions = tf.nn.sigmoid(attentions)
 
-    predictions["attentions"] = tf.identity(
-        input=attentions,
-        name="attentions"
-    )
+    predictions["attentions"] = attentions
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
@@ -433,7 +430,7 @@ def svhn_model_fn(features, labels, mode, params):
 def main(unused_argv):
 
     svhn_classifier = tf.estimator.Estimator(
-        model_fn=svhn_model_fn,
+        model_fn=acnn_model_fn,
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
@@ -459,8 +456,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "softmax": "softmax",
-                "attentions": "attentions"
+                "softmax": "softmax"
             },
             every_n_iter=100
         )

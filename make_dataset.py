@@ -68,7 +68,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
             continue
 
-        def random_resize_with_pad(image, size, mode="constant", constant_values=0):
+        def random_resize_with_pad(image, size, mode, **kwargs):
 
             diff_y = size[0] - image.shape[0]
             diff_x = size[1] - image.shape[1]
@@ -84,7 +84,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                     [0, 0]
                 ],
                 mode=mode,
-                constant_values=constant_values
+                **kwargs
             )
 
         def non_negative(x):

@@ -278,7 +278,7 @@ def acnn_model_fn(features, labels, mode, params):
 
 def main(unused_argv):
 
-    def random_resize_with_pad(image, size, mode="constant", constant_values=0):
+    def random_resize_with_pad(image, size, mode, **kwargs):
 
         diff_y = size[0] - image.shape[0]
         diff_x = size[1] - image.shape[1]
@@ -294,13 +294,13 @@ def main(unused_argv):
                 [0, 0]
             ],
             mode=mode,
-            constant_values=constant_values
+            **kwargs
         )
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128])
+    train_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128], mode="constant")
                              for image in mnist.train.images])
-    eval_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128])
+    eval_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128], mode="constant")
                             for image in mnist.test.images])
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
