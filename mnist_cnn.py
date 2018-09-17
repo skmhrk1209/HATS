@@ -115,7 +115,7 @@ def acnn_model_fn(features, labels, mode, params):
             input=logits,
             axis=-1
         ),
-        "probabilities": tf.nn.softmax(
+        "softmax": tf.nn.softmax(
             logits=logits,
             dim=-1,
             name="softmax"
@@ -167,7 +167,7 @@ def acnn_model_fn(features, labels, mode, params):
 
 def main(unused_argv):
 
-    def random_resize_with_pad(image, size, mode="constant"):
+    def random_resize_with_pad(image, size, mode="constant", constant_values=0):
 
         diff_y = size[0] - image.shape[0]
         diff_x = size[1] - image.shape[1]
@@ -175,7 +175,16 @@ def main(unused_argv):
         pad_width_y = np.random.randint(low=0, high=diff_y)
         pad_width_x = np.random.randint(low=0, high=diff_x)
 
-        return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x], [0, 0]], mode)
+        return np.pad(
+            array=image,
+            pad_width=[
+                [pad_width_y, diff_y - pad_width_y],
+                [pad_width_x, diff_x - pad_width_x],
+                [0, 0]
+            ],
+            mode=mode,
+            constant_values=constant_values
+        )
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
     train_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128])
@@ -210,7 +219,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "probabilities": "softmax"
+                "softmax": "softmax"
             },
             every_n_iter=100
         )

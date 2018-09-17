@@ -388,7 +388,7 @@ def svhn_model_fn(features, labels, mode, params):
             ],
             axis=1
         ),
-        "probabilities": tf.stack(
+        "softmax": tf.stack(
             values=[
                 tf.nn.softmax(
                     logits=logits,
@@ -396,7 +396,7 @@ def svhn_model_fn(features, labels, mode, params):
                 ) for logits in multi_logits
             ],
             axis=1,
-            name="probabilities"
+            name="softmax"
         )
     })
 
@@ -482,7 +482,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "probabilities": "probabilities",
+                "softmax": "softmax",
                 "attentions": "attentions"
             },
             every_n_iter=100

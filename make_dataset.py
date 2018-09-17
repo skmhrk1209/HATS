@@ -68,7 +68,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
             continue
 
-        def random_resize_with_pad(image, size, mode):
+        def random_resize_with_pad(image, size, mode="constant", constant_values=0):
 
             diff_y = size[0] - image.shape[0]
             diff_x = size[1] - image.shape[1]
@@ -76,7 +76,16 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
             pad_width_y = np.random.randint(low=0, high=diff_y)
             pad_width_x = np.random.randint(low=0, high=diff_x)
 
-            return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x], [0, 0]], mode)
+            return np.pad(
+                array=image,
+                pad_width=[
+                    [pad_width_y, diff_y - pad_width_y],
+                    [pad_width_x, diff_x - pad_width_x],
+                    [0, 0]
+                ],
+                mode=mode,
+                constant_values=constant_values
+            )
 
         def non_negative(x):
 
@@ -89,10 +98,19 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
         image = cv2.imread(os.path.join(os.path.dirname(args.struct), struct["name"]))
         image = cv2.resize(image[top:bottom, left:right, :], (28, 28))
-        image = random_resize_with_pad(image, size=[128, 128], mode="edge")
+        image = random_resize_with_pad(
+            image=image,
+            size=[128, 128],
+            mode="edge"
+        )
 
         label = np.array(struct["label"]).astype(np.int32) % 10
-        label = np.pad(label, pad_width=[0, max_length - length], mode="constant", constant_values=10)
+        label = np.pad(
+            array=label,
+            pad_width=[0, max_length - length],
+            mode="constant",
+            constant_values=10
+        )
 
         writer.write(
             record=tf.train.Example(
