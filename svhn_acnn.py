@@ -712,8 +712,8 @@ def main(unused_argv):
         for predict_result in itertools.islice(predict_results, 10):
 
             attention = predict_result["attentions"]
-            attention = scale(attention, attention.min(), attention.max(), 0, 1)
             attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
+            attention = scale(attention, attention.min(), attention.max(), 0, 1)
 
             image = predict_result["images"]
             image[:, :, 0] += attention
