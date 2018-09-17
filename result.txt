@@ -1,0 +1,8 @@
+NFO:tensorflow:Restoring parameters from mnist_cnn_model/model.ckpt-27500
+INFO:tensorflow:Finished evaluation at 2018-09-17-15:23:57
+INFO:tensorflow:Saving dict for global step 27500: accuracy = 0.8977, global_step =27500, loss = 0.8301222
+{'accuracy': 0.8977, 'loss': 0.8301222, 'global_step': 27500}
+INFO:tensorflow:Restoring parameters from mnist_acnn_model/model.ckpt-27500
+INFO:tensorflow:Finished evaluation at 2018-09-17-15:26:08
+INFO:tensorflow:Saving dict for global step 27500: accuracy = 0.9793, global_step =27500, loss = 0.10347236
+{'accuracy': 0.9793, 'loss': 0.10347236, 'global_step': 27500}
