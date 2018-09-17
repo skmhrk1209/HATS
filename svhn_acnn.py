@@ -298,7 +298,10 @@ def svhn_model_fn(features, labels, mode, params):
 
     attentions = tf.nn.sigmoid(attentions)
 
-    predictions["attentions"] = attentions
+    predictions["attentions"] = tf.identity(
+        input=attentions,
+        name="attentions"
+    )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     extract layer
@@ -393,7 +396,7 @@ def svhn_model_fn(features, labels, mode, params):
                 ) for logits in multi_logits
             ],
             axis=1,
-            name="softmax"
+            name="probabilities"
         )
     })
 
@@ -479,7 +482,8 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "probabilities": "softmax"
+                "probabilities": "probabilities",
+                "attentions": "attentions"
             },
             every_n_iter=100
         )
