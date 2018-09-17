@@ -38,52 +38,29 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
         features = tf.parse_single_example(
             serialized=example,
             features={
-                "path": tf.FixedLenFeature(
+                "image": tf.FixedLenFeature(
                     shape=[],
                     dtype=tf.string,
                     default_value=""
-                ),
-                "length": tf.FixedLenFeature(
-                    shape=[1],
-                    dtype=tf.int64,
-                    default_value=[0]
                 ),
                 "label": tf.FixedLenFeature(
                     shape=[5],
                     dtype=tf.int64,
                     default_value=[10] * 5
-                ),
-                "top": tf.FixedLenFeature(
-                    shape=[],
-                    dtype=tf.int64,
-                    default_value=0
-                ),
-                "bottom": tf.FixedLenFeature(
-                    shape=[],
-                    dtype=tf.int64,
-                    default_value=0
-                ),
-                "left": tf.FixedLenFeature(
-                    shape=[],
-                    dtype=tf.int64,
-                    default_value=0
-                ),
-                "right": tf.FixedLenFeature(
-                    shape=[],
-                    dtype=tf.int64,
-                    default_value=0
                 )
             }
         )
 
-        image = tf.read_file(features["path"])
-        image = tf.image.decode_png(image, 3)
+        image = tf.decode_raw(features["image"], tf.uint8)
         image = tf.image.convert_image_dtype(image, tf.float32)
+        image = tf.reshape(image, [128, 128, 3])
 
-        length = tf.cast(features["length"], tf.int32)
         label = tf.cast(features["label"], tf.int32)
 
-        return {"images": image}, tf.concat([length, label], 0)
+        length = tf.count_nonzero(label)
+        length = tf.cast(length, tf.int32)
+
+        return {"images": image}, tf.concat([[length], label], 0)
 
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.shuffle(30000)

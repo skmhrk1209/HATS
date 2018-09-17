@@ -16,8 +16,8 @@ for record in tf.python_io.tf_record_iterator(args.filename):
     example = tf.train.Example()
     example.ParseFromString(record)
 
-    string = example.features.feature["image"].bytes_list.value[0]
-    image = np.fromstring(string, dtype=np.uint8).reshape([128, 128, 3])
+    bytes = example.features.feature["image"].bytes_list.value[0]
+    image = np.frombuffer(bytes, dtype=np.uint8).reshape([128, 128, 3])
 
     cv2.imshow("image", image)
 
