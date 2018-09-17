@@ -717,6 +717,7 @@ def main(unused_argv):
 
             image = predict_result["images"]
             #image[:, :, 0] += attention
+            print(image.max())
 
             artists.append([plt.imshow(image, animated=True)])
 
