@@ -45,7 +45,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
-    (-1, 64, 64, 1) -> (-1, 64, 64, 32)
+    (-1, 128, 128, 1) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = features["images"]
@@ -54,7 +54,7 @@ def acnn_model_fn(features, labels, mode, params):
         inputs=inputs,
         filters=32,
         kernel_size=3,
-        strides=1,
+        strides=2,
         padding="same",
         activation=tf.nn.relu
     )
@@ -286,9 +286,9 @@ def main(unused_argv):
         return np.pad(image, [[pad_width_y, diff_y - pad_width_y], [pad_width_x, diff_x - pad_width_x], [0, 0]], "constant")
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[64, 64])
+    train_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128])
                              for image in mnist.train.images])
-    eval_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[64, 64])
+    eval_images = np.array([resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128])
                             for image in mnist.test.images])
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
@@ -369,7 +369,7 @@ def main(unused_argv):
             attention = predict_result["attentions"]
             attention = scale(attention, attention.min(), attention.max(), 0, 1)
             attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
-            attention = cv2.resize(attention, (64, 64))
+            attention = cv2.resize(attention, (128, 128))
 
             image = predict_result["images"]
             image = image.repeat(3, axis=-1)
