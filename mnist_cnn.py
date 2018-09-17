@@ -134,11 +134,6 @@ def acnn_model_fn(features, labels, mode, params):
         logits=logits
     )
 
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    IMPORTANT !!!
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    loss += tf.reduce_sum(tf.abs(attentions)) * params["attention_decay"]
-
     if mode == tf.estimator.ModeKeys.EVAL:
 
         eval_metric_ops = {
@@ -200,10 +195,7 @@ def main(unused_argv):
                     allow_growth=True
                 )
             )
-        ),
-        params={
-            "attention_decay": 1e-6
-        }
+        )
     )
 
     if args.train:
