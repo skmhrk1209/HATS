@@ -58,11 +58,13 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     digit_struct = DigitStruct(args.struct)
 
-    max_len = 5
+    max_length = 5
 
     for struct in digit_struct.get_all_structs():
 
-        if len(struct["label"]) > max_len:
+        length = len(struct["label"])
+
+        if length > max_length:
 
             continue
 
@@ -82,13 +84,15 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
         top = int(non_negative(min([_top for _top in struct["top"]])))
         bottom = int(non_negative(max([_top + _height for _top, _height in zip(struct["top"], struct["height"])])))
-
         left = int(non_negative(min([_left for _left in struct["left"]])))
         right = int(non_negative(max([_left + _width for _left, _width in zip(struct["left"], struct["width"])])))
 
         image = cv2.imread(os.path.join(os.path.dirname(args.struct), struct["name"]))
         image = cv2.resize(image[top:bottom, left:right, :], (28, 28))
         image = random_resize_with_pad(image, size=[128, 128], mode="edge")
+
+        label = np.array(struct["label"]).astype(np.int32) % 10
+        label = np.pad(label, [0, max_length - length], "constant", constant_values=10)
 
         writer.write(
             record=tf.train.Example(
@@ -99,13 +103,14 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                                 value=[image.tobytes()]
                             )
                         ),
+                        "length": tf.train.Feature(
+                            int64_list=tf.train.Int64List(
+                                value=[length]
+                            )
+                        ),
                         "label": tf.train.Feature(
                             int64_list=tf.train.Int64List(
-                                value=np.pad(
-                                    array=map(int, struct["label"]),
-                                    pad_width=[0, max_len - len(struct["label"])],
-                                    mode="constant"
-                                ).tolist()
+                                value=label.tolist()
                             )
                         )
                     }

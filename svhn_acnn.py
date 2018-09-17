@@ -31,9 +31,9 @@ def scale(input, input_min, input_max, output_min, output_max):
     return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
 
-def svhn_input_fn(filenames, training, batch_size, num_epochs):
+def svhn_input_fn(filenames, batch_size, num_epochs):
 
-    def parse(example, training):
+    def parse(example):
 
         features = tf.parse_single_example(
             serialized=example,
@@ -42,6 +42,11 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
                     shape=[],
                     dtype=tf.string,
                     default_value=""
+                ),
+                "length": tf.FixedLenFeature(
+                    shape=[1],
+                    dtype=tf.int64,
+                    default_value=[0]
                 ),
                 "label": tf.FixedLenFeature(
                     shape=[5],
@@ -55,21 +60,10 @@ def svhn_input_fn(filenames, training, batch_size, num_epochs):
         image = tf.image.convert_image_dtype(image, tf.float32)
         image = tf.reshape(image, [128, 128, 3])
 
+        length = tf.cast(features["length"], tf.int32)
         label = tf.cast(features["label"], tf.int32)
 
-        length = tf.count_nonzero(label)
-        length = tf.cast(length, tf.int32)
-
-        return {"images": image}, tf.concat([[length], label], 0)
-
-    dataset = tf.data.TFRecordDataset(filenames)
-    dataset = dataset.shuffle(30000)
-    dataset = dataset.repeat(num_epochs)
-    dataset = dataset.map(functools.partial(parse, training=training))
-    dataset = dataset.batch(batch_size)
-    dataset = dataset.prefetch(1)
-
-    return dataset.make_one_shot_iterator().get_next()
+        return {"images": image}, tf.concat([length, label], 0)
 
 
 def svhn_model_fn(features, labels, mode, params):
@@ -505,7 +499,6 @@ def main(unused_argv):
         train_input_fn = functools.partial(
             svhn_input_fn,
             filenames=["data/train.tfrecords"],
-            training=True,
             batch_size=args.batch_size,
             num_epochs=args.num_epochs
         )
@@ -528,7 +521,6 @@ def main(unused_argv):
         eval_input_fn = functools.partial(
             svhn_input_fn,
             filenames=["data/test.tfrecords"],
-            training=False,
             batch_size=args.batch_size,
             num_epochs=1
         )
@@ -544,7 +536,6 @@ def main(unused_argv):
         predict_input_fn = functools.partial(
             svhn_input_fn,
             filenames=["data/test.tfrecords"],
-            training=False,
             batch_size=args.batch_size,
             num_epochs=1
         )
