@@ -26,6 +26,11 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
+def scale(input, input_min, input_max, output_min, output_max):
+
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+
 def svhn_input_fn(filenames, batch_size, num_epochs):
 
     def parse(example):
@@ -37,11 +42,6 @@ def svhn_input_fn(filenames, batch_size, num_epochs):
                     shape=[],
                     dtype=tf.string,
                     default_value=""
-                ),
-                "length": tf.FixedLenFeature(
-                    shape=[1],
-                    dtype=tf.int64,
-                    default_value=[0]
                 ),
                 "label": tf.FixedLenFeature(
                     shape=[5],
@@ -55,10 +55,9 @@ def svhn_input_fn(filenames, batch_size, num_epochs):
         image = tf.image.convert_image_dtype(image, tf.float32)
         image = tf.reshape(image, [128, 128, 3])
 
-        length = tf.cast(features["length"], tf.int32)
         label = tf.cast(features["label"], tf.int32)
 
-        return {"images": image}, tf.concat([length, label], 0)
+        return {"images": image}, label
 
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.shuffle(30000)
@@ -70,7 +69,7 @@ def svhn_input_fn(filenames, batch_size, num_epochs):
     return dataset.make_one_shot_iterator().get_next()
 
 
-def svhn_model_fn(features, labels, mode, params):
+def cnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for CNN
 
@@ -199,74 +198,28 @@ def svhn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 1024) -> (-1, 6), (-1, 11) * 5
+    (-1, 1024) -> (-1, 11) * 5
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    multi_logits = [
-        tf.layers.dense(
-            inputs=inputs,
-            units=6
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-        tf.layers.dense(
-            inputs=inputs,
-            units=11
-        ),
-    ]
+    multi_logits = tf.stack(
+        values=[
+            tf.layers.dense(
+                inputs=inputs,
+                units=11
+            ) for i in range(5)
+        ],
+        axis=1
+    )
 
     predictions.update({
-        "length_classes": tf.stack(
-            values=[
-                tf.argmax(
-                    input=logits,
-                    axis=1
-                ) for logits in multi_logits[:1]
-            ],
-            axis=1
+        "classes": tf.argmax(
+            input=multi_logits,
+            axis=-1
         ),
-        "digits_classes": tf.stack(
-            values=[
-                tf.argmax(
-                    input=logits,
-                    axis=1
-                ) for logits in multi_logits[1:]
-            ],
-            axis=1
-        ),
-        "length_probabilities": tf.stack(
-            values=[
-                tf.nn.softmax(
-                    logits=logits,
-                    dim=1
-                ) for logits in multi_logits[:1]
-            ],
-            axis=1,
-            name="length_softmax"
-        ),
-        "digits_probabilities": tf.stack(
-            values=[
-                tf.nn.softmax(
-                    logits=logits,
-                    dim=1
-                ) for logits in multi_logits[1:]
-            ],
-            axis=1,
-            name="digits_softmax"
+        "softmax": tf.nn.softmax(
+            logits=multi_logits,
+            dim=-1,
+            name="softmax"
         )
     })
 
@@ -277,36 +230,15 @@ def svhn_model_fn(features, labels, mode, params):
             predictions=predictions
         )
 
-    loss = tf.reduce_sum(
+    loss = tf.reduce_mean(
         input_tensor=[
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
-                logits=logits
-            ) for i, logits in enumerate(multi_logits)
+                logits=multi_logits[:, i, :]
+            ) for i in range(5)
         ],
         axis=None
     )
-
-    if mode == tf.estimator.ModeKeys.EVAL:
-
-        eval_metric_ops = {
-            "accuracy": tf.metrics.accuracy(
-                labels=labels,
-                predictions=tf.concat(
-                    values=[
-                        predictions["length_classes"],
-                        predictions["digits_classes"]
-                    ],
-                    axis=1
-                )
-            )
-        }
-
-        return tf.estimator.EstimatorSpec(
-            mode=mode,
-            loss=loss,
-            eval_metric_ops=eval_metric_ops
-        )
 
     if mode == tf.estimator.ModeKeys.TRAIN:
 
@@ -323,11 +255,26 @@ def svhn_model_fn(features, labels, mode, params):
             train_op=train_op
         )
 
+    if mode == tf.estimator.ModeKeys.EVAL:
+
+        eval_metric_ops = {
+            "accuracy": tf.metrics.accuracy(
+                labels=labels,
+                predictions=predictions["classes"]
+            )
+        }
+
+        return tf.estimator.EstimatorSpec(
+            mode=mode,
+            loss=loss,
+            eval_metric_ops=eval_metric_ops
+        )
+
 
 def main(unused_argv):
 
     svhn_classifier = tf.estimator.Estimator(
-        model_fn=svhn_model_fn,
+        model_fn=cnn_model_fn,
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
@@ -336,7 +283,8 @@ def main(unused_argv):
                     allow_growth=True
                 )
             )
-        )
+        ),
+        params={}
     )
 
     if args.train:
@@ -350,8 +298,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "length_probabilities": "length_softmax",
-                "digits_probabilities": "digits_softmax"
+                "softmax": "softmax"
             },
             every_n_iter=100
         )

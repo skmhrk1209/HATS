@@ -5,6 +5,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 import argparse
+import subprocess
 import os
 import cv2
 import h5py
@@ -13,6 +14,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("struct", type=str)
 parser.add_argument("filename", type=str)
 args = parser.parse_args()
+
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 
 class DigitStruct:
@@ -68,41 +71,49 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
             continue
 
-        def random_resize_with_pad(image, size, mode, **kwargs):
+        def clip(x, min_value, max_value):
 
-            diff_y = size[0] - image.shape[0]
-            diff_x = size[1] - image.shape[1]
+            return min(max_value, max(min_value, x))
 
-            pad_width_y = np.random.randint(low=0, high=diff_y)
-            pad_width_x = np.random.randint(low=0, high=diff_x)
+        input = cv2.imread(os.path.join(os.path.dirname(args.struct), struct["name"]))
 
-            return np.pad(
-                array=image,
-                pad_width=[
-                    [pad_width_y, diff_y - pad_width_y],
-                    [pad_width_x, diff_x - pad_width_x],
-                    [0, 0]
-                ],
-                mode=mode,
-                **kwargs
-            )
+        top = int(max(min([t for t in struct["top"]]), 0))
+        bottom = int(min(max([t + h for t, h in zip(struct["top"], struct["height"])]), input.shape[0]))
+        left = int(max(min([l for l in struct["left"]]), 0))
+        right = int(min(max([l + w for l, w in zip(struct["left"], struct["width"])]), input.shape[1]))
 
-        def non_negative(x):
+        mask = np.zeros_like(input)
+        mask[top:bottom, left:right, :] = 255
 
-            return x if x > 0 else 0
+        cv2.imwrite("input.png", input)
+        cv2.imwrite("mask.png", mask)
 
-        top = int(non_negative(min([_top for _top in struct["top"]])))
-        bottom = int(non_negative(max([_top + _height for _top, _height in zip(struct["top"], struct["height"])])))
-        left = int(non_negative(min([_left for _left in struct["left"]])))
-        right = int(non_negative(max([_left + _width for _left, _width in zip(struct["left"], struct["width"])])))
+        try:
 
-        image = cv2.imread(os.path.join(os.path.dirname(args.struct), struct["name"]))
-        image = cv2.resize(image[top:bottom, left:right, :], (28, 28))
-        image = random_resize_with_pad(
-            image=image,
-            size=[128, 128],
-            mode="edge"
-        )
+            subprocess.call([
+                "th", "inpaint.lua",
+                "--input",  os.path.join(dirname, "input.png"),
+                "--mask", os.path.join(dirname, "mask.png"),
+                "--output", os.path.join(dirname, "output.png"),
+                "--maxdim", str(max(input.shape[:2]))
+            ], cwd="../siggraph2017_inpainting")
+
+        except subprocess.CalledProcessError as error:
+
+            print(error.output)
+
+            continue
+
+        output = cv2.imread("output.png")
+        output = cv2.resize(output, (128, 128))
+
+        bounding_box = input[top:bottom, left:right, :]
+        bounding_box = cv2.resize(bounding_box, (28, 28))
+
+        y = np.random.randint(0, 100)
+        x = np.random.randint(0, 100)
+
+        output[y:y+28, x:x+28, :] = bounding_box
 
         label = np.array(struct["label"]).astype(np.int32) % 10
         label = np.pad(
@@ -118,7 +129,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                     feature={
                         "image": tf.train.Feature(
                             bytes_list=tf.train.BytesList(
-                                value=[image.tobytes()]
+                                value=[output.tobytes()]
                             )
                         ),
                         "label": tf.train.Feature(
