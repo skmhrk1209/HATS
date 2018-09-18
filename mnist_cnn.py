@@ -26,11 +26,6 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def scale(input, input_min, input_max, output_min, output_max):
-
-    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
-
-
 def cnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for CNN

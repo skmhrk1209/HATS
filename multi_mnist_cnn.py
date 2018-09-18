@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
-parser.add_argument("--model_dir", type=str, default="svhn_cnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_mnist_cnn_model", help="model directory")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument('--predict', action="store_true", help="with prediction")
@@ -24,44 +24,6 @@ parser.add_argument('--gpu', type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
-
-
-def svhn_input_fn(filenames, batch_size, num_epochs):
-
-    def parse(example):
-
-        features = tf.parse_single_example(
-            serialized=example,
-            features={
-                "image": tf.FixedLenFeature(
-                    shape=[],
-                    dtype=tf.string,
-                    default_value=""
-                ),
-                "label": tf.FixedLenFeature(
-                    shape=[5],
-                    dtype=tf.int64,
-                    default_value=[10] * 5
-                )
-            }
-        )
-
-        image = tf.decode_raw(features["image"], tf.uint8)
-        image = tf.image.convert_image_dtype(image, tf.float32)
-        image = tf.reshape(image, [128, 128, 3])
-
-        label = tf.cast(features["label"], tf.int32)
-
-        return {"images": image}, label
-
-    dataset = tf.data.TFRecordDataset(filenames)
-    dataset = dataset.shuffle(30000)
-    dataset = dataset.repeat(num_epochs)
-    dataset = dataset.map(parse)
-    dataset = dataset.batch(batch_size)
-    dataset = dataset.prefetch(1)
-
-    return dataset.make_one_shot_iterator().get_next()
 
 
 def cnn_model_fn(features, labels, mode, params):
@@ -78,7 +40,7 @@ def cnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
-    (-1, 128, 128, 3) -> (-1, 64, 64, 32)
+    (-1, 128, 128, 1) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = features["images"]
@@ -87,35 +49,10 @@ def cnn_model_fn(features, labels, mode, params):
         inputs=inputs,
         filters=32,
         kernel_size=3,
-        strides=1,
-        padding="same"
+        strides=2,
+        padding="same",
+        activation=tf.nn.relu
     )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=32,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
 
     inputs = tf.layers.max_pooling2d(
         inputs=inputs,
@@ -133,35 +70,10 @@ def cnn_model_fn(features, labels, mode, params):
         inputs=inputs,
         filters=64,
         kernel_size=3,
-        strides=1,
-        padding="same"
+        strides=2,
+        padding="same",
+        activation=tf.nn.relu
     )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
-
-    inputs = tf.layers.conv2d(
-        inputs=inputs,
-        filters=64,
-        kernel_size=3,
-        strides=1,
-        padding="same"
-    )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=3,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
 
     inputs = tf.layers.max_pooling2d(
         inputs=inputs,
@@ -172,49 +84,35 @@ def cnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 3
-    (-1, 32, 32, 64) -> (-1, 1024)
+    (-1, 32, 32, 64) -> (-1, 128)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=1024
+        units=128,
+        activation=tf.nn.relu
     )
-
-    inputs = tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=1,
-        training=mode == tf.estimator.ModeKeys.TRAIN,
-        fused=True
-    )
-
-    inputs = tf.nn.relu(inputs)
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 1024) -> (-1, 11) * 5
+    (-1, 128) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    multi_logits = tf.stack(
-        values=[
-            tf.layers.dense(
-                inputs=inputs,
-                units=11
-            ) for i in range(5)
-        ],
-        axis=1
+    logits = tf.layers.dense(
+        inputs=inputs,
+        units=10
     )
 
     predictions.update({
         "classes": tf.argmax(
-            input=multi_logits,
+            input=logits,
             axis=-1
         ),
-        "softmax": tf.nn.softmax(
-            logits=multi_logits,
-            dim=-1,
-            name="softmax"
+        "sigmoid": tf.nn.sigmoid(
+            x=logits,
+            name="sigmoid"
         )
     })
 
@@ -225,14 +123,9 @@ def cnn_model_fn(features, labels, mode, params):
             predictions=predictions
         )
 
-    loss = tf.reduce_mean(
-        input_tensor=[
-            tf.losses.sparse_softmax_cross_entropy(
-                labels=labels[:, i],
-                logits=multi_logits[:, i, :]
-            ) for i in range(5)
-        ],
-        axis=None
+    loss = tf.losses.sigmoid_cross_entropy(
+        multi_class_labels=labels,
+        logits=logits
     )
 
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -268,8 +161,75 @@ def cnn_model_fn(features, labels, mode, params):
 
 def main(unused_argv):
 
-    svhn_classifier = tf.estimator.Estimator(
-        model_fn=cnn_model_fn,
+    def random_resize_with_pad(image, size, mode, **kwargs):
+
+        dy = size[0] - image.shape[0]
+        dx = size[1] - image.shape[1]
+
+        wy = np.random.randint(low=0, high=dy)
+        wx = np.random.randint(low=0, high=dx)
+
+        return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
+
+    def make_multi_mnist(images, labels, digits, size):
+
+        multi_images = []
+        multi_labels = []
+
+        for _ in range(size):
+
+            indices = np.random.randint(0, len(images), size=np.random.randint(1, digits + 1))
+
+            multi_image = np.stack(images[indices], axis=3)
+            multi_image = np.apply_along_axis(np.sum, axis=3, arr=multi_image)
+            multi_image = np.clip(multi_image, 0, 1)
+            multi_images.append(multi_image)
+
+            multi_label = np.identity(10, dtype=np.int32)[labels[indices]]
+            multi_label = np.any(multi_label, axis=0).astype(np.int32)
+            multi_labels.append(multi_label)
+
+        return np.array(multi_images), np.array(multi_labels)
+
+    mnist = tf.contrib.learn.datasets.load_dataset("mnist")
+
+    train_images = np.array([
+        random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.train.images
+    ])
+
+    eval_images = np.array([
+        random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.test.images
+    ])
+
+    train_labels = mnist.train.labels.astype(np.int32)
+    eval_labels = mnist.test.labels.astype(np.int32)
+
+    train_multi_images, train_multi_labels = make_multi_mnist(
+        images=train_images,
+        labels=train_labels,
+        digits=4,
+        size=train_images.shape[0]
+    )
+
+    eval_multi_images, eval_multi_labels = make_multi_mnist(
+        images=eval_images,
+        labels=eval_labels,
+        digits=4,
+        size=eval_images.shape[0]
+    )
+
+    mnist_classifier = tf.estimator.Estimator(
+        model_fn=acnn_model_fn,
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
@@ -284,35 +244,37 @@ def main(unused_argv):
 
     if args.train:
 
-        train_input_fn = functools.partial(
-            svhn_input_fn,
-            filenames=["data/train.tfrecords"],
+        train_input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={"images": train_multi_images},
+            y=train_multi_labels,
             batch_size=args.batch_size,
-            num_epochs=args.num_epochs
+            num_epochs=args.num_epochs,
+            shuffle=True
         )
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "softmax": "softmax"
+                "sigmoid": "sigmoid"
             },
             every_n_iter=100
         )
 
-        svhn_classifier.train(
+        mnist_classifier.train(
             input_fn=train_input_fn,
             hooks=[logging_hook]
         )
 
     if args.eval:
 
-        eval_input_fn = functools.partial(
-            svhn_input_fn,
-            filenames=["data/test.tfrecords"],
+        eval_input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={"images": eval_multi_images},
+            y=eval_multi_labels,
             batch_size=args.batch_size,
-            num_epochs=1
+            num_epochs=1,
+            shuffle=False
         )
 
-        eval_results = svhn_classifier.evaluate(
+        eval_results = mnist_classifier.evaluate(
             input_fn=eval_input_fn
         )
 
