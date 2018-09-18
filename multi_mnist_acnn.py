@@ -219,8 +219,7 @@ def acnn_model_fn(features, labels, mode, params):
             axis=-1
         ),
         "sigmoid": tf.nn.sigmoid(
-            logits=logits,
-            dim=-1,
+            x=logits,
             name="sigmoid"
         )
     })
@@ -331,8 +330,8 @@ def main(unused_argv):
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
-    train_multi_images, train_multi_labels = make_multi_mnist(train_images, train_labels, 4, len(train_images))
-    eval_multi_images, eval_multi_labels = make_multi_mnist(eval_images, eval_labels, 4, len(eval_images))
+    train_multi_images, train_multi_labels = make_multi_mnist(train_images, train_labels, 4, 10)
+    eval_multi_images, eval_multi_labels = make_multi_mnist(eval_images, eval_labels, 4, 10)
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,

@@ -289,10 +289,25 @@ def main(unused_argv):
         return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128], mode="constant")
-                             for image in mnist.train.images])
-    eval_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128], mode="constant")
-                            for image in mnist.test.images])
+
+    train_images = np.array([
+        random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.train.images
+    ])
+
+    eval_images = np.array([
+        random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.test.images
+    ])
+
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
