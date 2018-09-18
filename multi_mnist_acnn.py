@@ -330,8 +330,19 @@ def main(unused_argv):
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
-    train_multi_images, train_multi_labels = make_multi_mnist(train_images, train_labels, 4, 10)
-    eval_multi_images, eval_multi_labels = make_multi_mnist(eval_images, eval_labels, 4, 10)
+    train_multi_images, train_multi_labels = make_multi_mnist(
+        images=train_images,
+        labels=train_labels,
+        digits=4,
+        size=train_images.shape[0]
+    )
+
+    eval_multi_images, eval_multi_labels = make_multi_mnist(
+        images=eval_images,
+        labels=eval_labels,
+        digits=4,
+        size=eval_images.shape[0]
+    )
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
