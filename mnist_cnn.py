@@ -169,22 +169,13 @@ def main(unused_argv):
 
     def random_resize_with_pad(image, size, mode, **kwargs):
 
-        diff_y = size[0] - image.shape[0]
-        diff_x = size[1] - image.shape[1]
+        dy = size[0] - image.shape[0]
+        dx = size[1] - image.shape[1]
 
-        pad_width_y = np.random.randint(low=0, high=diff_y)
-        pad_width_x = np.random.randint(low=0, high=diff_x)
+        wy = np.random.randint(low=0, high=dy)
+        wx = np.random.randint(low=0, high=dx)
 
-        return np.pad(
-            array=image,
-            pad_width=[
-                [pad_width_y, diff_y - pad_width_y],
-                [pad_width_x, diff_x - pad_width_x],
-                [0, 0]
-            ],
-            mode=mode,
-            **kwargs
-        )
+        return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
     train_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128], mode="constant")

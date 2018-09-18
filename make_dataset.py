@@ -90,12 +90,12 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
         try:
 
-            subprocess.call([
+            subprocess.check_call([
                 "th", "inpaint.lua",
                 "--input",  os.path.join(dirname, "input.png"),
                 "--mask", os.path.join(dirname, "mask.png"),
                 "--output", os.path.join(dirname, "output.png"),
-                "--maxdim", str(max(input.shape[:2]))
+                "--maxdim", "500"
             ], cwd="../siggraph2017_inpainting")
 
         except subprocess.CalledProcessError as error:

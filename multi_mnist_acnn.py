@@ -218,10 +218,10 @@ def acnn_model_fn(features, labels, mode, params):
             input=logits,
             axis=-1
         ),
-        "softmax": tf.nn.softmax(
+        "sigmoid": tf.nn.sigmoid(
             logits=logits,
             dim=-1,
-            name="softmax"
+            name="sigmoid"
         )
     })
 
@@ -232,8 +232,8 @@ def acnn_model_fn(features, labels, mode, params):
             predictions=predictions
         )
 
-    loss = tf.losses.sparse_softmax_cross_entropy(
-        labels=labels,
+    loss = tf.losses.sigmoid_cross_entropy(
+        multi_class_labels=labels,
         logits=logits
     )
 
@@ -288,13 +288,51 @@ def main(unused_argv):
 
         return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
 
+    def make_multi_mnist(images, labels, digits, size):
+
+        multi_images = []
+        multi_labels = []
+
+        for _ in range(size):
+
+            indices = np.random.randint(0, len(images), size=np.random.randint(1, digits + 1))
+
+            multi_image = np.stack(images[indices], axis=3)
+            multi_image = np.apply_along_axis(np.sum, axis=3, arr=multi_image)
+            multi_image = np.clip(multi_image, 0, 1)
+            multi_images.append(multi_image)
+
+            multi_label = np.identity(10, dtype=np.int32)[labels[indices]]
+            multi_label = np.any(multi_label, axis=0).astype(np.int32)
+            multi_labels.append(multi_label)
+
+        return np.array(multi_images), np.array(multi_labels)
+
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128], mode="constant")
-                             for image in mnist.train.images])
-    eval_images = np.array([random_resize_with_pad(image.reshape([28, 28, 1]), size=[128, 128], mode="constant")
-                            for image in mnist.test.images])
+
+    train_images = np.array([
+        random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.train.images
+    ])
+
+    eval_images = np.array([
+        random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.test.images
+    ])
+
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
+
+    train_multi_images, train_multi_labels = make_multi_mnist(train_images, train_labels, 4, len(train_images))
+    eval_multi_images, eval_multi_labels = make_multi_mnist(eval_images, eval_labels, 4, len(eval_images))
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
@@ -315,8 +353,8 @@ def main(unused_argv):
     if args.train:
 
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": train_images},
-            y=train_labels,
+            x={"images": train_multi_images},
+            y=train_multi_labels,
             batch_size=args.batch_size,
             num_epochs=args.num_epochs,
             shuffle=True
@@ -324,7 +362,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "softmax": "softmax"
+                "sigmoid": "sigmoid"
             },
             every_n_iter=100
         )
@@ -337,8 +375,8 @@ def main(unused_argv):
     if args.eval:
 
         eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_images},
-            y=eval_labels,
+            x={"images": eval_multi_images},
+            y=eval_multi_labels,
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
@@ -353,8 +391,8 @@ def main(unused_argv):
     if args.predict:
 
         predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_images},
-            y=eval_labels,
+            x={"images": eval_multi_images},
+            y=eval_multi_labels,
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
