@@ -348,14 +348,14 @@ def main(unused_argv):
 
     train_filenames = glob.glob("data/mnist/train/*.png")
     train_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE) for filename in train_filenames])
-    train_multi_images = scale(train_multi_images, 0., 255., 0., 1.)
+    train_multi_images = scale(train_multi_images.astype(np.float32), 0, 255, 0, 1)
     train_multi_images = np.reshape(train_multi_images, [-1, 128, 128, 1])
     train_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
                                    for filename in train_filenames])
 
     eval_filenames = glob.glob("data/mnist/test/*.png")
     eval_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE) for filename in eval_filenames])
-    eval_multi_images = scale(eval_multi_images, 0., 255., 0., 1.)
+    eval_multi_images = scale(eval_multi_images.astype(np.float32), 0, 255, 0, 1)
     eval_multi_images = np.reshape(eval_multi_images, [-1, 128, 128, 1])
     eval_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
                                   for filename in eval_filenames])
