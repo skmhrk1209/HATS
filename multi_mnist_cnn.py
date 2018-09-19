@@ -253,7 +253,7 @@ def main(unused_argv):
     test_images, test_labels = load_multi_mnist("data/multi_mnist/test")
 
     mnist_classifier = tf.estimator.Estimator(
-        model_fn=acnn_model_fn,
+        model_fn=cnn_model_fn,
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
@@ -261,14 +261,14 @@ def main(unused_argv):
                     visible_device_list=args.gpu,
                     allow_growth=True
                 )
-        model_fn=cnn_model_fn,
+            )
         ),
         params={}
     )
 
     if args.train:
 
-        train_input_fn=tf.estimator.inputs.numpy_input_fn(
+        train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"images": train_images},
             y=train_labels,
             batch_size=args.batch_size,
@@ -276,7 +276,7 @@ def main(unused_argv):
             shuffle=True
         )
 
-        logging_hook=tf.train.LoggingTensorHook(
+        logging_hook = tf.train.LoggingTensorHook(
             tensors={
                 "probabilities": "probabilities"
             },
@@ -290,7 +290,7 @@ def main(unused_argv):
 
     if args.eval:
 
-        eval_input_fn=tf.estimator.inputs.numpy_input_fn(
+        eval_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"images": test_images},
             y=test_labels,
             batch_size=args.batch_size,
@@ -298,7 +298,7 @@ def main(unused_argv):
             shuffle=False
         )
 
-        eval_results=mnist_classifier.evaluate(
+        eval_results = mnist_classifier.evaluate(
             input_fn=eval_input_fn
         )
 
