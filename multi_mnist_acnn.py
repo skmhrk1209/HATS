@@ -215,14 +215,14 @@ def acnn_model_fn(features, labels, mode, params):
         units=10
     )
 
+    probabilities = tf.nn.sigmoid(
+        x=logits,
+        name="probabilities"
+    )
+
     predictions.update({
-        "classes": tf.round(
-            x=logits
-        ),
-        "sigmoid": tf.nn.sigmoid(
-            x=logits,
-            name="sigmoid"
-        )
+        "classes": tf.round(probabilities),
+        "probabilities": probabilities
     })
 
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -390,7 +390,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "sigmoid": "sigmoid"
+                "probabilities": "probabilities"
             },
             every_n_iter=100
         )

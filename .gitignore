@@ -1,5 +1,3 @@
 data/
 svhn_cnn_model/
 svhn_acnn_model/
-train.tfrecords
-test.tfrecords
