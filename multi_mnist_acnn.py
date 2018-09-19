@@ -107,7 +107,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention dense layer 3
-    (-1, 8, 8, 3) -> (-1, 10)
+    (-1, 8, 8, 3) -> (-1, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     shape = attentions.get_shape().as_list()
@@ -116,7 +116,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     attentions = tf.layers.dense(
         inputs=attentions,
-        units=10,
+        units=64,
         activation=tf.nn.relu
     )
 
