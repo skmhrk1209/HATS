@@ -309,58 +309,7 @@ def main(unused_argv):
         return np.array(multi_images), np.array(multi_labels)
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-
-    train_images = np.array([
-        random_resize_with_pad(
-            image=image.reshape([28, 28, 1]),
-            size=[128, 128],
-            mode="constant",
-            constant_values=0
-        ) for image in mnist.train.images
-    ])
-
-    eval_images = np.array([
-        random_resize_with_pad(
-            image=image.reshape([28, 28, 1]),
-            size=[128, 128],
-            mode="constant",
-            constant_values=0
-        ) for image in mnist.test.images
-    ])
-
-    train_labels = mnist.train.labels.astype(np.int32)
-    eval_labels = mnist.test.labels.astype(np.int32)
-
-    train_multi_images, train_multi_labels = make_multi_mnist(
-        images=train_images,
-        labels=train_labels,
-        digits=4,
-        size=train_images.shape[0]
-    )
-
-    eval_multi_images, eval_multi_labels = make_multi_mnist(
-        images=eval_images,
-        labels=eval_labels,
-        digits=4,
-        size=eval_images.shape[0]
-    )
     '''
-
-    train_filenames = glob.glob("data/mnist/train/*.png")
-    train_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-                                   for filename in train_filenames], dtype=np.float32)
-    train_multi_images = scale(train_multi_images, 0, 255, 0, 1)
-    train_multi_images = np.reshape(train_multi_images, [-1, 128, 128, 1])
-    train_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
-                                   for filename in train_filenames], dtype=np.int32)
-
-    eval_filenames = glob.glob("data/mnist/test/*.png")
-    eval_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-                                  for filename in eval_filenames], dtype=np.float32)
-    eval_multi_images = scale(eval_multi_images, 0, 255, 0, 1)
-    eval_multi_images = np.reshape(eval_multi_images, [-1, 128, 128, 1])
-    eval_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
-                                  for filename in eval_filenames], dtype=np.int32)
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
@@ -374,11 +323,39 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 1e-6
+            "attention_decay": 1e-3
         }
     )
 
     if args.train:
+
+        '''
+        train_images = np.array([
+            random_resize_with_pad(
+                image=image.reshape([28, 28, 1]),
+                size=[128, 128],
+                mode="constant",
+                constant_values=0
+            ) for image in mnist.train.images
+        ])
+
+        train_labels = mnist.train.labels.astype(np.int32)
+
+        train_multi_images, train_multi_labels = make_multi_mnist(
+            images=train_images,
+            labels=train_labels,
+            digits=4,
+            size=train_images.shape[0]
+        )
+        '''
+
+        train_filenames = glob.glob("data/mnist/train/*.png")
+        train_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+                                       for filename in train_filenames], dtype=np.float32)
+        train_multi_images = scale(train_multi_images, 0, 255, 0, 1)
+        train_multi_images = np.reshape(train_multi_images, [-1, 128, 128, 1])
+        train_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
+                                       for filename in train_filenames], dtype=np.int32)
 
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"images": train_multi_images},
@@ -401,6 +378,34 @@ def main(unused_argv):
         )
 
     if args.eval:
+
+        '''
+        eval_images = np.array([
+            random_resize_with_pad(
+                image=image.reshape([28, 28, 1]),
+                size=[128, 128],
+                mode="constant",
+                constant_values=0
+            ) for image in mnist.test.images
+        ])
+
+        eval_labels = mnist.test.labels.astype(np.int32)
+
+        eval_multi_images, eval_multi_labels = make_multi_mnist(
+            images=eval_images,
+            labels=eval_labels,
+            digits=4,
+            size=eval_images.shape[0]
+        )
+        '''
+
+        eval_filenames = glob.glob("data/mnist/test/*.png")
+        eval_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+                                      for filename in eval_filenames], dtype=np.float32)
+        eval_multi_images = scale(eval_multi_images, 0, 255, 0, 1)
+        eval_multi_images = np.reshape(eval_multi_images, [-1, 128, 128, 1])
+        eval_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
+                                      for filename in eval_filenames], dtype=np.int32)
 
         eval_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"images": eval_multi_images},
@@ -447,7 +452,7 @@ def main(unused_argv):
             artists.append([plt.imshow(image, animated=True)])
 
         anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
-        anim.save("mnist_attention.gif", writer="imagemagick")
+        anim.save("multi_mnist_attention.gif", writer="imagemagick")
 
         plt.show()
 
