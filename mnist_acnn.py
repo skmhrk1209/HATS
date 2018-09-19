@@ -11,6 +11,8 @@ import argparse
 import itertools
 import functools
 import operator
+import os
+import glob
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
@@ -224,6 +226,11 @@ def acnn_model_fn(features, labels, mode, params):
             name="softmax"
         )
     })
+
+    print("num params: {}".format(
+        np.sum([np.prod(variable.get_shape().as_list())
+                for variable in tf.global_variables()])
+    ))
 
     if mode == tf.estimator.ModeKeys.PREDICT:
 
