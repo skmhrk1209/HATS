@@ -375,7 +375,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 0.01
+            "attention_decay": 1e-3
         }
     )
 
