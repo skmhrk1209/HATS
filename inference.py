@@ -17,3 +17,10 @@ for filename in sys.argv[1:]:
 
     predictions = model.predict(preprocess_input(images.astype(np.float32)))
     print("predicted:", decode_predictions(predictions, top=1))
+
+    cv2.imshow("image", np.concatenate(images, axis=1))
+
+    while True:
+
+        if cv2.waitKey(1000) == ord("q"):
+            break

@@ -194,14 +194,14 @@ def acnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 3
-    (-1, 64, 9) -> (-1, 128)
+    (-1, 64, 9) -> (-1, 1024)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=128,
+        units=1024,
         activation=tf.nn.relu
     )
 
@@ -375,7 +375,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 1e-3
+            "attention_decay": 1e-4
         }
     )
 
