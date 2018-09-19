@@ -10651,51 +10651,13 @@ node {
   }
 }
 node {
-  name: "ArgMax/dimension"
-  op: "Const"
-  input: "^add"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-        }
-        int_val: -1
-      }
-    }
-  }
-}
-node {
-  name: "ArgMax"
-  op: "ArgMax"
+  name: "probabilities"
+  op: "Sigmoid"
   input: "dense_4/BiasAdd"
-  input: "ArgMax/dimension"
   attr {
     key: "T"
     value {
       type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "Tidx"
-    value {
-      type: DT_INT32
     }
   }
   attr {
@@ -10706,21 +10668,18 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 10
+          }
         }
       }
     }
   }
-  attr {
-    key: "output_type"
-    value {
-      type: DT_INT64
-    }
-  }
 }
 node {
-  name: "sigmoid"
-  op: "Sigmoid"
-  input: "dense_4/BiasAdd"
+  name: "Round"
+  op: "Round"
+  input: "probabilities"
   attr {
     key: "T"
     value {
@@ -12411,7 +12370,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
         }
-        float_val: 9.999999974752427e-07
+        float_val: 0.0010000000474974513
       }
     }
   }
@@ -36976,7 +36935,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_4420d5e0e96f4166b3c20589070b632e/part"
+        string_val: "_temp_f4667e15392a4968ac27f4452a59645e/part"
       }
     }
   }
