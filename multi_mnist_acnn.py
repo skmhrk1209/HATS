@@ -277,7 +277,7 @@ def acnn_model_fn(features, labels, mode, params):
 
 
 def main(unused_argv):
-
+    '''
     def random_resize_with_pad(image, size, mode, **kwargs):
 
         dy = size[0] - image.shape[0]
@@ -288,27 +288,6 @@ def main(unused_argv):
 
         return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
 
-    def make_multi_mnist(images, labels, digits, size):
-
-        multi_images = []
-        multi_labels = []
-
-        for _ in range(size):
-
-            indices = np.random.randint(0, len(images), size=np.random.randint(1, digits + 1))
-
-            multi_image = np.stack(images[indices], axis=3)
-            multi_image = np.apply_along_axis(np.sum, axis=3, arr=multi_image)
-            multi_image = np.clip(multi_image, 0, 1)
-            multi_images.append(multi_image)
-
-            multi_label = np.identity(10, dtype=np.int32)[labels[indices]]
-            multi_label = np.any(multi_label, axis=0).astype(np.int32)
-            multi_labels.append(multi_label)
-
-        return np.array(multi_images), np.array(multi_labels)
-
-    '''
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
 
     train_images = np.array([
@@ -332,6 +311,26 @@ def main(unused_argv):
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
+    def make_multi_mnist(images, labels, digits, size):
+
+        multi_images = []
+        multi_labels = []
+
+        for _ in range(size):
+
+            indices = np.random.randint(0, len(images), size=np.random.randint(1, digits + 1))
+
+            multi_image = np.stack(images[indices], axis=3)
+            multi_image = np.apply_along_axis(np.sum, axis=3, arr=multi_image)
+            multi_image = np.clip(multi_image, 0, 1)
+            multi_images.append(multi_image)
+
+            multi_label = np.identity(10, dtype=np.int32)[labels[indices]]
+            multi_label = np.any(multi_label, axis=0).astype(np.int32)
+            multi_labels.append(multi_label)
+
+        return np.array(multi_images), np.array(multi_labels)
+
     train_multi_images, train_multi_labels = make_multi_mnist(
         images=train_images,
         labels=train_labels,
@@ -347,21 +346,22 @@ def main(unused_argv):
     )
     '''
 
-    train_filenames = glob.glob("data/mnist/train/*.png")
-    train_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-                                   for filename in train_filenames], dtype=np.float32)
-    train_multi_images = scale(train_multi_images, 0, 255, 0, 1)
-    train_multi_images = np.reshape(train_multi_images, [-1, 128, 128, 1])
-    train_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
-                                   for filename in train_filenames], dtype=np.int32)
+    def load_multi_mnist(path):
 
-    eval_filenames = glob.glob("data/mnist/test/*.png")
-    eval_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-                                  for filename in eval_filenames], dtype=np.float32)
-    eval_multi_images = scale(eval_multi_images, 0, 255, 0, 1)
-    eval_multi_images = np.reshape(eval_multi_images, [-1, 128, 128, 1])
-    eval_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
-                                  for filename in eval_filenames], dtype=np.int32)
+        filenames = glob.glob(os.path.join(path, "*.png"))
+
+        images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+                           for filename in filenames], dtype=np.float32)
+        images = scale(images, 0, 255, 0, 1)
+        images = np.reshape(images, [-1, 128, 128, 1])
+
+        labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
+                           for filename in filenames], dtype=np.int32)
+
+        return images, labels
+
+    train_images, train_labels = load_multi_mnist("data/multi_mnist/train")
+    test_images, test_labels = load_multi_mnist("data/multi_mnist/test")
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
@@ -382,8 +382,8 @@ def main(unused_argv):
     if args.train:
 
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": train_multi_images},
-            y=train_multi_labels,
+            x={"images": train_images},
+            y=train_labels,
             batch_size=args.batch_size,
             num_epochs=args.num_epochs,
             shuffle=True
@@ -404,8 +404,8 @@ def main(unused_argv):
     if args.eval:
 
         eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_multi_images},
-            y=eval_multi_labels,
+            x={"images": test_images},
+            y=test_labels,
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
@@ -420,8 +420,8 @@ def main(unused_argv):
     if args.predict:
 
         predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_multi_images},
-            y=eval_multi_labels,
+            x={"images": test_images},
+            y=test_labels,
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False

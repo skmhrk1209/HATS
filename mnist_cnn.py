@@ -26,6 +26,11 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
+def scale(input, input_min, input_max, output_min, output_max):
+
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+
 def cnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for CNN
@@ -117,6 +122,8 @@ def cnn_model_fn(features, labels, mode, params):
         )
     })
 
+    print([v.name for v in tf.global_variables()])
+
     if mode == tf.estimator.ModeKeys.PREDICT:
 
         return tf.estimator.EstimatorSpec(
@@ -161,7 +168,7 @@ def cnn_model_fn(features, labels, mode, params):
 
 
 def main(unused_argv):
-
+    '''
     def random_resize_with_pad(image, size, mode, **kwargs):
 
         dy = size[0] - image.shape[0]
@@ -194,6 +201,24 @@ def main(unused_argv):
 
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
+    '''
+
+    def load_mnist(path):
+
+        filenames = glob.glob(os.path.join(path, "*.png"))
+
+        images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+                           for filename in filenames], dtype=np.float32)
+        images = scale(images, 0, 255, 0, 1)
+        images = np.reshape(images, [-1, 128, 128, 1])
+
+        labels = np.array([int(os.path.splitext(os.path.basename(filename))[0].split("-")[-1])
+                           for filename in filenames], dtype=np.int32)
+
+        return images, labels
+
+    train_images, train_labels = load_mnist("data/mnist/train")
+    test_images, test_labels = load_mnist("data/mnist/test")
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=cnn_model_fn,
@@ -234,8 +259,8 @@ def main(unused_argv):
     if args.eval:
 
         eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_images},
-            y=eval_labels,
+            x={"images": test_images},
+            y=test_labels,
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
