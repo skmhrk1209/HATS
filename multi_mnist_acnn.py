@@ -217,7 +217,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     predictions.update({
         "classes": tf.round(
-            input=logits
+            x=logits
         ),
         "sigmoid": tf.nn.sigmoid(
             x=logits,
@@ -351,14 +351,14 @@ def main(unused_argv):
     train_multi_images = scale(train_multi_images.astype(np.float32), 0, 255, 0, 1)
     train_multi_images = np.reshape(train_multi_images, [-1, 128, 128, 1])
     train_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
-                                   for filename in train_filenames])
+                                   for filename in train_filenames]).astype(np.int32)
 
     eval_filenames = glob.glob("data/mnist/test/*.png")
     eval_multi_images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE) for filename in eval_filenames])
     eval_multi_images = scale(eval_multi_images.astype(np.float32), 0, 255, 0, 1)
     eval_multi_images = np.reshape(eval_multi_images, [-1, 128, 128, 1])
     eval_multi_labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
-                                  for filename in eval_filenames])
+                                  for filename in eval_filenames]).astype(np.int32)
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
