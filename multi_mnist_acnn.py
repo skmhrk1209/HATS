@@ -308,9 +308,9 @@ def main(unused_argv):
 
         return np.array(multi_images), np.array(multi_labels)
 
+    '''
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
 
-    '''
     train_images = np.array([
         random_resize_with_pad(
             image=image.reshape([28, 28, 1]),
@@ -375,7 +375,7 @@ def main(unused_argv):
             )
         ),
         params={
-            "attention_decay": 1.0
+            "attention_decay": 0.01
         }
     )
 
