@@ -3,3 +3,7 @@ mnist_cnn_model/
 mnist_acnn_model/
 multi_mnist_cnn_model/
 multi_mnist_acnn_model/
+mnist_cnn_model.tar.gz
+mnist_acnn_model.tar.gz
+multi_mnist_cnn_model.tar.gz
+multi_mnist_acnn_model.tar.gz
