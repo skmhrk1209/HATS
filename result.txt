@@ -1,0 +1,83 @@
+# mnist_cnn
+INFO:tensorflow:Using config: {'_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  allow_growth: true
+  visible_device_list: "0"
+}
+, '_keep_checkpoint_max': 5, '_task_type': 'worker', '_train_distribute': None, '_is_chief': True, '_cluster_spec': <tensorflow.python.training.server_lib.ClusterSpec object at 0x11af70690>, '_evaluation_master': '', '_save_checkpoints_steps': None, '_keep_checkpoint_every_n_hours': 10000, '_service': None, '_num_ps_replicas': 0, '_tf_random_seed': None, '_master': '', '_device_fn': None, '_num_worker_replicas': 1, '_task_id': 0, '_log_step_count_steps': 100, '_model_dir': 'mnist_cnn_model', '_global_id_in_cluster': 0, '_save_summary_steps': 100}
+INFO:tensorflow:Calling model_fn.
+WARNING:tensorflow:From mnist_cnn.py:123: calling softmax (from tensorflow.python.ops.nn_ops)with dim is deprecated and will be removed in a future version.
+Instructions for updating:
+dim is deprecated, use axis instead
+num params: 8408843.0
+INFO:tensorflow:Done calling model_fn.
+INFO:tensorflow:Starting evaluation at 2018-09-19-10:55:55
+INFO:tensorflow:Graph was finalized.
+2018-09-19 19:55:55.386884: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+INFO:tensorflow:Restoring parameters from mnist_cnn_model/model.ckpt-27500
+INFO:tensorflow:Running local_init_op.
+INFO:tensorflow:Done running local_init_op.
+INFO:tensorflow:Finished evaluation at 2018-09-19-10:56:53
+INFO:tensorflow:Saving dict for global step 27500: accuracy = 0.8919, global_step = 27500, loss = 0.81817955
+INFO:tensorflow:Saving 'checkpoint_path' summary for global step 27500: mnist_cnn_model/model.ckpt-27500
+{'loss': 0.81817955, 'global_step': 27500, 'accuracy': 0.8919}
+
+# mnist_acnn
+INFO:tensorflow:Using config: {'_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  allow_growth: true
+  visible_device_list: "0"
+}
+, '_keep_checkpoint_max': 5, '_task_type': 'worker', '_train_distribute': None, '_is_chief': True, '_cluster_spec': <tensorflow.python.training.server_lib.ClusterSpec object at 0x128819b50>, '_evaluation_master': '', '_save_checkpoints_steps': None, '_keep_checkpoint_every_n_hours': 10000, '_service': None, '_num_ps_replicas': 0, '_tf_random_seed': None, '_master': '', '_device_fn': None, '_num_worker_replicas': 1, '_task_id': 0, '_log_step_count_steps': 100, '_model_dir': 'mnist_acnn_model', '_global_id_in_cluster': 0, '_save_summary_steps': 100}
+INFO:tensorflow:Calling model_fn.
+WARNING:tensorflow:From mnist_acnn.py:226: calling softmax (from tensorflow.python.ops.nn_ops) with dim is deprecated and will be removed in a future version.
+Instructions for updating:
+dim is deprecated, use axis instead
+num params: 115282.0
+INFO:tensorflow:Done calling model_fn.
+INFO:tensorflow:Starting evaluation at 2018-09-19-10:58:43
+INFO:tensorflow:Graph was finalized.
+2018-09-19 19:58:43.809735: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+INFO:tensorflow:Restoring parameters from mnist_acnn_model/model.ckpt-27500
+INFO:tensorflow:Running local_init_op.
+INFO:tensorflow:Done running local_init_op.
+INFO:tensorflow:Finished evaluation at 2018-09-19-10:59:06
+INFO:tensorflow:Saving dict for global step 27500: accuracy = 0.9793, global_step = 27500, loss = 0.0951539
+INFO:tensorflow:Saving 'checkpoint_path' summary for global step 27500: mnist_acnn_model/model.ckpt-27500
+{'loss': 0.0951539, 'global_step': 27500, 'accuracy': 0.9793}
+
+# multi_mnist_cnn
+INFO:tensorflow:Using config: {'_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  allow_growth: true
+  visible_device_list: "0"
+}
+, '_keep_checkpoint_max': 5, '_task_type': 'worker', '_train_distribute': None, '_is_chief': True, '_cluster_spec': <tensorflow.python.training.server_lib.ClusterSpec object at 0x12580e610>, '_evaluation_master': '', '_save_checkpoints_steps': None, '_keep_checkpoint_every_n_hours': 10000, '_service': None, '_num_ps_replicas': 0, '_tf_random_seed': None, '_master': '', '_device_fn': None, '_num_worker_replicas': 1, '_task_id': 0, '_log_step_count_steps': 100, '_model_dir': 'multi_mnist_cnn_model', '_global_id_in_cluster': 0, '_save_summary_steps': 100}
+INFO:tensorflow:Calling model_fn.
+INFO:tensorflow:Done calling model_fn.
+INFO:tensorflow:Starting evaluation at 2018-09-19-11:01:18
+INFO:tensorflow:Graph was finalized.
+2018-09-19 20:01:18.207407: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+INFO:tensorflow:Restoring parameters from multi_mnist_cnn_model/model.ckpt-55000
+INFO:tensorflow:Running local_init_op.
+INFO:tensorflow:Done running local_init_op.
+INFO:tensorflow:Finished evaluation at 2018-09-19-11:02:52
+INFO:tensorflow:Saving dict for global step 55000: accuracy = 0.85134, global_step = 55000, loss = 1.5828505
+INFO:tensorflow:Saving 'checkpoint_path' summary for global step 55000: multi_mnist_cnn_model/model.ckpt-55000
+{'loss': 1.5828505, 'global_step': 55000, 'accuracy': 0.85134}
+
+# multi_mnist_acnn
+INFO:tensorflow:Using config: {'_save_checkpoints_secs': 600, '_session_config': gpu_options {
+  allow_growth: true
+  visible_device_list: "0"
+}
+, '_keep_checkpoint_max': 5, '_task_type': 'worker', '_train_distribute': None, '_is_chief': True, '_cluster_spec': <tensorflow.python.training.server_lib.ClusterSpec object at 0x12320ab50>, '_evaluation_master': '', '_save_checkpoints_steps': None, '_keep_checkpoint_every_n_hours': 10000, '_service': None, '_num_ps_replicas': 0, '_tf_random_seed': None, '_master': '', '_device_fn': None, '_num_worker_replicas': 1, '_task_id': 0, '_log_step_count_steps': 100, '_model_dir': 'multi_mnist_acnn_model', '_global_id_in_cluster': 0, '_save_summary_steps': 100}
+INFO:tensorflow:Calling model_fn.
+INFO:tensorflow:Done calling model_fn.
+INFO:tensorflow:Starting evaluation at 2018-09-19-11:04:27
+INFO:tensorflow:Graph was finalized.
+2018-09-19 20:04:27.612715: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+INFO:tensorflow:Restoring parameters from multi_mnist_acnn_model/model.ckpt-55000
+INFO:tensorflow:Running local_init_op.
+INFO:tensorflow:Done running local_init_op.
+INFO:tensorflow:Finished evaluation at 2018-09-19-11:04:49
+INFO:tensorflow:Saving dict for global step 55000: accuracy = 0.9253, global_step = 55000, loss = 0.36013347
+INFO:tensorflow:Saving 'checkpoint_path' summary for global step 55000: multi_mnist_acnn_model/model.ckpt-55000
+{'loss': 0.36013347, 'global_step': 55000, 'accuracy': 0.9253}
