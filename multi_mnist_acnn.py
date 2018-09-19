@@ -75,6 +75,8 @@ def acnn_model_fn(features, labels, mode, params):
         activation=tf.nn.relu
     )
 
+    predictions["feature_maps"] = inputs
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     attention convolutional layer 1
     (-1, 32, 32, 64) -> (-1, 16, 16, 3)
@@ -431,26 +433,37 @@ def main(unused_argv):
             input_fn=predict_input_fn
         )
 
-        figure = plt.figure()
-        artists = []
+        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-        for predict_result in itertools.islice(predict_results, 10):
+            feature_maps = predict_result["feature_maps"]
+            attentions = predict_result["attentions"]
+            image = predict_result["images"]
 
-            attention = predict_result["attentions"]
-            attention = scale(attention, attention.min(), attention.max(), 0, 1)
-            attention = np.apply_along_axis(np.sum, axis=-1, arr=attention)
+            for j in range(feature_maps.shape[-1]):
+
+                feature_map = feature_maps[:, :, j]
+                feature_map = scale(feature_map, feature_map.min(), feature_map.max(), 0., 255.)
+                feature_map = cv2.resize(feature_map, (128, 128))
+
+                cv2.imwrite("feature_maps/multi_mnist/{}/{}.png".format(i, j), feature_map)
+
+            for j in range(attentions.shape[-1]):
+
+                attention = attentions[:, :, j]
+                attention = scale(attention, attention.min(), attention.max(), 0., 255.)
+                attention = cv2.resize(attention, (128, 128))
+
+                cv2.imwrite("attentions/multi_mnist/{}/{}.png".format(i, j), attention)
+
+            attention = np.apply_along_axis(np.sum, axis=-1, arr=attentions)
+            attention = scale(attention, attention.min(), attention.max(), 0., 255.)
             attention = cv2.resize(attention, (128, 128))
 
-            image = predict_result["images"]
+            image = scale(image, 0., 1., 0., 255.)
             image = image.repeat(3, axis=-1)
-            image[:, :, 0] += attention
+            image[:, :, -1] += attention
 
-            artists.append([plt.imshow(image, animated=True)])
-
-        anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
-        anim.save("multi_mnist_attention.gif", writer="imagemagick")
-
-        plt.show()
+            cv2.imwrite("images/multi_mnist/{}.png".format(i), image)
 
 
 if __name__ == "__main__":
