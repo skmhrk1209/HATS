@@ -452,7 +452,7 @@ def main(unused_argv):
 
         train_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["data/train.tfrecords"],
+            filenames=["data/svhn/train.tfrecords"],
             batch_size=args.batch_size,
             num_epochs=args.num_epochs
         )
@@ -473,7 +473,7 @@ def main(unused_argv):
 
         eval_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["data/test.tfrecords"],
+            filenames=["data/svhn/test.tfrecords"],
             batch_size=args.batch_size,
             num_epochs=1
         )
@@ -488,7 +488,7 @@ def main(unused_argv):
 
         predict_input_fn = functools.partial(
             svhn_input_fn,
-            filenames=["data/test.tfrecords"],
+            filenames=["data/svhn/test.tfrecords"],
             batch_size=args.batch_size,
             num_epochs=1
         )
