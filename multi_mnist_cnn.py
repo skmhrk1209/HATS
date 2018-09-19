@@ -11,6 +11,8 @@ import argparse
 import itertools
 import functools
 import operator
+import glob
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
@@ -26,9 +28,14 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
+def scale(input, input_min, input_max, output_min, output_max):
+
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+
 def cnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    model function for CNN
+    model function for ACNN
 
     features:   batch of features from input_fn
     labels:     batch of labels from input_fn
@@ -49,7 +56,7 @@ def cnn_model_fn(features, labels, mode, params):
         inputs=inputs,
         filters=32,
         kernel_size=3,
-        strides=2,
+        strides=1,
         padding="same",
         activation=tf.nn.relu
     )
@@ -70,7 +77,7 @@ def cnn_model_fn(features, labels, mode, params):
         inputs=inputs,
         filters=64,
         kernel_size=3,
-        strides=2,
+        strides=1,
         padding="same",
         activation=tf.nn.relu
     )
@@ -84,20 +91,20 @@ def cnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     dense layer 3
-    (-1, 32, 32, 64) -> (-1, 128)
+    (-1, 32, 32, 64) -> (-1, 1024)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.layers.flatten(inputs)
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=128,
+        units=1024,
         activation=tf.nn.relu
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 128) -> (-1, 10)
+    (-1, 1024) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     logits = tf.layers.dense(
@@ -105,15 +112,14 @@ def cnn_model_fn(features, labels, mode, params):
         units=10
     )
 
+    probabilities = tf.nn.sigmoid(
+        x=logits,
+        name="probabilities"
+    )
+
     predictions.update({
-        "classes": tf.argmax(
-            input=logits,
-            axis=-1
-        ),
-        "sigmoid": tf.nn.sigmoid(
-            x=logits,
-            name="sigmoid"
-        )
+        "classes": tf.round(probabilities),
+        "probabilities": probabilities
     })
 
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -160,7 +166,7 @@ def cnn_model_fn(features, labels, mode, params):
 
 
 def main(unused_argv):
-
+    '''
     def random_resize_with_pad(image, size, mode, **kwargs):
 
         dy = size[0] - image.shape[0]
@@ -170,26 +176,6 @@ def main(unused_argv):
         wx = np.random.randint(low=0, high=dx)
 
         return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
-
-    def make_multi_mnist(images, labels, digits, size):
-
-        multi_images = []
-        multi_labels = []
-
-        for _ in range(size):
-
-            indices = np.random.randint(0, len(images), size=np.random.randint(1, digits + 1))
-
-            multi_image = np.stack(images[indices], axis=3)
-            multi_image = np.apply_along_axis(np.sum, axis=3, arr=multi_image)
-            multi_image = np.clip(multi_image, 0, 1)
-            multi_images.append(multi_image)
-
-            multi_label = np.identity(10, dtype=np.int32)[labels[indices]]
-            multi_label = np.any(multi_label, axis=0).astype(np.int32)
-            multi_labels.append(multi_label)
-
-        return np.array(multi_images), np.array(multi_labels)
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
 
@@ -214,6 +200,26 @@ def main(unused_argv):
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
 
+    def make_multi_mnist(images, labels, digits, size):
+
+        multi_images = []
+        multi_labels = []
+
+        for _ in range(size):
+
+            indices = np.random.randint(0, len(images), size=np.random.randint(1, digits + 1))
+
+            multi_image = np.stack(images[indices], axis=3)
+            multi_image = np.apply_along_axis(np.sum, axis=3, arr=multi_image)
+            multi_image = np.clip(multi_image, 0, 1)
+            multi_images.append(multi_image)
+
+            multi_label = np.identity(10, dtype=np.int32)[labels[indices]]
+            multi_label = np.any(multi_label, axis=0).astype(np.int32)
+            multi_labels.append(multi_label)
+
+        return np.array(multi_images), np.array(multi_labels)
+
     train_multi_images, train_multi_labels = make_multi_mnist(
         images=train_images,
         labels=train_labels,
@@ -227,6 +233,24 @@ def main(unused_argv):
         digits=4,
         size=eval_images.shape[0]
     )
+    '''
+
+    def load_multi_mnist(path):
+
+        filenames = glob.glob(os.path.join(path, "*.png"))
+
+        images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+                           for filename in filenames], dtype=np.float32)
+        images = scale(images, 0, 255, 0, 1)
+        images = np.reshape(images, [-1, 128, 128, 1])
+
+        labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
+                           for filename in filenames], dtype=np.int32)
+
+        return images, labels
+
+    train_images, train_labels = load_multi_mnist("data/multi_mnist/train")
+    test_images, test_labels = load_multi_mnist("data/multi_mnist/test")
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
@@ -237,24 +261,24 @@ def main(unused_argv):
                     visible_device_list=args.gpu,
                     allow_growth=True
                 )
-            )
+        model_fn=cnn_model_fn,
         ),
         params={}
     )
 
     if args.train:
 
-        train_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": train_multi_images},
-            y=train_multi_labels,
+        train_input_fn=tf.estimator.inputs.numpy_input_fn(
+            x={"images": train_images},
+            y=train_labels,
             batch_size=args.batch_size,
             num_epochs=args.num_epochs,
             shuffle=True
         )
 
-        logging_hook = tf.train.LoggingTensorHook(
+        logging_hook=tf.train.LoggingTensorHook(
             tensors={
-                "sigmoid": "sigmoid"
+                "probabilities": "probabilities"
             },
             every_n_iter=100
         )
@@ -266,15 +290,15 @@ def main(unused_argv):
 
     if args.eval:
 
-        eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": eval_multi_images},
-            y=eval_multi_labels,
+        eval_input_fn=tf.estimator.inputs.numpy_input_fn(
+            x={"images": test_images},
+            y=test_labels,
             batch_size=args.batch_size,
             num_epochs=1,
             shuffle=False
         )
 
-        eval_results = mnist_classifier.evaluate(
+        eval_results=mnist_classifier.evaluate(
             input_fn=eval_input_fn
         )
 
