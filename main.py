@@ -102,7 +102,7 @@ def acnn_model_fn(features, labels, mode, params):
             false_fn=lambda: tf.ones_like(attentions)
         )
 
-        predictions["attentions"] = attentions
+        predictions["attentions"] = tf.reduce_sum(attentions, axis=3)
 
         shape = inputs.shape.as_list()
 
@@ -151,7 +151,7 @@ def acnn_model_fn(features, labels, mode, params):
     })
 
     tf.summary.image("images", predictions["images"], 10)
-    tf.summary.image("attentions", tf.reduce_sum(predictions["attentions"], axis=3), 10)
+    tf.summary.image("attentions", predictions["attentions"], 10)
 
     print("num params: {}".format(
         np.sum([np.prod(variable.get_shape().as_list())
