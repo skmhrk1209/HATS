@@ -6,12 +6,13 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
 import cv2
+import os
 import argparse
 from attention_network import AttentionNetwork
-from attr_dict import AttrDict
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="imagenet_acnn_model", help="model directory")
+parser.add_argument("--filenames", type=str, nargs="+", default=["train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument('--train', action="store_true", help="with training")
@@ -23,113 +24,141 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def acnn_model_fn(features, labels, mode, params):
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    model function for ACNN
-    features:   batch of features from input_fn
-    labels:     batch of labels from input_fn
-    mode:       enum { TRAIN, EVAL, PREDICT }
-    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+class AttrDict(dict):
 
-    module = hub.Module("https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1")
-    height, width = hub.get_expected_image_size(module)
-    images = ...  # A batch of images with shape [batch_size, height, width, 3].
-    features = module(images)  # Features with shape [batch_size, num_features].
+    def __getattr__(self, name): return self[name]
+
+    def __setattr__(self, name, value): self[name] = value
+
+    def __delattr__(self, name): del self[name]
+
+
+urls = AttrDict(
+    resnet_v1_50="https://tfhub.dev/google/imagenet/resnet_v1_50/feature_vector/1",
+    resnet_v1_101="https://tfhub.dev/google/imagenet/resnet_v1_101/feature_vector/1",
+    resnet_v1_152="https://tfhub.dev/google/imagenet/resnet_v1_152/feature_vector/1",
+    resnet_v2_50="https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1",
+    resnet_v2_101="https://tfhub.dev/google/imagenet/resnet_v2_101/feature_vector/1",
+    resnet_v2_152="https://tfhub.dev/google/imagenet/resnet_v2_152/feature_vector/1"
+)
+
+
+def imagenet_input_fn(filenames, num_epochs, batch_size, buffer_size):
+
+    def parse(example):
+
+        features = tf.parse_single_example(
+            serialized=example,
+            features={
+                "path": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.string,
+                    default_value=""
+                ),
+                "label": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.int64,
+                    default_value=0
+                )
+            }
+        )
+
+        image = tf.read_file(features["path"])
+        image = tf.image.decode_jpeg(image, 3)
+        image = tf.image.convert_image_dtype(image, tf.float32)
+
+        label = tf.cast(features["label"], tf.int32)
+
+        return image, label
+
+    dataset = tf.data.TFRecordDataset(filenames)
+    dataset = dataset.shuffle(buffer_size)
+    dataset = dataset.repeat(num_epochs)
+    dataset = dataset.map(parse)
+    dataset = dataset.batch(batch_size)
+    dataset = dataset.prefetch(1)
+
+    return dataset.make_one_shot_iterator()
+
+
+def acnn_model_fn(features, labels, mode, params):
 
     params = AttrDict(params)
     predictions = features.copy()
 
-    inputs = features["images"]
+    images = features["images"]
 
-    with tf.variable_scope("acnn"):
+    resnet_v2_50 = hub.Module(urls.resnet_v2_50)
 
-        inputs = tf.layers.conv2d(
-            inputs=inputs,
-            filters=32,
-            kernel_size=3,
-            strides=2,
-            padding="same",
-            activation=tf.nn.relu
-        )
+    attention_network = AttentionNetwork(
+        conv_params=[
+            AttrDict(
+                filters=4,
+                kernel_size=9,
+                strides=1
+            )
+        ] * 2,
+        deconv_params=[
+            AttrDict(
+                filters=16,
+                kernel_size=3,
+                strides=1
+            )
+        ] * 2,
+        bottleneck_units=128,
+        data_format="channels_last"
+    )
 
-        inputs = tf.layers.conv2d(
-            inputs=inputs,
-            filters=64,
-            kernel_size=3,
-            strides=2,
-            padding="same",
-            activation=tf.nn.relu
-        )
+    feature_maps = resnet_v2_50(
+        dict(images=images),
+        signature="image_feature_vector",
+        as_dict=True
+    )["resnet_v2_50/block4"]
 
-        attention_network = AttentionNetwork(
-            conv_params=[
-                AttrDict(
-                    filters=3,
-                    kernel_size=9,
-                    strides=2
-                )
-            ] * 2,
-            deconv_params=[
-                AttrDict(
-                    filters=9,
-                    kernel_size=3,
-                    strides=2
-                )
-            ] * 2,
-            bottleneck_units=10,
-            data_format="channels_last"
-        )
+    attentions = attention_network(
+        inputs=feature_maps,
+        training=mode == tf.estimator.ModeKeys.TRAIN
+    )
 
-        attentions = attention_network(
-            inputs=inputs,
-            training=mode == tf.estimator.ModeKeys.TRAIN
-        )
+    predictions["attentions"] = tf.reduce_sum(
+        input_tensor=attentions,
+        axis=3,
+        keep_dims=True
+    )
 
-        attentions = tf.cond(
-            pred=tf.constant(params.training_attention),
-            true_fn=lambda: attentions,
-            false_fn=lambda: tf.ones_like(attentions)
-        )
+    shape = feature_maps.shape.as_list()
 
-        predictions["attentions"] = tf.reduce_sum(
-            input_tensor=attentions,
-            axis=3,
-            keep_dims=True
-        )
+    feature_maps = tf.reshape(
+        tensor=feature_maps,
+        shape=[-1, np.prod(shape[1:3]), shape[3]]
+    )
 
-        shape = inputs.shape.as_list()
+    shape = attentions.shape.as_list()
 
-        inputs = tf.reshape(
-            tensor=inputs,
-            shape=[-1, np.prod(shape[1:3]), shape[3]]
-        )
+    attentions = tf.reshape(
+        tensor=attentions,
+        shape=[-1, np.prod(shape[1:3]), shape[3]]
+    )
 
-        shape = attentions.shape.as_list()
+    feature_vectors = tf.matmul(
+        a=feature_maps,
+        b=attentions,
+        transpose_a=True,
+        transpose_b=False
+    )
 
-        attentions = tf.reshape(
-            tensor=attentions,
-            shape=[-1, np.prod(shape[1:3]), shape[3]]
-        )
+    feature_vectors = tf.layers.flatten(feature_vectors)
 
-        inputs = tf.matmul(
-            a=inputs,
-            b=attentions,
-            transpose_a=True,
-            transpose_b=False
-        )
+    feature_vectors = tf.layers.dense(
+        inputs=feature_vectors,
+        units=1024,
+        activation=tf.nn.relu
+    )
 
-        inputs = tf.layers.flatten(inputs)
-
-        inputs = tf.layers.dense(
-            inputs=inputs,
-            units=128,
-            activation=tf.nn.relu
-        )
-
-        logits = tf.layers.dense(
-            inputs=inputs,
-            units=10
-        )
+    logits = tf.layers.dense(
+        inputs=feature_vectors,
+        units=1000
+    )
 
     predictions.update({
         "classes": tf.argmax(
@@ -145,11 +174,6 @@ def acnn_model_fn(features, labels, mode, params):
 
     tf.summary.image("images", predictions["images"], 10)
     tf.summary.image("attentions", predictions["attentions"], 10)
-
-    print("num params: {}".format(
-        np.sum([np.prod(variable.get_shape().as_list())
-                for variable in tf.global_variables("acnn")])
-    ))
 
     if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -201,60 +225,7 @@ def acnn_model_fn(features, labels, mode, params):
 
 def main(unused_argv):
 
-    def make_mnist():
-
-        def random_resize_with_pad(image, size, mode, **kwargs):
-            dy = size[0] - image.shape[0]
-            dx = size[1] - image.shape[1]
-            wy = np.random.randint(low=0, high=dy)
-            wx = np.random.randint(low=0, high=dx)
-            return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
-
-        mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-
-        train_images = [random_resize_with_pad(
-            image=image.reshape([28, 28, 1]),
-            size=[128, 128],
-            mode="constant",
-            constant_values=0
-        ) for image in mnist.train.images]
-
-        test_images = [random_resize_with_pad(
-            image=image.reshape([28, 28, 1]),
-            size=[128, 128],
-            mode="constant",
-            constant_values=0
-        ) for image in mnist.test.images]
-
-        train_labels = mnist.train.labels
-        test_labels = mnist.test.labels
-
-        return (train_images, train_labels), (test_images, test_labels)
-
-    def save_mnist(images, labels, path):
-
-        for i, (image, label) in enumerate(zip(images, labels)):
-
-            cv2.imwrite(os.path.join(path, "{}-{}.png".format(i, label)), image)
-
-    def load_mnist(path):
-
-        filenames = glob.glob(os.path.join(path, "*.png"))
-
-        images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-                           for filename in filenames], dtype=np.float32)
-        images = np.reshape(images, [-1, 128, 128, 1])
-        images /= 255.0
-
-        labels = np.array([int(os.path.splitext(os.path.basename(filename))[0].split("-")[-1])
-                           for filename in filenames], dtype=np.int32)
-
-        return images, labels
-
-    train_images, train_labels = load_mnist("data/mnist/train")
-    test_images, test_labels = load_mnist("data/mnist/test")
-
-    mnist_classifier = tf.estimator.Estimator(
+    imagenet_classifier = tf.estimator.Estimator(
         model_fn=acnn_model_fn,
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
@@ -265,21 +236,13 @@ def main(unused_argv):
                 )
             )
         ),
-        params={
-            "attention_decay": 1e-6,
-            "training_attention": True
-        }
+        params=dict(
+            attention_decay=1e-6,
+            training_attention=True
+        )
     )
 
     if args.train:
-
-        train_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": train_images},
-            y=train_labels,
-            batch_size=args.batch_size,
-            num_epochs=args.num_epochs,
-            shuffle=True
-        )
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
@@ -288,23 +251,25 @@ def main(unused_argv):
             every_n_iter=100
         )
 
-        mnist_classifier.train(
-            input_fn=train_input_fn,
+        imagenet_classifier.train(
+            input_fn=lambda: imagenet_input_fn(
+                filenames=args.filenames,
+                num_epochs=args.num_epochs,
+                batch_size=args.batch_size,
+                buffer_size=args.buffer_size
+            ),
             hooks=[logging_hook]
         )
 
     if args.eval:
 
-        eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": test_images},
-            y=test_labels,
-            batch_size=args.batch_size,
-            num_epochs=1,
-            shuffle=False
-        )
-
-        eval_results = mnist_classifier.evaluate(
-            input_fn=eval_input_fn
+        eval_results = imagenet_classifier.evaluate(
+            input_fn=lambda: imagenet_input_fn(
+                filenames=args.filenames,
+                num_epochs=args.num_epochs,
+                batch_size=args.batch_size,
+                buffer_size=args.buffer_size
+            )
         )
 
         print(eval_results)

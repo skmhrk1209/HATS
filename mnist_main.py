@@ -266,10 +266,10 @@ def main(unused_argv):
                 )
             )
         ),
-        params={
-            "attention_decay": 1e-6,
-            "training_attention": True
-        }
+        params=dict(
+            attention_decay=1e-6,
+            training_attention=True
+        )
     )
 
     if args.train:
