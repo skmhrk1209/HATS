@@ -202,6 +202,42 @@ def acnn_model_fn(features, labels, mode, params):
 
 def main(unused_argv):
 
+    def make_mnist():
+
+        def random_resize_with_pad(image, size, mode, **kwargs):
+            dy = size[0] - image.shape[0]
+            dx = size[1] - image.shape[1]
+            wy = np.random.randint(low=0, high=dy)
+            wx = np.random.randint(low=0, high=dx)
+            return np.pad(image, [[wy, dy - wy], [wx, dx - wx], [0, 0]], mode, **kwargs)
+
+        mnist = tf.contrib.learn.datasets.load_dataset("mnist")
+
+        train_images = [random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.train.images]
+
+        test_images = [random_resize_with_pad(
+            image=image.reshape([28, 28, 1]),
+            size=[128, 128],
+            mode="constant",
+            constant_values=0
+        ) for image in mnist.test.images]
+
+        train_labels = mnist.train.labels
+        test_labels = mnist.test.labels
+
+        return (train_images, train_labels), (test_images, test_labels)
+
+    def save_mnist(images, labels, path):
+
+        for i, (image, label) in enumerate(zip(images, labels)):
+
+            cv2.imwrite(os.path.join(path, "{}-{}.png".format(i, label)), image)
+
     def load_mnist(path):
 
         filenames = glob.glob(os.path.join(path, "*.png"))
