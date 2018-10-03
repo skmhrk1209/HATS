@@ -238,7 +238,7 @@ def main(unused_argv):
         ),
         params={
             "attention_decay": 1e-6,
-            "training_attention": False
+            "training_attention": tf.constant(False)
         }
     )
 
