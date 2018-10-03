@@ -105,7 +105,7 @@ def acnn_model_fn(features, labels, mode, params):
         predictions["attentions"] = tf.reduce_sum(
             input_tensor=attentions,
             axis=3,
-            keepdims=True
+            keep_dims=True
         )
 
         shape = inputs.shape.as_list()
