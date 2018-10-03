@@ -68,25 +68,15 @@ def acnn_model_fn(features, labels, mode, params):
                     filters=3,
                     kernel_size=9,
                     strides=2
-                ),
-                AttrDict(
-                    filters=3,
-                    kernel_size=9,
-                    strides=2
                 )
-            ],
+            ] * 2,
             deconv_params=[
                 AttrDict(
                     filters=9,
                     kernel_size=3,
                     strides=2
-                ),
-                AttrDict(
-                    filters=9,
-                    kernel_size=3,
-                    strides=2
                 )
-            ],
+            ] * 2,
             bottleneck_units=10,
             data_format="channels_last"
         )
@@ -242,7 +232,7 @@ def main(unused_argv):
         ),
         params={
             "attention_decay": 1e-6,
-            "training_attention": False
+            "training_attention": True
         }
     )
 
