@@ -102,7 +102,11 @@ def acnn_model_fn(features, labels, mode, params):
             false_fn=lambda: tf.ones_like(attentions)
         )
 
-        predictions["attentions"] = tf.reduce_sum(attentions, axis=3)
+        predictions["attentions"] = tf.reduce_sum(
+            inputs=attentions,
+            axis=3,
+            keepdims=True
+        )
 
         shape = inputs.shape.as_list()
 
@@ -279,36 +283,6 @@ def main(unused_argv):
         )
 
         print(eval_results)
-
-    if args.predict:
-
-        predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"images": test_images},
-            y=test_labels,
-            batch_size=args.batch_size,
-            num_epochs=1,
-            shuffle=False
-        )
-
-        predict_results = mnist_classifier.predict(
-            input_fn=predict_input_fn
-        )
-
-        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
-
-            image = predict_result["images"]
-            attentions = predict_result["attentions"]
-
-            attention = np.apply_along_axis(np.sum, axis=3, arr=attentions)
-            attention = cv2.resize(attention, (128, 128))
-
-            image = image.repeat(3, axis=3)
-            image[:, :, 2] += attention
-
-            cv2.imshow("image", image)
-
-            if cv2.waitKey(1000) == ord("q"):
-                break
 
 
 if __name__ == "__main__":
