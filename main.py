@@ -98,8 +98,8 @@ def acnn_model_fn(features, labels, mode, params):
 
         attentions = tf.cond(
             pred=params.training_attention,
-            true_fn=attentions,
-            false_fn=tf.ones_like(attentions)
+            true_fn=lambda: attentions,
+            false_fn=lambda: tf.ones_like(attentions)
         )
 
         predictions["attentions"] = attentions
@@ -149,6 +149,9 @@ def acnn_model_fn(features, labels, mode, params):
             name="softmax"
         )
     })
+
+    tf.summary.image("images", predictions["images"], 10)
+    tf.summary.image("attentions", predictions["attentions"], 10)
 
     print("num params: {}".format(
         np.sum([np.prod(variable.get_shape().as_list())
