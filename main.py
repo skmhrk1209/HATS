@@ -97,7 +97,7 @@ def acnn_model_fn(features, labels, mode, params):
         )
 
         attentions = tf.cond(
-            pred=params.training_attention,
+            pred=tf.constant(params.training_attention),
             true_fn=lambda: attentions,
             false_fn=lambda: tf.ones_like(attentions)
         )
@@ -238,7 +238,7 @@ def main(unused_argv):
         ),
         params={
             "attention_decay": 1e-6,
-            "training_attention": tf.constant(False)
+            "training_attention": False
         }
     )
 
