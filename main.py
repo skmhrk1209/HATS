@@ -17,10 +17,9 @@ from attention_network import AttentionNetwork
 from attr_dict import AttrDict
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
+parser.add_argument("--model_dir", type=str, default="mnist_acnn_model", help="model directory")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
-parser.add_argument("--model_dir", type=str, default="mnist_acnn_model", help="model directory")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument('--predict', action="store_true", help="with prediction")
