@@ -29,11 +29,6 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def scale(input, input_min, input_max, output_min, output_max):
-
-    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
-
-
 def acnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     model function for ACNN
@@ -216,8 +211,8 @@ def main(unused_argv):
 
         images = np.array([cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
                            for filename in filenames], dtype=np.float32)
-        images = scale(images, 0, 255, 0, 1)
         images = np.reshape(images, [-1, 128, 128, 1])
+        images /= 255.0
 
         labels = np.array([int(os.path.splitext(os.path.basename(filename))[0].split("-")[-1])
                            for filename in filenames], dtype=np.int32)
