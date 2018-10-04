@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import os
 import argparse
+from attr_dict import AttrDict
 from attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
@@ -23,24 +24,7 @@ args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-
-class AttrDict(dict):
-
-    def __getattr__(self, name): return self[name]
-
-    def __setattr__(self, name, value): self[name] = value
-
-    def __delattr__(self, name): del self[name]
-
-
-urls = AttrDict(
-    resnet_v1_50="https://tfhub.dev/google/imagenet/resnet_v1_50/feature_vector/1",
-    resnet_v1_101="https://tfhub.dev/google/imagenet/resnet_v1_101/feature_vector/1",
-    resnet_v1_152="https://tfhub.dev/google/imagenet/resnet_v1_152/feature_vector/1",
-    resnet_v2_50="https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1",
-    resnet_v2_101="https://tfhub.dev/google/imagenet/resnet_v2_101/feature_vector/1",
-    resnet_v2_152="https://tfhub.dev/google/imagenet/resnet_v2_152/feature_vector/1"
-)
+resnet_v2_50_url = "https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1"
 
 
 def imagenet_input_fn(filenames, num_epochs, batch_size, buffer_size):
@@ -88,7 +72,7 @@ def acnn_model_fn(features, labels, mode, params):
 
     images = features["images"]
 
-    resnet_v2_50 = hub.Module(urls.resnet_v2_50)
+    resnet_v2_50 = hub.Module(resnet_v2_50_url)
 
     attention_network = AttentionNetwork(
         conv_params=[
