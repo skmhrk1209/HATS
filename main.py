@@ -35,20 +35,16 @@ def main(unused_argv):
                 as_dict=True
             )["resnet_v2_50/block4"],
             attention_network=AttentionNetwork(
-                conv_params=[
-                    AttrDict(
-                        filters=4,
-                        kernel_size=9,
-                        strides=1
-                    )
-                ] * 2,
-                deconv_params=[
-                    AttrDict(
-                        filters=16,
-                        kernel_size=3,
-                        strides=1
-                    )
-                ] * 2,
+                conv_params=[AttrDict(
+                    filters=4,
+                    kernel_size=9,
+                    strides=1
+                )] * 2,
+                deconv_params=[AttrDict(
+                    filters=16,
+                    kernel_size=3,
+                    strides=1
+                )] * 2,
                 bottleneck_units=128,
                 data_format="channels_last"
             )
