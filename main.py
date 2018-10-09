@@ -59,8 +59,7 @@ def main(unused_argv):
             )
         ),
         params=dict(
-            attention_decay=1e-6,
-            training_attention=True
+            attention_decay=1e-6
         )
     )
 
