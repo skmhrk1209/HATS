@@ -33,11 +33,9 @@ with tf.Session(config=config) as session:
 
     acnn_model = acnn.Model(
         dataset=imagenet.Dataset(),
-        convolutional_network=lambda inputs: tf.keras.applications.resnet50.ResNet50(
+        convolutional_network=tf.keras.applications.resnet50.ResNet50(
             include_top=False,
             weights="imagenet",
-            input_tensor=inputs,
-            input_shape=[224, 224, 3],
             pooling=None
         ),
         attention_network=AttentionNetwork(
