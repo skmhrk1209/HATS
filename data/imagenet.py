@@ -24,6 +24,7 @@ class Dataset(dataset.Dataset):
 
         image = tf.read_file(features["path"])
         image = tf.image.decode_jpeg(image, 3)
+        image = tf.image.convert_image_dtype(image, tf.float32)
         image = tf.image.resize_images(image, [224, 224])
 
         label = tf.cast(features["label"], tf.int32)
