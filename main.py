@@ -37,7 +37,7 @@ with tf.Session(config=config) as session:
             include_top=False,
             weights="imagenet",
             input_tensor=inputs,
-            input_shape=[224, 224, 3],
+            input_shape=(224, 224, 3),
             pooling=None
         ),
         attention_network=AttentionNetwork(
