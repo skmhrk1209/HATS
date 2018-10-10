@@ -1,19 +1,35 @@
 import tensorflow as tf
-import argparse
-import os
-import glob
-import cv2
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--filename", type=str, required=True, help="tfrecord filename")
-args = parser.parse_args()
+def parse(example):
 
-for record  in tf.python_io.tf_record_iterator(args.filename):
-    example = tf.train.Example()
-    example.ParseFromString(record)
+    features = tf.parse_single_example(
+            serialized=example,
+            features={
+                "path": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.string,
+                    default_value=""
+                ),
+                "label": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.int64,
+                    default_value=0
+                )
+            }
+        )
 
-    filename = example.features.feature["path"].bytes_list.value[0]
-    image = cv2.imread(filename)
- 
+    image = tf.read_file(features["path"])
+    image = tf.image.decode_jpeg(image, 3)
+
+    return image
+
+dataset = tf.data.TFRecordDataset("train.tfrecord")
+dataset = dataset.map(parse)
+get_next = dataset.make_one_shot_iterator().get_next()
+
+with tf.Session() as session:
+
+    image = session.run(get_next)
+
     cv2.imshow("", image)
     cv2.waitKey(1000)
