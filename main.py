@@ -24,82 +24,83 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 resnet_v2_50 = "https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1"
 
+with tf.device('/device:GPU:0'):
 
-def main(unused_argv):
 
-    imagenet_classifier = tf.estimator.Estimator(
-        model_fn=acnn.Model(
-            convolutional_network=lambda inputs: hub.Module(resnet_v2_50)(
-                dict(images=inputs),
-                signature="image_feature_vector",
-                as_dict=True
-            )["resnet_v2_50/block4"],
-            attention_network=AttentionNetwork(
-                conv_params=[AttrDict(
-                    filters=4,
-                    kernel_size=9,
-                    strides=1
-                )] * 2,
-                deconv_params=[AttrDict(
-                    filters=16,
-                    kernel_size=3,
-                    strides=1
-                )] * 2,
-                bottleneck_units=128,
-                data_format="channels_last"
+    def main(unused_argv):
+
+        imagenet_classifier = tf.estimator.Estimator(
+            model_fn=acnn.Model(
+                convolutional_network=lambda inputs: hub.Module(resnet_v2_50)(
+                    dict(images=inputs),
+                    signature="image_feature_vector",
+                    as_dict=True
+                )["resnet_v2_50/block4"],
+                attention_network=AttentionNetwork(
+                    conv_params=[AttrDict(
+                        filters=4,
+                        kernel_size=9,
+                        strides=1
+                    )] * 2,
+                    deconv_params=[AttrDict(
+                        filters=16,
+                        kernel_size=3,
+                        strides=1
+                    )] * 2,
+                    bottleneck_units=128,
+                    data_format="channels_last"
+                )
+            ),
+            model_dir=args.model_dir,
+            config=tf.estimator.RunConfig().replace(
+                session_config=tf.ConfigProto(
+                    gpu_options=tf.GPUOptions(
+                        visible_device_list=args.gpu,
+                        allow_growth=True
+                    )
+                )
+            ),
+            params=dict(
+                attention_decay=1e-6
             )
-        ),
-        model_dir=args.model_dir,
-        config=tf.estimator.RunConfig().replace(
-            session_config=tf.ConfigProto(
-                gpu_options=tf.GPUOptions(
-                    visible_device_list=args.gpu,
-                    allow_growth=True
-                ),
-                allow_soft_placement=False
+        )
+
+        if args.train:
+
+            logging_hook = tf.train.LoggingTensorHook(
+                tensors={
+                    "softmax": "softmax"
+                },
+                every_n_iter=100
             )
-        ),
-        params=dict(
-            attention_decay=1e-6
-        )
-    )
 
-    if args.train:
+            imagenet_classifier.train(
+                input_fn=lambda: imagenet.Dataset(
+                    image_size=[224, 224],
+                    data_format="channels_last",
+                    filenames=args.filenames,
+                    num_epochs=args.num_epochs,
+                    batch_size=args.batch_size,
+                    buffer_size=args.buffer_size
+                ).get_next(),
+                hooks=[logging_hook]
+            )
 
-        logging_hook = tf.train.LoggingTensorHook(
-            tensors={
-                "softmax": "softmax"
-            },
-            every_n_iter=100
-        )
+        if args.eval:
 
-        imagenet_classifier.train(
-            input_fn=lambda: imagenet.Dataset(
-                image_size=[224, 224],
-                data_format="channels_last",
-                filenames=args.filenames,
-                num_epochs=args.num_epochs,
-                batch_size=args.batch_size,
-                buffer_size=args.buffer_size
-            ).get_next(),
-            hooks=[logging_hook]
-        )
+            eval_results = imagenet_classifier.evaluate(
+                input_fn=lambda: imagenet.Dataset(
+                    image_size=[224, 224],
+                    data_format="channels_last",
+                    filenames=args.filenames,
+                    num_epochs=args.num_epochs,
+                    batch_size=args.batch_size,
+                    buffer_size=args.buffer_size
+                ).get_next()
+            )
 
-    if args.eval:
-
-        eval_results = imagenet_classifier.evaluate(
-            input_fn=lambda: imagenet.Dataset(
-                image_size=[224, 224],
-                data_format="channels_last",
-                filenames=args.filenames,
-                num_epochs=args.num_epochs,
-                batch_size=args.batch_size,
-                buffer_size=args.buffer_size
-            ).get_next()
-        )
-
-        print(eval_results)
+            print(eval_results)
 
 
-if __name__ == "__main__":
-    tf.app.run()
+    if __name__ == "__main__":
+        tf.app.run()
