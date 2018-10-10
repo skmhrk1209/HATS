@@ -4,7 +4,7 @@ import argparse
 import functools
 from models import acnn
 from data import imagenet
-from archs.attention_network import AttentionNetwork
+from networks.attention_network import AttentionNetwork
 from utils.attr_dict import AttrDict
 
 parser = argparse.ArgumentParser()
