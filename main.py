@@ -5,7 +5,6 @@ from networks.attention_network import AttentionNetwork
 from networks.classification_network import ClassificationNetwork
 from data import imagenet
 from utils.attr_dict import AttrDict
-from tensorflow.keras.applications.resnet50 import ResNet50
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="imagenet_acnn_model", help="model directory")
@@ -33,7 +32,7 @@ with tf.Session(config=config) as session:
 
     acnn_model = acnn.Model(
         dataset=imagenet.Dataset(),
-        convolutional_network=ResNet50(
+        convolutional_network=tf.keras.applications.resnet50.ResNet50(
             weights="imagenet",
             include_top=False
         ),
