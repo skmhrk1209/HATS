@@ -1,5 +1,5 @@
 import tensorflow as tf
-import dataset
+from . import dataset
 
 
 class Dataset(dataset.Dataset):
