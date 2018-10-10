@@ -60,9 +60,9 @@ with tf.Session(config=config) as session:
         ),
         hyper_parameters=AttrDict(
             attention_decay=1e-6,
-            learning_rate=0.0002,
-            beta1=0.5,
-            beta2=0.999,
+            learning_rate=0.001, 
+            beta1=0.9, 
+            beta2=0.999
         ),
         name=args.model_dir
     )
