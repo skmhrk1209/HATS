@@ -1,14 +1,9 @@
 import tensorflow as tf
 import numpy as np
-import argparse
 import glob
 import os
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--imagenet_dir", type=str, default="../data/imagenet", help="model directory")
-args = parser.parse_args()
-
-filenames = glob.glob(os.path.join(args.imagenet_dir, "/*/*/*.JPEG"))
+filenames = glob.glob("../data/imagenet/*/*/*.JPEG")
 print(len(filenames))
 
 for filename in filenames:
