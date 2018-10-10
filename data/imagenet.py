@@ -1,5 +1,6 @@
 import tensorflow as tf
 from . import dataset
+from tensorflow.python.keras.applications import resnet50
 
 
 class Dataset(dataset.Dataset):
@@ -24,9 +25,9 @@ class Dataset(dataset.Dataset):
 
         image = tf.read_file(features["path"])
         image = tf.image.decode_jpeg(image, 3)
-        image = tf.image.convert_image_dtype(image, tf.float32)
         image = tf.image.resize_images(image, [224, 224])
+        #image = tf.py_func(resnet50.preprocess_input, [image], tf.float32)
 
         label = tf.cast(features["label"], tf.int32)
 
-        return {"image": image}, label
+        return image, label
