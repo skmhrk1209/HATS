@@ -1,7 +1,15 @@
 import tensorflow as tf
 import dataset
 
+
 class Dataset(dataset.Dataset):
+
+    def __init__(self, image_size, data_format, filenames, num_epochs, batch_size, buffer_size):
+
+        self.image_size = image_size
+        self.data_format = data_format
+
+        super(Dataset, self).__init__(filenames, num_epochs, batch_size, buffer_size)
 
     def parse(self, example):
 
@@ -24,6 +32,11 @@ class Dataset(dataset.Dataset):
         image = tf.read_file(features["path"])
         image = tf.image.decode_jpeg(image, 3)
         image = tf.image.convert_image_dtype(image, tf.float32)
+        image = tf.image.resize_images(image, self.image_size)
+
+        if self.data_format == "channels_first":
+
+            image = tf.transpose(image, [2, 0, 1])
 
         label = tf.cast(features["label"], tf.int32)
 

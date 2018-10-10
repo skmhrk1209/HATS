@@ -74,6 +74,8 @@ def main(unused_argv):
 
         imagenet_classifier.train(
             input_fn=lambda: imagenet.Dataset(
+                image_size=[224, 224],
+                data_format="channels_last",
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
