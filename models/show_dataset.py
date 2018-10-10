@@ -12,8 +12,8 @@ for record  in tf.python_io.tf_record_iterator(args.filename):
     example = tf.train.Example()
     example.ParseFromString(record)
 
-    image = example.features.feature["path"].bytes_list.value[0]
-    image = cv2.imread(image)
+    filename = example.features.feature["path"].bytes_list.value[0]
+    image = cv2.imread(filename)
  
     cv2.imshow("", image)
     cv2.waitKey(1000)
