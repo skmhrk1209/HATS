@@ -1,6 +1,5 @@
 import tensorflow as tf
 from . import dataset
-from tensorflow.keras.applications import resnet50
 
 
 class Dataset(dataset.Dataset):
