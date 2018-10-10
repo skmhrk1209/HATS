@@ -3,8 +3,8 @@ import numpy as np
 import argparse
 import glob
 import os
-from tf.keras.preprocessing import image
-from tf.keras.applications import resnet50
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications import resnet50
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--imagenet_dir", type=str)
