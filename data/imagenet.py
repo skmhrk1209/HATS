@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from . import dataset
 
 
@@ -22,9 +23,8 @@ class Dataset(dataset.Dataset):
             }
         )
 
-        image = tf.read_file(features["path"])
-        image = tf.image.decode_jpeg(image, 3)
-
+        image = tf.py_func(np.load, [features["path"]], tf.float32)
+        image = tf.reshape(image, [224, 224, 3])
         label = tf.cast(features["label"], tf.int32)
 
         return image, label

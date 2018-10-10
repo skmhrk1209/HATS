@@ -31,15 +31,12 @@ config = tf.ConfigProto(
 
 with tf.Session(config=config) as session:
 
-    def resnet50(inputs):
-
-        with tf.variable_scope("pretrained/resnet50"):
-
-            return ResNet50(weights="imagenet", include_top=False)(inputs)
-
     acnn_model = acnn.Model(
         dataset=imagenet.Dataset(),
-        convolutional_network=resnet50,
+        convolutional_network=ResNet50(
+            weights="imagenet",
+            include_top=False
+        ),
         attention_network=AttentionNetwork(
             conv_params=[AttrDict(
                 filters=4,

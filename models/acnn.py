@@ -28,8 +28,7 @@ class Model(object):
 
             self.attention_maps = self.attention_network(
                 inputs=self.feature_maps,
-                training=self.training,
-                name="attention_network"
+                training=self.training
             )
 
             shape = self.feature_maps.shape.as_list()
@@ -55,8 +54,7 @@ class Model(object):
 
             self.logits = self.classification_network(
                 inputs=feature_vectors,
-                training=self.training,
-                name="classification_network"
+                training=self.training
             )
 
             self.optimizer = tf.train.AdamOptimizer(
@@ -85,7 +83,7 @@ class Model(object):
 
             self.trainable_variables = [
                 variable for variable in tf.trainable_variables(scope=self.name)
-                if not "pretrained" in variable.name
+                if not hasattr(variable, "_keras_initialized") or not variable._keras_initialized
             ]
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
@@ -96,19 +94,13 @@ class Model(object):
                     var_list=self.trainable_variables
                 )
 
-            self.accuracy = tf.metrics.accuracy(
-                labels=self.labels,
-                predictions=tf.argmax(input=self.logits, axis=-1)
-            )
-
             self.saver = tf.train.Saver()
 
             attention_maps = tf.reduce_sum(self.attention_maps, axis=3, keepdims=True)
             self.summary = tf.summary.merge([
                 tf.summary.image("images", self.images, max_outputs=10),
                 tf.summary.image("attention_maps", attention_maps, max_outputs=10),
-                tf.summary.scalar("loss", self.loss),
-                tf.summary.scalar("accuracy", self.accuracy)
+                tf.summary.scalar("loss", self.loss)
             ])
 
     def initialize(self):
@@ -123,7 +115,7 @@ class Model(object):
         else:
             self.global_variables = [
                 variable for variable in tf.global_variables(scope=self.name)
-                if not "pretrained" in variable.name
+                if not hasattr(variable, "_keras_initialized") or not variable._keras_initialized
             ]
             session.run(tf.variables_initializer(self.global_variables))
             print("global variables in {} initialized".format(self.name))
@@ -160,13 +152,8 @@ class Model(object):
 
             if global_step % 100 == 0:
 
-                loss, accuracy = session.run(
-                    [self.loss, self.accuracy],
-                    feed_dict=feed_dict
-                )
-                print("global_step: {}, loss: {:.2f}, accuracy: {:.2f}".format(
-                    global_step, loss, accuracy
-                ))
+                loss = session.run(self.loss, feed_dict=feed_dict)
+                print("global_step: {}, loss: {:.2f}".format(global_step, loss))
 
                 summary = session.run(self.summary, feed_dict=feed_dict)
                 writer.add_summary(summary, global_step=global_step)
