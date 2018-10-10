@@ -138,7 +138,7 @@ class Model(object):
 
         feed_dict = {self.training: True}
 
-        for i in itertools.count():
+        while True:
 
             try:
                 _, global_step = session.run(

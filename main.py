@@ -33,9 +33,12 @@ with tf.Session(config=config) as session:
 
     acnn_model = acnn.Model(
         dataset=imagenet.Dataset(),
-        convolutional_network=tf.keras.applications.resnet50.ResNet50(
+        convolutional_network=lambda inputs: tf.keras.applications.resnet50.ResNet50(
+            include_top=False,
             weights="imagenet",
-            include_top=False
+            input_tensor=inputs,
+            input_shape=[224, 224, 3],
+            pooling=None
         ),
         attention_network=AttentionNetwork(
             conv_params=[AttrDict(
@@ -60,8 +63,8 @@ with tf.Session(config=config) as session:
         ),
         hyper_parameters=AttrDict(
             attention_decay=1e-6,
-            learning_rate=0.001, 
-            beta1=0.9, 
+            learning_rate=0.001,
+            beta1=0.9,
             beta2=0.999
         ),
         name=args.model_dir
