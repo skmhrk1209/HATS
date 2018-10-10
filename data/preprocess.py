@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--imagenet_dir", type=str)
 args = parser.parse_args()
 
-filenames = glob.glob(os.path.join(args.imagenet_dir, "/*/*/*.JPEG"))
+filenames = glob.glob("../data/imagenet/*/*/*.JPEG")
 
 for filename in filenames:
 
