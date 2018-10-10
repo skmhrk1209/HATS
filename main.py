@@ -54,7 +54,8 @@ def main(unused_argv):
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
                     visible_device_list=args.gpu,
-                    allow_growth=True
+                    allow_growth=True,
+                    allow_soft_placement=False
                 )
             )
         ),
@@ -88,6 +89,8 @@ def main(unused_argv):
 
         eval_results = imagenet_classifier.evaluate(
             input_fn=lambda: imagenet.Dataset(
+                image_size=[224, 224],
+                data_format="channels_last",
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
