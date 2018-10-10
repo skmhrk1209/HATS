@@ -30,7 +30,8 @@ get_next = dataset.make_one_shot_iterator().get_next()
 
 with tf.Session() as session:
 
-    image = session.run(get_next)
+    while True:
+        image = session.run(get_next)
 
-    cv2.imshow("", image)
-    cv2.waitKey(1000)
+        cv2.imshow("", image)
+        cv2.waitKey(1000)
