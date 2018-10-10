@@ -16,3 +16,4 @@ for filename in filenames:
     image = tf.keras.preprocessing.image.img_to_array(image)
     image = tf.keras.applications.resnet50.preprocess_input(image)
     np.save(filename.replace("imagenet", "imagenet_preprocessed").replace("JPEG", "npy"), image)
+    print(filename)
