@@ -23,7 +23,10 @@ class Dataset(dataset.Dataset):
             }
         )
 
-        image = tf.py_func(np.load, [features["path"]], tf.float32)
+        image = tf.read_file(features["path"])
+        image = tf.image.decode_jpeg(image, 3)
+        image = tf.image.resize_images(image, [224, 224])
+        image = tf.py_func(tf.keras.applications.resnet50.preprocess_input, [image], tf.float32)
         image = tf.reshape(image, [224, 224, 3])
         label = tf.cast(features["label"], tf.int32)
 
