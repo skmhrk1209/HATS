@@ -5,7 +5,7 @@ import cv2
 
 resnet50 = tf.keras.applications.resnet50.ResNet50(weights="imagenet", include_top=False)
 
-filenames = glob.glob("~/data/imagenet/*/*/*")
+filenames = glob.glob("/home/sakuma/data/imagenet/*/*/*")
 
 for filename in filenames:
 
