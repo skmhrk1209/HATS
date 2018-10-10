@@ -57,7 +57,8 @@ with tf.device('/device:GPU:0'):
                     gpu_options=tf.GPUOptions(
                         visible_device_list=args.gpu,
                         allow_growth=True
-                    )
+                    ),
+                    allow_soft_placement=False
                 )
             ),
             params=dict(
