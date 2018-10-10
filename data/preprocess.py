@@ -12,7 +12,7 @@ filenames = glob.glob(os.path.join(args.imagenet_dir, "/*/*/*.JPEG"))
 
 for filename in filenames:
 
-    image = tensorflow.keras.preprocessing.image.load_img(filename, target_size=(224, 224))
-    image = tensorflow.keras.preprocessing.image.img_to_array(image)
-    image = tensorflow.keras.applications.resnet50.preprocess_input(image)
+    image = tf.keras.preprocessing.image.load_img(filename, target_size=(224, 224))
+    image = tf.keras.preprocessing.image.img_to_array(image)
+    image = tf.keras.applications.resnet50.preprocess_input(image)
     print(type(image))
