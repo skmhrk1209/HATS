@@ -8,8 +8,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--imagenet_dir", type=str, default="../data/imagenet", help="model directory")
 args = parser.parse_args()
 
-resnet50 = tf.keras.applications.resnet50.ResNet50(weights="imagenet", include_top=False)
-
 filenames = glob.glob(os.path.join(args.imagenet_dir, "/*/*/*.JPEG"))
 print(len(filenames))
 
