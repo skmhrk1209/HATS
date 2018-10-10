@@ -30,7 +30,7 @@ def main(unused_argv):
     imagenet_classifier = tf.estimator.Estimator(
         model_fn=acnn.Model(
             convolutional_network=lambda inputs: hub.Module(resnet_v2_50)(
-                dict(images=inputs),
+                inputs=inputs,
                 signature="image_feature_vector",
                 as_dict=True
             )["resnet_v2_50/block4"],
