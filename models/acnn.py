@@ -81,10 +81,7 @@ class Model(object):
                 trainable=False
             )
 
-            self.trainable_variables = [
-                variable for variable in tf.trainable_variables(scope=self.name)
-                if not hasattr(variable, "_keras_initialized") or not variable._keras_initialized
-            ]
+            self.trainable_variables = tf.trainable_variables(scope=self.name)
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
@@ -116,10 +113,7 @@ class Model(object):
             print(checkpoint, "loaded")
 
         else:
-            self.global_variables = [
-                variable for variable in tf.global_variables(scope=self.name)
-                if not hasattr(variable, "_keras_initialized") or not variable._keras_initialized
-            ]
+            self.global_variables = tf.global_variables(scope=self.name)
             session.run(tf.variables_initializer(self.global_variables))
             print("global variables in {} initialized".format(self.name))
 
