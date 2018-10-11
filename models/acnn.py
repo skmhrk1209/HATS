@@ -96,10 +96,13 @@ class Model(object):
 
             self.saver = tf.train.Saver()
 
-            attention_maps = tf.reduce_sum(self.attention_maps, axis=3, keep_dims=True)
             self.summary = tf.summary.merge([
                 tf.summary.image("images", self.images, max_outputs=10),
-                tf.summary.image("attention_maps", attention_maps, max_outputs=10),
+                tf.summary.image("attention_maps", tf.reduce_mean(
+                    input_tensor=self.attention_maps,
+                    axis=3,
+                    keep_dims=True
+                ), max_outputs=10),
                 tf.summary.scalar("loss", self.loss)
             ])
 
