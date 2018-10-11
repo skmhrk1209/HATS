@@ -24,7 +24,22 @@ class AttentionNetwork(object):
                         filters=conv_param.filters,
                         kernel_size=conv_param.kernel_size,
                         strides=conv_param.strides,
-                        padding="same"
+                        padding="same",
+                        data_format=self.data_format,
+                        use_bias=True,
+                        kernel_initializer=tf.variance_scaling_initializer(),
+                        bias_initializer=tf.zeros_initializer()
+                    )
+
+                    inputs = tf.layers.batch_normalization(
+                        inputs=inputs,
+                        axis=1 if self.data_format == "channels_first" else 3,
+                        momentum=0.997,
+                        epsilon=1e-5,
+                        center=True,
+                        scale=True,
+                        training=training,
+                        fused=True
                     )
 
                     inputs = tf.nn.relu(inputs)
@@ -40,6 +55,17 @@ class AttentionNetwork(object):
                     units=self.bottleneck_units
                 )
 
+                inputs = tf.layers.batch_normalization(
+                    inputs=inputs,
+                    axis=1,
+                    momentum=0.997,
+                    epsilon=1e-5,
+                    center=True,
+                    scale=True,
+                    training=training,
+                    fused=True
+                )
+
                 inputs = tf.nn.relu(inputs)
 
             with tf.variable_scope("projection_block"):
@@ -47,6 +73,17 @@ class AttentionNetwork(object):
                 inputs = tf.layers.dense(
                     inputs=inputs,
                     units=np.prod(shape[1:])
+                )
+
+                inputs = tf.layers.batch_normalization(
+                    inputs=inputs,
+                    axis=1,
+                    momentum=0.997,
+                    epsilon=1e-5,
+                    center=True,
+                    scale=True,
+                    training=training,
+                    fused=True
                 )
 
                 inputs = tf.nn.relu(inputs)
@@ -65,7 +102,22 @@ class AttentionNetwork(object):
                         filters=deconv_param.filters,
                         kernel_size=deconv_param.kernel_size,
                         strides=deconv_param.strides,
-                        padding="same"
+                        padding="same",
+                        data_format=self.data_format,
+                        use_bias=True,
+                        kernel_initializer=tf.variance_scaling_initializer(),
+                        bias_initializer=tf.zeros_initializer()
+                    )
+
+                    inputs = tf.layers.batch_normalization(
+                        inputs=inputs,
+                        axis=1 if self.data_format == "channels_first" else 3,
+                        momentum=0.997,
+                        epsilon=1e-5,
+                        center=True,
+                        scale=True,
+                        training=training,
+                        fused=True
                     )
 
                     if i == len(self.deconv_params) - 1:
