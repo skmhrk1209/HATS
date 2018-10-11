@@ -72,7 +72,7 @@ class Model(object):
                     for variable in tf.global_variables()])
         ))
 
-        softmax = tf.nn.softmax(logits, dims=-1, name="softmax")
+        softmax = tf.nn.softmax(logits, dim=-1, name="softmax")
         classes = tf.argmax(logits, axis=-1, name="classes")
 
         loss = tf.losses.sparse_softmax_cross_entropy(
