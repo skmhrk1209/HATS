@@ -26,7 +26,11 @@ class ResidualNetwork(object):
                     padding="same",
                     data_format=self.data_format,
                     use_bias=False,
-                    kernel_initializer=tf.variance_scaling_initializer(),
+                    kernel_initializer=tf.variance_scaling_initializer(
+                        scale=2.0,
+                        mode="fan_in",
+                        distribution='truncated_normal',
+                    ),
                     bias_initializer=tf.zeros_initializer()
                 )
 

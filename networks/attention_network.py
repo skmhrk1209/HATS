@@ -26,7 +26,7 @@ class AttentionNetwork(object):
                         strides=conv_param.strides,
                         padding="same",
                         data_format=self.data_format,
-                        use_bias=True,
+                        use_bias=False,
                         kernel_initializer=tf.variance_scaling_initializer(),
                         bias_initializer=tf.zeros_initializer()
                     )
@@ -52,7 +52,8 @@ class AttentionNetwork(object):
 
                 inputs = tf.layers.dense(
                     inputs=inputs,
-                    units=self.bottleneck_units
+                    units=self.bottleneck_units,
+                    use_bias=False
                 )
 
                 inputs = tf.layers.batch_normalization(
@@ -72,7 +73,8 @@ class AttentionNetwork(object):
 
                 inputs = tf.layers.dense(
                     inputs=inputs,
-                    units=np.prod(shape[1:])
+                    units=np.prod(shape[1:]),
+                    use_bias=False
                 )
 
                 inputs = tf.layers.batch_normalization(
@@ -104,7 +106,7 @@ class AttentionNetwork(object):
                         strides=deconv_param.strides,
                         padding="same",
                         data_format=self.data_format,
-                        use_bias=True,
+                        use_bias=False,
                         kernel_initializer=tf.variance_scaling_initializer(),
                         bias_initializer=tf.zeros_initializer()
                     )
