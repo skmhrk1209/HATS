@@ -137,6 +137,8 @@ class Model(object):
 
         while True:
 
+            print("a")
+
             try:
                 _, global_step = session.run(
                     [self.train_op, self.global_step],
