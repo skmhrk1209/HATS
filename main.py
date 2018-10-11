@@ -18,7 +18,7 @@ parser.add_argument('--gpu', type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
-tf.keras.backend.set_learning_phase(False)
+tf.keras.backend.set_learning_phase(0)
 
 config = tf.ConfigProto(
     gpu_options=tf.GPUOptions(
