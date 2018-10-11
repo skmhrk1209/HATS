@@ -147,8 +147,6 @@ class Model(object):
                 print("training ended")
                 break
 
-            print(global_step)
-
             if global_step % 100 == 0:
 
                 loss = session.run(self.loss, feed_dict=feed_dict)
