@@ -60,7 +60,7 @@ with tf.Session(config=config) as session:
             data_format="channels_last"
         ),
         hyper_parameters=AttrDict(
-            attention_decay=1e-6,
+            attention_decay=1e-5,
             learning_rate=0.001,
             beta1=0.9,
             beta2=0.999
