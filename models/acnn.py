@@ -137,8 +137,6 @@ class Model(object):
 
         while True:
 
-            print("a")
-
             try:
                 _, global_step = session.run(
                     [self.train_op, self.global_step],
@@ -148,6 +146,8 @@ class Model(object):
             except tf.errors.OutOfRangeError:
                 print("training ended")
                 break
+
+            print(global_step)
 
             if global_step % 100 == 0:
 
