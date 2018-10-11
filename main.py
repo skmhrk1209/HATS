@@ -53,7 +53,7 @@ def main(unused_argv):
             ),
             num_classes=1000,
             data_format=args.data_format,
-            hyper_parameters=AttrDict(
+            hyper_params=AttrDict(
                 weight_decay=1e-4,
                 attention_decay=1e-6,
                 momentum=0.9,

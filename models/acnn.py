@@ -5,13 +5,13 @@ import numpy as np
 class Model(object):
 
     def __init__(self, attention_network, convolutional_network,
-                 num_classes, data_format, hyper_parameters):
+                 num_classes, data_format, hyper_params):
 
         self.attention_network = attention_network
         self.convolutional_network = convolutional_network
         self.num_classes = num_classes
         self.data_format = data_format
-        self.hyper_parameters = hyper_parameters
+        self.hyper_parameters = hyper_params
 
     def __call__(self, features, labels, mode):
         ''' model function for ACNN
