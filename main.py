@@ -57,7 +57,7 @@ def main(unused_argv):
                 weight_decay=1e-4,
                 attention_decay=1e-6,
                 momentum=0.9,
-                lerning_rate_fn=lambda global_step: tf.cond(
+                learning_rate_fn=lambda global_step: tf.cond(
                     pred=global_step < 50000,
                     true_fn=lambda: 0.1 * global_step / 50000,
                     false_fn=lambda: tf.train.piecewise_constant(
