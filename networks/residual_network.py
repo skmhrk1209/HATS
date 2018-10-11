@@ -30,8 +30,7 @@ class ResidualNetwork(object):
                         scale=2.0,
                         mode="fan_in",
                         distribution="normal",
-                    ),
-                    bias_initializer=tf.zeros_initializer()
+                    )
                 )
 
             if self.pool_param:
@@ -132,8 +131,11 @@ class ResidualNetwork(object):
                 padding="same",
                 data_format=data_format,
                 use_bias=False,
-                kernel_initializer=tf.variance_scaling_initializer(),
-                bias_initializer=tf.zeros_initializer()
+                kernel_initializer=tf.variance_scaling_initializer(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal",
+                )
             )
 
             inputs = tf.layers.conv2d(
@@ -144,8 +146,11 @@ class ResidualNetwork(object):
                 padding="same",
                 data_format=data_format,
                 use_bias=False,
-                kernel_initializer=tf.variance_scaling_initializer(),
-                bias_initializer=tf.zeros_initializer()
+                kernel_initializer=tf.variance_scaling_initializer(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal",
+                )
             )
 
             inputs = tf.layers.batch_normalization(
@@ -169,8 +174,11 @@ class ResidualNetwork(object):
                 padding="same",
                 data_format=data_format,
                 use_bias=False,
-                kernel_initializer=tf.variance_scaling_initializer(),
-                bias_initializer=tf.zeros_initializer()
+                kernel_initializer=tf.variance_scaling_initializer(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal",
+                )
             )
 
             inputs += shortcut

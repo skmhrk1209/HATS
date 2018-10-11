@@ -27,8 +27,11 @@ class AttentionNetwork(object):
                         padding="same",
                         data_format=self.data_format,
                         use_bias=False,
-                        kernel_initializer=tf.variance_scaling_initializer(),
-                        bias_initializer=tf.zeros_initializer()
+                        kernel_initializer=tf.variance_scaling_initializer(
+                            scale=2.0,
+                            mode="fan_in",
+                            distribution="normal",
+                        )
                     )
 
                     inputs = tf.layers.batch_normalization(
@@ -53,7 +56,12 @@ class AttentionNetwork(object):
                 inputs = tf.layers.dense(
                     inputs=inputs,
                     units=self.bottleneck_units,
-                    use_bias=False
+                    use_bias=False,
+                    kernel_initializer=tf.variance_scaling_initializer(
+                        scale=2.0,
+                        mode="fan_in",
+                        distribution="normal",
+                    )
                 )
 
                 inputs = tf.layers.batch_normalization(
@@ -74,7 +82,12 @@ class AttentionNetwork(object):
                 inputs = tf.layers.dense(
                     inputs=inputs,
                     units=np.prod(shape[1:]),
-                    use_bias=False
+                    use_bias=False,
+                    kernel_initializer=tf.variance_scaling_initializer(
+                        scale=2.0,
+                        mode="fan_in",
+                        distribution="normal",
+                    )
                 )
 
                 inputs = tf.layers.batch_normalization(
@@ -107,8 +120,11 @@ class AttentionNetwork(object):
                         padding="same",
                         data_format=self.data_format,
                         use_bias=False,
-                        kernel_initializer=tf.variance_scaling_initializer(),
-                        bias_initializer=tf.zeros_initializer()
+                        kernel_initializer=tf.variance_scaling_initializer(
+                            scale=2.0,
+                            mode="fan_in",
+                            distribution="normal",
+                        )
                     )
 
                     inputs = tf.layers.batch_normalization(
