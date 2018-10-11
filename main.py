@@ -59,7 +59,7 @@ def main(unused_argv):
                 momentum=0.9,
                 learning_rate_fn=lambda global_step: tf.cond(
                     pred=global_step < 50000,
-                    true_fn=lambda: 0.1 * global_step / 50000,
+                    true_fn=lambda: 0.1 * tf.cast(global_step, tf.float32) / 50000.0,
                     false_fn=lambda: tf.train.piecewise_constant(
                         x=global_step,
                         boundaries=[300000, 600000, 800000, 900000],
