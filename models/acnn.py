@@ -155,14 +155,12 @@ class Model(object):
                 summary = session.run(self.summary, feed_dict=feed_dict)
                 writer.add_summary(summary, global_step=global_step)
 
-                if global_step % 10000 == 0:
+                checkpoint = self.saver.save(
+                    sess=session,
+                    save_path=os.path.join(self.name, "model.ckpt"),
+                    global_step=global_step
+                )
 
-                    checkpoint = self.saver.save(
-                        sess=session,
-                        save_path=os.path.join(self.name, "model.ckpt"),
-                        global_step=global_step
-                    )
-
-                    stop = time.time()
-                    print("{} saved ({:.2f} sec)".format(checkpoint, stop - start))
-                    start = time.time()
+                stop = time.time()
+                print("{} saved ({:.2f} sec)".format(checkpoint, stop - start))
+                start = time.time()
