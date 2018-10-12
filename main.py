@@ -40,7 +40,7 @@ def main(unused_argv):
     imagenet_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[1, 1], blocks=3),
@@ -100,7 +100,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[128, 128]
+                image_size=[224, 224]
             ).get_next(),
             hooks=[
                 tf.train.LoggingTensorHook(
@@ -119,7 +119,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[128, 128]
+                image_size=[224, 224]
             ).get_next()
         )
 
