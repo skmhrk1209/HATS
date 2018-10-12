@@ -94,6 +94,8 @@ def main(unused_argv):
 
         imagenet_classifier.train(
             input_fn=lambda: Dataset(
+                image_size=[128, 128],
+                data_format=args.data_format,
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -111,6 +113,8 @@ def main(unused_argv):
 
         eval_results = imagenet_classifier.evaluate(
             input_fn=lambda: Dataset(
+                image_size=[128, 128],
+                data_format=args.data_format,
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
