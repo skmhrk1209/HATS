@@ -11,7 +11,7 @@ class Model(object):
         self.convolutional_network = convolutional_network
         self.num_classes = num_classes
         self.data_format = data_format
-        self.hyper_parameters = hyper_params
+        self.hyper_params = hyper_params
 
     def __call__(self, features, labels, mode):
         ''' model function for ACNN
@@ -83,7 +83,7 @@ class Model(object):
         loss += tf.add_n([
             tf.nn.l2_loss(variable) for variable in tf.trainable_variables()
             if "batch_normalization" not in variable.name
-        ]) * self.hyper_parameters.weight_decay
+        ]) * self.hyper_params.weight_decay
 
         loss += tf.reduce_mean(
             input_tensor=tf.reduce_mean(
@@ -94,7 +94,7 @@ class Model(object):
                 axis=1
             ),
             axis=0
-        ) * self.hyper_parameters.attention_decay
+        ) * self.hyper_params.attention_decay
 
         tf.summary.scalar("loss", loss)
 
@@ -121,8 +121,8 @@ class Model(object):
                 global_step = tf.train.get_or_create_global_step()
 
                 optimizer = tf.train.MomentumOptimizer(
-                    learning_rate=self.hyper_parameters.learning_rate_fn(global_step),
-                    momentum=self.hyper_parameters.momentum
+                    learning_rate=self.hyper_params.learning_rate_fn(global_step),
+                    momentum=self.hyper_params.momentum
                 )
 
                 train_op = optimizer.minimize(

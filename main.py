@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="imagenet_acnn_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
-parser.add_argument("--batch_size", type=int, default=100, help="batch size")
+parser.add_argument("--batch_size", type=int, default=64, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=1000000, help="buffer size to shuffle dataset")
 parser.add_argument('--data_format', type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
 parser.add_argument('--train', action="store_true", help="with training")
@@ -21,6 +21,18 @@ parser.add_argument('--gpu', type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
+
+
+def get_learning_rate_fn(base_learning_rate, batch_size, batch_denom,
+                         num_images, boundary_epochs, decay_rates):
+
+    initial_learning_rate = base_learning_rate * batch_size / batch_denom
+    batches_per_epoch = num_images / batch_size
+
+    boundaries = [batches_per_epoch * boundary_epoch for boundary_epoch in boundary_epochs]
+    values = [initial_learning_rate * decay_rate for decay_rate in decay_rates]
+
+    return lambda global_step: tf.train.piecewise_constant(global_step, boundaries, values)
 
 
 def main(unused_argv):
@@ -57,14 +69,13 @@ def main(unused_argv):
                 weight_decay=1e-4,
                 attention_decay=1e-6,
                 momentum=0.9,
-                learning_rate_fn=lambda global_step: tf.cond(
-                    pred=global_step < 50000,
-                    true_fn=lambda: 0.1 * tf.cast(global_step, tf.float32) / 50000.0,
-                    false_fn=lambda: tf.train.piecewise_constant(
-                        x=global_step,
-                        boundaries=[300000, 600000, 800000, 900000],
-                        values=[0.1, 0.01, 0.001, 0.0001, 0.00001]
-                    )
+                learning_rate_fn=get_learning_rate_fn(
+                    base_learning_rate=0.1,
+                    batch_size=args.batch_size,
+                    batch_denom=256,
+                    num_images=1281167,
+                    boundary_epochs=[30, 60, 80, 90],
+                    decay_rates=[1, 0.1, 0.01, 0.001, 0.0001]
                 )
             )
         ),
