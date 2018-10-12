@@ -59,7 +59,7 @@ class Dataset(dataset.Dataset):
         right = tf.cast(features["right"], tf.int32)
 
         shape = tf.shape(image)
-        _, _, boxes = tf.image.sample_distorted_bounding_box(
+        offset, target, _ = tf.image.sample_distorted_bounding_box(
             image_size=shape,
             bounding_boxes=tf.reshape(
                 tensor=tf.cast(
@@ -75,15 +75,15 @@ class Dataset(dataset.Dataset):
             aspect_ratio_range=[0.75, 1.33]
         )
 
-        image = tf.image.crop_and_resize(
+        image = tf.image.crop_to_bounding_box(
             image=image,
-            boxes=tf.reshape(
-                tensor=boxes,
-                shape=[1, -1]
-            ),
-            box_ind=[0],
-            crop_size=self.image_size
+            offset_height=offset[0],
+            offset_width=offset[1],
+            target_height=target[0],
+            target_width=target[1]
         )
+
+        image = tf.image.resize_images(image, self.image_size)
 
         image = tf.image.per_image_standardization(image)
 
