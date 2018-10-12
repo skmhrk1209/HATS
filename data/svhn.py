@@ -67,7 +67,7 @@ class Dataset(dataset.Dataset):
                         x=tf.stack([top, left, bottom, right]),
                         y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
                     ),
-                    DstT=tf.float32
+                    dtype=tf.float32
                 ),
                 shape=[1, 1, -1]
             ),
