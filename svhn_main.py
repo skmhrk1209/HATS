@@ -2,17 +2,17 @@ import tensorflow as tf
 import numpy as np
 import argparse
 from utils.attr_dict import AttrDict
-from data.imagenet import Dataset
+from data.svhn import Dataset
 from models.svhn_acnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="imagenet_acnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="svhn_acnn_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=1000000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=30000, help="buffer size to shuffle dataset")
 parser.add_argument('--data_format', type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
