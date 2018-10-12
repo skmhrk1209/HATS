@@ -43,10 +43,10 @@ def main(unused_argv):
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[1, 1], blocks=3),
-                    AttrDict(filters=128, strides=[1, 1], blocks=4),
-                    AttrDict(filters=256, strides=[2, 2], blocks=4),
-                    AttrDict(filters=512, strides=[2, 2], blocks=3),
+                    AttrDict(filters=64, strides=[2, 2], blocks=3),
+                    AttrDict(filters=128, strides=[2, 2], blocks=3),
+                    AttrDict(filters=256, strides=[1, 1], blocks=3),
+                    AttrDict(filters=512, strides=[1, 1], blocks=3),
                 ],
                 num_classes=None,
                 data_format=args.data_format
