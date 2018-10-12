@@ -35,7 +35,8 @@ class Model(object):
             name="attention_map",
             tensor=tf.reduce_sum(
                 input_tensor=attention_maps,
-                axis=1 if self.data_format == "channels_first" else 3
+                axis=1 if self.data_format == "channels_first" else 3,
+                keepdims=True
             )
         )
 
