@@ -62,9 +62,12 @@ class Dataset(dataset.Dataset):
         _, _, boxes = tf.image.sample_distorted_bounding_box(
             image_size=shape,
             bounding_boxes=tf.reshape(
-                tensor=tf.divide(
-                    x=tf.stack([top, left, bottom, right]),
-                    y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
+                tensor=tf.cast(
+                    x=tf.divide(
+                        x=tf.stack([top, left, bottom, right]),
+                        y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
+                    ),
+                    DstT=tf.float32
                 ),
                 shape=[1, 1, -1]
             ),
