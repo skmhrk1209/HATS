@@ -53,12 +53,17 @@ class Dataset(dataset.Dataset):
         image = tf.read_file(features["path"])
         image = tf.image.decode_png(image, 3)
 
+        top = tf.cast(features["top"], tf.int32)
+        left = tf.cast(features["left"], tf.int32)
+        bottom = tf.cast(features["bottom"], tf.int32)
+        right = tf.cast(features["right"], tf.int32)
+
         shape = tf.shape(image)
         _, _, boxes = tf.image.sample_distorted_bounding_box(
             image_size=shape,
             bounding_boxes=tf.reshape(
                 tensor=tf.divide(
-                    x=tf.stack([features["top"], features["left"], features["bottom"], features["right"]]),
+                    x=tf.stack([top, left, bottom, right]),
                     y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
                 ),
                 shape=[1, 1, -1]
