@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="imagenet_acnn_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
-parser.add_argument("--batch_size", type=int, default=64, help="batch size")
+parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=1000000, help="buffer size to shuffle dataset")
 parser.add_argument('--data_format', type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
 parser.add_argument('--train', action="store_true", help="with training")
@@ -44,8 +44,8 @@ def main(unused_argv):
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[1, 1], blocks=3),
-                    AttrDict(filters=128, strides=[2, 2], blocks=4),
-                    AttrDict(filters=256, strides=[2, 2], blocks=6),
+                    AttrDict(filters=128, strides=[1, 1], blocks=4),
+                    AttrDict(filters=256, strides=[2, 2], blocks=4),
                     AttrDict(filters=512, strides=[2, 2], blocks=3),
                 ],
                 num_classes=None,

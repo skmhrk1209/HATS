@@ -25,8 +25,8 @@ class Dataset(dataset.Dataset):
 
         image = tf.read_file(features["path"])
         image = tf.image.decode_jpeg(image, 3)
-        image = tf.image.resize_images(image, [224, 224])
-        image -= tf.expand_dims(tf.expand_dims([123.68, 116.78, 103.94], 0), 0)
+        image = tf.image.resize_images(image, [128, 128])
+        image -= tf.reshape([123.68, 116.78, 103.94], [1, 1, 3])
 
         label = tf.cast(features["label"], tf.int32)
 
