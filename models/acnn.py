@@ -55,7 +55,7 @@ class Model(object):
         )
 
         attention_maps = tf.cond(
-            pred=self.hyper_params.training_attention,
+            pred=tf.constant(self.hyper_params.training_attention),
             true_fn=lambda: attention_maps,
             false_fn=lambda: tf.ones_like(attention_maps)
         )
@@ -92,9 +92,8 @@ class Model(object):
             if "batch_normalization" not in variable.name
         ]) * self.hyper_params.weight_decay
 
-        loss += tf.reduce_mean(
-            tf.abs(attention_maps)
-        ) * self.hyper_params.attention_decay
+        loss += tf.reduce_mean(tf.abs(attention_maps)
+                               ) * self.hyper_params.attention_decay
 
         tf.summary.scalar("loss", loss)
 
