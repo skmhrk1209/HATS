@@ -5,10 +5,10 @@ from . import dataset
 
 class Dataset(dataset.Dataset):
 
-    def __init__(self, image_size, data_format, filenames, num_epochs, batch_size, buffer_size):
+    def __init__(self, filenames, num_epochs, batch_size, buffer_size, data_format, image_size):
 
-        self.image_size = image_size
         self.data_format = data_format
+        self.image_size = image_size
 
         super(Dataset, self).__init__(filenames, num_epochs, batch_size, buffer_size)
 
