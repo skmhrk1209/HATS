@@ -27,7 +27,7 @@ def get_learning_rate_fn(base_learning_rate, batch_size, batch_denom,
                          num_images, boundary_epochs, decay_rates):
 
     initial_learning_rate = base_learning_rate * batch_size / batch_denom
-    batches_per_epoch = num_images / batch_size
+    batches_per_epoch = num_images // batch_size
 
     boundaries = [batches_per_epoch * boundary_epoch for boundary_epoch in boundary_epochs]
     values = [initial_learning_rate * decay_rate for decay_rate in decay_rates]
