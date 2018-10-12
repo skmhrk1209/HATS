@@ -54,6 +54,12 @@ class Model(object):
                    [-1, np.prod(shape[1:3]), shape[3]])
         )
 
+        attention_maps = tf.cond(
+            pred=self.hyper_params.training_attention,
+            true_fn=lambda: attention_maps,
+            false_fn=lambda: tf.ones_like(attention_maps)
+        )
+
         feature_vectors = tf.matmul(
             a=feature_maps,
             b=attention_maps,
@@ -87,14 +93,7 @@ class Model(object):
         ]) * self.hyper_params.weight_decay
 
         loss += tf.reduce_mean(
-            input_tensor=tf.reduce_mean(
-                input_tensor=tf.reduce_sum(
-                    input_tensor=tf.abs(attention_maps),
-                    axis=2 if self.data_format == "channels_first" else 1
-                ),
-                axis=1
-            ),
-            axis=0
+            tf.abs(attention_maps)
         ) * self.hyper_params.attention_decay
 
         tf.summary.scalar("loss", loss)

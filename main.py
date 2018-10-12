@@ -43,10 +43,10 @@ def main(unused_argv):
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=3),
-                    AttrDict(filters=128, strides=[2, 2], blocks=3),
-                    AttrDict(filters=256, strides=[1, 1], blocks=3),
-                    AttrDict(filters=512, strides=[1, 1], blocks=3),
+                    AttrDict(filters=64, strides=[1, 1], blocks=3),
+                    AttrDict(filters=128, strides=[1, 1], blocks=3),
+                    AttrDict(filters=256, strides=[2, 2], blocks=3),
+                    AttrDict(filters=512, strides=[2, 2], blocks=3),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -66,8 +66,9 @@ def main(unused_argv):
             num_classes=1000,
             data_format=args.data_format,
             hyper_params=AttrDict(
+                training_attention=False,
                 weight_decay=1e-4,
-                attention_decay=1e-6,
+                attention_decay=1e-2,
                 momentum=0.9,
                 learning_rate_fn=get_learning_rate_fn(
                     base_learning_rate=0.1,
