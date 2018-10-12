@@ -58,8 +58,8 @@ class Dataset(dataset.Dataset):
             image_size=shape,
             bounding_boxes=tf.reshape(
                 tensor=tf.divide(
-                    x=[features["top"], features["left"], features["bottom"], features["right"]],
-                    y=[shape[0], shape[1], shape[0], shape[1]]
+                    x=tf.stack([features["top"], features["left"], features["bottom"], features["right"]]),
+                    y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
                 ),
                 shape=[1, 1, -1]
             ),
