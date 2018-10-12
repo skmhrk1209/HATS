@@ -59,16 +59,15 @@ class Dataset(dataset.Dataset):
         right = tf.cast(features["right"], tf.int32)
 
         shape = tf.shape(image)
+        bounding_box = tf.divide(
+            x=tf.stack([top, left, bottom, right]),
+            y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
+        )
+
         offset, target, _ = tf.image.sample_distorted_bounding_box(
             image_size=shape,
             bounding_boxes=tf.reshape(
-                tensor=tf.cast(
-                    x=tf.divide(
-                        x=tf.stack([top, left, bottom, right]),
-                        y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
-                    ),
-                    dtype=tf.float32
-                ),
+                tensor=tf.clip_by_value(bounding_box, 0.0, 1.0),
                 shape=[1, 1, -1]
             ),
             min_object_covered=1.0,
