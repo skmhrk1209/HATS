@@ -86,7 +86,6 @@ class Dataset(dataset.Dataset):
         )
 
         image = tf.image.resize_images(image, self.image_size)
-
         image = tf.image.per_image_standardization(image)
 
         if self.data_format == "channels_first":
