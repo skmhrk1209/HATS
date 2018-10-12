@@ -92,8 +92,9 @@ class Model(object):
             if "batch_normalization" not in variable.name
         ]) * self.hyper_params.weight_decay
 
-        loss += tf.reduce_mean(tf.abs(attention_maps)
-                               ) * self.hyper_params.attention_decay
+        loss += tf.reduce_mean(
+            tf.abs(attention_maps)
+        ) * self.hyper_params.attention_decay
 
         tf.summary.scalar("loss", loss)
 
@@ -102,13 +103,11 @@ class Model(object):
             predictions=classes
         )
 
-        accuracy_top_5 = tf.metrics.mean(
-            tf.nn.in_top_k(
-                predictions=logits,
-                targets=labels,
-                k=5
-            )
-        )
+        accuracy_top_5 = tf.metrics.mean(tf.nn.in_top_k(
+            predictions=logits,
+            targets=labels,
+            k=5
+        ))
 
         tf.summary.scalar("accuracy", accuracy[1])
         tf.summary.scalar("accuracy_top_5", accuracy_top_5[1])
