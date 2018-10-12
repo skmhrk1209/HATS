@@ -53,8 +53,7 @@ class Dataset(dataset.Dataset):
         image = tf.read_file(features["path"])
         image = tf.image.decode_png(image, 3)
 
-        shape = image.shape.as_list()
-        print(shape)
+        shape = tf.shape(image)
         _, _, boxes = tf.image.sample_distorted_bounding_box(
             image_size=shape,
             bounding_boxes=tf.reshape(
