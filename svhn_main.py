@@ -31,10 +31,10 @@ def main(unused_argv):
                 conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
-                    AttrDict(filters=512, strides=[1, 1], blocks=2),
+                    AttrDict(filters=64, strides=[1, 1], blocks=1),
+                    AttrDict(filters=128, strides=[1, 1], blocks=1),
+                    AttrDict(filters=256, strides=[2, 2], blocks=1),
+                    AttrDict(filters=512, strides=[2, 2], blocks=1),
                 ],
                 num_classes=None,
                 data_format=args.data_format
