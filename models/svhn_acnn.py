@@ -22,6 +22,12 @@ class Model(object):
             mode:       enum { TRAIN, EVAL, PREDICT }
         '''
 
+        tf.summary.image(
+            name="image",
+            tensor=features,
+            max_outputs=10
+        )
+
         feature_maps = self.convolutional_network(
             inputs=features,
             training=mode == tf.estimator.ModeKeys.TRAIN
@@ -38,7 +44,8 @@ class Model(object):
                 input_tensor=attention_maps,
                 axis=1 if self.data_format == "channels_first" else 3,
                 keep_dims=True
-            )
+            ),
+            max_outputs=10
         )
 
         shape = feature_maps.get_shape().as_list()
