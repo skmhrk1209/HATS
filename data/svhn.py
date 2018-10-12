@@ -67,7 +67,10 @@ class Dataset(dataset.Dataset):
         offset, target, _ = tf.image.sample_distorted_bounding_box(
             image_size=shape,
             bounding_boxes=tf.reshape(
-                tensor=tf.clip_by_value(bounding_box, 0.0, 1.0),
+                tensor=tf.cast(
+                    x=tf.clip_by_value(bounding_box, 0.0, 1.0),
+                    dtype=tf.float32
+                ),
                 shape=[1, 1, -1]
             ),
             min_object_covered=1.0,
