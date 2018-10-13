@@ -1,6 +1,9 @@
 import tensorflow as tf
 import numpy as np
 import argparse
+import itertools
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from utils.attr_dict import AttrDict
 from data.svhn import Dataset
 from models.svhn_acnn import Model
@@ -104,6 +107,40 @@ def main(unused_argv):
         )
 
         print(eval_results)
+
+    if args.predict:
+
+        predict_results = imagenet_classifier.evaluate(
+            input_fn=lambda: Dataset(
+                filenames=args.filenames,
+                num_epochs=args.num_epochs,
+                batch_size=args.batch_size,
+                buffer_size=args.buffer_size,
+                data_format=args.data_format,
+                image_size=[128, 128]
+            ).get_next()
+        )
+
+        figure = plt.figure()
+        artists = []
+
+        for predict_result in itertools.islice(predict_results, 10):
+
+            features = predict_result["features"]
+            reduced_attention_maps = predict_result["reduced_attention_maps"]
+            reduced_attention_maps = np.pad(
+                array=reduced_attention_maps,
+                pad_width=[[0, 0], [0, 0], [0, 2]],
+                mode="constant",
+                constant_values=0
+            )
+
+            artists.append([plt.imshow(features + reduced_attention_maps, animated=True)])
+
+        anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
+        anim.save("svhn_attention.gif", writer="imagemagick")
+
+        plt.show()
 
 
 if __name__ == "__main__":

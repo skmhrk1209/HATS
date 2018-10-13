@@ -23,7 +23,7 @@ class Model(object):
         '''
 
         tf.summary.image(
-            name="image",
+            name="features",
             tensor=features,
             max_outputs=10
         )
@@ -38,39 +38,66 @@ class Model(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        tf.summary.image(
-            name="attention_map",
-            tensor=tf.reduce_sum(
-                input_tensor=attention_maps,
-                axis=1 if self.data_format == "channels_first" else 3,
-                keep_dims=True
-            ),
-            max_outputs=10
-        )
-
-        shape = feature_maps.get_shape().as_list()
-        feature_maps = tf.reshape(
-            tensor=feature_maps,
-            shape=([-1, shape[1], np.prod(shape[2:4])] if self.data_format == "channels_first" else
-                   [-1, np.prod(shape[1:3]), shape[3]])
-        )
-
-        shape = attention_maps.get_shape().as_list()
-        attention_maps = tf.reshape(
-            tensor=attention_maps,
-            shape=([-1, shape[1], np.prod(shape[2:4])] if self.data_format == "channels_first" else
-                   [-1, np.prod(shape[1:3]), shape[3]])
-        )
-
         attention_maps = tf.cond(
             pred=tf.constant(self.hyper_params.training_attention),
             true_fn=lambda: attention_maps,
             false_fn=lambda: tf.ones_like(attention_maps)
         )
 
+        reduced_attention_maps = tf.reduce_sum(
+            input_tensor=attention_maps,
+            axis=1 if self.data_format == "channels_first" else 3,
+            keep_dims=True
+        )
+
+        def scale(input_val, input_min, input_max, output_min, output_max):
+
+            return output_min + (input_val - input_min) / (input_max - input_min) * (output_max - output_min)
+
+        input_min = tf.reduce_min(
+            input_tensor=reduced_attention_maps,
+            axis=[2, 3] if self.data_format == "channels_first" else [1, 2],
+            keep_dims=True
+        )
+
+        input_max = tf.reduce_max(
+            input_tensor=reduced_attention_maps,
+            axis=[2, 3] if self.data_format == "channels_first" else [1, 2],
+            keep_dims=True
+        )
+
+        reduced_attention_maps = scale(
+            input_val=reduced_attention_maps,
+            input_min=input_min,
+            input_max=input_max,
+            output_min=tf.zeros_like(input_min),
+            output_max=tf.ones_like(input_max)
+        )
+
+        shape = features.shape.as_list()
+
+        reduced_attention_maps = tf.image.resize_images(
+            images=reduced_attention_maps,
+            size=shape[2:4] if self.data_format == "channels_first" else shape[1:3]
+        )
+
+        tf.summary.image(
+            name="reduced_attention_maps",
+            tensor=reduced_attention_maps,
+            max_outputs=10
+        )
+
+        def flatten_images(inputs, data_format):
+
+            input_shape = inputs.get_shape().as_list()
+            output_shape = ([-1, input_shape[1], np.prod(input_shape[2:4])] if self.data_format == "channels_first" else
+                            [-1, np.prod(input_shape[1:3]), input_shape[3]])
+
+            return tf.reshape(inputs, output_shape)
+
         feature_vectors = tf.matmul(
-            a=feature_maps,
-            b=attention_maps,
+            a=flatten_images(feature_maps, self.data_format),
+            b=flatten_images(attention_maps, self.data_format),
             transpose_a=False if self.data_format == "channels_first" else True,
             transpose_b=True if self.data_format == "channels_first" else False
         )
@@ -91,6 +118,21 @@ class Model(object):
 
         softmax = tf.nn.softmax(multi_logits, dim=-1, name="softmax")
         classes = tf.argmax(multi_logits, axis=-1, name="classes")
+
+        if mode == tf.estimator.ModeKeys.PREDICT:
+
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                predictions=dict(
+                    features=features,
+                    feature_maps=feature_maps,
+                    attention_maps=attention_maps,
+                    reduced_attention_maps=reduced_attention_maps,
+                    feature_vectors=feature_vectors,
+                    softmax=softmax,
+                    classes=classes
+                )
+            )
 
         loss = tf.reduce_mean([
             tf.losses.sparse_softmax_cross_entropy(
