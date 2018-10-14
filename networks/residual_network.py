@@ -89,7 +89,13 @@ class ResidualNetwork(object):
 
             inputs = tf.layers.dense(
                 inputs=inputs,
-                units=self.num_classes
+                units=self.num_classes,
+                kernel_initializer=tf.variance_scaling_initializer(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal",
+                ),
+                bias_initializer=tf.zeros_initializer()
             )
 
             return inputs

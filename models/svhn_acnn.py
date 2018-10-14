@@ -86,7 +86,13 @@ class Model(object):
         multi_logits = tf.stack([
             tf.layers.dense(
                 inputs=feature_vectors,
-                units=self.num_classes
+                units=self.num_classes,
+                kernel_initializer=tf.variance_scaling_initializer(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal",
+                ),
+                bias_initializer=tf.zeros_initializer()
             ) for i in range(self.num_digits)
         ], axis=1)
 
