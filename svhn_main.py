@@ -131,7 +131,7 @@ def main(unused_argv):
 
             attention_maps = np.apply_along_axis(
                 func1d=np.sum,
-                axis=1 if args.data_format == "channels_first" else 3,
+                axis=0 if args.data_format == "channels_first" else 2,
                 arr=attention_maps
             )
             attention_maps = scale(
