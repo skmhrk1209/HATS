@@ -109,7 +109,7 @@ def main(unused_argv):
 
     if args.predict:
 
-        predict_results = imagenet_classifier.evaluate(
+        predict_results = imagenet_classifier.predict(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
@@ -124,6 +124,9 @@ def main(unused_argv):
 
             features = predict_result["features"]
             reduced_attention_maps = predict_result["reduced_attention_maps"]
+
+            print(reduced_attention_maps.min(), reduced_attention_maps.max())
+
             reduced_attention_maps = np.pad(
                 array=reduced_attention_maps,
                 pad_width=[[0, 0], [0, 0], [0, 2]],
