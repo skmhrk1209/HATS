@@ -16,60 +16,54 @@ class ResidualNetwork(object):
 
         with tf.variable_scope(name, reuse=reuse):
 
-            with tf.variable_scope("conv2d_block"):
-
-                inputs = tf.layers.conv2d(
-                    inputs=inputs,
-                    filters=self.conv_param.filters,
-                    kernel_size=self.conv_param.kernel_size,
-                    strides=self.conv_param.strides,
-                    padding="same",
-                    data_format=self.data_format,
-                    use_bias=False,
-                    kernel_initializer=tf.variance_scaling_initializer(
-                        scale=2.0,
-                        mode="fan_in",
-                        distribution="normal",
-                    )
+            inputs = tf.layers.conv2d(
+                inputs=inputs,
+                filters=self.conv_param.filters,
+                kernel_size=self.conv_param.kernel_size,
+                strides=self.conv_param.strides,
+                padding="same",
+                data_format=self.data_format,
+                use_bias=False,
+                kernel_initializer=tf.variance_scaling_initializer(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal",
                 )
+            )
 
             if self.pool_param:
 
-                with tf.variable_scope("pooling2d_block"):
-
-                    inputs = tf.layers.max_pooling2d(
-                        inputs=inputs,
-                        pool_size=self.pool_param.pool_size,
-                        strides=self.pool_param.strides,
-                        padding="same",
-                        data_format=self.data_format
-                    )
+                inputs = tf.layers.max_pooling2d(
+                    inputs=inputs,
+                    pool_size=self.pool_param.pool_size,
+                    strides=self.pool_param.strides,
+                    padding="same",
+                    data_format=self.data_format
+                )
 
             for i, residual_param in enumerate(self.residual_params):
 
                 for j in range(residual_param.blocks)[:1]:
 
-                    with tf.variable_scope("residual_block_{}_{}".format(i, j)):
-
-                        inputs = self.residual_block(
-                            inputs=inputs,
-                            filters=residual_param.filters,
-                            strides=residual_param.strides,
-                            data_format=self.data_format,
-                            training=training
-                        )
+                    inputs = self.residual_block(
+                        inputs=inputs,
+                        filters=residual_param.filters,
+                        strides=residual_param.strides,
+                        data_format=self.data_format,
+                        training=training,
+                        name="residual_block_{}_{}".format(i, j)
+                    )
 
                 for j in range(residual_param.blocks)[1:]:
 
-                    with tf.variable_scope("residual_block_{}_{}".format(i, j)):
-
-                        inputs = self.residual_block(
-                            inputs=inputs,
-                            filters=residual_param.filters,
-                            strides=[1, 1],
-                            data_format=self.data_format,
-                            training=training
-                        )
+                    inputs = self.residual_block(
+                        inputs=inputs,
+                        filters=residual_param.filters,
+                        strides=[1, 1],
+                        data_format=self.data_format,
+                        training=training,
+                        name="residual_block_{}_{}".format(i, j)
+                    )
 
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,

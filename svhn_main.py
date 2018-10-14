@@ -30,13 +30,13 @@ def main(unused_argv):
     imagenet_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[1, 1]),
+                conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=1),
-                    AttrDict(filters=128, strides=[2, 2], blocks=1),
-                    AttrDict(filters=256, strides=[1, 1], blocks=1),
-                    AttrDict(filters=512, strides=[1, 1], blocks=1),
+                    AttrDict(filters=32, strides=[1, 1], blocks=2),
+                    AttrDict(filters=64, strides=[1, 1], blocks=2),
+                    AttrDict(filters=128, strides=[1, 1], blocks=2),
+                    AttrDict(filters=256, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -58,7 +58,7 @@ def main(unused_argv):
             data_format=args.data_format,
             hyper_params=AttrDict(
                 training_attention=True,
-                weight_decay=1e-4,
+                weight_decay=0.0,
                 attention_decay=1e-2
             )
         ),
@@ -82,7 +82,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[128, 128]
+                image_size=[64, 64]
             ).get_next(),
             hooks=[
                 tf.train.LoggingTensorHook(
@@ -101,7 +101,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[128, 128]
+                image_size=[64, 64]
             ).get_next()
         )
 
@@ -116,7 +116,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[128, 128]
+                image_size=[64, 64]
             ).get_next()
         )
 
@@ -125,16 +125,34 @@ def main(unused_argv):
             features = predict_result["features"]
             attention_maps = predict_result["attention_maps"]
 
-            print(attention_maps.min(), attention_maps.max())
-
             def scale(input_val, input_min, input_max, output_min, output_max):
 
                 return output_min + (input_val - input_min) / (input_max - input_min) * (output_max - output_min)
-                
-            attention_maps = np.apply_along_axis(np.sum, axis=2, arr=attention_maps)
-            attention_maps = scale(attention_maps, attention_maps.min(), attention_maps.max(), 0, 1)
 
-            cv2.imwrite("image_{}.png".format(i), attention_maps * 255.)
+            attention_maps = np.apply_along_axis(
+                func1d=np.sum,
+                axis=1 if args.data_format == "channels_first" else 3,
+                arr=attention_maps
+            )
+            attention_maps = scale(
+                input_val=attention_maps,
+                input_min=attention_maps.min(),
+                input_max=attention_maps.max(),
+                output_min=0.,
+                output_max=1.
+            )
+            attention_maps = np.expand_dims(attention_maps, axis=2)
+            attention_maps = np.pad(
+                array=attention_maps.expand_dims(),
+                pad_width=[[0, 0], [0, 0], [0, 2]],
+                mode="constant",
+                constant_values=0
+            )
+            attention_maps = cv2.resize(attention_maps, dsize=features.shape)
+
+            image = features + attention_maps
+
+            cv2.imwrite("image_{}.png".format(i), image * 255.)
 
 
 if __name__ == "__main__":

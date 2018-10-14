@@ -38,54 +38,33 @@ class Model(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        attention_maps = tf.cond(
-            pred=tf.constant(self.hyper_params.training_attention),
-            true_fn=lambda: attention_maps,
-            false_fn=lambda: tf.ones_like(attention_maps)
-        )
+        shape = attention_maps.shape.as_list()
 
-        reduced_attention_maps = tf.reduce_sum(
-            input_tensor=attention_maps,
-            axis=1 if self.data_format == "channels_first" else 3,
-            keep_dims=True
-        )
+        if self.data_format == "channels_first":
 
-        def scale(input_val, input_min, input_max, output_min, output_max):
+            for i in range(shape[1]):
 
-            return output_min + (input_val - input_min) / (input_max - input_min) * (output_max - output_min)
+                tf.summary.image(
+                    name="attention_maps_{}".format(i),
+                    tensor=tf.reshape(
+                        tensor=attention_maps[:, i, :, :],
+                        shape=[-1, 1, shape[2], shape[3]]
+                    ),
+                    max_outputs=10
+                )
 
-        input_min = tf.reduce_min(
-            input_tensor=reduced_attention_maps,
-            axis=[2, 3] if self.data_format == "channels_first" else [1, 2],
-            keep_dims=True
-        )
+        else:
 
-        input_max = tf.reduce_max(
-            input_tensor=reduced_attention_maps,
-            axis=[2, 3] if self.data_format == "channels_first" else [1, 2],
-            keep_dims=True
-        )
+            for i in range(shape[3]):
 
-        reduced_attention_maps = scale(
-            input_val=reduced_attention_maps,
-            input_min=input_min,
-            input_max=input_max,
-            output_min=tf.zeros_like(input_min),
-            output_max=tf.ones_like(input_max)
-        )
-
-        shape = features.shape.as_list()
-
-        reduced_attention_maps = tf.image.resize_images(
-            images=reduced_attention_maps,
-            size=shape[2:4] if self.data_format == "channels_first" else shape[1:3]
-        )
-
-        tf.summary.image(
-            name="reduced_attention_maps",
-            tensor=reduced_attention_maps,
-            max_outputs=10
-        )
+                tf.summary.image(
+                    name="attention_maps_{}".format(i),
+                    tensor=tf.reshape(
+                        tensor=attention_maps[:, :, :, i],
+                        shape=[-1, shape[1], shape[2], 1]
+                    ),
+                    max_outputs=10
+                )
 
         def flatten_images(inputs, data_format):
 
@@ -111,10 +90,10 @@ class Model(object):
             ) for i in range(self.num_digits)
         ], axis=1)
 
-        print("num params: {}".format(
-            np.sum([np.prod(variable.get_shape().as_list())
-                    for variable in tf.global_variables()])
-        ))
+        print("num params: {}".format(np.sum([
+            np.prod(variable.get_shape().as_list())
+            for variable in tf.global_variables()
+        ])))
 
         softmax = tf.nn.softmax(multi_logits, dim=-1, name="softmax")
         classes = tf.argmax(multi_logits, axis=-1, name="classes")
@@ -127,7 +106,6 @@ class Model(object):
                     features=features,
                     feature_maps=feature_maps,
                     attention_maps=attention_maps,
-                    reduced_attention_maps=reduced_attention_maps,
                     feature_vectors=feature_vectors,
                     softmax=softmax,
                     classes=classes
