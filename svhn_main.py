@@ -148,7 +148,7 @@ def main(unused_argv):
                 mode="constant",
                 constant_values=0
             )
-            attention_maps = cv2.resize(attention_maps, dsize=features.shape)
+            attention_maps = cv2.resize(attention_maps, dsize=[64, 64])
 
             image = features + attention_maps
 
