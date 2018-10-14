@@ -130,8 +130,9 @@ def main(unused_argv):
             def scale(input_val, input_min, input_max, output_min, output_max):
 
                 return output_min + (input_val - input_min) / (input_max - input_min) * (output_max - output_min)
-
-            attention_maps = np.apply_along_axis(np.sum, axis=2, attention_maps)
+                
+            attention_maps = np.apply_along_axis(np.sum, axis=2, arr=attention_maps)
+            attention_maps = scale(attention_maps, attention_maps.min(), attention_maps.max(), 0, 1)
             attention_maps = np.expand_dims(attention_maps, axis=2)
 
             attention_maps = np.pad(
