@@ -2,8 +2,7 @@ import tensorflow as tf
 import numpy as np
 import argparse
 import itertools
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import cv2
 from utils.attr_dict import AttrDict
 from data.svhn import Dataset
 from models.svhn_acnn import Model
@@ -121,10 +120,7 @@ def main(unused_argv):
             ).get_next()
         )
 
-        figure = plt.figure()
-        artists = []
-
-        for predict_result in itertools.islice(predict_results, 10):
+        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
             features = predict_result["features"]
             reduced_attention_maps = predict_result["reduced_attention_maps"]
@@ -135,12 +131,7 @@ def main(unused_argv):
                 constant_values=0
             )
 
-            artists.append([plt.imshow(features + reduced_attention_maps, animated=True)])
-
-        anim = animation.ArtistAnimation(figure, artists, interval=1000, repeat=False)
-        anim.save("svhn_attention.gif", writer="imagemagick")
-
-        plt.show()
+            cv2.imwrite("image_{}.png".format(i), (features + reduced_attention_maps) * 255.)
 
 
 if __name__ == "__main__":
