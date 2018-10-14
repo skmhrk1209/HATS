@@ -58,7 +58,7 @@ def main(unused_argv):
             num_digits=4,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                training_attention=False,
+                training_attention=True,
                 weight_decay=1e-4,
                 attention_decay=1e-2
             )
