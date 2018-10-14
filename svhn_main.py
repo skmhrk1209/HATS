@@ -144,7 +144,7 @@ def main(unused_argv):
             attention_maps = np.expand_dims(attention_maps, axis=2)
             attention_maps = np.pad(
                 array=attention_maps,
-                pad_width=[[0, 0], [0, 0], [0, 2]],
+                pad_width=[[0, 0], [0, 0], [2, 0]],
                 mode="constant",
                 constant_values=0
             )
