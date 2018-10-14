@@ -123,18 +123,25 @@ def main(unused_argv):
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
             features = predict_result["features"]
-            reduced_attention_maps = predict_result["reduced_attention_maps"]
+            attention_maps = predict_result["attention_maps"]
 
-            print(reduced_attention_maps.min(), reduced_attention_maps.max())
+            print(attention_maps.min(), attention_maps.max())
 
-            reduced_attention_maps = np.pad(
-                array=reduced_attention_maps,
+            def scale(input_val, input_min, input_max, output_min, output_max):
+
+            return output_min + (input_val - input_min) / (input_max - input_min) * (output_max - output_min)
+
+            attention_maps = np.apply_along_axis(np.sum, axis=2, attention_maps)
+            attention_maps = np.expand_dims(attention_maps, axis=2)
+
+            attention_maps = np.pad(
+                array=attention_maps,
                 pad_width=[[0, 0], [0, 0], [0, 2]],
                 mode="constant",
                 constant_values=0
             )
 
-            cv2.imwrite("image_{}.png".format(i), (features + reduced_attention_maps) * 255.)
+            cv2.imwrite("image_{}.png".format(i), (features + attention_maps) * 255.)
 
 
 if __name__ == "__main__":
