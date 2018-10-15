@@ -59,7 +59,7 @@ def main(unused_argv):
             hyper_params=AttrDict(
                 training_attention=True,
                 weight_decay=0.0,
-                attention_decay=0.1
+                attention_decay=1.0
             )
         ),
         model_dir=args.model_dir,
