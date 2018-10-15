@@ -85,6 +85,7 @@ class Dataset(dataset.Dataset):
             target_width=target[1]
         )
 
+        unprocessed = tf.image.convert_image_dtype(unprocessed, tf.float32)
         unprocessed = tf.image.resize_images(unprocessed, self.image_size)
         preprocessed = tf.image.per_image_standardization(unprocessed)
 
