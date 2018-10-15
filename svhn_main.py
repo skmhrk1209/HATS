@@ -122,7 +122,6 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            unprocessed = predict_result["unprocessed"]
             attention_maps = predict_result["attention_maps"]
 
             def scale(input_val, input_min, input_max, output_min, output_max):
