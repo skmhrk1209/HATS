@@ -122,7 +122,7 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            features = predict_result["features"]
+            unprocessed = predict_result["unprocessed"]
             attention_maps = predict_result["attention_maps"]
 
             def scale(input_val, input_min, input_max, output_min, output_max):
@@ -150,7 +150,7 @@ def main(unused_argv):
             )
             attention_maps = cv2.resize(attention_maps, dsize=(64, 64))
 
-            image = features + attention_maps
+            image = unprocessed + attention_maps
 
             cv2.imwrite("output/image_{}.png".format(i), image * 255.)
 

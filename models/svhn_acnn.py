@@ -23,13 +23,19 @@ class Model(object):
         '''
 
         tf.summary.image(
-            name="features",
-            tensor=features,
+            name="unprocessed",
+            tensor=features["unprocessed"],
+            max_outputs=10
+        )
+
+        tf.summary.image(
+            name="preprocessed",
+            tensor=features["preprocessed"],
             max_outputs=10
         )
 
         feature_maps = self.convolutional_network(
-            inputs=features,
+            inputs=features["preprocessed"],
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
@@ -48,7 +54,7 @@ class Model(object):
                     name="attention_maps_{}".format(i),
                     tensor=tf.reshape(
                         tensor=attention_maps[:, i, :, :],
-                        shape=[-1, 1, shape[2], shape[3]]
+                        shape=[-1, shape[2], shape[3], 1]
                     ),
                     max_outputs=10
                 )
@@ -109,7 +115,8 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=dict(
-                    features=features,
+                    unprocessed=features["unprocessed"],
+                    preprocessed=features["preprocessed"],
                     feature_maps=feature_maps,
                     attention_maps=attention_maps,
                     feature_vectors=feature_vectors,
