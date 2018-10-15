@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--steps", type=int, default=10000, help="number of training steps")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
-parser.add_argument("--model_dir", type=str, default="mnist_cnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_mnist_cnn_model", help="model directory")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument('--predict', action="store_true", help="with prediction")
@@ -31,7 +31,7 @@ def scale(input, input_min, input_max, output_min, output_max):
 
 def cnn_model_fn(features, labels, mode, params):
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    model function for CNN
+    model function for ACNN
 
     features:   batch of features from input_fn
     labels:     batch of labels from input_fn
@@ -73,7 +73,7 @@ def cnn_model_fn(features, labels, mode, params):
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     logits layer
-    (-1, 128) -> (-1, 10)
+    (-1, 1024) -> (-1, 10)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.reduce_mean(
@@ -83,7 +83,7 @@ def cnn_model_fn(features, labels, mode, params):
 
     inputs = tf.layers.dense(
         inputs=inputs,
-        units=128,
+        units=1024,
         activation=tf.nn.relu
     )
 
@@ -92,22 +92,15 @@ def cnn_model_fn(features, labels, mode, params):
         units=10
     )
 
-    predictions.update({
-        "classes": tf.argmax(
-            input=logits,
-            axis=-1
-        ),
-        "softmax": tf.nn.softmax(
-            logits=logits,
-            dim=-1,
-            name="softmax"
-        )
-    })
+    probabilities = tf.nn.sigmoid(
+        x=logits,
+        name="probabilities"
+    )
 
-    print("num params: {}".format(
-        np.sum([np.prod(variable.get_shape().as_list())
-                for variable in tf.global_variables()])
-    ))
+    predictions.update({
+        "classes": tf.round(probabilities),
+        "probabilities": probabilities
+    })
 
     if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -116,8 +109,8 @@ def cnn_model_fn(features, labels, mode, params):
             predictions=predictions
         )
 
-    loss = tf.losses.sparse_softmax_cross_entropy(
-        labels=labels,
+    loss = tf.losses.sigmoid_cross_entropy(
+        multi_class_labels=labels,
         logits=logits
     )
 
@@ -186,9 +179,43 @@ def main(unused_argv):
 
     train_labels = mnist.train.labels.astype(np.int32)
     eval_labels = mnist.test.labels.astype(np.int32)
+
+    def make_multi_mnist(images, labels, digits, size):
+
+        multi_images = []
+        multi_labels = []
+
+        for _ in range(size):
+
+            indices = np.random.randint(0, len(images), size=np.random.randint(1, digits + 1))
+
+            multi_image = np.stack(images[indices], axis=3)
+            multi_image = np.apply_along_axis(np.sum, axis=3, arr=multi_image)
+            multi_image = np.clip(multi_image, 0, 1)
+            multi_images.append(multi_image)
+
+            multi_label = np.identity(10, dtype=np.int32)[labels[indices]]
+            multi_label = np.any(multi_label, axis=0).astype(np.int32)
+            multi_labels.append(multi_label)
+
+        return np.array(multi_images), np.array(multi_labels)
+
+    train_multi_images, train_multi_labels = make_multi_mnist(
+        images=train_images,
+        labels=train_labels,
+        digits=4,
+        size=train_images.shape[0]
+    )
+
+    eval_multi_images, eval_multi_labels = make_multi_mnist(
+        images=eval_images,
+        labels=eval_labels,
+        digits=4,
+        size=eval_images.shape[0]
+    )
     '''
 
-    def load_mnist(path):
+    def load_multi_mnist(path):
 
         filenames = glob.glob(os.path.join(path, "*.png"))
 
@@ -197,13 +224,13 @@ def main(unused_argv):
         images = scale(images, 0, 255, 0, 1)
         images = np.reshape(images, [-1, 128, 128, 1])
 
-        labels = np.array([int(os.path.splitext(os.path.basename(filename))[0].split("-")[-1])
+        labels = np.array([[int(c) for c in os.path.splitext(os.path.basename(filename))[0].split("-")[-1]]
                            for filename in filenames], dtype=np.int32)
 
         return images, labels
 
-    train_images, train_labels = load_mnist("../data/mnist/train")
-    test_images, test_labels = load_mnist("../data/mnist/test")
+    train_images, train_labels = load_multi_mnist("data/multi_mnist/train")
+    test_images, test_labels = load_multi_mnist("data/multi_mnist/test")
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=cnn_model_fn,
@@ -231,7 +258,7 @@ def main(unused_argv):
 
         logging_hook = tf.train.LoggingTensorHook(
             tensors={
-                "softmax": "softmax"
+                "probabilities": "probabilities"
             },
             every_n_iter=100
         )
