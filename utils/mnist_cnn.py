@@ -206,8 +206,8 @@ def main(unused_argv):
 
         return images, labels
 
-    train_images, train_labels = load_mnist("mnist/train")
-    test_images, test_labels = load_mnist("mnist/test")
+    train_images, train_labels = load_mnist("../data/mnist/train")
+    test_images, test_labels = load_mnist("../data/mnist/test")
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=cnn_model_fn,
