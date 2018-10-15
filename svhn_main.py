@@ -30,7 +30,7 @@ def main(unused_argv):
     imagenet_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=32, strides=[1, 1], blocks=2),
@@ -50,7 +50,7 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
-                bottleneck_units=32,
+                bottleneck_units=16,
                 data_format=args.data_format
             ),
             num_classes=11,
@@ -122,33 +122,9 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            attention_maps = predict_result["attention_maps"]
+            reduced_attention_maps = predict_result["reduced_attention_maps"]
 
-            def scale(input_val, input_min, input_max, output_min, output_max):
-
-                return output_min + (input_val - input_min) / (input_max - input_min) * (output_max - output_min)
-
-            attention_maps = np.apply_along_axis(
-                func1d=np.sum,
-                axis=0 if args.data_format == "channels_first" else 2,
-                arr=attention_maps
-            )
-            attention_maps = scale(
-                input_val=attention_maps,
-                input_min=attention_maps.min(),
-                input_max=attention_maps.max(),
-                output_min=0.,
-                output_max=255.
-            )
-            attention_maps = np.expand_dims(attention_maps, axis=2)
-            attention_maps = np.pad(
-                array=attention_maps,
-                pad_width=[[0, 0], [0, 0], [2, 0]],
-                mode="constant",
-                constant_values=0
-            )
-
-            cv2.imwrite("output/attention_map_{}.png".format(i), attention_maps)
+            cv2.imwrite("output/reduced_attention_map_{}.png".format(i), reduced_attention_maps)
 
 
 if __name__ == "__main__":

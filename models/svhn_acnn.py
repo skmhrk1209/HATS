@@ -23,19 +23,13 @@ class Model(object):
         '''
 
         tf.summary.image(
-            name="unprocessed",
-            tensor=features["unprocessed"],
-            max_outputs=10
-        )
-
-        tf.summary.image(
-            name="preprocessed",
-            tensor=features["preprocessed"],
+            name="features",
+            tensor=features,
             max_outputs=10
         )
 
         feature_maps = self.convolutional_network(
-            inputs=features["preprocessed"],
+            inputs=features,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
@@ -44,33 +38,17 @@ class Model(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        shape = attention_maps.shape.as_list()
+        reduced_attention_maps = tf.reduce_sum(
+            input_tensor=attention_maps,
+            axis=1 if self.data_format == "channels_first" else 3,
+            keep_dims=True
+        )
 
-        if self.data_format == "channels_first":
-
-            for i in range(shape[1]):
-
-                tf.summary.image(
-                    name="attention_maps_{}".format(i),
-                    tensor=tf.reshape(
-                        tensor=attention_maps[:, i, :, :],
-                        shape=[-1, shape[2], shape[3], 1]
-                    ),
-                    max_outputs=10
-                )
-
-        else:
-
-            for i in range(shape[3]):
-
-                tf.summary.image(
-                    name="attention_maps_{}".format(i),
-                    tensor=tf.reshape(
-                        tensor=attention_maps[:, :, :, i],
-                        shape=[-1, shape[1], shape[2], 1]
-                    ),
-                    max_outputs=10
-                )
+        tf.summary.image(
+            name="reduced_attention_maps",
+            tensor=reduced_attention_maps,
+            max_outputs=10
+        )
 
         def flatten_images(inputs, data_format):
 
@@ -115,10 +93,10 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=dict(
-                    unprocessed=features["unprocessed"],
-                    preprocessed=features["preprocessed"],
+                    features=features,
                     feature_maps=feature_maps,
                     attention_maps=attention_maps,
+                    reduced_attention_maps=reduced_attention_maps,
                     feature_vectors=feature_vectors,
                     softmax=softmax,
                     classes=classes

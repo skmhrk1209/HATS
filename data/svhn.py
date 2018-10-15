@@ -50,15 +50,15 @@ class Dataset(dataset.Dataset):
             }
         )
 
-        unprocessed = tf.read_file(features["path"])
-        unprocessed = tf.image.decode_png(unprocessed, 3)
+        image = tf.read_file(features["path"])
+        image = tf.image.decode_png(image, 3)
 
         top = tf.cast(features["top"], tf.int32)
         left = tf.cast(features["left"], tf.int32)
         bottom = tf.cast(features["bottom"], tf.int32)
         right = tf.cast(features["right"], tf.int32)
 
-        shape = tf.shape(unprocessed)
+        shape = tf.shape(image)
         bounding_box = tf.divide(
             x=tf.stack([top, left, bottom, right]),
             y=tf.stack([shape[0], shape[1], shape[0], shape[1]])
@@ -74,24 +74,24 @@ class Dataset(dataset.Dataset):
                 shape=[1, 1, -1]
             ),
             min_object_covered=1.0,
-            aspect_ratio_range=[0.75, 1.33]
+            aspect_ratio_range=[0.75, 1.33],
+            use_image_if_no_bounding_boxes=True
         )
 
-        unprocessed = tf.image.crop_to_bounding_box(
-            image=unprocessed,
+        image = tf.image.crop_to_bounding_box(
+            image=image,
             offset_height=offset[0],
             offset_width=offset[1],
             target_height=target[0],
             target_width=target[1]
         )
 
-        unprocessed = tf.image.convert_image_dtype(unprocessed, tf.float32)
-        unprocessed = tf.image.resize_images(unprocessed, self.image_size)
-        preprocessed = tf.image.per_image_standardization(unprocessed)
+        image = tf.image.convert_image_dtype(image, tf.float32)
+        image = tf.image.resize_images(image, self.image_size)
 
         if self.data_format == "channels_first":
-            preprocessed = tf.transpose(preprocessed, [2, 0, 1])
+            image = tf.transpose(image, [2, 0, 1])
 
         label = tf.cast(features["label"], tf.int32)
 
-        return {"unprocessed": unprocessed, "preprocessed": preprocessed}, label
+        return image, label
