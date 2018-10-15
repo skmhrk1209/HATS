@@ -148,9 +148,8 @@ def main(unused_argv):
                 mode="constant",
                 constant_values=0
             )
-            attention_maps = cv2.resize(attention_maps, dsize=(64, 64))
-
-            image = unprocessed + attention_maps
+            #attention_maps = cv2.resize(attention_maps, dsize=(64, 64))
+            #image = unprocessed + attention_maps
 
             cv2.imwrite("output/image_{}.png".format(i), attention_maps * 255.)
 
