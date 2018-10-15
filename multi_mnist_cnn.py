@@ -41,12 +41,12 @@ def cnn_model_fn(features, labels, mode, params):
     predictions = {}
     predictions.update(features)
 
+    inputs = features["images"]
+
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     convolutional layer 1
     (-1, 128, 128, 1) -> (-1, 64, 64, 32)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    inputs = features["images"]
 
     inputs = tf.layers.conv2d(
         inputs=inputs,
@@ -72,8 +72,8 @@ def cnn_model_fn(features, labels, mode, params):
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    logits layer
-    (-1, 1024) -> (-1, 10)
+    global average pooling layer
+    (-1, 32, 32, 64) -> (-1, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.reduce_mean(
@@ -81,11 +81,21 @@ def cnn_model_fn(features, labels, mode, params):
         axis=[1, 2]
     )
 
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    dense layer
+    (-1, 64) -> (-1, 1024)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
     inputs = tf.layers.dense(
         inputs=inputs,
         units=1024,
         activation=tf.nn.relu
     )
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    logits layer
+    (-1, 1024) -> (-1, 10)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     logits = tf.layers.dense(
         inputs=inputs,
@@ -229,8 +239,8 @@ def main(unused_argv):
 
         return images, labels
 
-    train_images, train_labels = load_multi_mnist("data/multi_mnist/train")
-    test_images, test_labels = load_multi_mnist("data/multi_mnist/test")
+    train_images, train_labels = load_multi_mnist("../data/multi_mnist/train")
+    test_images, test_labels = load_multi_mnist("../data/multi_mnist/test")
 
     mnist_classifier = tf.estimator.Estimator(
         model_fn=cnn_model_fn,

@@ -72,8 +72,8 @@ def cnn_model_fn(features, labels, mode, params):
     )
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    logits layer
-    (-1, 128) -> (-1, 10)
+    global average pooling layer
+    (-1, 32, 32, 64) -> (-1, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     inputs = tf.reduce_mean(
@@ -81,11 +81,21 @@ def cnn_model_fn(features, labels, mode, params):
         axis=[1, 2]
     )
 
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    dense layer
+    (-1, 64) -> (-1, 128)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
     inputs = tf.layers.dense(
         inputs=inputs,
         units=128,
         activation=tf.nn.relu
     )
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    logits layer
+    (-1, 128) -> (-1, 10)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     logits = tf.layers.dense(
         inputs=inputs,
