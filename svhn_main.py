@@ -152,7 +152,7 @@ def main(unused_argv):
 
             image = features + attention_maps
 
-            cv2.imwrite("image_{}.png".format(i), image * 255.)
+            cv2.imwrite("output/image_{}.png".format(i), image * 255.)
 
 
 if __name__ == "__main__":
