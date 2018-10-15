@@ -59,7 +59,7 @@ def main(unused_argv):
             hyper_params=AttrDict(
                 training_attention=True,
                 weight_decay=0.0,
-                attention_decay=0.05
+                attention_decay=0.1
             )
         ),
         model_dir=args.model_dir,
@@ -139,7 +139,7 @@ def main(unused_argv):
                 input_min=attention_maps.min(),
                 input_max=attention_maps.max(),
                 output_min=0.,
-                output_max=1.
+                output_max=255.
             )
             attention_maps = np.expand_dims(attention_maps, axis=2)
             attention_maps = np.pad(
@@ -148,10 +148,8 @@ def main(unused_argv):
                 mode="constant",
                 constant_values=0
             )
-            #attention_maps = cv2.resize(attention_maps, dsize=(64, 64))
-            #image = unprocessed + attention_maps
 
-            cv2.imwrite("output/image_{}.png".format(i), attention_maps * 255.)
+            cv2.imwrite("output/attention_map_{}.png".format(i), attention_maps)
 
 
 if __name__ == "__main__":
