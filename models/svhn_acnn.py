@@ -4,11 +4,11 @@ import numpy as np
 
 class Model(object):
 
-    def __init__(self, attention_network, convolutional_network,
+    def __init__(self, convolutional_network, attention_network,
                  num_classes, num_digits, data_format, hyper_params):
 
-        self.attention_network = attention_network
         self.convolutional_network = convolutional_network
+        self.attention_network = attention_network
         self.num_classes = num_classes
         self.num_digits = num_digits
         self.data_format = data_format

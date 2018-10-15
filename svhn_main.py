@@ -57,7 +57,7 @@ def main(unused_argv):
             num_digits=4,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_map_decay=1e-5,
+                attention_map_decay=1e-3,
                 total_variation_decay=1e-6
             )
         ),
