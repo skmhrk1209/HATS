@@ -80,11 +80,6 @@ class Model(object):
             ) for i in range(self.num_digits)
         ], axis=1)
 
-        print("num params: {}".format(np.sum([
-            np.prod(variable.get_shape().as_list())
-            for variable in tf.global_variables()
-        ])))
-
         softmax = tf.nn.softmax(multi_logits, dim=-1, name="softmax")
         classes = tf.argmax(multi_logits, axis=-1, name="classes")
 
@@ -103,22 +98,23 @@ class Model(object):
                 )
             )
 
-        loss = tf.reduce_mean([
+        cross_entropy_loss = tf.reduce_mean([
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
                 logits=multi_logits[:, i, :]
             ) for i in range(self.num_digits)
         ])
 
-        loss += tf.add_n([
-            tf.nn.l2_loss(variable) for variable in tf.trainable_variables()
-            if "batch_normalization" not in variable.name
-        ]) * self.hyper_params.weight_decay
+        attention_map_loss = tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), [1, 2, 3]))
+        total_variation_loss = tf.reduce_mean(tf.image.total_variation(attention_maps))
 
-        loss += tf.reduce_mean(
-            tf.abs(attention_maps)
-        ) * self.hyper_params.attention_decay
+        loss = cross_entropy_loss + \
+            attention_map_loss * self.hyper_params.attention_map_decay + \
+            total_variation_loss * self.hyper_params.total_variation_decay \
 
+        tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
+        tf.summary.scalar("attention_map_loss", attention_map_loss)
+        tf.summary.scalar("total_variation_loss", total_variation_loss)
         tf.summary.scalar("loss", loss)
 
         accuracy = tf.metrics.accuracy(
