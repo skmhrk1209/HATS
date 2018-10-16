@@ -105,7 +105,7 @@ class Model(object):
             ) for i in range(self.num_digits)
         ])
 
-        attention_map_loss = tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), [1, 2, 3]))
+        attention_map_loss = tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3]))
         total_variation_loss = tf.reduce_mean(tf.image.total_variation(attention_maps))
 
         loss = cross_entropy_loss + \
