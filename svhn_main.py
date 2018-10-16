@@ -2,7 +2,8 @@ import tensorflow as tf
 import numpy as np
 import argparse
 import itertools
-import cv2
+import seaborn
+import matplotlib.pyplot as plt
 from utils.attr_dict import AttrDict
 from data.svhn import Dataset
 from models.svhn_acnn import Model
@@ -15,11 +16,11 @@ parser.add_argument('--filenames', type=str, nargs="+", default=["train.tfrecord
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=30000, help="buffer size to shuffle dataset")
-parser.add_argument('--data_format', type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
-parser.add_argument('--train', action="store_true", help="with training")
-parser.add_argument('--eval', action="store_true", help="with evaluation")
-parser.add_argument('--predict', action="store_true", help="with prediction")
-parser.add_argument('--gpu', type=str, default="0", help="gpu id")
+parser.add_argument("--data_format", type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
+parser.add_argument("--train", action="store_true", help="with training")
+parser.add_argument("--eval", action="store_true", help="with evaluation")
+parser.add_argument("--predict", action="store_true", help="with prediction")
+parser.add_argument("--gpu", type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
@@ -121,9 +122,10 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            reduced_attention_maps = predict_result["reduced_attention_maps"]
+            reduced_attention_map = predict_result["reduced_attention_maps"]
+            seaborn.heatmap(reduced_attention_map)
 
-            cv2.imwrite("output/reduced_attention_map_{}.png".format(i), reduced_attention_maps)
+            plt.savefig("output/reduced_attention_map_{}.png".format(i))
 
 
 if __name__ == "__main__":
