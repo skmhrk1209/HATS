@@ -52,6 +52,7 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 bottleneck_units=16,
+                sequence_length=4,
                 data_format=args.data_format
             ),
             num_classes=11,
