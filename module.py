@@ -19,7 +19,7 @@ with tf.Session() as sess:
     )
 
     tf.train.write_graph(
-        graph_or_graph_def=session.graph.as_graph_def(),
+        graph_or_graph_def=sess.graph.as_graph_def(),
         logdir="resnet_v2_50",
         name="graph.pb",
         as_text=False
