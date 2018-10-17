@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-class AttentionNetwork(object):
+class RecurrentAttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params, bottleneck_units, sequence_length, data_format):
 
