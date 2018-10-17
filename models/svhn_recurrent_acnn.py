@@ -112,7 +112,10 @@ class Model(object):
             for attention_maps in attention_maps_sequence
         ])
 
-        total_variation_loss = tf.reduce_mean(tf.image.total_variation(attention_maps))
+        total_variation_loss = tf.reduce_sum([
+            tf.reduce_mean(tf.image.total_variation(attention_maps))
+            for attention_maps in attention_maps_sequence
+        ])
 
         loss = cross_entropy_loss + \
             attention_map_loss * self.hyper_params.attention_map_decay + \
