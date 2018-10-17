@@ -123,7 +123,7 @@ def main(unused_argv):
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
             reduced_attention_map = predict_result["reduced_attention_maps"]
-            seaborn.heatmap(reduced_attention_map)
+            seaborn.heatmap(reduced_attention_map.reshape([32, 32]))
 
             plt.savefig("output/reduced_attention_map_{}.png".format(i))
 
