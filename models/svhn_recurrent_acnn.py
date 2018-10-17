@@ -84,7 +84,7 @@ class Model(object):
 
         softmax = tf.nn.softmax(multi_logits, dim=-1, name="softmax")
         classes = tf.argmax(multi_logits, axis=-1, name="classes")
-
+        '''
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             return tf.estimator.EstimatorSpec(
@@ -99,7 +99,7 @@ class Model(object):
                     classes=classes
                 )
             )
-
+        '''
         cross_entropy_loss = tf.reduce_mean([
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels[:, i],
