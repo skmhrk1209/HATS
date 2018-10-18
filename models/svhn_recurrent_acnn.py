@@ -84,6 +84,8 @@ class Model(object):
 
         labels_sequence = tf.unstack(labels, axis=1)
 
+        print(labels_sequence[0].dtype)
+
         classes_sequence = [tf.argmax(
             input=logits,
             axis=-1,
