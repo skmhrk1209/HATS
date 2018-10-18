@@ -32,7 +32,7 @@ class Model(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        reduced_attention_maps_sequence = [tf.reduce_sum(
+        merged_attention_maps_sequence = [tf.reduce_sum(
             input_tensor=attention_maps,
             axis=1 if self.data_format == "channels_first" else 3,
             keep_dims=True
@@ -115,7 +115,7 @@ class Model(object):
 
         total_accuracy = (
             tf.reduce_mean([accuracy[0] for accuracy in accuracy_sequence]),
-            tf.group([accuracy[1] for accuracy in accuracy_sequence])
+            tf.group(*[accuracy[1] for accuracy in accuracy_sequence])
         )
 
         # ==========================================================================================
@@ -126,10 +126,10 @@ class Model(object):
         )
 
         [tf.summary.image(
-            name="reduced_attention_maps_sequence_{}".format(i),
-            tensor=reduced_attention_maps,
+            name="merged_attention_maps_sequence_{}".format(i),
+            tensor=merged_attention_maps,
             max_outputs=8
-        ) for i, reduced_attention_maps in enumerate(reduced_attention_maps_sequence)]
+        ) for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
 
         [tf.summary.scalar("cross_entropy_loss_sequence_{}".format(i), total_cross_entropy_loss)
          for i, total_cross_entropy_loss in enumerate(cross_entropy_loss_sequence)]
