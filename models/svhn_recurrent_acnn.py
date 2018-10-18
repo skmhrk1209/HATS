@@ -15,12 +15,6 @@ class Model(object):
         self.hyper_params = hyper_params
 
     def __call__(self, features, labels, mode):
-        ''' model function for ACNN
-
-            features:   batch of features from input_fn
-            labels:     batch of labels from input_fn
-            mode:       enum { TRAIN, EVAL, PREDICT }
-        '''
 
         feature_maps = self.convolutional_network(
             inputs=features,
@@ -66,11 +60,9 @@ class Model(object):
                 distribution="normal",
             ),
             bias_initializer=tf.zeros_initializer(),
-            name="multi_logits",
+            name="logits",
             reuse=tf.AUTO_REUSE
         ) for feature_vectors in feature_vectors_sequence]
-
-        labels_sequence = tf.unstack(labels, axis=1)
 
         classes_sequence = [tf.argmax(
             input=logits,
@@ -78,25 +70,27 @@ class Model(object):
             name="classes"
         ) for logits in logits_sequence]
 
+        labels_sequence = tf.unstack(labels, axis=1)
+
         cross_entropy_loss_sequence = [tf.losses.sparse_softmax_cross_entropy(
             labels=labels,
             logits=logits
         ) for labels, logits in zip(labels_sequence, logits_sequence)]
 
-        total_cross_entropy_loss = tf.reduce_mean(cross_entropy_loss_sequence)
+        cross_entropy_loss = tf.reduce_mean(cross_entropy_loss_sequence)
 
         attention_map_loss_sequence = [tf.reduce_mean(tf.reduce_sum(
             input_tensor=tf.abs(attention_maps),
             axis=[1, 2, 3]
         )) for attention_maps in attention_maps_sequence]
 
-        total_attention_map_loss = tf.reduce_mean(attention_map_loss_sequence)
+        attention_map_loss = tf.reduce_mean(attention_map_loss_sequence)
 
         total_variation_loss_sequence = [tf.reduce_mean(
             input_tensor=tf.image.total_variation(attention_maps)
         ) for attention_maps in attention_maps_sequence]
 
-        total_total_variation_loss = tf.reduce_mean(total_variation_loss_sequence)
+        total_variation_loss = tf.reduce_mean(total_variation_loss_sequence)
 
         loss_sequence = [(
             cross_entropy_loss * self.hyper_params.cross_entropy_decay +
@@ -106,14 +100,14 @@ class Model(object):
             cross_entropy_loss_sequence, attention_map_loss_sequence, total_variation_loss_sequence
         )]
 
-        total_loss = tf.reduce_mean(loss_sequence)
+        loss = tf.reduce_mean(loss_sequence)
 
         accuracy_sequence = [tf.metrics.accuracy(
             labels=labels,
             predictions=classes
         ) for labels, classes in zip(labels_sequence, classes_sequence)]
 
-        total_accuracy = tf.reduce_mean([accuracy[0] for accuracy in accuracy_sequence])
+        accuracy = tf.reduce_mean([accuracy[0] for accuracy in accuracy_sequence])
 
         # ==========================================================================================
         tf.summary.image(
@@ -130,41 +124,37 @@ class Model(object):
 
         [tf.summary.scalar("cross_entropy_loss_sequence_{}".format(i), cross_entropy_loss)
          for i, cross_entropy_loss in enumerate(cross_entropy_loss_sequence)]
-        tf.summary.scalar("total_cross_entropy_loss", total_cross_entropy_loss)
+        tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
 
         [tf.summary.scalar("attention_map_loss_sequence_{}".format(i), attention_map_loss)
          for i, attention_map_loss in enumerate(attention_map_loss_sequence)]
-        tf.summary.scalar("total_attention_map_loss", total_attention_map_loss)
+        tf.summary.scalar("attention_map_loss", attention_map_loss)
 
         [tf.summary.scalar("total_variation_loss_sequence_{}".format(i), total_variation_loss)
          for i, total_variation_loss in enumerate(total_variation_loss_sequence)]
-        tf.summary.scalar("total_total_variation_loss", total_total_variation_loss)
+        tf.summary.scalar("total_variation_loss", total_variation_loss)
 
         [tf.summary.scalar("loss_sequence_{}".format(i), loss)
          for i, loss in enumerate(loss_sequence)]
-        tf.summary.scalar("total_loss", total_loss)
+        tf.summary.scalar("loss", loss)
 
         [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[1])
          for i, accuracy in enumerate(accuracy_sequence)]
-        tf.summary.scalar("total_accuracy", total_accuracy)
+        tf.summary.scalar("accuracy", accuracy)
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                global_step = tf.train.get_or_create_global_step()
-
-                optimizer = tf.train.AdamOptimizer()
-
-                train_op = optimizer.minimize(
-                    loss=total_loss,
-                    global_step=global_step
+                train_op = tf.train.AdamOptimizer().minimize(
+                    loss=loss,
+                    global_step=tf.train.get_global_step()
                 )
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
-                loss=total_loss,
+                loss=loss,
                 train_op=train_op
             )
 
@@ -172,6 +162,6 @@ class Model(object):
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
-                loss=total_loss,
-                eval_metric_ops={"total_accuracy": total_accuracy}
+                loss=loss,
+                eval_metric_ops={"accuracy": accuracy}
             )
