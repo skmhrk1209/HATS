@@ -1,4 +1,5 @@
 import json
+import time
 import requests
 import subprocess
 
@@ -20,4 +21,10 @@ def post_slack(url, text):
 
 if __name__ == "__main__":
 
-    post_slack(url, "".join([line.decode("utf-8") + "\n" for line in read_lines("nvidia-smi")]))
+    start = time.time()
+
+    while True:
+
+        time.sleep(1800)
+
+        post_slack(url, "".join([line.decode("utf-8") + "\n" for line in read_lines("nvidia-smi")]))

@@ -118,9 +118,6 @@ class Model(object):
             tf.group(*[accuracy[1] for accuracy in accuracy_sequence])
         )
 
-        print(total_accuracy[0])
-        print(total_accuracy[1])
-
         # ==========================================================================================
         tf.summary.image(
             name="features",
