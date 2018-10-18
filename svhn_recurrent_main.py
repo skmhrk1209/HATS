@@ -84,13 +84,7 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
                 image_size=[64, 64]
-            ).get_next(),
-            hooks=[
-                tf.train.LoggingTensorHook(
-                    tensors={"softmax": "softmax"},
-                    every_n_iter=100
-                )
-            ]
+            ).get_next()
         )
 
     if args.eval:
