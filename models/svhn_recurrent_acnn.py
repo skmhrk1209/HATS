@@ -118,6 +118,9 @@ class Model(object):
             tf.group(*[accuracy[1] for accuracy in accuracy_sequence])
         )
 
+        print(total_accuracy[0])
+        print(total_accuracy[1])
+
         # ==========================================================================================
         tf.summary.image(
             name="features",
@@ -147,9 +150,9 @@ class Model(object):
          for i, total_loss in enumerate(loss_sequence)]
         tf.summary.scalar("total_loss", total_loss)
 
-        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[0])
+        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[1])
          for i, accuracy in enumerate(accuracy_sequence)]
-        tf.summary.scalar("total_accuracy", total_accuracy[0])
+        tf.summary.scalar("total_accuracy", total_accuracy[1])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
