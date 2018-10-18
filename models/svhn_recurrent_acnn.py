@@ -84,8 +84,6 @@ class Model(object):
 
         labels_sequence = tf.unstack(labels, axis=1)
 
-        print(labels_sequence[0].dtype)
-
         classes_sequence = [tf.argmax(
             input=logits,
             axis=-1,
@@ -95,7 +93,7 @@ class Model(object):
         cross_entropy_loss_sequence = [tf.losses.sparse_softmax_cross_entropy(
             labels=labels,
             logits=logits
-        ) for labels, logits in zip(labels_sequence, labels_sequence)]
+        ) for labels, logits in zip(labels_sequence, logits_sequence)]
 
         cross_entropy_loss = tf.reduce_mean(cross_entropy_loss_sequence)
 
