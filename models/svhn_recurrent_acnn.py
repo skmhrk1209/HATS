@@ -99,10 +99,10 @@ class Model(object):
         total_total_variation_loss = tf.reduce_mean(total_variation_loss_sequence)
 
         loss_sequence = [(
-            total_cross_entropy_loss * self.hyper_params.cross_entropy_decay +
-            total_attention_map_loss * self.hyper_params.attention_map_decay +
-            total_total_variation_loss * self.hyper_params.total_variation_decay
-        ) for total_cross_entropy_loss, total_attention_map_loss, total_total_variation_loss in zip(
+            cross_entropy_loss * self.hyper_params.cross_entropy_decay +
+            attention_map_loss * self.hyper_params.attention_map_decay +
+            total_variation_loss * self.hyper_params.total_variation_decay
+        ) for cross_entropy_loss, attention_map_loss, total_variation_loss in zip(
             cross_entropy_loss_sequence, attention_map_loss_sequence, total_variation_loss_sequence
         )]
 
@@ -131,20 +131,20 @@ class Model(object):
             max_outputs=8
         ) for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
 
-        [tf.summary.scalar("cross_entropy_loss_sequence_{}".format(i), total_cross_entropy_loss)
-         for i, total_cross_entropy_loss in enumerate(cross_entropy_loss_sequence)]
+        [tf.summary.scalar("cross_entropy_loss_sequence_{}".format(i), cross_entropy_loss)
+         for i, cross_entropy_loss in enumerate(cross_entropy_loss_sequence)]
         tf.summary.scalar("total_cross_entropy_loss", total_cross_entropy_loss)
 
-        [tf.summary.scalar("attention_map_loss_sequence_{}".format(i), total_attention_map_loss)
-         for i, total_attention_map_loss in enumerate(attention_map_loss_sequence)]
+        [tf.summary.scalar("attention_map_loss_sequence_{}".format(i), attention_map_loss)
+         for i, attention_map_loss in enumerate(attention_map_loss_sequence)]
         tf.summary.scalar("total_attention_map_loss", total_attention_map_loss)
 
-        [tf.summary.scalar("total_variation_loss_sequence_{}".format(i), total_total_variation_loss)
-         for i, total_total_variation_loss in enumerate(total_variation_loss_sequence)]
+        [tf.summary.scalar("total_variation_loss_sequence_{}".format(i), total_variation_loss)
+         for i, total_variation_loss in enumerate(total_variation_loss_sequence)]
         tf.summary.scalar("total_total_variation_loss", total_total_variation_loss)
 
-        [tf.summary.scalar("loss_sequence_{}".format(i), total_loss)
-         for i, total_loss in enumerate(loss_sequence)]
+        [tf.summary.scalar("loss_sequence_{}".format(i), loss)
+         for i, loss in enumerate(loss_sequence)]
         tf.summary.scalar("total_loss", total_loss)
 
         [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[1])
