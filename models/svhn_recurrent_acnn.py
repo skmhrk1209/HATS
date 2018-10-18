@@ -147,9 +147,9 @@ class Model(object):
          for i, loss in enumerate(loss_sequence)]
         tf.summary.scalar("total_loss", total_loss)
 
-        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[1])
+        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[0])
          for i, accuracy in enumerate(accuracy_sequence)]
-        tf.summary.scalar("total_accuracy", total_accuracy[1])
+        tf.summary.scalar("total_accuracy", total_accuracy[0])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
