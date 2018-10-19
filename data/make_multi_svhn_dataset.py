@@ -18,7 +18,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
         labels = [[int(digit) for digit in label] for label in os.path.splitext(os.path.basename(file))[0].split("-")[1:]]
         labels = [np.pad(label, [[0, digits_length - len(label)]], "constant", constant_values=10) for label in labels]
-        labels = np.pad(labels, [[0, sequence_length - len(labels)], [0, 0]], "constant", constant_values=10)
+        labels = np.pad(labels, [[0, sequence_length - len(labels)], [0, 0]], "constant", constant_values=10).astype(np.int32)
         labels = [digit for label in labels for digit in label]
 
         writer.write(
