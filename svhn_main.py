@@ -121,12 +121,11 @@ def main(unused_argv):
         )
 
         fig, ax = plt.subplots(2, 4)
-        images = []
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            images.append(ax[0, i].imshow(predict_result["features"]))
-            images.append(ax[1, i].imshow(predict_result["features"]))
+            ax[0, i].imshow(predict_result["features"])
+            ax[1, i].imshow(predict_result["reduced_attention_maps"])
 
         plt.show()
 
