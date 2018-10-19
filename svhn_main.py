@@ -125,6 +125,7 @@ def main(unused_argv):
             reduced_attention_map = predict_result["reduced_attention_maps"]
             seaborn.heatmap(reduced_attention_map.reshape([32, 32]))
 
+            plt.figure()
             plt.savefig("output/reduced_attention_map_{}.png".format(i))
 
 

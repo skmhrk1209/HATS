@@ -2,5 +2,5 @@
 __pycache__/
 .vscode/
 .DS_Store
-svhn_acnn_model_1/
-svhn_acnn_model_2/
+svhn/
+svhn_acnn_model/
