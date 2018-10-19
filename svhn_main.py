@@ -2,9 +2,7 @@ import tensorflow as tf
 import numpy as np
 import argparse
 import itertools
-import seaborn
-import matplotlib.pyplot as plt
-from matplotlib import colors
+import cv2
 from utils.attr_dict import AttrDict
 from data.svhn import Dataset
 from models.svhn_acnn import Model
@@ -120,40 +118,15 @@ def main(unused_argv):
                 image_size=[64, 64]
             ).get_next()
         )
-
-        fig, axs = plt.subplots(2, 4)
-        fig.suptitle('Multiple images')
-
-        images = []
+       
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
-            images.append(axs[0, i].imshow(predict_result["features"], cmap="cool"))
-            images.append(axs[1, i].imshow(predict_result["reduced_attention_maps"], cmap="cool"))
 
-        # Find the min and max of all colors for use in setting the color scale.
-        vmin = min(image.get_array().min() for image in images)
-        vmax = max(image.get_array().max() for image in images)
-        norm = colors.Normalize(vmin=vmin, vmax=vmax)
-        for im in images:
-            im.set_norm(norm)
+            feature = predict_result["features"]
+            reduced_attention_map = predict_result["reduced_attention_maps"]
+            reduced_attention_map = cv2.resize(reduced_attention_map, feature.shape[:-1])
+            feature[:, :, -1] += reduced_attention_map
 
-        fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1)
-
-
-        # Make images respond to changes in the norm of other images (e.g. via the
-        # "edit axis, curves and images parameters" GUI on Qt), but be careful not to
-        # recurse infinitely!
-        def update(changed_image):
-            for im in images:
-                if (changed_image.get_cmap() != im.get_cmap()
-                        or changed_image.get_clim() != im.get_clim()):
-                    im.set_cmap(changed_image.get_cmap())
-                    im.set_clim(changed_image.get_clim())
-
-
-        for im in images:
-            im.callbacksSM.connect('changed', update)
-
-        plt.show()
+            cv2.imwrite("outputs/image_{}".format(i), feature)
 
 if __name__ == "__main__":
     tf.app.run()
