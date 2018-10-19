@@ -125,7 +125,7 @@ def main(unused_argv):
             reduced_attention_map = predict_result["reduced_attention_maps"]
             reduced_attention_map = cv2.resize(reduced_attention_map, feature.shape[:-1])
             feature[:, :, -1] += reduced_attention_map
-            cv2.imwrite("outputs/image_{}.png".format(i), feature * 255.)
+            cv2.imwrite("outputs/image_{}.png".format(i), reduced_attention_map * 255.)
 
 if __name__ == "__main__":
     tf.app.run()
