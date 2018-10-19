@@ -120,18 +120,15 @@ def main(unused_argv):
             ).get_next()
         )
 
+        fig, ax = plt.subplots(2, 4)
+        images = []
+
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            plt.figure()
+            images.append(axs[0, i].imshow(predict_result["features"]))
+            images.append(axs[1, i].imshow(predict_result["features"]))
 
-            features = predict_result["features"]
-            plt.imshow(features)
-
-            reduced_attention_map = predict_result["reduced_attention_maps"]
-            seaborn.heatmap(reduced_attention_map.reshape([32, 32]))
-
-            plt.savefig("output/reduced_attention_map_{}.png".format(i))
-
+        plt.show()
 
 if __name__ == "__main__":
     tf.app.run()
