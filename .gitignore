@@ -1,6 +1,7 @@
+.DS_Store
+.vscode/
 *.pyc
 __pycache__/
-.vscode/
-.DS_Store
+*.tfrecord
 svhn/
 svhn_acnn_model/
