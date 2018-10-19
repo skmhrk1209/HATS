@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import argparse
 import itertools
-import matplotlib.pyplot as plt
+import cv2
 from utils.attr_dict import AttrDict
 from data.svhn import Dataset
 from models.svhn_acnn import Model
@@ -128,11 +128,11 @@ def main(unused_argv):
             feature = predict_result["features"]
             reduced_attention_map = predict_result["reduced_attention_maps"]
             reduced_attention_map = scale(reduced_attention_map, reduced_attention_map.min(), reduced_attention_map.max(), 0., 1.)
+            reduced_attention_map = cv2.resize(reduced_attention_map, feature.shape[:-1])
+            feature[:, :, -1] += reduced_attention_map
 
-            plt.imshow(feature)
-            plt.imshow(reduced_attention_map)
-
-            plt.show()
+            cv2.imwrite("outputs/feature_{}.png".format(i), feature * 255.)
+            cv2.imwrite("outputs/reduced_attention_map_{}.png".format(i), reduced_attention_map * 255.)
 
 
 if __name__ == "__main__":
