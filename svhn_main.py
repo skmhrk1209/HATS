@@ -118,14 +118,20 @@ def main(unused_argv):
                 image_size=[64, 64]
             ).get_next()
         )
-       
+
+        def scale(input, input_min, input_max, output_min, output_max):
+
+            return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
             feature = predict_result["features"]
             reduced_attention_map = predict_result["reduced_attention_maps"]
+            reduced_attention_map = scale(reduced_attention_map, reduced_attention_map.min(), reduced_attention_map.max(), 0., 1.)
             reduced_attention_map = cv2.resize(reduced_attention_map, feature.shape[:-1])
             feature[:, :, -1] += reduced_attention_map
             cv2.imwrite("outputs/image_{}.png".format(i), reduced_attention_map * 255.)
+
 
 if __name__ == "__main__":
     tf.app.run()
