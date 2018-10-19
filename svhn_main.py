@@ -126,8 +126,8 @@ def main(unused_argv):
 
         images = []
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
-            images.append(axs[i, j].imshow(predict_result["features"], cmap="cool"))
-            images.append(axs[i, j].imshow(predict_result["reduced_attention_maps"], cmap="cool"))
+            images.append(axs[0, i].imshow(predict_result["features"], cmap="cool"))
+            images.append(axs[1, i].imshow(predict_result["reduced_attention_maps"], cmap="cool"))
 
         # Find the min and max of all colors for use in setting the color scale.
         vmin = min(image.get_array().min() for image in images)
