@@ -120,12 +120,37 @@ def main(unused_argv):
             ).get_next()
         )
 
-        fig, ax = plt.subplots(2, 4)
+        fig, axs = plt.subplots(2, 4)
+        fig.suptitle('Multiple images')
 
+        images = []
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
+            images.append(axs[i, j].imshow(predict_result["features"], cmap="cool"))
+            images.append(axs[i, j].imshow(predict_result["reduced_attention_maps"], cmap="cool"))
 
-            ax[0, i].imshow(predict_result["features"])
-            ax[1, i].imshow(predict_result["reduced_attention_maps"])
+        # Find the min and max of all colors for use in setting the color scale.
+        vmin = min(image.get_array().min() for image in images)
+        vmax = max(image.get_array().max() for image in images)
+        norm = colors.Normalize(vmin=vmin, vmax=vmax)
+        for im in images:
+            im.set_norm(norm)
+
+        fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1)
+
+
+        # Make images respond to changes in the norm of other images (e.g. via the
+        # "edit axis, curves and images parameters" GUI on Qt), but be careful not to
+        # recurse infinitely!
+        def update(changed_image):
+            for im in images:
+                if (changed_image.get_cmap() != im.get_cmap()
+                        or changed_image.get_clim() != im.get_clim()):
+                    im.set_cmap(changed_image.get_cmap())
+                    im.set_clim(changed_image.get_clim())
+
+
+        for im in images:
+            im.callbacksSM.connect('changed', update)
 
         plt.show()
 
