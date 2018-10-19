@@ -5,7 +5,7 @@ import itertools
 import seaborn
 import matplotlib.pyplot as plt
 from utils.attr_dict import AttrDict
-from data.svhn import Dataset
+from data.multi_svhn import Dataset
 from models.multi_svhn_acnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.recurrent_attention_network import RecurrentAttentionNetwork
@@ -84,7 +84,9 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[64, 64]
+                image_size=[64, 64],
+                digits_length=4,
+                sequence_length=4
             ).get_next()
         )
 
@@ -97,7 +99,9 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[64, 64]
+                image_size=[64, 64],
+                digits_length=4,
+                sequence_length=4
             ).get_next()
         )
 
@@ -112,7 +116,9 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[64, 64]
+                image_size=[64, 64],
+                digits_length=4,
+                sequence_length=4
             ).get_next()
         )
 

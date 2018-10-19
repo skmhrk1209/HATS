@@ -80,7 +80,6 @@ class Model(object):
             ) for logits in multi_logits
         ] for multi_logits in multi_logits_sequence]
 
-        print(labels.shape)
         multi_labels_sequence = [
             tf.unstack(multi_labels, axis=1)
             for multi_labels in tf.unstack(labels, axis=1)
