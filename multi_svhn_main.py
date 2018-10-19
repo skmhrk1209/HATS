@@ -6,13 +6,13 @@ import seaborn
 import matplotlib.pyplot as plt
 from utils.attr_dict import AttrDict
 from data.svhn import Dataset
-from models.svhn_recurrent_acnn import Model
+from models.multi_svhn_acnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.recurrent_attention_network import RecurrentAttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="svhn_recurrent_acnn_model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--model_dir", type=str, default="multi_svhn_acnn_model", help="model directory")
+parser.add_argument('--filenames', type=str, nargs="+", default=["multi_svhn_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=30000, help="buffer size to shuffle dataset")
