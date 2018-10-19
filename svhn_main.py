@@ -124,7 +124,8 @@ def main(unused_argv):
             feature = predict_result["features"]
             reduced_attention_map = predict_result["reduced_attention_maps"]
             reduced_attention_map = cv2.resize(reduced_attention_map, feature.shape[:-1])
-            feature[:, :, -1] += reduced_attention_map[:, :, 0]
+            print(reduced_attention_map.shape)
+            feature[:, :, -1] += reduced_attention_map
             cv2.imwrite("outputs/image_{}.png".format(i), feature * 255.)
 
 if __name__ == "__main__":
