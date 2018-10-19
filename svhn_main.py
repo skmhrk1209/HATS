@@ -4,6 +4,7 @@ import argparse
 import itertools
 import seaborn
 import matplotlib.pyplot as plt
+from matplotlib import colors
 from utils.attr_dict import AttrDict
 from data.svhn import Dataset
 from models.svhn_acnn import Model
