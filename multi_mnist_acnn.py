@@ -201,10 +201,10 @@ def acnn_model_fn(features, labels, mode, params):
 
     merged_attentions_sequence = [
         tf.reduce_sum(
-            input_tensor=attention_maps,
-            axis=1 if self.data_format == "channels_first" else 3,
+            input_tensor=attentions,
+            axis=3,
             keep_dims=True
-        ) for attention_maps in attention_maps_sequence
+        ) for attentions in attentions_sequence
     ]
 
     [tf.summary.image(
