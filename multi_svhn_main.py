@@ -60,7 +60,7 @@ def main(unused_argv):
             data_format=args.data_format,
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
-                attention_map_decay=1e-3,
+                attention_map_decay=1e-1,
                 total_variation_decay=0e-0
             )
         ),
