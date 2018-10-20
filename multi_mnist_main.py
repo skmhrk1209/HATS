@@ -37,7 +37,7 @@ def main(unused_argv):
             indices = np.random.randint(images.shape[0], size=np.random.random_integers(num_occurrences))
             translations = sorted([[np.random.randint(image_size[0] - 28), np.random.randint(image_size[1] - 28)] for _ in indices])
 
-            multi_image = np.zeros(image_size + images.shape[-1:], np.float32)
+            multi_image = np.zeros(image_size + [images.shape[-1]], np.float32)
 
             for image, translation in zip(images[indices], translations):
 
