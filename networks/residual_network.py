@@ -68,10 +68,6 @@ class ResidualNetwork(object):
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
                 axis=1 if self.data_format == "channels_first" else 3,
-                momentum=0.997,
-                epsilon=1e-5,
-                center=True,
-                scale=True,
                 training=training,
                 fused=True
             )
@@ -113,10 +109,6 @@ class ResidualNetwork(object):
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
                 axis=1 if data_format == "channels_first" else 3,
-                momentum=0.997,
-                epsilon=1e-5,
-                center=True,
-                scale=True,
                 training=training,
                 fused=True
             )
@@ -156,10 +148,6 @@ class ResidualNetwork(object):
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
                 axis=1 if data_format == "channels_first" else 3,
-                momentum=0.997,
-                epsilon=1e-5,
-                center=True,
-                scale=True,
                 training=training,
                 fused=True
             )
