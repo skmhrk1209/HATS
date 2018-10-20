@@ -38,20 +38,16 @@ class RecurrentAttentionNetwork(object):
                         name="conv2d",
                         reuse=tf.AUTO_REUSE
                     ) for inputs in inputs_sequence]
-
+                    '''
                     inputs_sequence = [tf.layers.batch_normalization(
                         inputs=inputs,
                         axis=1 if self.data_format == "channels_first" else 3,
-                        momentum=0.997,
-                        epsilon=1e-5,
-                        center=True,
-                        scale=True,
                         training=training,
                         fused=True,
                         name="batch_normalization",
                         reuse=tf.AUTO_REUSE
                     ) for inputs in inputs_sequence]
-
+                    '''
                     inputs_sequence = [tf.nn.relu(
                         features=inputs
                     ) for inputs in inputs_sequence]
@@ -119,20 +115,16 @@ class RecurrentAttentionNetwork(object):
                         name="deconv2d",
                         reuse=tf.AUTO_REUSE
                     ) for inputs in inputs_sequence]
-
+                    '''
                     inputs_sequence = [tf.layers.batch_normalization(
                         inputs=inputs,
                         axis=1 if self.data_format == "channels_first" else 3,
-                        momentum=0.997,
-                        epsilon=1e-5,
-                        center=True,
-                        scale=True,
                         training=training,
                         fused=True,
                         name="batch_normalization",
                         reuse=tf.AUTO_REUSE
                     ) for inputs in inputs_sequence]
-
+                    '''
                     if i == len(self.deconv_params) - 1:
 
                         inputs_sequence = [tf.nn.sigmoid(
