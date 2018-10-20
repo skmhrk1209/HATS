@@ -17,7 +17,7 @@ class Model(object):
     def __call__(self, features, labels, mode):
 
         feature_maps = self.convolutional_network(
-            inputs=features,
+            inputs=features["images"],
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 

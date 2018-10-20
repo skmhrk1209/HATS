@@ -106,7 +106,7 @@ def main(unused_argv):
 
         imagenet_classifier.train(
             input_fn=tf.estimator.inputs.numpy_input_fn(
-                x=train_images,
+                x={"images": train_images},
                 y=train_labels,
                 batch_size=args.batch_size,
                 num_epochs=args.num_epochs,
@@ -118,7 +118,7 @@ def main(unused_argv):
 
         eval_results = imagenet_classifier.evaluate(
             input_fn=tf.estimator.inputs.numpy_input_fn(
-                x=test_images,
+                x={"images": test_images},
                 y=test_labels
             )
         )
@@ -129,7 +129,7 @@ def main(unused_argv):
 
         predict_results = imagenet_classifier.predict(
             input_fn=tf.estimator.inputs.numpy_input_fn(
-                x=test_images,
+                x={"images": test_images},
                 y=test_labels
             )
         )

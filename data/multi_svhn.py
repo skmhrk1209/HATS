@@ -44,4 +44,4 @@ class Dataset(dataset.Dataset):
         labels = tf.cast(features["labels"], tf.int32)
         labels = tf.reshape(labels, [self.sequence_length, self.digits_length])
 
-        return image, labels
+        return {"images": image}, labels
