@@ -38,13 +38,15 @@ def main(unused_argv):
             translations = sorted([[np.random.randint(image_size[0] - 28), np.random.randint(image_size[1] - 28)] for _ in indices])
 
             multi_image = np.zeros(image_size + [images.shape[-1]], np.float32)
+            multi_label = np.pad(labels[indices], [0, num_occurrences - len(indices)], "constant", constant_values=10)
+            multi_label = np.expand_dims(multi_label, axis=-1)
 
             for image, translation in zip(images[indices], translations):
 
                 multi_image[translation[0]:translation[0]+28, translation[1]:translation[1]+28, :] += image
 
             multi_images.append(multi_image)
-            multi_labels.append(labels[indices])
+            multi_labels.append(multi_label)
 
         return np.array(multi_images), np.array(multi_labels)
 
