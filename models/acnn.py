@@ -144,13 +144,13 @@ class Model(object):
         tf.summary.image(
             name="images",
             tensor=features["images"],
-            max_outputs=8
+            max_outputs=4
         )
 
         [tf.summary.image(
             name="merged_attention_maps_sequence_{}".format(i),
             tensor=merged_attention_maps,
-            max_outputs=8
+            max_outputs=4
         ) for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
 
         [[tf.summary.scalar("multi_cross_entropy_loss_sequence_{}_{}".format(i, j), cross_entropy_loss)
