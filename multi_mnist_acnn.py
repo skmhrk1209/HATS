@@ -87,7 +87,7 @@ def acnn_model_fn(features, labels, mode, params):
             strides=2,
             padding="same",
             activation=tf.nn.relu,
-            name="conv2d_0",
+            name="attention_conv2d_0",
             reuse=tf.AUTO_REUSE
         ) for attentions in attentions_sequence
     ]
@@ -105,7 +105,7 @@ def acnn_model_fn(features, labels, mode, params):
             strides=2,
             padding="same",
             activation=tf.nn.relu,
-            name="conv2d_1",
+            name="attention_conv2d_1",
             reuse=tf.AUTO_REUSE
         ) for attentions in attentions_sequence
     ]
@@ -151,7 +151,7 @@ def acnn_model_fn(features, labels, mode, params):
             inputs=attentions,
             units=functools.reduce(operator.mul, shape[1:]),
             activation=tf.nn.relu,
-            name="dense_0",
+            name="attention_dense",
             reuse=tf.AUTO_REUSE
         ) for attentions in attentions_sequence
     ]
@@ -176,7 +176,7 @@ def acnn_model_fn(features, labels, mode, params):
             strides=2,
             padding="same",
             activation=tf.nn.relu,
-            name="deconv2d_0",
+            name="attention_deconv2d_0",
             reuse=tf.AUTO_REUSE
         ) for attentions in attentions_sequence
     ]
@@ -194,7 +194,7 @@ def acnn_model_fn(features, labels, mode, params):
             strides=2,
             padding="same",
             activation=tf.nn.sigmoid,
-            name="deconv2d_1",
+            name="attention_deconv2d_1",
             reuse=tf.AUTO_REUSE
         ) for attentions in attentions_sequence
     ]
@@ -261,7 +261,7 @@ def acnn_model_fn(features, labels, mode, params):
             inputs=inputs,
             units=1024,
             activation=tf.nn.relu,
-            name="dense_1",
+            name="dense",
             reuse=tf.AUTO_REUSE
         ) for inputs in inputs_sequence
     ]
