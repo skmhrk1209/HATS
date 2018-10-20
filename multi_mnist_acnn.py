@@ -115,7 +115,7 @@ def acnn_model_fn(features, labels, mode, params):
     (-1, 8, 8, 3) -> (-1, 64)
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    shape = attentions.get_shape().as_list()
+    shape = attentions_sequence[0].get_shape().as_list()
 
     attentions_sequence = [
         tf.layers.flatten(attentions)
