@@ -39,22 +39,22 @@ def main(unused_argv):
 
             while len(translations) < len(indices):
 
-                y = np.random.randint(image_size[0] - 28)
-                x = np.random.randint(image_size[1] - 28)
+                yy = np.random.randint(image_size[0] - 28)
+                xx = np.random.randint(image_size[1] - 28)
 
-                for yy, xx in translations:
-                    if yy - 28 < y < yy + 28 and xx - 28 < x < xx + 28:
+                for y, x in translations:
+                    if y - 28 < yy < y + 28 and x - 28 < xx < x + 28:
                         break
                 else:
-                    translations.append([y, x])
+                    translations.append([yy, xx])
 
             multi_image = np.zeros(image_size + [images.shape[-1]], np.float32)
             multi_label = np.pad(labels[indices], [0, num_occurrences - len(indices)], "constant", constant_values=10)
             multi_label = np.expand_dims(multi_label, axis=-1)
 
-            for image, translation in zip(images[indices], sorted(translations)):
+            for image, (y, x) in zip(images[indices], sorted(translations)):
 
-                multi_image[translation[0]:translation[0]+28, translation[1]:translation[1]+28, :] += image
+                multi_image[y: y + 28, x: x + 28, :] += image
 
             multi_images.append(multi_image)
             multi_labels.append(multi_label)
