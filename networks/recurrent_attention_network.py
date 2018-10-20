@@ -22,43 +22,49 @@ class RecurrentAttentionNetwork(object):
 
                 with tf.variable_scope("conv_block_{}".format(i)):
 
-                    inputs_sequence = [tf.layers.conv2d(
-                        inputs=inputs,
-                        filters=conv_param.filters,
-                        kernel_size=conv_param.kernel_size,
-                        strides=conv_param.strides,
-                        padding="same",
-                        data_format=self.data_format,
-                        use_bias=False,
-                        kernel_initializer=tf.variance_scaling_initializer(
-                            scale=2.0,
-                            mode="fan_in",
-                            distribution="normal",
-                        ),
-                        name="conv2d",
-                        reuse=tf.AUTO_REUSE
-                    ) for inputs in inputs_sequence]
-                    '''
-                    inputs_sequence = [tf.layers.batch_normalization(
-                        inputs=inputs,
-                        axis=1 if self.data_format == "channels_first" else 3,
-                        training=training,
-                        fused=True,
-                        name="batch_normalization",
-                        reuse=tf.AUTO_REUSE
-                    ) for inputs in inputs_sequence]
-                    '''
-                    inputs_sequence = [tf.nn.relu(
-                        features=inputs
-                    ) for inputs in inputs_sequence]
+                    inputs_sequence = [
+                        tf.layers.conv2d(
+                            inputs=inputs,
+                            filters=conv_param.filters,
+                            kernel_size=conv_param.kernel_size,
+                            strides=conv_param.strides,
+                            padding="same",
+                            data_format=self.data_format,
+                            use_bias=False,
+                            kernel_initializer=tf.variance_scaling_initializer(
+                                scale=2.0,
+                                mode="fan_in",
+                                distribution="normal",
+                            ),
+                            name="conv2d",
+                            reuse=tf.AUTO_REUSE
+                        ) for inputs in inputs_sequence
+                    ]
+
+                    inputs_sequence = [
+                        tf.layers.batch_normalization(
+                            inputs=inputs,
+                            axis=1 if self.data_format == "channels_first" else 3,
+                            training=training,
+                            fused=True,
+                            name="batch_normalization",
+                            reuse=tf.AUTO_REUSE
+                        ) for inputs in inputs_sequence
+                    ]
+
+                    inputs_sequence = [
+                        tf.nn.relu(inputs)
+                        for inputs in inputs_sequence
+                    ]
 
             shape = inputs_sequence[0].shape.as_list()
 
             with tf.variable_scope("bottleneck_block"):
 
-                inputs_sequence = [tf.layers.flatten(
-                    inputs=inputs
-                ) for inputs in inputs_sequence]
+                inputs_sequence = [
+                    tf.layers.flatten(inputs)
+                    for inputs in inputs_sequence
+                ]
 
                 multi_lstm_cell = tf.nn.rnn_cell.MultiRNNCell([
                     tf.nn.rnn_cell.LSTMCell(
@@ -90,51 +96,59 @@ class RecurrentAttentionNetwork(object):
                     )
                 )
 
-                inputs_sequence = [tf.reshape(
-                    tensor=inputs,
-                    shape=[-1] + shape[1:]
-                ) for inputs in inputs_sequence]
+                inputs_sequence = [
+                    tf.reshape(
+                        tensor=inputs,
+                        shape=[-1] + shape[1:]
+                    ) for inputs in inputs_sequence
+                ]
 
             for i, deconv_param in enumerate(self.deconv_params):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
-                    inputs_sequence = [tf.layers.conv2d_transpose(
-                        inputs=inputs,
-                        filters=deconv_param.filters,
-                        kernel_size=deconv_param.kernel_size,
-                        strides=deconv_param.strides,
-                        padding="same",
-                        data_format=self.data_format,
-                        use_bias=False,
-                        kernel_initializer=tf.variance_scaling_initializer(
-                            scale=2.0,
-                            mode="fan_in",
-                            distribution="normal",
-                        ),
-                        name="deconv2d",
-                        reuse=tf.AUTO_REUSE
-                    ) for inputs in inputs_sequence]
-                    '''
-                    inputs_sequence = [tf.layers.batch_normalization(
-                        inputs=inputs,
-                        axis=1 if self.data_format == "channels_first" else 3,
-                        training=training,
-                        fused=True,
-                        name="batch_normalization",
-                        reuse=tf.AUTO_REUSE
-                    ) for inputs in inputs_sequence]
-                    '''
+                    inputs_sequence = [
+                        tf.layers.conv2d_transpose(
+                            inputs=inputs,
+                            filters=deconv_param.filters,
+                            kernel_size=deconv_param.kernel_size,
+                            strides=deconv_param.strides,
+                            padding="same",
+                            data_format=self.data_format,
+                            use_bias=False,
+                            kernel_initializer=tf.variance_scaling_initializer(
+                                scale=2.0,
+                                mode="fan_in",
+                                distribution="normal",
+                            ),
+                            name="deconv2d",
+                            reuse=tf.AUTO_REUSE
+                        ) for inputs in inputs_sequence
+                    ]
+
+                    inputs_sequence = [
+                        tf.layers.batch_normalization(
+                            inputs=inputs,
+                            axis=1 if self.data_format == "channels_first" else 3,
+                            training=training,
+                            fused=True,
+                            name="batch_normalization",
+                            reuse=tf.AUTO_REUSE
+                        ) for inputs in inputs_sequence
+                    ]
+
                     if i == len(self.deconv_params) - 1:
 
-                        inputs_sequence = [tf.nn.sigmoid(
-                            x=inputs
-                        ) for inputs in inputs_sequence]
+                        inputs_sequence = [
+                            tf.nn.sigmoid(inputs)
+                            for inputs in inputs_sequence
+                        ]
 
                     else:
 
-                        inputs_sequence = [tf.nn.relu(
-                            features=inputs
-                        ) for inputs in inputs_sequence]
+                        inputs_sequence = [
+                            tf.nn.relu(inputs)
+                            for inputs in inputs_sequence
+                        ]
 
             return inputs_sequence
