@@ -88,7 +88,10 @@ class RecurrentAttentionNetwork(object):
                 inputs_sequence, _ = tf.nn.static_rnn(
                     cell=multi_lstm_cell,
                     inputs=inputs_sequence,
-                    dtype=tf.float32
+                    initial_state=multi_lstm_cell.zero_state(
+                        batch_size=tf.shape(inputs)[0],
+                        dtype=tf.float32
+                    )
                 )
 
                 inputs_sequence = [tf.reshape(
