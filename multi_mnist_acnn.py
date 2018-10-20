@@ -375,16 +375,8 @@ def main(unused_argv):
             shuffle=True
         )
 
-        logging_hook = tf.train.LoggingTensorHook(
-            tensors={
-                "probabilities": "probabilities"
-            },
-            every_n_iter=100
-        )
-
         mnist_classifier.train(
-            input_fn=train_input_fn,
-            hooks=[logging_hook]
+            input_fn=train_input_fn
         )
 
 
