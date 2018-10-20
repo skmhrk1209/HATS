@@ -142,8 +142,8 @@ class Model(object):
 
         # ==========================================================================================
         tf.summary.image(
-            name="features",
-            tensor=features,
+            name="images",
+            tensor=features["images"],
             max_outputs=8
         )
 
