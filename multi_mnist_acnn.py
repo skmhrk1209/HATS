@@ -342,7 +342,7 @@ def main(unused_argv):
             multi_images.append(back)
             multi_labels.append(labels[indices])
 
-        return np.array(multi_images). np.array(multi_labels)
+        return np.array(multi_images), np.array(multi_labels)
 
     mnist = tf.contrib.learn.datasets.load_dataset("mnist")
     train_images = mnist.train.images.astype(np.float32).reshape([-1, 28, 28, 1])
