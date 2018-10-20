@@ -31,25 +31,25 @@ def main(unused_argv):
     imagenet_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
+                conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=32, strides=[1, 1], blocks=2),
-                    AttrDict(filters=64, strides=[1, 1], blocks=2),
-                    AttrDict(filters=128, strides=[1, 1], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
+                    AttrDict(filters=32, strides=[2, 2], blocks=1),
+                    AttrDict(filters=64, strides=[2, 2], blocks=1),
+                    AttrDict(filters=128, strides=[1, 1], blocks=1),
+                    AttrDict(filters=256, strides=[1, 1], blocks=1),
                 ],
                 num_classes=None,
                 data_format=args.data_format
             ),
             recurrent_attention_network=RecurrentAttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=2, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=1, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 bottleneck_units=16,
                 sequence_length=4,
@@ -61,7 +61,7 @@ def main(unused_argv):
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
                 attention_map_decay=1e-0,
-                total_variation_decay=1e-6
+                total_variation_decay=1e-4
             )
         ),
         model_dir=args.model_dir,
@@ -84,7 +84,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[64, 64],
+                image_size=[128, 128],
                 digits_length=4,
                 sequence_length=4
             ).get_next()
@@ -99,7 +99,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[64, 64],
+                image_size=[128, 128],
                 digits_length=4,
                 sequence_length=4
             ).get_next()
@@ -116,7 +116,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[64, 64],
+                image_size=[128, 128],
                 digits_length=4,
                 sequence_length=4
             ).get_next()
