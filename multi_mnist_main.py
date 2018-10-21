@@ -102,7 +102,7 @@ def main(unused_argv):
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
                 attention_map_decay=1e-2,
-                total_variation_decay=1e-5 #1e-6
+                total_variation_decay=1e-5  # 1e-6
             )
         ),
         model_dir=args.model_dir,
@@ -133,7 +133,8 @@ def main(unused_argv):
         eval_results = imagenet_classifier.evaluate(
             input_fn=tf.estimator.inputs.numpy_input_fn(
                 x={"images": test_images},
-                y=test_labels
+                y=test_labels,
+                shuffle=False
             )
         )
 
