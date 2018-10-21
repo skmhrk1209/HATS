@@ -165,9 +165,9 @@ class Model(object):
         [[tf.summary.scalar("multi_accuracy_sequence_{}_{}".format(i, j), accuracy[1])
           for j, accuracy in enumerate(accuracy_sequence)]
          for i, accuracy_sequence in enumerate(multi_accuracy_sequence)]
-        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[0])
+        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[1])
          for i, accuracy in enumerate(accuracy_sequence)]
-        tf.summary.scalar("accuracy", accuracy[0])
+        tf.summary.scalar("accuracy", accuracy[1])
 
         [tf.summary.scalar("attention_map_loss_sequence_{}".format(i), attention_map_loss)
          for i, attention_map_loss in enumerate(attention_map_loss_sequence)]
