@@ -134,11 +134,13 @@ class Model(object):
         ] for multi_labels, multi_classes in zip(multi_labels_sequence, multi_classes_sequence)]
 
         accuracy_sequence = [
-            tf.reduce_mean([accuracy[0] for accuracy in multi_accuracy])
+            (tf.reduce_mean([accuracy[0] for accuracy in multi_accuracy]),
+             tf.group(*[accuracy[1] for accuracy in multi_accuracy]))
             for multi_accuracy in multi_accuracy_sequence
         ]
 
-        accuracy = tf.reduce_mean(accuracy_sequence)
+        accuracy = (tf.reduce_mean([accuracy[0] for accuracy in accuracy_sequence]),
+                    tf.group(*[accuracy[1] for accuracy in accuracy_sequence]))
 
         # ==========================================================================================
         tf.summary.image(
@@ -163,9 +165,9 @@ class Model(object):
         [[tf.summary.scalar("multi_accuracy_sequence_{}_{}".format(i, j), accuracy[1])
           for j, accuracy in enumerate(accuracy_sequence)]
          for i, accuracy_sequence in enumerate(multi_accuracy_sequence)]
-        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy)
+        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[0])
          for i, accuracy in enumerate(accuracy_sequence)]
-        tf.summary.scalar("accuracy", accuracy)
+        tf.summary.scalar("accuracy", accuracy[0])
 
         [tf.summary.scalar("attention_map_loss_sequence_{}".format(i), attention_map_loss)
          for i, attention_map_loss in enumerate(attention_map_loss_sequence)]
