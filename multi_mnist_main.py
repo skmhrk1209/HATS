@@ -145,7 +145,8 @@ def main(unused_argv):
         predict_results = imagenet_classifier.predict(
             input_fn=tf.estimator.inputs.numpy_input_fn(
                 x={"images": test_images},
-                y=test_labels
+                y=test_labels,
+                shuffle=False
             )
         )
 
