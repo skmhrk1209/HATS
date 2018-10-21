@@ -27,15 +27,16 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
 
-    def make_multi_mnist(images, labels, image_size, num_occurrences):
+    def make_multi_mnist(images, labels, image_size, min_occurrences, max_occurrences):
 
         multi_images = []
         multi_labels = []
 
         for _ in range(images.shape[0]):
 
-            indices = np.random.randint(images.shape[0], size=np.random.random_integers(num_occurrences))
-            translations = sorted([[np.random.randint(image_size[0] - 28), np.random.randint(image_size[1] - 28)] for _ in indices])
+            num_occurrences = np.random.random_integers(min_occurrences, max_occurrences)
+            indices = np.random.randint(images.shape[0], size=num_occurrences)
+            translations = []
 
             while len(translations) < len(indices):
 
@@ -49,7 +50,7 @@ def main(unused_argv):
                     translations.append([yy, xx])
 
             multi_image = np.zeros(image_size + [images.shape[-1]], np.float32)
-            multi_label = np.pad(labels[indices], [0, num_occurrences - len(indices)], "constant", constant_values=10)
+            multi_label = np.pad(labels[indices], [0, max_occurrences - len(indices)], "constant", constant_values=10)
             multi_label = np.expand_dims(multi_label, axis=-1)
 
             for image, (y, x) in zip(images[indices], sorted(translations)):
@@ -67,8 +68,8 @@ def main(unused_argv):
     test_images = mnist.test.images.astype(np.float32).reshape([-1, 28, 28, 1])
     test_labels = mnist.test.labels.astype(np.int32)
 
-    train_images, train_labels = make_multi_mnist(train_images, train_labels, [128, 128], 4)
-    test_images, test_labels = make_multi_mnist(test_images, test_labels, [128, 128], 4)
+    train_images, train_labels = make_multi_mnist(train_images, train_labels, [128, 128], 1, 4)
+    test_images, test_labels = make_multi_mnist(test_images, test_labels, [128, 128], 1, 4)
 
     imagenet_classifier = tf.estimator.Estimator(
         model_fn=Model(
