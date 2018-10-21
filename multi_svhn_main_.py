@@ -11,7 +11,7 @@ from networks.residual_network import ResidualNetwork
 from networks.hierarchical_recurrent_attention_network import HierarchicalRecurrentAttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_svhn_acnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_svhn_acnn_model_", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_svhn_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
