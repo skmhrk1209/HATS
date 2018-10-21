@@ -65,8 +65,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                         scale=2.0,
                         mode="fan_in",
                         distribution="normal",
-                    ),
-                    name="global_lstm_cell"
+                    )
                 )
 
                 inputs_sequence = tf.nn.static_rnn(
@@ -91,8 +90,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        ),
-                        name="local_lstm_cell"
+                        )
                     ),
                     tf.nn.rnn_cell.LSTMCell(
                         num_units=np.prod(shape[1:]),
@@ -101,8 +99,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        ),
-                        name="projection_lstm_cell"
+                        )
                     )
                 ])
 
