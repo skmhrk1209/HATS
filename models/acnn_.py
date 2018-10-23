@@ -158,9 +158,9 @@ class Model(object):
                     tf.group(*[accuracy[1] for accuracy in accuracy_sequence]))
 
         # ==========================================================================================
-        tf.summary.image("images", features["images"], max_outputs=4)
+        tf.summary.image("images", features["images"], max_outputs=2)
 
-        [[tf.summary.image("merged_attention_maps_sequence_sequence_{}_{}".format(i, j), merged_attention_maps, max_outputs=4)
+        [[tf.summary.image("merged_attention_maps_sequence_sequence_{}_{}".format(i, j), merged_attention_maps, max_outputs=2)
           for j, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
          for i, merged_attention_maps_sequence in enumerate(merged_attention_maps_sequence_sequence)]
 

@@ -143,17 +143,10 @@ class Model(object):
                     tf.group(*[accuracy[1] for accuracy in accuracy_sequence]))
 
         # ==========================================================================================
-        tf.summary.image(
-            name="images",
-            tensor=features["images"],
-            max_outputs=4
-        )
+        tf.summary.image("images", features["images"], max_outputs=4)
 
-        [tf.summary.image(
-            name="merged_attention_maps_sequence_{}".format(i),
-            tensor=merged_attention_maps,
-            max_outputs=4
-        ) for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
+        [tf.summary.image("merged_attention_maps_sequence_{}".format(i), merged_attention_maps, max_outputs=4)
+         for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
 
         [[tf.summary.scalar("multi_cross_entropy_loss_sequence_{}_{}".format(i, j), cross_entropy_loss)
           for j, cross_entropy_loss in enumerate(cross_entropy_loss_sequence)]
