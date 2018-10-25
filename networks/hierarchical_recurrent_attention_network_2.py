@@ -66,7 +66,8 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        )
+                        ),
+                        name="global_lstm_cell_0"
                     ),
                     tf.nn.rnn_cell.LSTMCell(
                         num_units=np.prod(shape[1:]),
@@ -75,7 +76,8 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        )
+                        ),
+                        name="global_lstm_cell_1"
                     )
                 ])
 
@@ -101,7 +103,8 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        )
+                        ),
+                        name="local_lstm_cell_0"
                     ),
                     tf.nn.rnn_cell.LSTMCell(
                         num_units=np.prod(shape[1:]),
@@ -110,7 +113,8 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        )
+                        ),
+                        name="local_lstm_cell_1"
                     )
                 ])
 
