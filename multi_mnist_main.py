@@ -2,8 +2,7 @@ import tensorflow as tf
 import numpy as np
 import argparse
 import itertools
-import seaborn
-import matplotlib.pyplot as plt
+import cv2
 from utils.attr_dict import AttrDict
 from models.acnn_1 import Model
 from networks.residual_network import ResidualNetwork
@@ -152,10 +151,16 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            reduced_attention_map = predict_result["reduced_attention_maps"]
-            seaborn.heatmap(reduced_attention_map.reshape([32, 32]))
+            for j in range(4):
 
-            plt.savefig("output/reduced_attention_map_{}.png".format(i))
+                merged_attention_map = predict_result["merged_attention_maps_{}_{}.png".format(i, j)]
+                merged_attention_map = cv2.resize(merged_attention_map, [128, 128])
+
+                image = predict_result["images"]
+                image[0:, :, :] += merged_attention_map
+
+                cv2.imwrite("output/mimage_{}_{}.png".format(i, j), image * 255.0)
+                cv2.imwrite("output/merged_attention_map_{}_{}.png".format(i, j), merged_attention_map * 255.0)
 
 
 if __name__ == "__main__":

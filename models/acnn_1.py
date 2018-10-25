@@ -197,3 +197,15 @@ class Model(object):
                 loss=loss,
                 eval_metric_ops={"accuracy": accuracy}
             )
+
+        if mode == tf.estimator.ModeKeys.PREDICT:
+
+            features.update({
+                "merged_attention_maps_{}".format(i): merged_attention_maps
+                for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)
+            })
+
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                predictions=features
+            )
