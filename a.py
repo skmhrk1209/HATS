@@ -6,7 +6,7 @@ c1 = tf.nn.rnn_cell.LSTMCell(10)
 c2 = tf.nn.rnn_cell.LSTMCell(10)
 
 y1 = tf.nn.static_rnn(c1, [x1], dtype=tf.float32, scope="a")
-y2 = tf.nn.static_rnn(c2, [x2], dtype=tf.float32, scope="b")
+y2 = tf.nn.static_rnn(c1, [x2], dtype=tf.float32, scope="b")
 
 with tf.Session() as sess:
 
