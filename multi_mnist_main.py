@@ -5,7 +5,7 @@ import itertools
 import seaborn
 import matplotlib.pyplot as plt
 from utils.attr_dict import AttrDict
-from models.acnn import Model
+from models.acnn_1 import Model
 from networks.residual_network import ResidualNetwork
 from networks.recurrent_attention_network import RecurrentAttentionNetwork
 

@@ -6,12 +6,12 @@ import seaborn
 import matplotlib.pyplot as plt
 from utils.attr_dict import AttrDict
 from data.multi_svhn import Dataset
-from models.acnn_ import Model
+from models.acnn_2 import Model
 from networks.residual_network import ResidualNetwork
-from networks.hierarchical_recurrent_attention_network import HierarchicalRecurrentAttentionNetwork
+from networks.hierarchical_recurrent_attention_network_1 import HierarchicalRecurrentAttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_svhn_acnn_model_", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_svhn_acnn_model_2", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_svhn_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
