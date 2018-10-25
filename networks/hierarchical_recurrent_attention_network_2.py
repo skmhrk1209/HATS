@@ -66,8 +66,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        ),
-                        name="global_lstm_cell_0"
+                        )
                     ),
                     tf.nn.rnn_cell.LSTMCell(
                         num_units=np.prod(shape[1:]),
@@ -76,8 +75,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        ),
-                        name="global_lstm_cell_1"
+                        )
                     )
                 ])
 
@@ -87,7 +85,8 @@ class HierarchicalRecurrentAttentionNetwork(object):
                     initial_state=multi_lstm_cell.zero_state(
                         batch_size=tf.shape(inputs)[0],
                         dtype=tf.float32
-                    )
+                    ),
+                    scope="global_rnn"
                 )[0]
 
                 inputs_sequence_sequence = [
@@ -103,8 +102,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        ),
-                        name="local_lstm_cell_0"
+                        )
                     ),
                     tf.nn.rnn_cell.LSTMCell(
                         num_units=np.prod(shape[1:]),
@@ -113,8 +111,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                             scale=2.0,
                             mode="fan_in",
                             distribution="normal",
-                        ),
-                        name="local_lstm_cell_1"
+                        )
                     )
                 ])
 
@@ -125,7 +122,8 @@ class HierarchicalRecurrentAttentionNetwork(object):
                         initial_state=multi_lstm_cell.zero_state(
                             batch_size=tf.shape(inputs)[0],
                             dtype=tf.float32
-                        )
+                        ),
+                        scope="local_rnn"
                     )[0] for inputs_sequence in inputs_sequence_sequence
                 ]
 
