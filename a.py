@@ -2,10 +2,11 @@ import tensorflow as tf
 
 x1 = tf.zeros([10, 10])
 x2 = tf.zeros([10, 10])
-c = tf.nn.rnn_cell.LSTMCell(10)
+c1 = tf.nn.rnn_cell.LSTMCell(10)
+c2 = tf.nn.rnn_cell.LSTMCell(10)
 
-y1 = tf.nn.static_rnn(c, [x1], dtype=tf.float32)
-y2 = tf.nn.static_rnn(c, [x2], dtype=tf.float32)
+y1 = tf.nn.static_rnn(c1, [x1], dtype=tf.float32)
+y2 = tf.nn.static_rnn(c2, [x2], dtype=tf.float32)
 
 with tf.Session() as sess:
 
