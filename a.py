@@ -10,4 +10,6 @@ with tf.Session() as sess:
 
     sess.run(tf.global_variables_initializer())
 
+    print(tf.trainable_variables())
+
     sess.run([y1, y2])
