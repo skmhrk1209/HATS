@@ -90,16 +90,13 @@ class Model(object):
         ])
 
         attention_map_loss = tf.reduce_mean([
-            tf.reduce_mean(tf.reduce_sum(
-                input_tensor=tf.abs(attention_maps),
-                axis=[1, 2, 3]
-            )) for attention_maps in attention_maps_sequence
+            tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3]))
+            for attention_maps in attention_maps_sequence
         ])
 
         total_variation_loss = tf.reduce_mean([
-            tf.reduce_mean(
-                input_tensor=tf.image.total_variation(attention_maps)
-            ) for attention_maps in attention_maps_sequence
+            tf.reduce_mean(tf.image.total_variation(attention_maps))
+            for attention_maps in attention_maps_sequence
         ])
 
         loss = \
