@@ -76,7 +76,7 @@ class Model(object):
             features.update({
                 "merged_attention_maps_{}_{}".format(i, j): merged_attention_maps
                 for i, merged_attention_maps_sequence in enumerate(merged_attention_maps_sequence_sequence)
-                for j, merged_attention_maps in merged_attention_maps_sequence
+                for j, merged_attention_maps in enumerate(merged_attention_maps_sequence)
             })
 
             return tf.estimator.EstimatorSpec(
