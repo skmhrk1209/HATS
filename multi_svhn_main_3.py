@@ -2,8 +2,7 @@ import tensorflow as tf
 import numpy as np
 import argparse
 import itertools
-import seaborn
-import matplotlib.pyplot as plt
+import cv2
 from utils.attr_dict import AttrDict
 from data.multi_svhn import Dataset
 from models.acnn_2 import Model
@@ -125,10 +124,23 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            reduced_attention_map = predict_result["reduced_attention_maps"]
-            seaborn.heatmap(reduced_attention_map.reshape([32, 32]))
+            for j in range(4):
 
-            plt.savefig("output/reduced_attention_map_{}.png".format(i))
+                for k in range(4):
+
+                    def scale(input, input_min, input_max, output_min, output_max):
+                        return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+                    merged_attention_map = predict_result["merged_attention_maps_{}_{}".format(j, k)]
+                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
+                    merged_attention_map = cv2.resize(merged_attention_map, (128, 128))
+
+                    image = np.array(predict_result["images"])
+                    image[:, :, 0] += merged_attention_map
+
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                    cv2.imwrite("outputs_3/image_{}_{}_{}.png".format(i, j, k), image * 255.0)
+                    cv2.imwrite("outputs_3/merged_attention_map_{}_{}_{}.png".format(i, j, k), merged_attention_map * 255.0)
 
 
 if __name__ == "__main__":
