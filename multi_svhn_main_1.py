@@ -132,8 +132,8 @@ def main(unused_argv):
                 image[:, :, 0] += merged_attention_map
 
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                cv2.imwrite("outputs_1/image_{}_{}".format(i, j), image)
-                cv2.imwrite("outputs_1/merged_attention_map_{}_{}".format(i, j), merged_attention_map)
+                cv2.imwrite("outputs_1/image_{}_{}.png".format(i, j), image * 255.0)
+                cv2.imwrite("outputs_1/merged_attention_map_{}_{}.png".format(i, j), merged_attention_map * 255.0)
 
 
 if __name__ == "__main__":
