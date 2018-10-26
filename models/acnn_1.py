@@ -122,11 +122,8 @@ class Model(object):
         ] for multi_logits in multi_logits_sequence]
 
         accuracy = tf.metrics.accuracy(
-            labels=labels,
-            predictions=tf.concat([
-                tf.stack(multi_classes, axis=1)
-                for multi_classes in multi_classes_sequence
-            ], axis=1)
+            labels=multi_labels_sequence,
+            predictions=multi_classes_sequence
         )
 
         # ==========================================================================================
