@@ -5,12 +5,12 @@ import itertools
 import cv2
 from utils.attr_dict import AttrDict
 from data.multi_svhn import Dataset
-from models.acnn_1 import Model
+from models.acnn import Model
 from networks.residual_network import ResidualNetwork
-from networks.recurrent_attention_network import RecurrentAttentionNetwork
+from networks.hierarchical_recurrent_attention_network import HierarchicalRecurrentAttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_svhn_acnn_model_1", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_svhn_acnn_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_svhn_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -30,7 +30,7 @@ def main(unused_argv):
     imagenet_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[1, 1]),
+                conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=32, strides=[2, 2], blocks=2),
@@ -41,7 +41,7 @@ def main(unused_argv):
                 num_classes=None,
                 data_format=args.data_format
             ),
-            recurrent_attention_network=RecurrentAttentionNetwork(
+            attention_network=HierarchicalRecurrentAttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
@@ -50,17 +50,18 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
-                bottleneck_units=16,
+                global_bottleneck_units=16,
+                local_bottleneck_units=16,
                 sequence_length=4,
+                digits_length=4,
                 data_format=args.data_format
             ),
             num_classes=11,
-            num_digits=4,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
                 attention_map_decay=1e-2,
-                total_variation_decay=1e-4
+                total_variation_decay=1e-6
             )
         ),
         model_dir=args.model_dir,
@@ -125,19 +126,21 @@ def main(unused_argv):
 
             for j in range(4):
 
-                def scale(input, input_min, input_max, output_min, output_max):
-                    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+                for k in range(4):
 
-                merged_attention_map = predict_result["merged_attention_maps_{}".format(j)]
-                merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                merged_attention_map = cv2.resize(merged_attention_map, (128, 128))
+                    def scale(input, input_min, input_max, output_min, output_max):
+                        return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
-                image = np.array(predict_result["images"])
-                image[:, :, 0] += merged_attention_map
+                    merged_attention_map = predict_result["merged_attention_maps_{}_{}".format(j, k)]
+                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
+                    merged_attention_map = cv2.resize(merged_attention_map, (128, 128))
 
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                cv2.imwrite("outputs_1/image_{}_{}.png".format(i, j), image * 255.0)
-                cv2.imwrite("outputs_1/merged_attention_map_{}_{}.png".format(i, j), merged_attention_map * 255.0)
+                    image = np.array(predict_result["images"])
+                    image[:, :, 0] += merged_attention_map
+
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                    cv2.imwrite("outputs/image_{}_{}_{}.png".format(i, j, k), image * 255.0)
+                    cv2.imwrite("outputs/merged_attention_map_{}_{}_{}.png".format(i, j, k), merged_attention_map * 255.0)
 
 
 if __name__ == "__main__":

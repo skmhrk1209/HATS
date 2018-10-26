@@ -5,6 +5,4 @@ __pycache__/
 *.tfrecord
 svhn/
 multi_svhn/
-multi_svhn_acnn_model_1/
-multi_svhn_acnn_model_2/
-multi_svhn_acnn_model_3/
+multi_svhn_acnn_model/

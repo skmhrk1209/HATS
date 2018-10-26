@@ -4,11 +4,11 @@ import numpy as np
 
 class Model(object):
 
-    def __init__(self, convolutional_network, recurrent_attention_network,
+    def __init__(self, convolutional_network, attention_network,
                  num_classes, data_format, hyper_params):
 
         self.convolutional_network = convolutional_network
-        self.recurrent_attention_network = recurrent_attention_network
+        self.attention_network = attention_network
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -20,7 +20,7 @@ class Model(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        attention_maps_sequence_sequence = self.recurrent_attention_network(
+        attention_maps_sequence_sequence = self.attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
@@ -71,6 +71,14 @@ class Model(object):
             ) for feature_vectors in feature_vectors_sequence
         ] for feature_vectors_sequence in feature_vectors_sequence_sequence]
 
+        classes_sequence_sequence = [[
+            tf.argmax(
+                input=logits,
+                axis=-1,
+                name="classes"
+            ) for logits in logits_sequence
+        ] for logits_sequence in logits_sequence_sequence]
+
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             features.update({
@@ -79,18 +87,16 @@ class Model(object):
                 for j, merged_attention_maps in enumerate(merged_attention_maps_sequence)
             })
 
+            features.update({
+                "classes_{}_{}".format(i, j): classes
+                for i, classes_sequence in enumerate(classes_sequence_sequence)
+                for j, classes in enumerate(classes_sequence)
+            })
+
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=features
             )
-
-        classes_sequence_sequence = [[
-            tf.argmax(
-                input=logits,
-                axis=-1,
-                name="classes"
-            ) for logits in logits_sequence
-        ] for logits_sequence in logits_sequence_sequence]
 
         labels_sequence_sequence = [
             tf.unstack(multi_labels, axis=1)
@@ -208,9 +214,9 @@ class Model(object):
         [[tf.summary.scalar("accuracy_sequence_sequence_{}_{}".format(i, j), accuracy[1])
           for j, accuracy in enumerate(accuracy_sequence)]
          for i, accuracy_sequence in enumerate(accuracy_sequence_sequence)]
-        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[0])
+        [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[1])
          for i, accuracy in enumerate(accuracy_sequence)]
-        tf.summary.scalar("accuracy", accuracy[0])
+        tf.summary.scalar("accuracy", accuracy[1])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:

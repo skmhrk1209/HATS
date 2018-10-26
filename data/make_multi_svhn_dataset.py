@@ -11,8 +11,8 @@ args = parser.parse_args()
 
 with tf.python_io.TFRecordWriter(args.filename) as writer:
 
-    digits_length = 4
     sequence_length = 4
+    digits_length = 4
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
