@@ -159,7 +159,7 @@ def main(unused_argv):
                 image = predict_result["images"]
                 image[:, :, 0] += merged_attention_map
 
-                cv2.imwrite("outputs/mimage_{}_{}.png".format(i, j), image * 255.0)
+                cv2.imwrite("outputs/image_{}_{}.png".format(i, j), image * 255.0)
                 cv2.imwrite("outputs/merged_attention_map_{}_{}.png".format(i, j), merged_attention_map * 255.0)
 
 
