@@ -131,7 +131,7 @@ def main(unused_argv):
                     def scale(input, input_min, input_max, output_min, output_max):
                         return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
-                    merged_attention_map = predict_result["merged_attention_maps_{}_{}".format(j, l)]
+                    merged_attention_map = predict_result["merged_attention_maps_{}_{}".format(j, k)]
                     merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                     merged_attention_map = cv2.resize(merged_attention_map, (128, 128))
 
