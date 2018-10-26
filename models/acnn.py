@@ -160,6 +160,15 @@ class Model(object):
 
         loss = tf.reduce_mean(loss_sequence)
 
+        accuracy = tf.metrics.accuracy(
+            labels=labels_sequence_sequence,
+            predictions=classes_sequence_sequence
+        )
+
+        accuracy_value = tf.identity(accuracy[0], "accuracy_value")
+        #tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, accuracy[1])
+
+        '''
         accuracy_sequence_sequence = [[
             tf.metrics.accuracy(
                 labels=labels,
@@ -175,8 +184,8 @@ class Model(object):
 
         accuracy = (tf.reduce_mean([accuracy[0] for accuracy in accuracy_sequence]),
                     tf.group(*[accuracy[1] for accuracy in accuracy_sequence]))
+        '''
 
-        # ==========================================================================================
         tf.summary.image("images", features["images"], max_outputs=2)
 
         [[tf.summary.image("merged_attention_maps_sequence_sequence_{}_{}".format(i, j), merged_attention_maps, max_outputs=2)
@@ -211,13 +220,16 @@ class Model(object):
          for i, loss in enumerate(loss_sequence)]
         tf.summary.scalar("loss", loss)
 
+        tf.summary.scalar("accuracy", accuracy[1])
+
+        '''
         [[tf.summary.scalar("accuracy_sequence_sequence_{}_{}".format(i, j), accuracy[1])
           for j, accuracy in enumerate(accuracy_sequence)]
          for i, accuracy_sequence in enumerate(accuracy_sequence_sequence)]
         [tf.summary.scalar("accuracy_sequence_{}".format(i), accuracy[1])
          for i, accuracy in enumerate(accuracy_sequence)]
         tf.summary.scalar("accuracy", accuracy[1])
-        # ==========================================================================================
+        '''
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 

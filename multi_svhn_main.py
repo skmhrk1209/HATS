@@ -27,7 +27,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
 
-    imagenet_classifier = tf.estimator.Estimator(
+    multi_svhn_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
                 conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[1, 1]),
@@ -77,7 +77,7 @@ def main(unused_argv):
 
     if args.train:
 
-        imagenet_classifier.train(
+        multi_svhn_classifier.train(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
@@ -87,12 +87,20 @@ def main(unused_argv):
                 image_size=[128, 128],
                 digits_length=4,
                 sequence_length=4
-            ).get_next()
+            ).get_next(),
+            hooks=[
+                tf.train.LoggingTensorHook(
+                    tensors={
+                        "accuracy": "accuracy_value"
+                    },
+                    every_n_iter=100
+                )
+            ]
         )
 
     if args.eval:
 
-        eval_results = imagenet_classifier.evaluate(
+        eval_results = multi_svhn_classifier.evaluate(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
@@ -109,7 +117,7 @@ def main(unused_argv):
 
     if args.predict:
 
-        predict_results = imagenet_classifier.predict(
+        predict_results = multi_svhn_classifier.predict(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
