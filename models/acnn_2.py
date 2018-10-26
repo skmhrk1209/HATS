@@ -71,6 +71,19 @@ class Model(object):
             ) for feature_vectors in feature_vectors_sequence
         ] for feature_vectors_sequence in feature_vectors_sequence_sequence]
 
+        if mode == tf.estimator.ModeKeys.PREDICT:
+
+            features.update({
+                "merged_attention_maps_{}_{}".format(i, j): merged_attention_maps
+                for i, merged_attention_maps_sequence in enumerate(merged_attention_maps_sequence_sequence)
+                for j, merged_attention_maps in merged_attention_maps_sequence
+            })
+
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                predictions=features
+            )
+
         classes_sequence_sequence = [[
             tf.argmax(
                 input=logits,
