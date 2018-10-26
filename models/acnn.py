@@ -165,8 +165,7 @@ class Model(object):
             predictions=classes_sequence_sequence
         )
 
-        accuracy_value = tf.identity(accuracy[0], "accuracy_value")
-        #tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, accuracy[1])
+        tf.identity(accuracy[0], "accuracy_value")
 
         '''
         accuracy_sequence_sequence = [[
