@@ -153,7 +153,7 @@ def main(unused_argv):
 
             for j in range(4):
 
-                merged_attention_map = predict_result["merged_attention_maps_{}_{}.png".format(i, j)]
+                merged_attention_map = predict_result["merged_attention_maps_{}.png".format(j)]
                 merged_attention_map = cv2.resize(merged_attention_map, [128, 128])
 
                 image = predict_result["images"]
