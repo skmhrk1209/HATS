@@ -72,6 +72,18 @@ class Model(object):
             ) for i in range(self.num_digits)
         ] for feature_vectors in feature_vectors_sequence]
 
+        if mode == tf.estimator.ModeKeys.PREDICT:
+
+            features.update({
+                "merged_attention_maps_{}".format(i): merged_attention_maps
+                for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)
+            })
+
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                predictions=features
+            )
+
         multi_labels_sequence = [
             tf.unstack(multi_labels, axis=1)
             for multi_labels in tf.unstack(labels, axis=1)
@@ -149,16 +161,4 @@ class Model(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops={"accuracy": accuracy}
-            )
-
-        if mode == tf.estimator.ModeKeys.PREDICT:
-
-            features.update({
-                "merged_attention_maps_{}".format(i): merged_attention_maps
-                for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)
-            })
-
-            return tf.estimator.EstimatorSpec(
-                mode=mode,
-                predictions=features
             )
