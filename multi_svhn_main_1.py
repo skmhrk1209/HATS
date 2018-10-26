@@ -132,7 +132,7 @@ def main(unused_argv):
                 merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                 merged_attention_map = cv2.resize(merged_attention_map, (128, 128))
 
-                image = predict_result["images"]
+                image = np.asarray(predict_result["images"])
                 image[:, :, 0] += merged_attention_map
 
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
