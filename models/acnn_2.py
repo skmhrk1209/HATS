@@ -88,7 +88,7 @@ class Model(object):
 
             features.update({
                 "classes_{}".format(i): classes
-                for j, classes in enumerate(classes_sequence)
+                for i, classes in enumerate(classes_sequence)
             })
 
             return tf.estimator.EstimatorSpec(
