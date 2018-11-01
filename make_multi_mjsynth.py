@@ -40,7 +40,7 @@ for i in range(90000):
                 rects.append(proposal)
                 break
 
-    random_filenames = [pair[0] for pair in sorted(zip(random_filenames, rects), key=lambda pair: pair[1])]
+    random_filenames = [pair[0] for pair in sorted(zip(random_filenames, rects), key=lambda pair: (pair[1].bounds[1], pair[1].bounds[0]))]
     labels = "_".join([os.path.splitext(random_filename)[0].split("_")[1] for random_filename in random_filenames])
 
     cv2.imwrite("/home/sakuma/data/multi_mjsynth/train/{}_{}.jpg".format(i, labels), image)
@@ -80,7 +80,7 @@ for i in range(10000):
                 rects.append(proposal)
                 break
 
-    random_filenames = [pair[0] for pair in sorted(zip(random_filenames, rects), key=lambda pair: pair[1])]
+    random_filenames = [pair[0] for pair in sorted(zip(random_filenames, rects), key=lambda pair: (pair[1].bounds[1], pair[1].bounds[0]))]
     labels = "_".join([os.path.splitext(random_filename)[0].split("_")[1] for random_filename in random_filenames])
 
     cv2.imwrite("/home/sakuma/data/multi_mjsynth/test/{}_{}.jpg".format(i, labels), image)
