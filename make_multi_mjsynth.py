@@ -3,7 +3,7 @@ import cv2
 import glob
 import os
 import shutil
-from shapely.geometry import rect
+from shapely.geometry import box
 
 filenames = glob.glob("/home/sakuma/data/mjsynth/train/*.jpg")
 
@@ -27,7 +27,7 @@ for i in range(90000):
             w = random_image.shape[1]
             x = np.random.randint(0, 256 - w)
             y = np.random.randint(0, 256 - h)
-            proposal = rect(x, y, x + w, y + h)
+            proposal = box(x, y, x + w, y + h)
 
             for rect in rects:
 
@@ -66,7 +66,7 @@ for i in range(10000):
             w = random_image.shape[1]
             x = np.random.randint(0, 256 - w)
             y = np.random.randint(0, 256 - h)
-            proposal = rect(x, y, x + w, y + h)
+            proposal = box(x, y, x + w, y + h)
 
             for rect in rects:
 
