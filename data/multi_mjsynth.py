@@ -28,7 +28,7 @@ class Dataset(dataset.Dataset):
                 "labels": tf.FixedLenFeature(
                     shape=[self.sequence_length * self.digits_length],
                     dtype=tf.int64,
-                    default_value=[10] * (self.sequence_length * self.digits_length)
+                    default_value=[62] * (self.sequence_length * self.digits_length)
                 )
             }
         )
