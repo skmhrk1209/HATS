@@ -10,15 +10,16 @@ filenames = [filename for filename in filenames if (lambda image: (image is not 
 
 for i, filename in enumerate(filenames[:int(len(filenames) * 0.9)]):
 
-    shutil.copy(filename, "~/data/mjsynth/train/{}_{}.jpg".format(i, filename.split("_")[1]))
+    shutil.move(filename, "~/data/mjsynth/train/{}_{}.jpg".format(i, filename.split("_")[1]))
 
 for i, filename in enumerate(filenames[int(len(filenames) * 0.9):]):
 
-    shutil.copy(filename, "~/data/mjsynth/test/{}_{}.jpg".format(i, filename.split("_")[1]))
+    shutil.move(filename, "~/data/mjsynth/test/{}_{}.jpg".format(i, filename.split("_")[1]))
 
 filenames = glob.glob("~/data/mjsynth/train/*.jpg")
+print(len(filenames))
 
-for i in range(90):
+for i in range(900000):
 
     random_filenames = np.random.choice(filenames, np.random.randint(1, 5))
     labels = "_".join([os.path.splitext(random_filename)[0].split("_")[1] for random_filename in random_filenames])
@@ -41,8 +42,9 @@ for i in range(90):
     cv2.imwrite("~/data/multi_mjsynth/train/{}_{}.jpg".format(i, labels), image)
 
 filenames = glob.glob("~/data/mjsynth/test/*.jpg")
+print(len(filenames))
 
-for i in range(10):
+for i in range(100000):
 
     random_filenames = np.random.choice(filenames, np.random.randint(1, 5))
     random_filenames = np.pad(random_filenames, [0, 4 - len(random_filenames)], "constant", constant_values="")
