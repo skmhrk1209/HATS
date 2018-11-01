@@ -38,6 +38,7 @@ for i in range(90000):
 
                 image[y:y+h, x:x+w, :] += random_image
                 rects.append(proposal)
+                break
 
     random_filenames = [pair[0] for pair in sorted(zip(random_filenames, rects), key=lambda pair: pair[1])]
     labels = "_".join([os.path.splitext(random_filename)[0].split("_")[1] for random_filename in random_filenames])
@@ -77,6 +78,7 @@ for i in range(10000):
 
                 image[y:y+h, x:x+w, :] += random_image
                 rects.append(proposal)
+                break
 
     random_filenames = [pair[0] for pair in sorted(zip(random_filenames, rects), key=lambda pair: pair[1])]
     labels = "_".join([os.path.splitext(random_filename)[0].split("_")[1] for random_filename in random_filenames])
