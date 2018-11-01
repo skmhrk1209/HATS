@@ -5,7 +5,7 @@ import os
 import shutil
 
 filenames = glob.glob("~/data/synth/*/*/*.jpg")
-
+print(len(filenames))
 filenames = [filename for filename in filenames if (lambda image: (image is not None) and (image.shape[1] <= 128))(cv2.imread(filename))]
 
 for i, filename in enumerate(filenames[:int(len(filenames) * 0.9)]):
