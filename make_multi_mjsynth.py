@@ -4,19 +4,20 @@ import glob
 import os
 import shutil
 
-filenames = glob.glob("~/data/synth/*/*/*.jpg")
+filenames = glob.glob("/home/sakuma/data/synth/*/*/*.jpg")
 print(len(filenames))
 filenames = [filename for filename in filenames if (lambda image: (image is not None) and (image.shape[1] <= 128))(cv2.imread(filename))]
+print(len(filenames))
 
 for i, filename in enumerate(filenames[:int(len(filenames) * 0.9)]):
 
-    shutil.move(filename, "~/data/mjsynth/train/{}_{}.jpg".format(i, filename.split("_")[1]))
+    shutil.move(filename, "/home/sakuma/data/mjsynth/train/{}_{}.jpg".format(i, filename.split("_")[1]))
 
 for i, filename in enumerate(filenames[int(len(filenames) * 0.9):]):
 
-    shutil.move(filename, "~/data/mjsynth/test/{}_{}.jpg".format(i, filename.split("_")[1]))
+    shutil.move(filename, "/home/sakuma/data/mjsynth/test/{}_{}.jpg".format(i, filename.split("_")[1]))
 
-filenames = glob.glob("~/data/mjsynth/train/*.jpg")
+filenames = glob.glob("/home/sakuma/data/mjsynth/train/*.jpg")
 print(len(filenames))
 
 for i in range(900000):
@@ -39,9 +40,9 @@ for i in range(900000):
 
         image[y: y + random_image.shape[0], x: x + random_image.shape[1], :] = random_image
 
-    cv2.imwrite("~/data/multi_mjsynth/train/{}_{}.jpg".format(i, labels), image)
+    cv2.imwrite("/home/sakuma/data/multi_mjsynth/train/{}_{}.jpg".format(i, labels), image)
 
-filenames = glob.glob("~/data/mjsynth/test/*.jpg")
+filenames = glob.glob("/home/sakuma/data/mjsynth/test/*.jpg")
 print(len(filenames))
 
 for i in range(100000):
@@ -64,4 +65,4 @@ for i in range(100000):
 
         image[y: y + random_image.shape[0], x: x + random_image.shape[1], :] = random_image
 
-    cv2.imwrite("~/data/multi_mjsynth/test/{}_{}.jpg".format(i, labels), image)
+    cv2.imwrite("/home/sakuma/data/multi_mjsynth/test/{}_{}.jpg".format(i, labels), image)
