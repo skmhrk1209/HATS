@@ -9,6 +9,8 @@ filenames = glob.glob("/home/sakuma/data/mjsynth/train/*.jpg")
 
 for i in range(90000):
 
+    print(i)
+
     num_strings = np.random.randint(1, 5)
     random_filenames = np.random.choice(filenames, num_strings)
     image = np.zeros([256, 256, 3], dtype=np.uint8)
@@ -45,6 +47,8 @@ for i in range(90000):
 filenames = glob.glob("/home/sakuma/data/mjsynth/test/*.jpg")
 
 for i in range(10000):
+
+    print(i)
 
     num_strings = np.random.randint(1, 5)
     random_filenames = np.random.choice(filenames, num_strings)
