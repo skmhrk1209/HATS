@@ -9,7 +9,7 @@ filenames = glob.glob("/home/sakuma/data/mjsynth/train/*.jpg")
 
 for i in range(90000):
 
-    num_strings ＝ np.random.randint(1, 5)
+    num_strings = np.random.randint(1, 5)
     random_filenames = np.random.choice(filenames, num_strings)
     image = np.zeros([256, 256, 3], dtype=np.uint8)
 
@@ -29,7 +29,7 @@ for i in range(90000):
 
             for box in boxes:
 
-                if proposal.intersects(rect):
+                if proposal.intersects(box):
                     break
 
             else:
@@ -46,7 +46,7 @@ filenames = glob.glob("/home/sakuma/data/mjsynth/test/*.jpg")
 
 for i in range(10000):
 
-    num_strings ＝ np.random.randint(1, 5)
+    num_strings = np.random.randint(1, 5)
     random_filenames = np.random.choice(filenames, num_strings)
     image = np.zeros([256, 256, 3], dtype=np.uint8)
 
@@ -66,7 +66,7 @@ for i in range(10000):
 
             for box in boxes:
 
-                if proposal.intersects(rect):
+                if proposal.intersects(box):
                     break
 
             else:
