@@ -4,7 +4,7 @@ import argparse
 import itertools
 import cv2
 from utils.attr_dict import AttrDict
-from data.multi_svhn import Dataset
+from data.multi_mjsynth import Dataset
 from models.acnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.hierarchical_recurrent_attention_network import HierarchicalRecurrentAttentionNetwork
@@ -85,8 +85,8 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
                 image_size=[128, 128],
-                digits_length=4,
-                sequence_length=24
+                sequence_length=4,
+                string_length=24
             ).get_next(),
             hooks=[
                 tf.train.LoggingTensorHook(
@@ -108,8 +108,8 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
                 image_size=[128, 128],
-                digits_length=4,
-                sequence_length=24
+                sequence_length=4,
+                string_length=24
             ).get_next()
         )
 
@@ -125,8 +125,8 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
                 image_size=[128, 128],
-                digits_length=4,
-                sequence_length=24
+                sequence_length=4,
+                string_length=24
             ).get_next()
         )
 
