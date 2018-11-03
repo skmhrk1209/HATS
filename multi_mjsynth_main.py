@@ -86,7 +86,7 @@ def main(unused_argv):
                 data_format=args.data_format,
                 image_size=[128, 128],
                 digits_length=4,
-                sequence_length=4
+                sequence_length=24
             ).get_next(),
             hooks=[
                 tf.train.LoggingTensorHook(
@@ -109,7 +109,7 @@ def main(unused_argv):
                 data_format=args.data_format,
                 image_size=[128, 128],
                 digits_length=4,
-                sequence_length=4
+                sequence_length=24
             ).get_next()
         )
 
@@ -126,7 +126,7 @@ def main(unused_argv):
                 data_format=args.data_format,
                 image_size=[128, 128],
                 digits_length=4,
-                sequence_length=4
+                sequence_length=24
             ).get_next()
         )
 
@@ -134,7 +134,7 @@ def main(unused_argv):
 
             for j in range(4):
 
-                for k in range(4):
+                for k in range(24):
 
                     def scale(input, input_min, input_max, output_min, output_max):
                         return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
