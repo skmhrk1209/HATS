@@ -6,14 +6,14 @@ class HierarchicalRecurrentAttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params,
                  global_bottleneck_units, local_bottleneck_units,
-                 sequence_length, digits_length, data_format):
+                 sequence_length, string_length, data_format):
 
         self.conv_params = conv_params
         self.deconv_params = deconv_params
         self.global_bottleneck_units = global_bottleneck_units
         self.local_bottleneck_units = local_bottleneck_units
         self.sequence_length = sequence_length
-        self.digits_length = digits_length
+        self.string_length = string_length
         self.data_format = data_format
 
     def __call__(self, inputs, training, name="attention_network", reuse=None):
@@ -90,7 +90,7 @@ class HierarchicalRecurrentAttentionNetwork(object):
                 )[0]
 
                 inputs_sequence_sequence = [
-                    [inputs] * self.digits_length
+                    [inputs] * self.string_length
                     for inputs in inputs_sequence
                 ]
 

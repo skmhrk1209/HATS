@@ -53,7 +53,7 @@ def main(unused_argv):
                 global_bottleneck_units=16,
                 local_bottleneck_units=16,
                 sequence_length=4,
-                digits_length=4,
+                string_length=4,
                 data_format=args.data_format
             ),
             num_classes=11,
