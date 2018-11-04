@@ -44,7 +44,7 @@ def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
 
             random_image = cv2.imread(random_filename)
 
-            if random_image.shape[1] > 256:
+            if random_image.shape[0] > image_size[0] or random_image.shape[1] > image_size[1]:
                 random_filenames = np.delete(random_filenames, j)
                 continue
 
@@ -52,8 +52,8 @@ def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
 
                 h = random_image.shape[0]
                 w = random_image.shape[1]
-                x = np.random.random_integers(0, 256 - w)
-                y = np.random.random_integers(0, 256 - h)
+                y = np.random.random_integers(0, image_size[0] - h)
+                x = np.random.random_integers(0, image_size[1] - w)
                 proposal = (x, y, x + w, y + h)
 
                 for random_rect in random_rects:
