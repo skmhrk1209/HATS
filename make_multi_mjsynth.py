@@ -22,9 +22,9 @@ def prepare_mjsynth(mjsynth_dir, string_length, split_ratio):
         if len(label) <= string_length:
 
             if i < len(filenames) * split_ratio:
-                shutil.move(filename, "/home/sakuma/mjsynth/train/{}_{}.jpg".format(i, label))
+                shutil.move(filename, "/home/sakuma/data/mjsynth/train/{}_{}.jpg".format(i, label))
             else:
-                shutil.move(filename, "/home/sakuma/mjsynth/test/{}_{}.jpg".format(i, label))
+                shutil.move(filename, "/home/sakuma/data/mjsynth/test/{}_{}.jpg".format(i, label))
 
 
 @jit
