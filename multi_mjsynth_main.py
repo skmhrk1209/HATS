@@ -56,7 +56,7 @@ def main(unused_argv):
                 string_length=24,
                 data_format=args.data_format
             ),
-            num_classes=62,
+            num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
