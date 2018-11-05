@@ -18,14 +18,14 @@ def prepare_mjsynth(mjsynth_dir, string_length, split_ratio):
 
         label = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
         print(i, label)
-
+        '''
         if len(label) <= string_length:
 
             if i < len(filenames) * split_ratio:
-                #shutil.move(filename, "/home/sakuma/mjsynth/train/{}_{}.jpg".format(i, label))
+                shutil.move(filename, "/home/sakuma/mjsynth/train/{}_{}.jpg".format(i, label))
             else:
-                #shutil.move(filename, "/home/sakuma/mjsynth/test/{}_{}.jpg".format(i, label))
-
+                shutil.move(filename, "/home/sakuma/mjsynth/test/{}_{}.jpg".format(i, label))
+        '''
 
 @jit
 def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
