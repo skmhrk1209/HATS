@@ -22,9 +22,9 @@ def prepare_mjsynth(mjsynth_dir, string_length, split_ratio):
         if len(label) <= string_length:
 
             if i < len(filenames) * split_ratio:
-                shutil.move(filename, "/home/sakuma/mjsynth/train/{}_{}.jpg".format(i, label))
+                #shutil.move(filename, "/home/sakuma/mjsynth/train/{}_{}.jpg".format(i, label))
             else:
-                shutil.move(filename, "/home/sakuma/mjsynth/test/{}_{}.jpg".format(i, label))
+                #shutil.move(filename, "/home/sakuma/mjsynth/test/{}_{}.jpg".format(i, label))
 
 
 @jit
@@ -79,5 +79,5 @@ def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
 if __name__ == "__main__":
 
     prepare_mjsynth("/home/sakuma/synth/*/*", 10, 0.9)
-    make_multi_mjsynth("/home/sakuma/mjsynth/train", (256, 256), 90000, 4)
-    make_multi_mjsynth("/home/sakuma/mjsynth/test", (256, 256), 10000, 4)
+    #make_multi_mjsynth("/home/sakuma/mjsynth/train", (256, 256), 90000, 4)
+    #make_multi_mjsynth("/home/sakuma/mjsynth/test", (256, 256), 10000, 4)
