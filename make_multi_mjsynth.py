@@ -73,7 +73,7 @@ def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
         #labels = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
         #print(i, labels)
 
-        cv2.imwrite(os.path.join(mjsynth_dir.replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), image)
+        #cv2.imwrite(os.path.join(mjsynth_dir.replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), image)
 
 
 if __name__ == "__main__":
