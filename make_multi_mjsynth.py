@@ -15,8 +15,8 @@ def make_multi_thread(func, num_threads):
     def func_mt(*args):
 
         chunk_size = len(args[0]) / num_threads
-        chunks = [args[0][num_chunk * i:num_chunk * (i + 1)] for i in range(num_threads)[:-1]]
-        chunks += [args[0][num_chunk * i:] for i in range(num_threads)[-1:]]
+        chunks = [args[0][chunk_size * i:chunk_size * (i + 1)] for i in range(num_threads)[:-1]]
+        chunks += [args[0][chunk_size * i:] for i in range(num_threads)[-1:]]
 
         threads = [threading.Thread(target=func, args=(chunk,) + args[1:]) for chunk in chunks]
 
