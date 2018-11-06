@@ -52,7 +52,7 @@ def make_multi_mjsynth(filenames, sequence_length, image_size, num_data):
             while True:
 
                 h = random_image.shape[0]
-                w = random_image.shape[1[[]]
+                w = random_image.shape[1]
                 y = np.random.random_integers(0, image_size[0] - h)
                 x = np.random.random_integers(0, image_size[1] - w)
                 proposal = (y, x, y + h, x + w)
