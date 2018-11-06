@@ -14,7 +14,7 @@ def make_multi_thread(func, num_threads):
 
     def func_mt(*args):
 
-        threads = [threading.Thread(target=func, args=args) for _ in range(num_threads)]
+        threads = [threading.Thread(target=func, args=args + (i,)) for i in range(num_threads)]
 
         for thread in threads:
             thread.start()
@@ -26,9 +26,9 @@ def make_multi_thread(func, num_threads):
 
 
 @jit(nopython=False, nogil=True)
-def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_length):
+def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_length, thread_id):
 
-    for i in range(num_data):
+    for i in range(num_data * thread_id, num_data * (thread_id + 1)):
 
         num_strings = random.randint(1, sequence_length)
         random_filenames = random.sample(filenames, num_strings)
