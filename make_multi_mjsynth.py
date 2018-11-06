@@ -14,11 +14,7 @@ def make_multi_thread(func, num_threads):
 
     def func_mt(*args):
 
-        chunk_size = len(args[0]) / num_threads
-        chunks = [args[0][chunk_size * i:chunk_size * (i + 1)] for i in range(num_threads)[:-1]]
-        chunks += [args[0][chunk_size * i:] for i in range(num_threads)[-1:]]
-
-        threads = [threading.Thread(target=func, args=(chunk,) + args[1:]) for chunk in chunks]
+        threads = [threading.Thread(target=func, args=args) for _ in range(num_threads)]
 
         for thread in threads:
             thread.start()
@@ -30,7 +26,7 @@ def make_multi_thread(func, num_threads):
 
 
 @jit(nopython=False, nogil=True)
-def make_multi_mjsynth(filenames, sequence_length, image_size, num_data):
+def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_length):
 
     for i in range(num_data):
 
@@ -78,5 +74,5 @@ def make_multi_mjsynth(filenames, sequence_length, image_size, num_data):
 
 if __name__ == "__main__":
 
-    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, [256, 256], 90000)
-    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, [256, 256], 10000)
+    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 3000, [256, 256], 4, 10)
+    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 300, [256, 256], 4, 10)
