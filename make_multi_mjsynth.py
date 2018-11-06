@@ -40,6 +40,10 @@ def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, num_ret
 
             random_image = cv2.imread(random_filename)
 
+            if random_image is None:
+                random_filenames.remove(random_filename)
+                continue
+
             if random_image.shape[0] > image_size[0] or random_image.shape[1] > image_size[1]:
                 random_filenames.remove(random_filename)
                 continue
