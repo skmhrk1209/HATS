@@ -14,11 +14,11 @@ def make_multi_thread(func, num_threads):
 
     def func_mt(*args):
 
-        num_chunk = len(args[0]) / num_threads
-        chunks = [args[num_chunk * i:num_chunk * (i + 1)] for i in range(num_threads)[:-1]]
-        chunks += [args[num_chunk * i:] for i in range(num_threads)[-1:]]
+        chunk_size = len(args[0]) / num_threads
+        chunks = [args[0][num_chunk * i:num_chunk * (i + 1)] for i in range(num_threads)[:-1]]
+        chunks += [args[0][num_chunk * i:] for i in range(num_threads)[-1:]]
 
-        threads = [threading.Thread(target=func, args=chunk) for chunk in chunks]
+        threads = [threading.Thread(target=func, args=(chunk,) + args[1:]) for chunk in chunks]
 
         for thread in threads:
             thread.start()
@@ -52,7 +52,7 @@ def make_multi_mjsynth(filenames, sequence_length, image_size, num_data):
             while True:
 
                 h = random_image.shape[0]
-                w = random_image.shape[1]
+                w = random_image.shape[1[[]]
                 y = np.random.random_integers(0, image_size[0] - h)
                 x = np.random.random_integers(0, image_size[1] - w)
                 proposal = (y, x, y + h, x + w)
