@@ -29,7 +29,7 @@ def make_multi_thread(func, num_threads):
     return func_mt
 
 
-@jit('void(str[:], int, int, int[:], int)', nopython=True, nogil=True)
+@jit('void(char[:,:], int, int, int[:], int)', nopython=True, nogil=True)
 def make_multi_mjsynth(filenames, sequence_length, string_length, image_size, num_data):
 
     for i in range(num_data):
