@@ -64,7 +64,6 @@ def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_
 
         random_filenames = [random_filename for random_rect, random_filename in sorted(zip(random_rects, random_filenames))]
         labels = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
-        print(i, labels)
 
         cv2.imwrite(os.path.join(os.path.dirname(filenames[0]).replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), image)
 
