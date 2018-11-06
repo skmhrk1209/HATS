@@ -69,8 +69,8 @@ def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
                     break
 
         random_filenames = np.delete(random_filenames, remove_indices)
-        random_filenames = [random_filename for random_rect, random_filename in sorted(zip(random_rects, random_filenames))]
-        #labels = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
+        #random_filenames = [random_filename for random_rect, random_filename in sorted(zip(random_rects, random_filenames))]
+        labels = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
         #print(i, labels)
 
         #cv2.imwrite(os.path.join(mjsynth_dir.replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), image)
