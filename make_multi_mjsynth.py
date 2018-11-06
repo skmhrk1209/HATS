@@ -4,9 +4,8 @@ import glob
 import os
 import random
 import threading
-from operator import itemgetter
-from operator import attrgetter
 from numba import jit
+from tqdm import trange
 from shapely.geometry import box
 
 
@@ -28,7 +27,7 @@ def make_multi_thread(func, num_threads):
 @jit(nopython=False, nogil=True)
 def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_length, thread_id):
 
-    for i in range(num_data * thread_id, num_data * (thread_id + 1)):
+    for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
         num_strings = random.randint(1, sequence_length)
         random_filenames = random.sample(filenames, num_strings)
