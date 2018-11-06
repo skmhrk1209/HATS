@@ -4,6 +4,7 @@ import glob
 import os
 import random
 import threading
+import itertools
 from numba import jit
 from tqdm import trange
 from shapely.geometry import box
@@ -27,7 +28,7 @@ def make_multi_thread(func, num_threads):
 @jit(nopython=False, nogil=True)
 def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_length, thread_id):
 
-    for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
+    for i in range(num_data * thread_id, num_data * (thread_id + 1)):
 
         num_strings = random.randint(1, sequence_length)
         random_filenames = random.sample(filenames, num_strings)
@@ -43,7 +44,7 @@ def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_
                 random_filenames.remove(random_filename)
                 continue
 
-            while True:
+            for j in itertools.count():
 
                 h = random_image.shape[0]
                 w = random_image.shape[1]
@@ -61,6 +62,8 @@ def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, string_
                     image[y:y+h, x:x+w, :] += random_image
                     random_rects.append(proposal)
                     break
+
+            print j
 
         random_filenames = [random_filename for random_rect, random_filename in sorted(zip(random_rects, random_filenames))]
         labels = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
