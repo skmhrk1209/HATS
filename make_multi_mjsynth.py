@@ -3,34 +3,34 @@ import cv2
 import glob
 import os
 import shutil
+import threading
 from operator import itemgetter
 from operator import attrgetter
 from numba import jit
 from shapely.geometry import box
 
 
+def make_multi_thread(func, num_threads):
+
+    def func_mt(*args):
+
+        num_chunk = len(args[0]) / num_threads
+        chunks = [args[num_chunk * i:num_chunk * (i + 1)] for i in range(num_threads)[:-1]]
+        chunks += [args[num_chunk * i:] for i in range(num_threads)[-1:]]
+
+        threads = [threading.Thread(target=func, args=chunk) for chunk in chunks]
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+
+    return func_mt
+
+
 @jit(nopython=True, nogil=True)
-def prepare_mjsynth(mjsynth_dir, string_length, split_ratio):
-
-    filenames = glob.glob(os.path.join(mjsynth_dir, "*"))
-
-    for i, filename in enumerate(filenames):
-
-        label = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
-        print(i, label)
-
-        if len(label) <= string_length:
-
-            if i < len(filenames) * split_ratio:
-                shutil.move(filename, "/home/sakuma/data/mjsynth/train/{}_{}.jpg".format(i, label))
-            else:
-                shutil.move(filename, "/home/sakuma/data/mjsynth/test/{}_{}.jpg".format(i, label))
-
-
-@jit(nopython=True, nogil=True)
-def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
-
-    filenames = glob.glob(os.path.join(mjsynth_dir, "*"))
+def make_multi_mjsynth(filenames, sequence_length, string_length, image_size, num_data):
 
     for i in range(num_data):
 
@@ -73,11 +73,10 @@ def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
         labels = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
         print(i, labels)
 
-        cv2.imwrite(os.path.join(mjsynth_dir.replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), image)
+        cv2.imwrite(os.path.join(os.path.dirname(filenames[0]).replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), image)
 
 
 if __name__ == "__main__":
 
-    #prepare_mjsynth("/home/sakuma/data/synth/*/*", 10, 0.9)
-    make_multi_mjsynth("/home/sakuma/data/mjsynth/train", (256, 256), 90000, 4)
-    make_multi_mjsynth("/home/sakuma/data/mjsynth/test", (256, 256), 10000, 4)
+    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, 10, (256, 256), 90000)
+    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, 10, (256, 256), 10000)
