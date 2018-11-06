@@ -12,9 +12,12 @@ from shapely.geometry import box
 
 def make_multi_thread(func, num_threads):
 
-    def func_mt(*args):
+    def func_mt(arg, *args):
 
-        threads = [threading.Thread(target=func, args=args) for _ in range(num_threads)]
+        chnk_size = len(arg) / num_threads
+        chunk_args = [arg[chnk_size * i:chnk_size * (i + 1)] for i in range(num_threads)]
+
+        threads = [threading.Thread(target=func, args=((chunk_arg,) + args)) for chunk_arg in chunk_args]
 
         for thread in threads:
             thread.start()
