@@ -78,5 +78,5 @@ def make_multi_mjsynth(filenames, sequence_length, image_size, num_data):
 
 if __name__ == "__main__":
 
-    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, [256, 256], 90000)
-    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, [256, 256], 10000)
+    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, [256, 256], 90000)
+    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, [256, 256], 10000)
