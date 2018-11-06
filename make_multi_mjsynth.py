@@ -9,7 +9,7 @@ from numba import jit
 from shapely.geometry import box
 
 
-@jit
+@jit(nopython=True, nogil=True)
 def prepare_mjsynth(mjsynth_dir, string_length, split_ratio):
 
     filenames = glob.glob(os.path.join(mjsynth_dir, "*"))
@@ -27,7 +27,7 @@ def prepare_mjsynth(mjsynth_dir, string_length, split_ratio):
                 shutil.move(filename, "/home/sakuma/data/mjsynth/test/{}_{}.jpg".format(i, label))
 
 
-@jit
+@jit(nopython=True, nogil=True)
 def make_multi_mjsynth(mjsynth_dir, image_size, num_data, sequence_length):
 
     filenames = glob.glob(os.path.join(mjsynth_dir, "*"))
