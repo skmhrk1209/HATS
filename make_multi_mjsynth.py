@@ -36,7 +36,7 @@ def make_multi_mjsynth(filenames, sequence_length, string_length, image_size, nu
 
         num_strings = np.random.random_integers(1, sequence_length)
         random_filenames = np.random.choice(filenames, num_strings)
-        image = np.zeros(image_size + (3,), dtype=np.uint8)
+        image = np.zeros(image_size + [3], dtype=np.uint8)
 
         random_rects = []
         remove_indices = []
@@ -78,5 +78,5 @@ def make_multi_mjsynth(filenames, sequence_length, string_length, image_size, nu
 
 if __name__ == "__main__":
 
-    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, 10, (256, 256), 90000)
-    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, 10, (256, 256), 10000)
+    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, 10, [256, 256], 90000)
+    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, 10, [256, 256], 10000)
