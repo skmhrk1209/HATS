@@ -53,7 +53,7 @@ def main(unused_argv):
                 global_bottleneck_units=16,
                 local_bottleneck_units=16,
                 sequence_length=4,
-                string_length=24,
+                string_length=10,
                 data_format=args.data_format
             ),
             num_classes=63,
@@ -86,7 +86,7 @@ def main(unused_argv):
                 data_format=args.data_format,
                 image_size=[128, 128],
                 sequence_length=4,
-                string_length=24
+                string_length=10
             ).get_next(),
             hooks=[
                 tf.train.LoggingTensorHook(
@@ -109,7 +109,7 @@ def main(unused_argv):
                 data_format=args.data_format,
                 image_size=[128, 128],
                 sequence_length=4,
-                string_length=24
+                string_length=10
             ).get_next()
         )
 
@@ -126,7 +126,7 @@ def main(unused_argv):
                 data_format=args.data_format,
                 image_size=[128, 128],
                 sequence_length=4,
-                string_length=24
+                string_length=10
             ).get_next()
         )
 
@@ -134,7 +134,7 @@ def main(unused_argv):
 
             for j in range(4):
 
-                for k in range(24):
+                for k in range(10):
 
                     def scale(input, input_min, input_max, output_min, output_max):
                         return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
