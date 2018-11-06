@@ -7,6 +7,7 @@ import threading
 from operator import itemgetter
 from operator import attrgetter
 from numba import jit
+from nmba import
 from shapely.geometry import box
 
 
@@ -29,8 +30,8 @@ def make_multi_thread(func, num_threads):
     return func_mt
 
 
-@jit#('void(char[:,:], int, int, int[:], int)', nopython=True, nogil=True)
-def make_multi_mjsynth(filenames, sequence_length, string_length, image_size, num_data):
+@jit(nopython=False, nogil=True)
+def make_multi_mjsynth(filenames, sequence_length, image_size, num_data):
 
     for i in range(num_data):
 
@@ -78,5 +79,5 @@ def make_multi_mjsynth(filenames, sequence_length, string_length, image_size, nu
 
 if __name__ == "__main__":
 
-    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, 10, [256, 256], 90000)
-    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, 10, [256, 256], 10000)
+    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 4, [256, 256], 90000)
+    make_multi_thread(make_multi_mjsynth, 16)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 4, [256, 256], 10000)
