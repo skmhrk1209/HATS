@@ -12,7 +12,7 @@ args = parser.parse_args()
 with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     sequence_length = 4
-    string_length = 24
+    string_length = 10
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
