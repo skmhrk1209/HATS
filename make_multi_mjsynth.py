@@ -35,7 +35,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
-        multi_image = np.zeros(image_size + [3], dtype=np.uint8)
+        multi_image = np.zeros(image_size + (3,), dtype=np.uint8)
         num_strings = random.randint(1, sequence_length)
 
         strings = []
@@ -52,7 +52,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 
                     image = cv2.imread(filename)
 
-                    if image is not None and image.shape[:2] <= image_size:
+                    if image and image.shape[:2] <= image_size:
                         break
 
             for _ in range(num_retries):
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         filenames=filenames[:int(len(filenames) * 0.9)],
         directory="/home/sakuma/data/multi_mjsynth/train",
         num_data=3000,
-        image_size=[128, 128],
+        image_size=(128, 128),
         sequence_length=4,
         string_length=10,
         num_retries=100
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         filenames=filenames[int(len(filenames) * 0.9):],
         directory="/home/sakuma/data/multi_mjsynth/test",
         num_data=300,
-        image_size=[128, 128],
+        image_size=(128, 128),
         sequence_length=4,
         string_length=10,
         num_retries=100
