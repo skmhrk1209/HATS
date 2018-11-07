@@ -38,19 +38,19 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
         multi_image = np.zeros(image_size + [3], dtype=np.uint8)
         num_strings = random.randint(1, sequence_length)
 
-        random_filenames = []
-        random_rects = []
+        strings = []
+        rects = []
 
         for _ in range(num_strings):
 
             while True:
 
-                random_filename = random.sample(filenames, 1)[0]
-                string = os.path.splitext(os.path.basename(random_filename))[0].split("_")[1]
+                filename = random.sample(filenames, 1)[0]
+                string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
 
                 if len(string) <= string_length:
 
-                    image = cv2.imread(random_filename)
+                    image = cv2.imread(filename)
 
                     if image is not None and image.shape[:2] <= image_size:
                         break
@@ -63,22 +63,20 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
                 x = random.randint(0, image_size[1] - w)
                 proposal = (y, x, y + h, x + w)
 
-                for random_rect in random_rects:
+                for rect in rects:
 
-                    if box(*proposal).intersects(box(*random_rect)):
+                    if box(*proposal).intersects(box(*rect)):
                         break
 
                 else:
 
                     multi_image[y:y+h, x:x+w, :] += image
-                    random_filenames.append(random_filename)
-                    random_rects.append(proposal)
+                    strings.append(string)
+                    rects.append(proposal)
                     break
 
-        random_filenames = [random_filename for random_rect, random_filename in sorted(zip(random_rects, random_filenames))]
-        strings = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
-
-        cv2.imwrite(os.path.join(directory, "{}_{}.jpg".format(i, strings)), multi_image)
+        strings = [string for rect, string in sorted(zip(rects, strings))]
+        cv2.imwrite(os.path.join(directory, "{}_{}.jpg".format(i, "_".join(strings))), multi_image)
 
 
 if __name__ == "__main__":
