@@ -130,20 +130,18 @@ if __name__ == "__main__":
         string_length=10
     )
 
-    directory = "/home/sakuma/data/mjsynth/train"
-    filenames = glob.glob(os.path.join(directory, "*.jpg"))
+    filenames = glob.glob("/home/sakuma/data/mjsynth/train/*.jpg")
 
     make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames,
-        directory=directory.replace("mjsynth, multi_mjsynth"),
+        directory=os.path.dirname(filenames).replace("mjsynth, multi_mjsynth"),
         num_data=3000,
         image_size=[128, 128],
         sequence_length=4,
         num_retries=100
     )
 
-    directory = "/home/sakuma/data/mjsynth/test"
-    filenames = glob.glob(os.path.join(directory, "*.jpg"))
+    filenames = glob.glob("/home/sakuma/data/mjsynth/test/*.jpg")
 
     make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames,
