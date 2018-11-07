@@ -148,7 +148,7 @@ class Model(object):
 
         tf.summary.scalar("streaming_accuracy", streaming_accuracy[1])
 
-        tf.identity(streaming_accuracy[0], "streaming_accuracy")
+        tf.identity(streaming_accuracy[0], "streaming_accuracy_value")
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
