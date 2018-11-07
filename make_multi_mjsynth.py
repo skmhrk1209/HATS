@@ -64,7 +64,7 @@ def prepare_mjsynth(filenames, directory, image_size, string_length, thread_id):
 
             image = cv2.imread(filename)
 
-            if image and image.shape[0] <= image_size[0] and image.shape[1] <= image_size[1]:
+            if image is not None and image.shape[0] <= image_size[0] and image.shape[1] <= image_size[1]:
 
                 shutil.copy(filename, os.path.join(directory, "{}".format(thread_id), "{}_{}.jpg".format(i, string)))
                 i += 1
