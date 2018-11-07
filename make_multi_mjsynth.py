@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     filenames = glob.glob("/home/sakuma/data/mjsynth/*/*/*.jpg")
 
-    random.seed(0)
+    random.seed(19931209)
     random.shuffle(filenames)
 
     make_multi_thread(make_multi_mjsynth, num_threads=32)(
