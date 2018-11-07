@@ -7,7 +7,7 @@ import random
 import threading
 import itertools
 from numba import jit
-from tqdm import trange
+from tqdm import trange, tqdm
 from shapely.geometry import box
 
 
@@ -55,16 +55,19 @@ def prepare_mjsynth(filenames, directory, image_size, string_length, thread_id):
 
     os.mkdir(os.path.join(directory, "{}".format(thread_id)))
 
-    filenames = [
-        filename for filename in filenames if
-        (lambda string: len(string) <= string_length)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
-        (lambda image: image and image.shape[0] <= image_size[0] and image.shape[1] <= image_size[1])(cv2.imread(filename))
-    ]
-
-    for i, filename in enumerate(filenames):
+    i = 0
+    for filename in tqdm(filenames):
 
         string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
-        shutil.copy(filename, os.path.join(directory, "{}".format(thread_id), "{}_{}.jpg".format(i, string)))
+
+        if len(string) <= string_length:
+
+            image = cv2.imread(filename)
+
+            if image and image.shape[0] <= image_size[0] and image.shape[1] <= image_size[1]:
+
+                shutil.copy(filename, os.path.join(directory, "{}".format(thread_id), "{}_{}.jpg".format(i, string)))
+                i += 1
 
 
 @jit(nopython=False, nogil=True)
@@ -72,7 +75,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 
     os.mkdir(os.path.join(directory, "{}".format(thread_id)))
 
-    for i in trange(num_data):
+    for i in tqdm(range(num_data)):
 
         multi_image = np.zeros(image_size + [3], dtype=np.uint8)
         num_strings = random.randint(1, sequence_length)
