@@ -19,7 +19,7 @@ parser.add_argument("--data_format", type=str, choices=["channels_first", "chann
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
-parser.add_argument("--gpu", type=str, default="0", help="gpu id")
+parser.add_argument("--gpu", type=str, default="0,1,2", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
