@@ -52,7 +52,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 
                     image = cv2.imread(filename)
 
-                    if image and image.shape[:2] <= image_size:
+                    if (image is not None) and (image.shape[:2] <= image_size):
                         break
 
             for _ in range(num_retries):
