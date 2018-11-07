@@ -30,13 +30,11 @@ def main(unused_argv):
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
-                    AttrDict(filters=514, strides=[1, 1], blocks=2)
+                    AttrDict(filters=32, strides=[1, 1], blocks=2),
+                    AttrDict(filters=64, strides=[1, 1], blocks=2)
                 ],
                 num_classes=None,
                 data_format=args.data_format
