@@ -7,7 +7,7 @@ import random
 import threading
 import itertools
 from numba import jit
-from tqdm import trange, tqdm
+from tqdm import tqdm
 from shapely.geometry import box
 
 
