@@ -45,7 +45,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 
             while True:
 
-                random_filename = random.sample(filenames, 1)
+                random_filename = random.sample(filenames, 1)[0]
                 string = os.path.splitext(os.path.basename(random_filename))[0].split("_")[1]
 
                 if len(string) <= string_length:
