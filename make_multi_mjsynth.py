@@ -88,7 +88,7 @@ if __name__ == "__main__":
     random.seed(0)
     random.shuffle(filenames)
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32)(
         filenames=filenames[:int(len(filenames) * 0.9)],
         directory="/home/sakuma/data/multi_mjsynth/train",
         num_data=3000,
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         num_retries=100
     )
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32)(
         filenames=filenames[int(len(filenames) * 0.9):],
         directory="/home/sakuma/data/multi_mjsynth/test",
         num_data=300,
