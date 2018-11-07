@@ -7,7 +7,7 @@ import random
 import threading
 import itertools
 from numba import jit
-from tqdm import tqdm
+from tqdm import trange
 from shapely.geometry import box
 
 
@@ -33,7 +33,7 @@ def make_multi_thread(func, num_threads):
 @jit(nopython=False, nogil=True)
 def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_length, string_length, num_retries, thread_id):
 
-    for i in tqdm(range(num_data * thread_id, num_data * (thread_id + 1))):
+    for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
         multi_image = np.zeros(image_size + [3], dtype=np.uint8)
         num_strings = random.randint(1, sequence_length)
