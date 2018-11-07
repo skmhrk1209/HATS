@@ -91,7 +91,7 @@ def main(unused_argv):
             hooks=[
                 tf.train.LoggingTensorHook(
                     tensors={
-                        "accuracy": "accuracy_value"
+                        "accuracy": "non_streaming_accuracy"
                     },
                     every_n_iter=100
                 )
