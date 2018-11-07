@@ -30,28 +30,26 @@ def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, num_ret
 
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
+        multi_image = np.zeros(image_size + [3], dtype=np.uint8)
         num_strings = random.randint(1, sequence_length)
-        random_filenames = random.sample(filenames, num_strings)
-        image = np.zeros(image_size + [3], dtype=np.uint8)
 
+        random_filenames = []
         random_rects = []
 
-        for random_filename in random_filenames[:]:
+        for _ in range(num_strings):
 
-            random_image = cv2.imread(random_filename)
+            while True:
 
-            if random_image is None:
-                random_filenames.remove(random_filename)
-                continue
+                random_filename = random.sample(filenames, 1)
+                image = cv2.imread(random_filename)
 
-            if random_image.shape[0] > image_size[0] or random_image.shape[1] > image_size[1]:
-                random_filenames.remove(random_filename)
-                continue
+                if image and image.shape[0] <= image_size[0] and image.shape[1] <= image_size[1]:
+                    break
 
             for _ in range(num_retries):
 
-                h = random_image.shape[0]
-                w = random_image.shape[1]
+                h = image.shape[0]
+                w = image.shape[1]
                 y = random.randint(0, image_size[0] - h)
                 x = random.randint(0, image_size[1] - w)
                 proposal = (y, x, y + h, x + w)
@@ -63,21 +61,18 @@ def make_multi_mjsynth(filenames, num_data, image_size, sequence_length, num_ret
 
                 else:
 
-                    image[y:y+h, x:x+w, :] += random_image
+                    multi_image[y:y+h, x:x+w, :] += image
+                    random_filenames.append(random_filename)
                     random_rects.append(proposal)
                     break
-
-            else:
-                random_filenames.remove(random_filename)
-                continue
 
         random_filenames = [random_filename for random_rect, random_filename in sorted(zip(random_rects, random_filenames))]
         labels = "_".join([os.path.splitext(os.path.basename(random_filename))[0].split("_")[1] for random_filename in random_filenames])
 
-        cv2.imwrite(os.path.join(os.path.dirname(filenames[0]).replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), image)
+        cv2.imwrite(os.path.join(os.path.dirname(filenames[0]).replace("mjsynth", "multi_mjsynth"), "{}_{}.jpg".format(i, labels)), multi_image)
 
 
 if __name__ == "__main__":
 
-    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 3000, [256, 256], 4, 100)
-    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 300, [256, 256], 4, 100)
+    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/train/*"), 3000, [128, 128], 4, 100)
+    make_multi_thread(make_multi_mjsynth, 32)(glob.glob("/home/sakuma/data/mjsynth/test/*"), 300, [128, 128], 4, 100)
