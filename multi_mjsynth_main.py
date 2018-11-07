@@ -34,8 +34,7 @@ def main(unused_argv):
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=32, strides=[2, 2], blocks=2),
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2)
+                    AttrDict(filters=64, strides=[2, 2], blocks=2)
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -83,7 +82,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=[128, 128],
                 sequence_length=4,
                 string_length=10
             ).get_next(),
@@ -104,7 +103,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=[128, 128],
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -121,7 +120,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=[128, 128],
                 sequence_length=4,
                 string_length=10
             ).get_next()
