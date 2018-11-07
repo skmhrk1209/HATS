@@ -69,7 +69,7 @@ def main(unused_argv):
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
                     visible_device_list=args.gpu,
-                    allow_growth=True
+                    allow_growth=False
                 )
             )
         )
