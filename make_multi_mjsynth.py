@@ -55,8 +55,7 @@ def prepare_mjsynth(filenames, directory, image_size, string_length, thread_id):
 
     os.mkdir(os.path.join(directory, "{}".format(thread_id)))
 
-    i = 0
-    for filename in tqdm(filenames):
+    for i, filename in enumerate(tqdm(filenames)):
 
         string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
 
@@ -67,7 +66,6 @@ def prepare_mjsynth(filenames, directory, image_size, string_length, thread_id):
             if image is not None and image.shape[0] <= image_size[0] and image.shape[1] <= image_size[1]:
 
                 shutil.copy(filename, os.path.join(directory, "{}".format(thread_id), "{}_{}.jpg".format(i, string)))
-                i += 1
 
 
 @jit(nopython=False, nogil=True)
