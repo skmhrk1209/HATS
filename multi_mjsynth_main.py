@@ -34,11 +34,7 @@ def main(unused_argv):
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=32, strides=[2, 2], blocks=2),
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    '''
-                    AttrDict(filters=128, strides=[1, 1], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
-                    '''
+                    AttrDict(filters=64, strides=[2, 2], blocks=2)
                 ],
                 num_classes=None,
                 data_format=args.data_format
