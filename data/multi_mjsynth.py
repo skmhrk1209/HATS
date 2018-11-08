@@ -25,7 +25,7 @@ class Dataset(dataset.Dataset):
                     dtype=tf.string,
                     default_value=""
                 ),
-                "labels": tf.FixedLenFeature(
+                "label": tf.FixedLenFeature(
                     shape=[self.sequence_length * self.string_length],
                     dtype=tf.int64,
                     default_value=[62] * (self.sequence_length * self.string_length)
@@ -43,7 +43,7 @@ class Dataset(dataset.Dataset):
         if self.data_format == "channels_first":
             image = tf.transpose(image, [2, 0, 1])
 
-        labels = tf.cast(features["labels"], tf.int32)
-        labels = tf.reshape(labels, [self.sequence_length, self.string_length])
+        label = tf.cast(features["labels"], tf.int32)
+        label = tf.reshape(label, [self.sequence_length, self.string_length])
 
-        return {"images": image}, labels
+        return {"image": image}, label

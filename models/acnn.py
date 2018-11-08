@@ -15,7 +15,7 @@ class Model(object):
 
     def __call__(self, features, labels, mode):
 
-        images = features["images"]
+        images = features["image"]
 
         tf.summary.image("images", images, max_outputs=2)
 
