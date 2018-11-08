@@ -18,8 +18,8 @@ class Model(object):
 
         images = features["image"]
 
-        images.set_shape([self.hyper_params.batch_size] + images.get_shape()[1:])
-        labels.set_shape([self.hyper_params.batch_size] + labels.get_shape()[1:])
+        images.set_shape([self.hyper_params.batch_size] + images.get_shape().as_list()[1:])
+        labels.set_shape([self.hyper_params.batch_size] + labels.get_shape().as_list()[1:])
 
         feature_maps = self.convolutional_network(
             inputs=images,
