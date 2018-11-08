@@ -23,7 +23,7 @@ class Model(object):
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN,
             name="global_attention_network",
-            reuse=None
+            reuse=tf.AUTO_REUSE
         )
 
         for i, global_attention_maps in enumerate(global_attention_maps_seq):
