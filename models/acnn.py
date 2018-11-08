@@ -136,10 +136,10 @@ class Model(object):
             for attention_maps in attention_maps_sequence
         ])
 
-        loss =
-        ctc_loss * self.hyper_params.ctc_loss_decay +
-        attention_map_loss * self.hyper_params.attention_map_decay +
-        total_variation_loss * self.hyper_params.total_variation_decay
+        loss = \
+            ctc_loss * self.hyper_params.ctc_loss_decay + \
+            attention_map_loss * self.hyper_params.attention_map_decay + \
+            total_variation_loss * self.hyper_params.total_variation_decay
 
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
