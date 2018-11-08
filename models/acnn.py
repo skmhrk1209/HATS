@@ -113,8 +113,10 @@ class Model(object):
             total_variation_loss * self.hyper_params.total_variation_decay
 
         classes = tf.stack([
-            tf.stack([tf.argmax(logits, axis=-1) for logits in multi_logits], axis=1)
-            for multi_logits in multi_logits_sequence
+            tf.stack([
+                tf.argmax(logits, axis=-1, output_type=tf.int32)
+                for logits in multi_logits
+            ], axis=1) for multi_logits in multi_logits_sequence
         ], axis=1)
 
         streaming_accuracy = tf.metrics.accuracy(
