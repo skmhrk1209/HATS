@@ -103,12 +103,7 @@ def main(unused_argv):
                 string_length=10
             ).get_next(),
             hooks=[
-                '''
-                tf.train.LoggingTensorHook(
-                    tensors={"streaming_accuracy": "streaming_accuracy_value"},
-                    every_n_iter=100
-                ),
-                '''
+                
                 tf_debug.LocalCLIDebugHook()
             ]
         )
