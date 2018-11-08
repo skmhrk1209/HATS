@@ -118,10 +118,10 @@ class Model(object):
 
         error_rate = tf.reduce_mean([
             tf.edit_distance(
-                hypothesis=tf.nn.ctc_greedy_decoder(
+                hypothesis=tf.cast(tf.nn.ctc_greedy_decoder(
                     inputs=logits,
                     sequence_length=sequence_length
-                )[0][0],
+                )[0][0], tf.int32),
                 truth=labels,
                 normalize=True
             )
