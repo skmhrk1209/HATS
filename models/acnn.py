@@ -115,11 +115,11 @@ class Model(object):
             tf.edit_distance(
                 hypothesis=tf.cast(tf.nn.ctc_greedy_decoder(
                     inputs=logits,
-                    sequence_length=sequence_length
+                    sequence_length=[self.string_length] * self.hyper_params.batch_size
                 )[0][0], tf.int32),
                 truth=labels,
                 normalize=True
-            ) for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence)
+            ) for labels, logits in zip(labels_sequence, logits_sequence)
         ])
 
         error_rate = tf.identity(error_rate, name="errot_rate")
