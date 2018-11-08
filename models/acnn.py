@@ -76,14 +76,13 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
-            features.update({
-                "merged_attention_maps_{}".format(i): merged_attention_maps
-                for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)
-            })
-
             return tf.estimator.EstimatorSpec(
                 mode=mode,
-                predictions=features
+                predictions={
+                    *{"images": images},
+                    *{"merged_attention_maps_{}".format(i): merged_attention_maps
+                      for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)}
+                }
             )
 
         multi_labels_sequence = [
@@ -108,10 +107,10 @@ class Model(object):
             for attention_maps in attention_maps_sequence
         ])
 
-        loss = \
-            cross_entropy_loss * self.hyper_params.cross_entropy_decay + \
-            attention_map_loss * self.hyper_params.attention_map_decay + \
-            total_variation_loss * self.hyper_params.total_variation_decay \
+        loss =
+        cross_entropy_loss * self.hyper_params.cross_entropy_decay +
+        attention_map_loss * self.hyper_params.attention_map_decay +
+        total_variation_loss * self.hyper_params.total_variation_decay
 
         multi_classes_sequence = [[
             tf.argmax(logits, axis=-1)

@@ -131,21 +131,19 @@ def main(unused_argv):
 
             for j in range(4):
 
-                for k in range(10):
+                def scale(input, input_min, input_max, output_min, output_max):
+                    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
-                    def scale(input, input_min, input_max, output_min, output_max):
-                        return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+                merged_attention_map = predict_result["merged_attention_maps_{}".format(j)]
+                merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
+                merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
 
-                    merged_attention_map = predict_result["merged_attention_maps_{}_{}".format(j, k)]
-                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                    merged_attention_map = cv2.resize(merged_attention_map, (128, 128))
+                image = predict_result["images"]
+                image[:, :, 0] += merged_attention_map
 
-                    image = np.array(predict_result["images"])
-                    image[:, :, 0] += merged_attention_map
-
-                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                    cv2.imwrite("outputs/image_{}_{}_{}.png".format(i, j, k), image * 255.0)
-                    cv2.imwrite("outputs/merged_attention_map_{}_{}_{}.png".format(i, j, k), merged_attention_map * 255.0)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                cv2.imwrite("outputs/image_{}_{}.png".format(i, j), image * 255.0)
+                cv2.imwrite("outputs/merged_attention_map_{}_{}.png".format(i, j), merged_attention_map * 255.0)
 
 
 if __name__ == "__main__":
