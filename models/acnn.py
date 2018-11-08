@@ -96,12 +96,14 @@ class Model(object):
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
-        sequence_length_sequence = [[
-            tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))).shape[0]
-            for dense_label in tf.unstack(dense_labels, axis=0)
-        ] for dense_labels in tf.unstack(labels, axis=1)]
+        sequence_length_sequence = [
+            tf.map_fn(
+                fn=lambda dense_label: tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))).shape[0]),
+                elems=dense_labels
+            ) for dense_labels in tf.unstack(labels, axis=1)
+        ]
 
-        ctc_loss = tf.reduce_mean([
+        ctc_loss= tf.reduce_mean([
             tf.nn.ctc_loss(
                 labels=labels,
                 inputs=logits,
@@ -113,7 +115,7 @@ class Model(object):
             ) for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence)
         ])
 
-        error_rate = tf.reduce_mean([
+        error_rate= tf.reduce_mean([
             tf.edit_distance(
                 hypothesis=tf.nn.ctc_greedy_decoder(
                     inputs=logits,
@@ -124,19 +126,19 @@ class Model(object):
             )
         ] for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence))
 
-        attention_map_loss = tf.reduce_mean([
+        attention_map_loss= tf.reduce_mean([
             tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3]))
             for attention_maps in attention_maps_sequence
         ])
 
-        total_variation_loss = tf.reduce_mean([
+        total_variation_loss= tf.reduce_mean([
             tf.reduce_mean(tf.image.total_variation(attention_maps))
             for attention_maps in attention_maps_sequence
         ])
 
-        loss = \
-            ctc_loss * self.hyper_params.ctc_loss_decay + \
-            attention_map_loss * self.hyper_params.attention_map_decay + \
+        loss =
+            ctc_loss * self.hyper_params.ctc_loss_decay +
+            attention_map_loss * self.hyper_params.attention_map_decay +
             total_variation_loss * self.hyper_params.total_variation_decay
 
         # ==========================================================================================
@@ -154,9 +156,9 @@ class Model(object):
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                train_op = tf.train.AdamOptimizer().minimize(
-                    loss=loss,
-                    global_step=tf.train.get_global_step()
+                train_op= tf.train.AdamOptimizer().minimize(
+                    loss = loss,
+                    global_step = tf.train.get_global_step()
                 )
 
             return tf.estimator.EstimatorSpec(
