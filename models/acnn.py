@@ -74,6 +74,16 @@ class Model(object):
             ) for i in range(self.string_length)
         ] for feature_vectors in feature_vectors_sequence]
 
+        multi_classes_sequence = [[
+            tf.argmax(logits, axis=-1)
+            for logits in multi_logits
+        ] for multi_logits in multi_logits_sequence]
+
+        multi_labels_sequence = [
+            tf.unstack(multi_labels, axis=1)
+            for multi_labels in tf.unstack(labels, axis=1)
+        ]
+
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             return tf.estimator.EstimatorSpec(
@@ -84,11 +94,6 @@ class Model(object):
                       for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)}
                 )
             )
-
-        multi_labels_sequence = [
-            tf.unstack(multi_labels, axis=1)
-            for multi_labels in tf.unstack(labels, axis=1)
-        ]
 
         cross_entropy_loss = tf.reduce_mean([[
             tf.losses.sparse_softmax_cross_entropy(
@@ -112,18 +117,13 @@ class Model(object):
             attention_map_loss * self.hyper_params.attention_map_decay + \
             total_variation_loss * self.hyper_params.total_variation_decay
 
-        multi_classes_sequence = [[
-            tf.argmax(logits, axis=-1)
-            for logits in multi_logits
-        ] for multi_logits in multi_logits_sequence]
-
         streaming_accuracy = tf.metrics.accuracy(
             labels=multi_labels_sequence,
             predictions=multi_classes_sequence
         )
 
         non_streaming_accuracy = tf.reduce_mean(
-            input_tensor=tf.cast(multi_labels_sequence == multi_classes_sequence, tf.float32),
+            input_tensor=tf.cast(tf.equal(multi_labels_sequence, multi_classes_sequence), tf.float32),
             name="non_streaming_accuracy"
         )
 
