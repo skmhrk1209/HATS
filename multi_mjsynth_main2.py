@@ -9,8 +9,6 @@ from models.acnn2 import Model
 from networks.residual_network import ResidualNetwork
 from networks.recurrent_attention_network import RecurrentAttentionNetwork
 
-from tensorflow.python import debug as tf_debug
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn2_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth_train.tfrecord"], help="tfrecord filenames")
@@ -103,8 +101,10 @@ def main(unused_argv):
                 string_length=10
             ).get_next(),
             hooks=[
-                
-                tf_debug.LocalCLIDebugHook()
+                tf.train.LoggingTensorHook(
+                    tensors={"streaming_accuracy": "streaming_accuracy_value"},
+                    every_n_iter=100
+                )
             ]
         )
 

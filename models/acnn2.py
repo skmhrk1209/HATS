@@ -68,6 +68,8 @@ class Model(object):
             ) for logits in logits_seq
         ] for logits_seq in logits_seq_seq]
 
+        print(len(logits_seq_seq), len(logits_seq_seq[0]))
+
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             features.update({
