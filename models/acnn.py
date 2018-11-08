@@ -111,7 +111,7 @@ class Model(object):
                 sequence_length=sequence_length,
                 preprocess_collapse_repeated=False,
                 ctc_merge_repeated=True,
-                ignore_longer_outputs_than_inputs=False,
+                ignore_longer_outputs_than_inputs=True,
                 time_major=True
             ) for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence)
         ])
