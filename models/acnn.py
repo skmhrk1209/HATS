@@ -115,7 +115,7 @@ class Model(object):
                 time_major=True
             ) for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence)
         ])
-        '''
+
         error_rate = tf.reduce_mean([
             tf.edit_distance(
                 hypothesis=tf.nn.ctc_greedy_decoder(
@@ -124,10 +124,9 @@ class Model(object):
                 )[0][0],
                 truth=labels,
                 normalize=True
-            )
-        ] for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence))
-        '''
-        error_rate=1
+            ) for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence)
+        ])
+
         error_rate = tf.identity(error_rate, name="errot_rate")
 
         attention_map_loss = tf.reduce_mean([
