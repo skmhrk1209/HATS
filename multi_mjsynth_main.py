@@ -5,9 +5,9 @@ import itertools
 import cv2
 from utils.attr_dict import AttrDict
 from data.multi_mjsynth import Dataset
-from models.acnn2 import Model
+from models.acnn import Model
 from networks.residual_network import ResidualNetwork
-from networks.recurrent_attention_network import RecurrentAttentionNetwork
+from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
@@ -29,7 +29,7 @@ def main(unused_argv):
 
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=Model(
-            global_attention_network=RecurrentAttentionNetwork(
+            global_attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
@@ -46,7 +46,7 @@ def main(unused_argv):
                 sequence_length=4,
                 data_format=args.data_format
             ),
-            local_attention_network=RecurrentAttentionNetwork(
+            local_attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
