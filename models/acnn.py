@@ -88,7 +88,7 @@ class Model(object):
             return tf.SparseTensor(
                 indices=indices,
                 values=values,
-                dense_shape=dense.shape
+                dense_shape=tf.shape(dense)
             )
 
         labels_sequence = [
