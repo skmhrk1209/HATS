@@ -100,7 +100,7 @@ class Model(object):
         ]
 
         for labels in labels_sequence:
-            tf.Print(labels)
+            tf.Print(labels, labels)
 
         sequence_length_sequence = [[
             tf.shape(tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))))[0]
