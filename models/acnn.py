@@ -17,6 +17,8 @@ class Model(object):
 
         images = features["image"]
 
+        print images.shape
+
         tf.summary.image("images", images, max_outputs=2)
 
         global_attention_maps_seq = self.global_attention_network(
