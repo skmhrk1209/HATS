@@ -17,7 +17,7 @@ class Model(object):
 
         images = features["image"]
 
-        print images.shape
+        print(images.shape)
 
         tf.summary.image("images", images, max_outputs=2)
 
