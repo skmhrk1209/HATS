@@ -99,6 +99,9 @@ class Model(object):
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
+        for labels in labels_sequence:
+            tf.print(labels)
+
         sequence_length_sequence = [[
             tf.shape(tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))))[0]
             for dense_label in tf.unstack(dense_labels, axis=0)
