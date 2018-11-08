@@ -21,7 +21,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
         strings = os.path.splitext(os.path.basename(file))[0].split("_")[1:]
 
-        print(len(strings))
+        if len(strings) > 10: print(len(strings))
 
         label = np.pad(
             array=[
@@ -36,8 +36,6 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
             mode="constant",
             constant_values=62
         ).astype(np.int32)
-
-        print(label.shape)
 
         writer.write(
             record=tf.train.Example(
