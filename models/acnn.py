@@ -88,8 +88,6 @@ class Model(object):
             indices = tf.where(tf.not_equal(dense, blank))
             values = tf.gather_nd(dense, indices)
 
-            indices = tf.Print(indices, [tf.shape(indices), tf.shape(values)], "indices: ")
-
             return tf.SparseTensor(
                 indices=indices,
                 values=values,
@@ -108,7 +106,7 @@ class Model(object):
                 sequence_length=[self.string_length] * self.hyper_params.batch_size,
                 preprocess_collapse_repeated=False,
                 ctc_merge_repeated=True,
-                ignore_longer_outputs_than_inputs=False,
+                ignore_longer_outputs_than_inputs=True,
                 time_major=True
             ) for labels, logits in zip(labels_sequence, logits_sequence)
         ])
