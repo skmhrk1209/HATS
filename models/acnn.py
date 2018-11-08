@@ -99,21 +99,16 @@ class Model(object):
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
-        sequence_length_sequence = [[
-            tf.shape(tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))))[0]
-            for dense_label in tf.unstack(dense_labels, axis=0)
-        ] for dense_labels in tf.unstack(labels, axis=1)]
-
         ctc_loss = tf.reduce_mean([
             tf.nn.ctc_loss(
                 labels=labels,
                 inputs=logits,
-                sequence_length=sequence_length,
+                sequence_length=[self.string_length] * self.hyper_params.batch_size,
                 preprocess_collapse_repeated=False,
                 ctc_merge_repeated=True,
                 ignore_longer_outputs_than_inputs=False,
                 time_major=True
-            ) for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence)
+            ) for labels, logits in zip(labels_sequence, logits_sequence)
         ])
 
         error_rate = tf.reduce_mean([
