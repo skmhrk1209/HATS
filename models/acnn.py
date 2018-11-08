@@ -4,12 +4,13 @@ import numpy as np
 
 class Model(object):
 
-    def __init__(self, global_attention_network, local_attention_network,
-                 convolutional_network, data_format, hyper_params):
+    def __init__(self, convolutional_network, attention_network,
+                 string_length, num_classes, data_format, hyper_params):
 
-        self.global_attention_network = global_attention_network
-        self.local_attention_network = local_attention_network
         self.convolutional_network = convolutional_network
+        self.attention_network = attention_network
+        self.string_length = string_length
+        self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
 
@@ -17,71 +18,67 @@ class Model(object):
 
         images = features["image"]
 
-        tf.summary.image("images", images, max_outputs=2)
-
-        global_attention_maps_seq = self.global_attention_network(
+        feature_maps = self.convolutional_network(
             inputs=images,
-            training=mode == tf.estimator.ModeKeys.TRAIN,
-            name="global_attention_network"
+            training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        for i, global_attention_maps in enumerate(global_attention_maps_seq):
-            tf.summary.image("global_attention_maps_{}".format(i), global_attention_maps, max_outputs=2)
+        attention_maps_sequence = self.attention_network(
+            inputs=feature_maps,
+            training=mode == tf.estimator.ModeKeys.TRAIN
+        )
 
-        images_seq = [
-            images * global_attention_maps
-            for global_attention_maps in global_attention_maps_seq
+        merged_attention_maps_sequence = [
+            tf.reduce_sum(
+                input_tensor=attention_maps,
+                axis=1 if self.data_format == "channels_first" else 3,
+                keep_dims=True
+            ) for attention_maps in attention_maps_sequence
         ]
 
-        local_attention_maps_seq_seq = [
-            self.local_attention_network(
-                inputs=images,
-                training=mode == tf.estimator.ModeKeys.TRAIN,
-                name="local_attention_network",
-                reuse=tf.AUTO_REUSE
-            ) for images in images_seq
+        def flatten_images(inputs, data_format):
+
+            input_shape = inputs.get_shape().as_list()
+            output_shape = ([-1, input_shape[1], np.prod(input_shape[2:4])] if self.data_format == "channels_first" else
+                            [-1, np.prod(input_shape[1:3]), input_shape[3]])
+
+            return tf.reshape(inputs, output_shape)
+
+        feature_vectors_sequence = [
+            tf.matmul(
+                a=flatten_images(feature_maps, self.data_format),
+                b=flatten_images(attention_maps, self.data_format),
+                transpose_a=False if self.data_format == "channels_first" else True,
+                transpose_b=True if self.data_format == "channels_first" else False
+            ) for attention_maps in attention_maps_sequence
         ]
 
-        for i, local_attention_maps_seq in enumerate(local_attention_maps_seq_seq):
-            for j, local_attention_maps in enumerate(local_attention_maps_seq):
-                tf.summary.image("local_attention_maps_{}_{}".format(i, j), local_attention_maps, max_outputs=2)
+        feature_vectors_sequence = [
+            tf.layers.flatten(
+                inputs=feature_vectors
+            ) for feature_vectors in feature_vectors_sequence
+        ]
 
-        images_seq_seq = [[
-            images * local_attention_maps
-            for local_attention_maps in local_attention_maps_seq
-        ] for images, local_attention_maps_seq in zip(images_seq, local_attention_maps_seq_seq)]
-
-        logits_seq_seq = [[
-            self.convolutional_network(
-                inputs=images,
-                training=mode == tf.estimator.ModeKeys.TRAIN,
-                name="convolutional_network",
+        multi_logits_sequence = [[
+            tf.layers.dense(
+                inputs=feature_vectors,
+                units=self.num_classes,
+                kernel_initializer=tf.variance_scaling_initializer(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal",
+                ),
+                bias_initializer=tf.zeros_initializer(),
+                name="logits_{}".format(i),
                 reuse=tf.AUTO_REUSE
-            ) for images in images_seq
-        ] for images_seq in images_seq_seq]
-
-        classes_seq_seq = [[
-            tf.argmax(
-                input=logits,
-                axis=-1
-            ) for logits in logits_seq
-        ] for logits_seq in logits_seq_seq]
+            ) for i in range(self.string_length)
+        ] for feature_vectors in feature_vectors_sequence]
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             features.update({
-                "global_attention_maps_seq": tf.stack(
-                    global_attention_maps_seq,
-                    axis=1
-                ),
-                "local_attention_maps_seq_seq": tf.stack([
-                    tf.stack(local_attention_maps_seq, axis=1)
-                    for local_attention_maps_seq in local_attention_maps_seq
-                ], axis=1),
-                "classes_seq_seq": tf.stack([
-                    tf.stack(classes_seq, axis=1)
-                    for classes_seq in classes_seq_seq
-                ], axis=1)
+                "merged_attention_maps_{}".format(i): merged_attention_maps
+                for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)
             })
 
             return tf.estimator.EstimatorSpec(
@@ -89,7 +86,7 @@ class Model(object):
                 predictions=features
             )
 
-        labels_seq_seq = [
+        multi_labels_sequence = [
             tf.unstack(multi_labels, axis=1)
             for multi_labels in tf.unstack(labels, axis=1)
         ]
@@ -98,62 +95,46 @@ class Model(object):
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels,
                 logits=logits
-            ) for labels, logits in zip(labels_seq, logits_seq)
-        ] for labels_seq, logits_seq in zip(labels_seq_seq, logits_seq_seq)])
+            ) for labels, logits in zip(multi_labels, multi_logits)
+        ] for multi_labels, multi_logits in zip(multi_labels_sequence, multi_logits_sequence)])
 
-        tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
-
-        global_attention_map_loss = tf.reduce_mean([
-            tf.reduce_mean(tf.reduce_sum(
-                input_tensor=tf.abs(global_attention_maps),
-                axis=[1, 2, 3]
-            )) for global_attention_maps in global_attention_maps_seq
+        attention_map_loss = tf.reduce_mean([
+            tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3]))
+            for attention_maps in attention_maps_sequence
         ])
 
-        tf.summary.scalar("global_attention_map_loss", global_attention_map_loss)
-
-        local_attention_map_loss = tf.reduce_mean([[
-            tf.reduce_mean(tf.reduce_sum(
-                input_tensor=tf.abs(local_attention_maps),
-                axis=[1, 2, 3]
-            )) for local_attention_maps in local_attention_maps_seq
-        ] for local_attention_maps_seq in local_attention_maps_seq_seq])
-
-        tf.summary.scalar("local_attention_map_loss", local_attention_map_loss)
-
-        global_total_variation_loss = tf.reduce_mean([
-            tf.reduce_mean(
-                input_tensor=tf.image.total_variation(global_attention_maps)
-            ) for global_attention_maps in global_attention_maps_seq
+        total_variation_loss = tf.reduce_mean([
+            tf.reduce_mean(tf.image.total_variation(attention_maps))
+            for attention_maps in attention_maps_sequence
         ])
-
-        tf.summary.scalar("global_total_variation_loss", global_total_variation_loss)
-
-        local_total_variation_loss = tf.reduce_mean([[
-            tf.reduce_mean(
-                input_tensor=tf.image.total_variation(local_attention_maps)
-            ) for local_attention_maps in local_attention_maps_seq
-        ] for local_attention_maps_seq in local_attention_maps_seq_seq])
-
-        tf.summary.scalar("local_total_variation_loss", local_total_variation_loss)
 
         loss = \
             cross_entropy_loss * self.hyper_params.cross_entropy_decay + \
-            global_attention_map_loss * self.hyper_params.global_attention_map_decay + \
-            local_attention_map_loss * self.hyper_params.local_attention_map_decay + \
-            global_total_variation_loss * self.hyper_params.global_total_variation_decay + \
-            local_total_variation_loss * self.hyper_params.local_total_variation_decay
+            attention_map_loss * self.hyper_params.attention_map_decay + \
+            total_variation_loss * self.hyper_params.total_variation_decay \
 
-        tf.summary.scalar("loss", loss)
+        multi_classes_sequence = [[
+            tf.argmax(logits, axis=-1)
+            for logits in multi_logits
+        ] for multi_logits in multi_logits_sequence]
 
-        streaming_accuracy = tf.metrics.accuracy(
-            labels=labels_seq_seq,
-            predictions=classes_seq_seq
+        accuracy = tf.metrics.accuracy(
+            labels=multi_labels_sequence,
+            predictions=multi_classes_sequence
         )
 
-        tf.summary.scalar("streaming_accuracy", streaming_accuracy[1])
+        tf.identity(accuracy[0], name="accuracy_value")
 
-        tf.identity(streaming_accuracy[0], "streaming_accuracy_value")
+        # ==========================================================================================
+        tf.summary.image("images", images, max_outputs=2)
+        [tf.summary.image("merged_attention_maps_sequence_{}".format(i), merged_attention_maps, max_outputs=2)
+         for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
+        tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
+        tf.summary.scalar("attention_map_loss", attention_map_loss)
+        tf.summary.scalar("total_variation_loss", total_variation_loss)
+        tf.summary.scalar("loss", loss)
+        tf.summary.scalar("accuracy", accuracy[1])
+        # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
@@ -175,5 +156,5 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops={"streaming_accuracy": streaming_accuracy}
+                eval_metric_ops={"accuracy": accuracy}
             )
