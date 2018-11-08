@@ -16,13 +16,24 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
-        def convert(c):
-            return ord(c) - 48 if c <= "9" else ord(c) - 55 if c <= "Z" else ord(c) - 61
+        def convert(char):
+            return ord(char) - 48 if char <= "9" else ord(char) - 55 if char <= "Z" else ord(char) - 61
 
-        labels = [[convert(c) for c in label] for label in os.path.splitext(os.path.basename(file))[0].split("_")[1:]]
-        labels = [np.pad(label, [[0, string_length - len(label)]], "constant", constant_values=62) for label in labels]
-        labels = np.pad(labels, [[0, sequence_length - len(labels)], [0, 0]], "constant", constant_values=62).astype(np.int32)
-        labels = [c for label in labels for c in label]
+        strings = os.path.splitext(os.path.basename(file))[0].split("_")[1:]
+
+        label = np.pad(
+            array=[
+                np.pad(
+                    array=[convert(char) for char in string],
+                    pad_width=[[0, string_length - len(string)]],
+                    mode="constant",
+                    constant_values=62
+                ) for string in strings
+            ],
+            pad_width=[[0, sequence_length - len(strings)]],
+            mode="constant",
+            constant_values=62
+        ).astype(np.int32).reshape([-1]).tolist()
 
         writer.write(
             record=tf.train.Example(
@@ -33,9 +44,9 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                                 value=[file.encode("utf-8")]
                             )
                         ),
-                        "labels": tf.train.Feature(
+                        "label": tf.train.Feature(
                             int64_list=tf.train.Int64List(
-                                value=labels
+                                value=label
                             )
                         )
                     }

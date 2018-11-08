@@ -36,7 +36,9 @@ class Dataset(dataset.Dataset):
         image = tf.read_file(features["path"])
         image = tf.image.decode_png(image, 3)
         image = tf.image.convert_image_dtype(image, tf.float32)
-        image = tf.image.resize_images(image, self.image_size)
+
+        if self.image_size:
+            image = tf.image.resize_images(image, self.image_size)
 
         if self.data_format == "channels_first":
             image = tf.transpose(image, [2, 0, 1])

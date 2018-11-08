@@ -5,15 +5,15 @@ import itertools
 import cv2
 from utils.attr_dict import AttrDict
 from data.multi_mjsynth import Dataset
-from models.acnn import Model
+from models.acnn2 import Model
 from networks.residual_network import ResidualNetwork
-from networks.hierarchical_recurrent_attention_network import HierarchicalRecurrentAttentionNetwork
+from networks.recurrent_attention_network import RecurrentAttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
-parser.add_argument("--batch_size", type=int, default=64, help="batch size")
+parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=100000, help="buffer size to shuffle dataset")
 parser.add_argument("--data_format", type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
 parser.add_argument("--train", action="store_true", help="with training")
@@ -29,39 +29,59 @@ def main(unused_argv):
 
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=Model(
+            global_attention_network=RecurrentAttentionNetwork(
+                conv_params=[
+                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=32, kernel_size=[9, 9], strides=[2, 2]),
+                ],
+                deconv_params=[
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=3, kernel_size=[9, 9], strides=[2, 2]),
+                ],
+                bottleneck_units=16,
+                sequence_length=4,
+                data_format=args.data_format
+            ),
+            local_attention_network=RecurrentAttentionNetwork(
+                conv_params=[
+                    AttrDict(filters=4, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
+                ],
+                deconv_params=[
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=4, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=3, kernel_size=[3, 3], strides=[2, 2]),
+                ],
+                bottleneck_units=16,
+                sequence_length=10,
+                data_format=args.data_format
+            ),
             convolutional_network=ResidualNetwork(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
-                    AttrDict(filters=512, strides=[1, 1], blocks=2)
+                    AttrDict(filters=256, strides=[2, 2], blocks=2),
+                    AttrDict(filters=512, strides=[2, 2], blocks=2)
                 ],
-                num_classes=None,
+                num_classes=63,
                 data_format=args.data_format
             ),
-            attention_network=HierarchicalRecurrentAttentionNetwork(
-                conv_params=[
-                    AttrDict(filters=4, kernel_size=[7, 7], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[7, 7], strides=[2, 2]),
-                ],
-                deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                ],
-                global_bottleneck_units=16,
-                local_bottleneck_units=16,
-                sequence_length=4,
-                string_length=10,
-                data_format=args.data_format
-            ),
-            num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
-                attention_map_decay=1e-2,
-                total_variation_decay=1e-6
+                global_attention_map_decay=1e-6,
+                local_attention_map_decay=1e-3,
+                global_total_variation_decay=1e-12,
+                local_total_variation_decay=1e-9
             )
         ),
         model_dir=args.model_dir,
