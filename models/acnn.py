@@ -74,11 +74,6 @@ class Model(object):
             ) for i in range(self.string_length)
         ] for feature_vectors in feature_vectors_sequence]
 
-        multi_classes_sequence = [[
-            tf.argmax(logits, axis=-1)
-            for logits in multi_logits
-        ] for multi_logits in multi_logits_sequence]
-
         multi_labels_sequence = [
             tf.unstack(multi_labels, axis=1)
             for multi_labels in tf.unstack(labels, axis=1)
@@ -117,22 +112,18 @@ class Model(object):
             attention_map_loss * self.hyper_params.attention_map_decay + \
             total_variation_loss * self.hyper_params.total_variation_decay
 
+        classes = tf.stack([
+            tf.stack([tf.argmax(logits, axis=-1) for logits in multi_logits], axis=1)
+            for multi_logits in multi_logits_sequence
+        ], axis=1)
+
         streaming_accuracy = tf.metrics.accuracy(
-            labels=multi_labels_sequence,
-            predictions=multi_classes_sequence
+            labels=labels,
+            predictions=classes
         )
 
         non_streaming_accuracy = tf.reduce_mean(
-            input_tensor=tf.cast(tf.equal(
-                x=tf.stack([
-                    tf.stack(multi_labels, axis=1)
-                    for multi_labels in multi_labels_sequence
-                ], axis=1),
-                y=tf.stack([
-                    tf.stack(multi_classes, axis=1)
-                    for multi_classes in multi_classes_sequence
-                ], axis=1),
-            ), tf.float32),
+            input_tensor=tf.cast(tf.equal(labels, classes), tf.float32),
             name="non_streaming_accuracy"
         )
 
