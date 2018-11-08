@@ -85,10 +85,8 @@ class Model(object):
 
         def to_sparse(dense, blank):
 
-            indices = tf.where(tf.not_equal(dense, tf.constant(blank)))
+            indices = tf.where(tf.not_equal(dense, blank))
             values = tf.gather_nd(dense, indices)
-
-            print(dense.shape)
 
             return tf.SparseTensor(
                 indices=indices,
