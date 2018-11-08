@@ -33,7 +33,9 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
             pad_width=[[0, sequence_length - len(strings)]],
             mode="constant",
             constant_values=62
-        ).astype(np.int32).reshape([-1]).tolist()
+        ).astype(np.int32)
+
+        print(label.shape)
 
         writer.write(
             record=tf.train.Example(
@@ -46,7 +48,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                         ),
                         "label": tf.train.Feature(
                             int64_list=tf.train.Int64List(
-                                value=label
+                                value=label.reshape([-1]).tolist()
                             )
                         )
                     }
