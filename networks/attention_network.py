@@ -46,7 +46,7 @@ class AttentionNetwork(object):
 
                     inputs = tf.nn.relu(inputs)
 
-            shape = inputs.shape.as_list()
+            shape = tf.shape(inputs)
 
             with tf.variable_scope("bottleneck_block"):
 
@@ -65,7 +65,7 @@ class AttentionNetwork(object):
                         )
                     ),
                     tf.nn.rnn_cell.LSTMCell(
-                        num_units=np.prod(shape[1:]),
+                        num_units=tf.reduce_prod(shape[1:]),
                         use_peepholes=True,
                         initializer=tf.variance_scaling_initializer(
                             scale=2.0,
@@ -79,7 +79,7 @@ class AttentionNetwork(object):
                     cell=multi_lstm_cell,
                     inputs=inputs_sequence,
                     initial_state=multi_lstm_cell.zero_state(
-                        batch_size=tf.shape(inputs)[0],
+                        batch_size=shape[0],
                         dtype=tf.float32
                     )
                 )
@@ -87,7 +87,7 @@ class AttentionNetwork(object):
                 inputs_sequence = [
                     tf.reshape(
                         tensor=inputs,
-                        shape=[-1] + shape[1:]
+                        shape=shape
                     ) for inputs in inputs_sequence
                 ]
 
