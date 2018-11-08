@@ -99,7 +99,7 @@ class Model(object):
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
-        for l in labels_sequence:
+        for l in tf.unstack(labels, axis=1):
             tf.Print(l, [l], "l: ")
 
         ctc_loss = tf.reduce_mean([
