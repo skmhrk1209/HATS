@@ -126,6 +126,8 @@ class Model(object):
             )
         ] for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence))
 
+        error_rate = tf.identity(error_rate, name="errot_rate")
+
         attention_map_loss = tf.reduce_mean([
             tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3]))
             for attention_maps in attention_maps_sequence
