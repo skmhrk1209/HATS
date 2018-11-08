@@ -99,6 +99,9 @@ class Model(object):
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
+        for l in labels_sequence:
+            tf.Print(l, [l], "l: ")
+
         ctc_loss = tf.reduce_mean([
             tf.nn.ctc_loss(
                 labels=labels,
@@ -106,7 +109,7 @@ class Model(object):
                 sequence_length=[self.string_length] * self.hyper_params.batch_size,
                 preprocess_collapse_repeated=False,
                 ctc_merge_repeated=True,
-                ignore_longer_outputs_than_inputs=True,
+                ignore_longer_outputs_than_inputs=False,
                 time_major=True
             ) for labels, logits in zip(labels_sequence, logits_sequence)
         ])
