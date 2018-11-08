@@ -31,15 +31,11 @@ def main(unused_argv):
         model_fn=Model(
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=32, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=3, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=3, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=3, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=3, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 bottleneck_units=16,
