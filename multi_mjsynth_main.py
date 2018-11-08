@@ -87,6 +87,7 @@ def main(unused_argv):
                 string_length=10
             ).get_next(),
             hooks=[
+                tf_debug.LocalCLIDebugHook(),
                 tf.train.LoggingTensorHook(
                     tensors={"error_rate": "error_rate"},
                     every_n_iter=100
