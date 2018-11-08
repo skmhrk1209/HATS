@@ -68,8 +68,6 @@ class Model(object):
             ) for logits in logits_seq
         ] for logits_seq in logits_seq_seq]
 
-        print(len(logits_seq_seq), len(logits_seq_seq[0]))
-
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             features.update({
@@ -96,6 +94,8 @@ class Model(object):
             tf.unstack(multi_labels, axis=1)
             for multi_labels in tf.unstack(labels, axis=1)
         ]
+
+        print(len(labels_seq_seq), len(labels_seq_seq[0]))
 
         cross_entropy_loss = tf.reduce_mean([[
             tf.losses.sparse_softmax_cross_entropy(
