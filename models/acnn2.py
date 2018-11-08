@@ -95,8 +95,6 @@ class Model(object):
             for multi_labels in tf.unstack(labels, axis=1)
         ]
 
-        print(len(labels_seq_seq), len(labels_seq_seq[0]))
-
         cross_entropy_loss = tf.reduce_mean([[
             tf.losses.sparse_softmax_cross_entropy(
                 labels=labels,
