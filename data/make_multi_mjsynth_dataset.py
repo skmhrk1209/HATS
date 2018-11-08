@@ -21,21 +21,17 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
         strings = os.path.splitext(os.path.basename(file))[0].split("_")[1:]
 
-        if len(strings) > 10: print(len(strings))
-
         label = np.pad(
-            array=[
-                np.pad(
-                    array=[convert(char) for char in string],
-                    pad_width=[[0, string_length - len(string)]],
-                    mode="constant",
-                    constant_values=62
-                ) for string in strings
-            ],
-            pad_width=[[0, sequence_length - len(strings)]],
+            array=[np.pad(
+                array=[convert(char) for char in string],
+                pad_width=[[0, string_length - len(string)]],
+                mode="constant",
+                constant_values=62
+            ) for string in strings],
+            pad_width=[[0, sequence_length - len(strings)], [0, 0]],
             mode="constant",
             constant_values=62
-        ).astype(np.int32)
+        ).astype(np.int32).reshape([-1]).tolist()
 
         writer.write(
             record=tf.train.Example(
@@ -48,7 +44,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                         ),
                         "label": tf.train.Feature(
                             int64_list=tf.train.Int64List(
-                                value=label.reshape([-1]).tolist()
+                                value=label
                             )
                         )
                     }
