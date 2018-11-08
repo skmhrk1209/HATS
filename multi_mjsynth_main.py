@@ -8,6 +8,7 @@ from data.multi_mjsynth import Dataset
 from models.acnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
+from tensorflow.python import debug as tf_debug
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
