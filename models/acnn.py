@@ -99,7 +99,7 @@ class Model(object):
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
-        for labels in labels_sequence:
+        for labels in tf.unstack(labels, axis=1):
             tf.Print(labels, labels)
 
         sequence_length_sequence = [[
