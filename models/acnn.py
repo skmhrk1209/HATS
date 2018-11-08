@@ -88,8 +88,8 @@ class Model(object):
             indices = tf.where(tf.not_equal(dense, blank))
             values = tf.gather_nd(dense, indices)
 
-            indices = tf.Print(indices, [tf.shape(indices)])
-            values = tf.Print(values, [tf.shape(values)])
+            indices = tf.Print(indices, [tf.shape(indices)], "indices: ")
+            values = tf.Print(values, [tf.shape(values)], "values: ")
 
             return tf.SparseTensor(
                 indices=indices,
