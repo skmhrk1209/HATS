@@ -123,7 +123,7 @@ class Model(object):
         )
 
         non_streaming_accuracy = tf.reduce_mean(
-            input_tensor=tf.cast(multi_labels_sequence == multi_classes_sequence, tf.float32)
+            input_tensor=tf.cast(multi_labels_sequence == multi_classes_sequence, tf.float32),
             name="non_streaming_accuracy"
         )
 
