@@ -90,7 +90,7 @@ if __name__ == "__main__":
         filenames=filenames[:int(len(filenames) * 0.9)],
         directory="/home/sakuma/data/multi_mjsynth/train",
         num_data=3000,
-        image_size=(128, 128),
+        image_size=(256, 256),
         sequence_length=4,
         string_length=10,
         num_retries=100
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         filenames=filenames[int(len(filenames) * 0.9):],
         directory="/home/sakuma/data/multi_mjsynth/test",
         num_data=300,
-        image_size=(128, 128),
+        image_size=(256, 256),
         sequence_length=4,
         string_length=10,
         num_retries=100
