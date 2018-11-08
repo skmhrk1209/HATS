@@ -16,6 +16,9 @@ class Model(object):
 
     def __call__(self, features, labels, mode):
 
+        features.set_shape([self.hyper_params.batch_size] + features.get_shape[1:])
+        labels.set_shape([self.hyper_params.batch_size] + labels.get_shape[1:])
+
         images = features["image"]
 
         feature_maps = self.convolutional_network(
@@ -74,7 +77,7 @@ class Model(object):
                 cell=lstm_cell,
                 inputs=[feature_vectors] * self.string_length,
                 initial_state=lstm_cell.zero_state(
-                    batch_size=tf.shape(feature_vectors)[0],
+                    batch_size=feature_vectors.shape[0],
                     dtype=tf.float32
                 )
             )[0] for feature_vectors in feature_vectors_sequence
@@ -88,7 +91,7 @@ class Model(object):
             return tf.SparseTensor(
                 indices=indices,
                 values=values,
-                dense_shape=tf.cast(tf.shape(dense), tf.int64)
+                dense_shape=dense.shape
             )
 
         labels_sequence = [
@@ -96,12 +99,10 @@ class Model(object):
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
-        sequence_length_sequence = [
-            tf.map_fn(
-                fn=lambda dense_label: tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))).shape[0],
-                elems=dense_labels
-            ) for dense_labels in tf.unstack(labels, axis=1)
-        ]
+        sequence_length_sequence = [[
+            tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))).shape[0]
+            for dense_label in tf.unstack(dense_labels, axis=0)
+        ] for dense_labels in tf.unstack(labels, axis=1)]
 
         ctc_loss = tf.reduce_mean([
             tf.nn.ctc_loss(

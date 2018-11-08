@@ -56,6 +56,7 @@ def main(unused_argv):
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
+                batch_size=args.batch_size,
                 cross_entropy_decay=1e-0,
                 attention_map_decay=1e-3,
                 total_variation_decay=1e-6
