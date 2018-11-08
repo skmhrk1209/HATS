@@ -59,48 +59,70 @@ class Model(object):
             ) for feature_vectors in feature_vectors_sequence
         ]
 
-        multi_logits_sequence = [[
-            tf.layers.dense(
-                inputs=feature_vectors,
-                units=self.num_classes,
-                kernel_initializer=tf.variance_scaling_initializer(
-                    scale=2.0,
-                    mode="fan_in",
-                    distribution="normal",
-                ),
-                bias_initializer=tf.zeros_initializer(),
-                name="logits_{}".format(i),
-                reuse=tf.AUTO_REUSE
-            ) for i in range(self.string_length)
-        ] for feature_vectors in feature_vectors_sequence]
+        lstm_cell = tf.nn.rnn_cell.LSTMCell(
+            num_units=self.num_classes,
+            use_peepholes=True,
+            initializer=tf.variance_scaling_initializer(
+                scale=2.0,
+                mode="fan_in",
+                distribution="normal",
+            )
+        )
 
-        multi_classes_sequence = [[
-            tf.argmax(logits, axis=-1, output_type=tf.int32)
-            for logits in multi_logits
-        ] for multi_logits in multi_logits_sequence]
-
-        multi_labels_sequence = [
-            tf.unstack(multi_labels, axis=1)
-            for multi_labels in tf.unstack(labels, axis=1)
+        logits_sequence = [
+            tf.nn.static_rnn(
+                cell=lstm_cell,
+                inputs=[feature_vectors] * self.string_length,
+                initial_state=lstm_cell.zero_state(
+                    batch_size=tf.shape(feature_vectors)[0],
+                    dtype=tf.float32
+                )
+            )[0] for feature_vectors in feature_vectors_sequence
         ]
 
-        if mode == tf.estimator.ModeKeys.PREDICT:
+        def to_sparse(dense, blank):
 
-            return tf.estimator.EstimatorSpec(
-                mode=mode,
-                predictions=dict(
-                    {"images": images},
-                    *{"merged_attention_maps_{}".format(i): merged_attention_maps
-                      for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)}
-                )
+            indices = tf.where(tf.not_equal(dense, tf.constant(blank)))
+            values = tf.gather_nd(dense, indices)
+
+            return tf.SparseTensor(
+                indices=indices,
+                values=values,
+                dense_shape=dense.shape
             )
 
-        cross_entropy_loss = tf.reduce_mean([[
-            tf.losses.sparse_softmax_cross_entropy(
+        labels_sequence = [
+            to_sparse(dense_labels, self.num_classes - 1)
+            for dense_labels in tf.unstack(labels, axis=1)
+        ]
+
+        sequence_length_sequence = [[
+            tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))).shape[0]
+            for dense_label in tf.unstack(dense_labels, axis=0)
+        ] for dense_labels in tf.unstack(labels, axis=1)]
+
+        ctc_loss = tf.reduce_mean([
+            tf.nn.ctc_loss(
                 labels=labels,
-                logits=logits
-            ) for labels, logits in zip(multi_labels, multi_logits)
-        ] for multi_labels, multi_logits in zip(multi_labels_sequence, multi_logits_sequence)])
+                inputs=logits,
+                sequence_length=sequence_length,
+                preprocess_collapse_repeated=False,
+                ctc_merge_repeated=True,
+                ignore_longer_outputs_than_inputs=False,
+                time_major=True
+            ) for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence)
+        ])
+
+        error_rate = tf.reduce_mean([
+            tf.edit_distance(
+                hypothesis=tf.nn.ctc_greedy_decoder(
+                    inputs=logits,
+                    sequence_length=sequence_length
+                )[0][0],
+                truth=labels,
+                normalize=True
+            )
+        ] for labels, logits, sequence_length in zip(labels_sequence, logits_sequence, sequence_length_sequence))
 
         attention_map_loss = tf.reduce_mean([
             tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3]))
@@ -113,34 +135,19 @@ class Model(object):
         ])
 
         loss = \
-            cross_entropy_loss * self.hyper_params.cross_entropy_decay + \
+            ctc_loss * self.hyper_params.ctc_loss_decay + \
             attention_map_loss * self.hyper_params.attention_map_decay + \
             total_variation_loss * self.hyper_params.total_variation_decay
-
-        classes = tf.stack([
-            tf.stack(multi_classes, axis=1)
-            for multi_classes in multi_classes_sequence
-        ], axis=1)
-
-        streaming_accuracy = tf.metrics.accuracy(
-            labels=labels,
-            predictions=classes
-        )
-
-        non_streaming_accuracy = tf.reduce_mean(
-            input_tensor=tf.cast(tf.equal(labels, classes), tf.float32),
-            name="non_streaming_accuracy"
-        )
 
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
         [tf.summary.image("merged_attention_maps_sequence_{}".format(i), merged_attention_maps, max_outputs=2)
          for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
-        tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
+        tf.summary.scalar("ctc_loss", ctc_loss)
         tf.summary.scalar("attention_map_loss", attention_map_loss)
         tf.summary.scalar("total_variation_loss", total_variation_loss)
         tf.summary.scalar("loss", loss)
-        tf.summary.scalar("accuracy", streaming_accuracy[1])
+        tf.summary.scalar("error_rate", error_rate)
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
@@ -163,5 +170,5 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops={"accuracy": streaming_accuracy}
+                eval_metric_ops={"error_rate": error_rate}
             )
