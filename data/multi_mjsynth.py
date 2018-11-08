@@ -43,7 +43,7 @@ class Dataset(dataset.Dataset):
         if self.data_format == "channels_first":
             image = tf.transpose(image, [2, 0, 1])
 
-        label = tf.cast(features["labels"], tf.int32)
+        label = tf.cast(features["label"], tf.int32)
         label = tf.reshape(label, [self.sequence_length, self.string_length])
 
         return {"image": image}, label
