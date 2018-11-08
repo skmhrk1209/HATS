@@ -18,8 +18,8 @@ class Model(object):
 
         images = features["image"]
 
-        images.set_shape([self.hyper_params.batch_size] + images.get_shape().as_list()[1:])
-        labels.set_shape([self.hyper_params.batch_size] + labels.get_shape().as_list()[1:])
+        images.shape[0] = self.hyper_params.batch_size
+        labels.shape[0] = self.hyper_params.batch_size
 
         print(images.shape)
 
@@ -43,7 +43,7 @@ class Model(object):
 
         def flatten_images(inputs, data_format):
 
-            input_shape = inputs.get_shape().as_list()
+            input_shape = inputs.shape.as_list()
             output_shape = ([-1, input_shape[1], np.prod(input_shape[2:4])] if self.data_format == "channels_first" else
                             [-1, np.prod(input_shape[1:3]), input_shape[3]])
 
@@ -102,7 +102,7 @@ class Model(object):
         ]
 
         sequence_length_sequence = [[
-            tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))).shape[0]
+            tf.where(tf.not_equal(dense_label, tf.constant(self.num_classes - 1))).shape.as_list()[0]
             for dense_label in tf.unstack(dense_labels, axis=0)
         ] for dense_labels in tf.unstack(labels, axis=1)]
 
