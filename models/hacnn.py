@@ -76,9 +76,7 @@ class Model(object):
         multi_logits_sequence = [[
             tf.layers.dense(
                 inputs=feature_vectors,
-                units=self.num_classes,
-                name="logits",
-                reuse=tf.AUTO_REUSE
+                units=self.num_classes
             ) for feature_vectors in multi_feature_vectors
         ] for multi_feature_vectors in multi_feature_vectors_sequence]
 
