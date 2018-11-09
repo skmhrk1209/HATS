@@ -51,7 +51,7 @@ def main(unused_argv):
                 rnn_params=[
                     AttrDict(sequence_length=4, num_units=[64, 64]),
                     AttrDict(sequence_length=10, num_units=[8, 8])
-                ]
+                ],
                 data_format=args.data_format
             ),
             num_classes=63,
