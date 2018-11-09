@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import functools
+from fabric.colors import magenta
 
 
 def map_innermost(function, sequence, classes=(list,)):
@@ -28,11 +28,13 @@ class AttentionNetwork(object):
 
         with tf.variable_scope(name, reuse=reuse):
 
-            print("building attention network: {}".format(name))
+            print(magenta("building attention network: {}".format(name)))
 
             for i, conv_param in enumerate(self.conv_params):
 
                 with tf.variable_scope("conv_block_{}".format(i)):
+
+                    print(magenta("-" * 128))
 
                     inputs = tf.layers.conv2d(
                         inputs=inputs,
@@ -50,6 +52,10 @@ class AttentionNetwork(object):
                         name="conv2d"
                     )
 
+                    print(magenta("conv2d: filters={}, kernel_size={}, strides={}".format(
+                        conv_param.filters, conv_param.kernel_size, conv_param.strides
+                    )))
+
                     inputs = tf.layers.batch_normalization(
                         inputs=inputs,
                         axis=1 if self.data_format == "channels_first" else 3,
@@ -58,7 +64,11 @@ class AttentionNetwork(object):
                         name="batch_normalization"
                     )
 
+                    print(magenta("batch normalization"))
+
                     inputs = tf.nn.relu(inputs)
+
+                    print(magenta("relu"))
 
             shape = inputs.shape.as_list()
 
@@ -67,6 +77,8 @@ class AttentionNetwork(object):
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
+
+                    print(magenta("-" * 128))
 
                     multi_lstm_cell = tf.nn.rnn_cell.MultiRNNCell([
                         tf.nn.rnn_cell.LSTMCell(
@@ -85,7 +97,13 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
+                    print(magenta("rnn: cell_type=LSTM, sequence_length={}, num_units: {}".format(
+                        rnn_param.sequence_length, rnn_param.num_units
+                    )))
+
             with tf.variable_scope("projection_block"):
+
+                print(magenta("-" * 128))
 
                 inputs = map_innermost(
                     function=lambda inputs: tf.layers.dense(
@@ -103,10 +121,14 @@ class AttentionNetwork(object):
                     sequence=inputs
                 )
 
+                print(magenta("dense: num_units: {}".format(np.prod(shape[1:]))))
+
                 inputs = map_innermost(
                     function=lambda inputs: tf.nn.relu(inputs),
                     sequence=inputs
                 )
+
+                print(magenta("relu"))
 
                 inputs = map_innermost(
                     function=lambda inputs: tf.reshape(
@@ -119,6 +141,8 @@ class AttentionNetwork(object):
             for i, deconv_param in enumerate(self.deconv_params[:-1]):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
+
+                    print(magenta("-" * 128))
 
                     inputs = map_innermost(
                         function=lambda inputs: tf.layers.conv2d_transpose(
@@ -140,6 +164,10 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
+                    print(magenta("deconv2d: filters={}, kernel_size={}, strides={}".format(
+                        deconv_param.filters, deconv_param.kernel_size, deconv_param.strides
+                    )))
+
                     inputs = map_innermost(
                         function=lambda inputs: tf.layers.batch_normalization(
                             inputs=inputs,
@@ -152,10 +180,14 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
+                    print(magenta("batch normalization"))
+
                     inputs = map_innermost(
                         function=lambda inputs: tf.nn.relu(inputs),
                         sequence=inputs
                     )
+
+                    print(magenta("relu"))
 
             for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
 
@@ -181,6 +213,10 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
+                    print(magenta("deconv2d: filters={}, kernel_size={}, strides={}".format(
+                        deconv_param.filters, deconv_param.kernel_size, deconv_param.strides
+                    )))
+
                     inputs = map_innermost(
                         function=lambda inputs: tf.layers.batch_normalization(
                             inputs=inputs,
@@ -193,10 +229,14 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
+                    print(magenta("batch normalization"))
+
                     inputs = map_innermost(
                         function=lambda inputs: tf.nn.sigmoid(inputs),
                         sequence=inputs
                     )
+
+                    print(magenta("sigmoid"))
 
             print("attention depth: {}".format(nest_depth(inputs)))
 
