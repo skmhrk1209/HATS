@@ -124,8 +124,9 @@ class Model(object):
 
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
-        [tf.summary.image("merged_attention_maps_sequence_{}".format(i), merged_attention_maps, max_outputs=2)
-         for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
+        [[tf.summary.image("merged_attention_maps_{}_{}".format(i, j), merged_attention_maps, max_outputs=2)
+          for j, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
+         for i, merged_attention_maps_sequence in enumerate(merged_attention_maps_sequence_sequence)]
         tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
         tf.summary.scalar("attention_map_loss", attention_map_loss)
         tf.summary.scalar("total_variation_loss", total_variation_loss)
