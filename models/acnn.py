@@ -95,7 +95,7 @@ class Model(object):
             )
 
         labels_sequence = [
-            to_sparse(dense_labels, self.num_classes)
+            to_sparse(dense_labels, self.num_classes - 1)
             for dense_labels in tf.unstack(labels, axis=1)
         ]
 
