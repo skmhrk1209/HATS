@@ -95,12 +95,9 @@ class Model(object):
             )
 
         labels_sequence = [
-            to_sparse(dense_labels, self.num_classes - 1)
+            to_sparse(dense_labels, self.num_classes)
             for dense_labels in tf.unstack(labels, axis=1)
         ]
-
-        for l in tf.unstack(labels, axis=1):
-            tf.Print(l, [l], "l: ")
 
         ctc_loss = tf.reduce_mean([
             tf.nn.ctc_loss(
