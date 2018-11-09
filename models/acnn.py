@@ -72,7 +72,7 @@ class Model(object):
         ]
 
         multi_classes_sequence = [[
-            tf.argmax(logits, axis=-1, output_type=tf.int32)
+            tf.argmax(logits, axis=-1)
             for logits in multi_logits
         ] for multi_logits in multi_logits_sequence]
 
