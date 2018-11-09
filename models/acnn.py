@@ -81,7 +81,7 @@ class Model(object):
         ] for multi_feature_vectors in multi_feature_vectors_sequence]
 
         multi_classes_sequence = [[
-            tf.argmax(logits, axis=-1)
+            tf.argmax(logits, axis=-1, output_type=tf.int32)
             for logits in multi_logits
         ] for multi_logits in multi_logits_sequence]
 
