@@ -35,8 +35,6 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[2, 2], blocks=2),
-                    AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -45,14 +43,10 @@ def main(unused_argv):
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=32, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=3, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 bottleneck_units=16,
                 sequence_length=4,
@@ -64,7 +58,7 @@ def main(unused_argv):
             data_format=args.data_format,
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
-                attention_map_decay=1e-3,
+                attention_map_decay=1e-2,
                 total_variation_decay=1e-6
             )
         ),
