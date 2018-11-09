@@ -74,10 +74,7 @@ class Model(object):
             sequence=logits
         )
 
-        labels = [
-            tf.unstack(labels, axis=1)
-            for labels in tf.unstack(labels, axis=1)
-        ]
+        labels = [tf.unstack(labels, axis=1) for labels in tf.unstack(labels, axis=1)]
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -113,25 +110,12 @@ class Model(object):
             attention_map_loss * self.hyper_params.attention_map_decay + \
             total_variation_loss * self.hyper_params.total_variation_decay
 
-        labels = tf.stack([
-            tf.stack(labels_sequence, axis=1)
-            for labels_sequence in labels_sequence_sequence
-        ], axis=1)
-
-        predictions = tf.stack([
-            tf.stack(predictions_sequence, axis=1)
-            for predictions_sequence in predictions_sequence_sequence
-        ], axis=1)
-
-        streaming_accuracy = tf.metrics.accuracy(
+        accuracy = tf.metrics.accuracy(
             labels=labels,
             predictions=predictions
         )
 
-        non_streaming_accuracy = tf.reduce_mean(
-            input_tensor=tf.cast(tf.equal(labels, predictions), tf.float32),
-            name="non_streaming_accuracy"
-        )
+        tf.identity(accuracy[0], "accuracy_value")
 
         # ==========================================================================================
         enumerate_map_innermost(
@@ -147,7 +131,7 @@ class Model(object):
         tf.summary.scalar("attention_map_loss", attention_map_loss)
         tf.summary.scalar("total_variation_loss", total_variation_loss)
         tf.summary.scalar("loss", loss)
-        tf.summary.scalar("accuracy", streaming_accuracy[1])
+        tf.summary.scalar("accuracy", accuracy[1])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
@@ -170,5 +154,5 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops={"streaming_accuracy": streaming_accuracy}
+                eval_metric_ops={"accuracy": accuracy}
             )
