@@ -1,19 +1,7 @@
 import tensorflow as tf
 import numpy as np
+from algorithms.sequence import *
 from fabric.colors import magenta
-
-
-def map_innermost(function, sequence, classes=(list,)):
-
-    return ([map_innermost(function, element) for element in sequence]
-            if isinstance(sequence, classes) else function(sequence))
-
-
-def nest_depth(sequence, classes=(list,)):
-
-    return (max([nest_depth(element, classes) for element in sequence]) + 1
-            if isinstance(sequence, classes) else 0)
-
 
 class AttentionNetwork(object):
 

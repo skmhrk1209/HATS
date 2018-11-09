@@ -5,12 +5,12 @@ import itertools
 import cv2
 from utils.attr_dict import AttrDict
 from data.multi_mjsynth import Dataset
-from models.hacnn import Model
+from models.acnn import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network_ import AttentionNetwork
+from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model_3", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -35,8 +35,6 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
-                    AttrDict(filters=512, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -44,18 +42,18 @@ def main(unused_argv):
             attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
-                rnn_params=[
-                    AttrDict(sequence_length=4, num_units=[256, 256]),
-                    AttrDict(sequence_length=10, num_units=[16, 16])
-                ],
+                bottleneck_units=16,
+                sequence_length=4,
                 data_format=args.data_format
             ),
+            string_length=10,
+            lstm_units=128,
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(

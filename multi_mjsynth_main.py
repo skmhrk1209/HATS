@@ -5,7 +5,7 @@ import itertools
 import cv2
 from utils.attr_dict import AttrDict
 from data.multi_mjsynth import Dataset
-from models.acnn import Model
+from models.hacnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
@@ -35,6 +35,8 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=256, strides=[1, 1], blocks=2),
+                    AttrDict(filters=512, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -42,18 +44,18 @@ def main(unused_argv):
             attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
-                ],
-                deconv_params=[
-                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
-                bottleneck_units=16,
-                sequence_length=4,
+                deconv_params=[
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                ],
+                rnn_params=[
+                    AttrDict(sequence_length=4, num_units=[256, 256]),
+                    AttrDict(sequence_length=10, num_units=[16, 16])
+                ],
                 data_format=args.data_format
             ),
-            string_length=10,
-            lstm_units=128,
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
