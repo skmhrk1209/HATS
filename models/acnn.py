@@ -18,9 +18,6 @@ class Model(object):
 
         images = features["image"]
 
-        images.set_shape([self.hyper_params.batch_size] + images.shape.as_list()[1:])
-        labels.set_shape([self.hyper_params.batch_size] + labels.shape.as_list()[1:])
-
         feature_maps = self.convolutional_network(
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
@@ -41,25 +38,19 @@ class Model(object):
 
         def flatten_images(inputs, data_format):
 
-            input_shape = inputs.shape.as_list()
+            input_shape = inputs.get_shape().as_list()
             output_shape = ([-1, input_shape[1], np.prod(input_shape[2:4])] if self.data_format == "channels_first" else
                             [-1, np.prod(input_shape[1:3]), input_shape[3]])
 
             return tf.reshape(inputs, output_shape)
 
         feature_vectors_sequence = [
-            tf.matmul(
+            tf.layers.flatten(tf.matmul(
                 a=flatten_images(feature_maps, self.data_format),
                 b=flatten_images(attention_maps, self.data_format),
                 transpose_a=False if self.data_format == "channels_first" else True,
                 transpose_b=True if self.data_format == "channels_first" else False
-            ) for attention_maps in attention_maps_sequence
-        ]
-
-        feature_vectors_sequence = [
-            tf.layers.flatten(
-                inputs=feature_vectors
-            ) for feature_vectors in feature_vectors_sequence
+            )) for attention_maps in attention_maps_sequence
         ]
 
         lstm_cell = tf.nn.rnn_cell.LSTMCell(
@@ -72,57 +63,41 @@ class Model(object):
             )
         )
 
-        logits_sequence = [
+        multi_logits_sequence = [
             tf.nn.static_rnn(
                 cell=lstm_cell,
                 inputs=[feature_vectors] * self.string_length,
-                initial_state=lstm_cell.zero_state(
-                    batch_size=feature_vectors.shape[0],
-                    dtype=tf.float32
-                )
+                dtype=tf.float32
             )[0] for feature_vectors in feature_vectors_sequence
         ]
 
-        def to_sparse(dense, blank):
+        multi_classes_sequence = [[
+            tf.argmax(logits, axis=-1, output_type=tf.int32)
+            for logits in multi_logits
+        ] for multi_logits in multi_logits_sequence]
 
-            indices = tf.where(tf.not_equal(dense, blank))
-            values = tf.gather_nd(dense, indices)
-
-            return tf.SparseTensor(
-                indices=indices,
-                values=values,
-                dense_shape=dense.shape
-            )
-
-        labels_sequence = [
-            to_sparse(dense_labels, self.num_classes - 1)
-            for dense_labels in tf.unstack(labels, axis=1)
+        multi_labels_sequence = [
+            tf.unstack(multi_labels, axis=1)
+            for multi_labels in tf.unstack(labels, axis=1)
         ]
 
-        ctc_loss = tf.reduce_mean([
-            tf.nn.ctc_loss(
+        if mode == tf.estimator.ModeKeys.PREDICT:
+
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                predictions=dict(
+                    {"images": images},
+                    *{"merged_attention_maps_{}".format(i): merged_attention_maps
+                      for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)}
+                )
+            )
+
+        cross_entropy_loss = tf.reduce_mean([[
+            tf.losses.sparse_softmax_cross_entropy(
                 labels=labels,
-                inputs=logits,
-                sequence_length=[self.string_length] * self.hyper_params.batch_size,
-                preprocess_collapse_repeated=False,
-                ctc_merge_repeated=True,
-                ignore_longer_outputs_than_inputs=False,
-                time_major=True
-            ) for labels, logits in zip(labels_sequence, logits_sequence)
-        ])
-
-        error_rate = tf.reduce_mean([
-            tf.edit_distance(
-                hypothesis=tf.cast(tf.nn.ctc_greedy_decoder(
-                    inputs=logits,
-                    sequence_length=[self.string_length] * self.hyper_params.batch_size
-                )[0][0], tf.int32),
-                truth=labels,
-                normalize=True
-            ) for labels, logits in zip(labels_sequence, logits_sequence)
-        ])
-
-        error_rate = tf.identity(error_rate, name="errot_rate")
+                logits=logits
+            ) for labels, logits in zip(multi_labels, multi_logits)
+        ] for multi_labels, multi_logits in zip(multi_labels_sequence, multi_logits_sequence)])
 
         attention_map_loss = tf.reduce_mean([
             tf.reduce_mean(tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3]))
@@ -135,19 +110,34 @@ class Model(object):
         ])
 
         loss = \
-            ctc_loss * self.hyper_params.ctc_loss_decay + \
+            cross_entropy_loss * self.hyper_params.cross_entropy_decay + \
             attention_map_loss * self.hyper_params.attention_map_decay + \
             total_variation_loss * self.hyper_params.total_variation_decay
+
+        classes = tf.stack([
+            tf.stack(multi_classes, axis=1)
+            for multi_classes in multi_classes_sequence
+        ], axis=1)
+
+        streaming_accuracy = tf.metrics.accuracy(
+            labels=labels,
+            predictions=classes
+        )
+
+        non_streaming_accuracy = tf.reduce_mean(
+            input_tensor=tf.cast(tf.equal(labels, classes), tf.float32),
+            name="non_streaming_accuracy"
+        )
 
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
         [tf.summary.image("merged_attention_maps_sequence_{}".format(i), merged_attention_maps, max_outputs=2)
          for i, merged_attention_maps in enumerate(merged_attention_maps_sequence)]
-        tf.summary.scalar("ctc_loss", ctc_loss)
+        tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
         tf.summary.scalar("attention_map_loss", attention_map_loss)
         tf.summary.scalar("total_variation_loss", total_variation_loss)
         tf.summary.scalar("loss", loss)
-        tf.summary.scalar("error_rate", error_rate)
+        tf.summary.scalar("accuracy", streaming_accuracy[1])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
@@ -170,5 +160,5 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops={"error_rate": error_rate}
+                eval_metric_ops={"accuracy": streaming_accuracy}
             )

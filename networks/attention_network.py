@@ -78,10 +78,7 @@ class AttentionNetwork(object):
                 inputs_sequence = tf.nn.static_rnn(
                     cell=multi_lstm_cell,
                     inputs=inputs_sequence,
-                    initial_state=multi_lstm_cell.zero_state(
-                        batch_size=tf.shape(inputs)[0],
-                        dtype=tf.float32
-                    )
+                    dtype=tf.float32
                 )[0]
 
                 inputs_sequence = [
