@@ -5,7 +5,7 @@ from data.multi_mjsynth import Dataset
 label = Dataset(
     filenames="multi_mjsynth_train.tfrecord",
     num_epochs=1,
-    batch_size=128,
+    batch_size=1,
     buffer_size=1,
     data_format="channels_last",
     image_size=[256, 256],
