@@ -101,7 +101,7 @@ class Model(object):
             sequence=attention_maps
         ))
 
-        total_valiation_loss = tf.reduce_mean(map_innermost(
+        total_variation_loss = tf.reduce_mean(map_innermost(
             function=lambda attention_maps: tf.reduce_mean(
                 tf.image.total_variation(attention_maps)
             ),
