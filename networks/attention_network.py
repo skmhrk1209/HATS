@@ -1,20 +1,35 @@
 import tensorflow as tf
 import numpy as np
+from fabric.colors import magenta
+
+
+def map_innermost(function, sequence, classes=(list,)):
+
+    return ([map_innermost(function, element) for element in sequence]
+            if isinstance(sequence, classes) else function(sequence))
+
+
+def nest_depth(sequence, classes=(list,)):
+
+    return (max([nest_depth(element, classes) for element in sequence]) + 1
+            if isinstance(sequence, classes) else 0)
 
 
 class AttentionNetwork(object):
 
-    def __init__(self, conv_params, deconv_params, bottleneck_units, sequence_length, data_format):
+    def __init__(self, conv_params, deconv_params, rnn_params, data_format):
 
         self.conv_params = conv_params
         self.deconv_params = deconv_params
-        self.bottleneck_units = bottleneck_units
-        self.sequence_length = sequence_length
+        self.rnn_params = rnn_params
         self.data_format = data_format
 
     def __call__(self, inputs, training, name="attention_network", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
+
+            print(magenta("-" * 64))
+            print(magenta("building attention network: {}".format(name)))
 
             for i, conv_param in enumerate(self.conv_params):
 
@@ -36,6 +51,11 @@ class AttentionNetwork(object):
                         name="conv2d"
                     )
 
+                    print(magenta("-" * 64))
+                    print(magenta("conv2d: filters={}, kernel_size={}, strides={}".format(
+                        conv_param.filters, conv_param.kernel_size, conv_param.strides
+                    )))
+
                     inputs = tf.layers.batch_normalization(
                         inputs=inputs,
                         axis=1 if self.data_format == "channels_first" else 3,
@@ -44,46 +64,87 @@ class AttentionNetwork(object):
                         name="batch_normalization"
                     )
 
+                    print(magenta("-" * 64))
+                    print(magenta("batch normalization"))
+
                     inputs = tf.nn.relu(inputs)
+
+                    print(magenta("-" * 64))
+                    print(magenta("relu"))
 
             shape = inputs.shape.as_list()
 
-            with tf.variable_scope("bottleneck_block"):
+            inputs = tf.layers.flatten(inputs)
 
-                inputs = tf.layers.flatten(inputs)
+            for i, rnn_param in enumerate(self.rnn_params):
 
-                inputs_sequence = [inputs] * self.sequence_length
+                with tf.variable_scope("rnn_block_{}".format(i)):
 
-                multi_lstm_cell = tf.nn.rnn_cell.MultiRNNCell([
-                    tf.nn.rnn_cell.LSTMCell(
-                        num_units=self.bottleneck_units,
-                        use_peepholes=True
-                    ),
-                    tf.nn.rnn_cell.LSTMCell(
-                        num_units=np.prod(shape[1:]),
-                        use_peepholes=True
+                    multi_lstm_cell = tf.nn.rnn_cell.MultiRNNCell([
+                        tf.nn.rnn_cell.LSTMCell(
+                            num_units=num_units,
+                            use_peepholes=True
+                        ) for num_units in rnn_param.num_units
+                    ])
+
+                    inputs = map_innermost(
+                        function=lambda inputs: tf.nn.static_rnn(
+                            cell=multi_lstm_cell,
+                            inputs=[inputs] * rnn_param.sequence_length,
+                            dtype=tf.float32,
+                            scope="rnn"
+                        )[0],
+                        sequence=inputs
                     )
-                ])
 
-                inputs_sequence = tf.nn.static_rnn(
-                    cell=multi_lstm_cell,
-                    inputs=inputs_sequence,
-                    dtype=tf.float32
-                )[0]
+                    print(magenta("-" * 64))
+                    print(magenta("rnn: cell_type=LSTM, sequence_length={}, num_units: {}".format(
+                        rnn_param.sequence_length, rnn_param.num_units
+                    )))
 
-                inputs_sequence = [
-                    tf.reshape(
+            with tf.variable_scope("projection_block"):
+
+                inputs = map_innermost(
+                    function=lambda inputs: tf.layers.dense(
+                        inputs=inputs,
+                        units=np.prod(shape[1:]),
+                        kernel_initializer=tf.variance_scaling_initializer(
+                            scale=2.0,
+                            mode="fan_in",
+                            distribution="normal",
+                        ),
+                        bias_initializer=tf.zeros_initializer(),
+                        name="projection",
+                        reuse=tf.AUTO_REUSE
+                    ),
+                    sequence=inputs
+                )
+
+                print(magenta("-" * 64))
+                print(magenta("dense: num_units: {}".format(np.prod(shape[1:]))))
+
+                inputs = map_innermost(
+                    function=lambda inputs: tf.nn.relu(inputs),
+                    sequence=inputs
+                )
+
+                print(magenta("-" * 64))
+                print(magenta("relu"))
+
+                inputs = map_innermost(
+                    function=lambda inputs: tf.reshape(
                         tensor=inputs,
                         shape=[-1] + shape[1:]
-                    ) for inputs in inputs_sequence
-                ]
+                    ),
+                    sequence=inputs
+                )
 
             for i, deconv_param in enumerate(self.deconv_params[:-1]):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
-                    inputs_sequence = [
-                        tf.layers.conv2d_transpose(
+                    inputs = map_innermost(
+                        function=lambda inputs: tf.layers.conv2d_transpose(
                             inputs=inputs,
                             filters=deconv_param.filters,
                             kernel_size=deconv_param.kernel_size,
@@ -98,31 +159,44 @@ class AttentionNetwork(object):
                             ),
                             name="deconv2d",
                             reuse=tf.AUTO_REUSE
-                        ) for inputs in inputs_sequence
-                    ]
+                        ),
+                        sequence=inputs
+                    )
 
-                    inputs_sequence = [
-                        tf.layers.batch_normalization(
+                    print(magenta("-" * 64))
+                    print(magenta("deconv2d: filters={}, kernel_size={}, strides={}".format(
+                        deconv_param.filters, deconv_param.kernel_size, deconv_param.strides
+                    )))
+
+                    inputs = map_innermost(
+                        function=lambda inputs: tf.layers.batch_normalization(
                             inputs=inputs,
                             axis=1 if self.data_format == "channels_first" else 3,
                             training=training,
                             fused=True,
                             name="batch_normalization",
                             reuse=tf.AUTO_REUSE
-                        ) for inputs in inputs_sequence
-                    ]
+                        ),
+                        sequence=inputs
+                    )
 
-                    inputs_sequence = [
-                        tf.nn.relu(inputs)
-                        for inputs in inputs_sequence
-                    ]
+                    print(magenta("-" * 64))
+                    print(magenta("batch normalization"))
+
+                    inputs = map_innermost(
+                        function=lambda inputs: tf.nn.relu(inputs),
+                        sequence=inputs
+                    )
+
+                    print(magenta("-" * 64))
+                    print(magenta("relu"))
 
             for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
-                    inputs_sequence = [
-                        tf.layers.conv2d_transpose(
+                    inputs = map_innermost(
+                        function=lambda inputs: tf.layers.conv2d_transpose(
                             inputs=inputs,
                             filters=deconv_param.filters,
                             kernel_size=deconv_param.kernel_size,
@@ -137,23 +211,39 @@ class AttentionNetwork(object):
                             ),
                             name="deconv2d",
                             reuse=tf.AUTO_REUSE
-                        ) for inputs in inputs_sequence
-                    ]
+                        ),
+                        sequence=inputs
+                    )
 
-                    inputs_sequence = [
-                        tf.layers.batch_normalization(
+                    print(magenta("-" * 64))
+                    print(magenta("deconv2d: filters={}, kernel_size={}, strides={}".format(
+                        deconv_param.filters, deconv_param.kernel_size, deconv_param.strides
+                    )))
+
+                    inputs = map_innermost(
+                        function=lambda inputs: tf.layers.batch_normalization(
                             inputs=inputs,
                             axis=1 if self.data_format == "channels_first" else 3,
                             training=training,
                             fused=True,
                             name="batch_normalization",
                             reuse=tf.AUTO_REUSE
-                        ) for inputs in inputs_sequence
-                    ]
+                        ),
+                        sequence=inputs
+                    )
 
-                    inputs_sequence = [
-                        tf.nn.sigmoid(inputs)
-                        for inputs in inputs_sequence
-                    ]
+                    print(magenta("-" * 64))
+                    print(magenta("batch normalization"))
 
-            return inputs_sequence
+                    inputs = map_innermost(
+                        function=lambda inputs: tf.nn.sigmoid(inputs),
+                        sequence=inputs
+                    )
+
+                    print(magenta("-" * 64))
+                    print(magenta("sigmoid"))
+
+            print(magenta("-" * 64))
+            print(magenta("attention depth: {}".format(nest_depth(inputs))))
+
+            return inputs

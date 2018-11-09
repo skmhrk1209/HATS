@@ -35,6 +35,8 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=256, strides=[1, 1], blocks=2),
+                    AttrDict(filters=512, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -42,15 +44,15 @@ def main(unused_argv):
             attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
-                ],
-                deconv_params=[
-                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
+                deconv_params=[
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                ],
                 rnn_params=[
-                    AttrDict(sequence_length=4, num_units=[64, 64]),
-                    AttrDict(sequence_length=10, num_units=[8, 8])
+                    AttrDict(sequence_length=4, num_units=[256, 256]),
+                    AttrDict(sequence_length=10, num_units=[16, 16])
                 ],
                 data_format=args.data_format
             ),
