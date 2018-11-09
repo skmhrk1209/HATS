@@ -53,6 +53,7 @@ def main(unused_argv):
                 data_format=args.data_format
             ),
             string_length=10,
+            lstm_units=128,
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
