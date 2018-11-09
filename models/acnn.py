@@ -160,5 +160,5 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops={"accuracy": streaming_accuracy}
+                eval_metric_ops={"streaming_accuracy": streaming_accuracy}
             )

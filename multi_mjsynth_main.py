@@ -8,7 +8,6 @@ from data.multi_mjsynth import Dataset
 from models.acnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
-from tensorflow.python import debug as tf_debug
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
@@ -57,8 +56,7 @@ def main(unused_argv):
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                batch_size=args.batch_size,
-                ctc_loss_decay=1e-0,
+                cross_entropy_decay=1e-0,
                 attention_map_decay=1e-3,
                 total_variation_decay=1e-6
             )
@@ -89,7 +87,9 @@ def main(unused_argv):
             ).get_next(),
             hooks=[
                 tf.train.LoggingTensorHook(
-                    tensors={"error_rate": "error_rate"},
+                    tensors={
+                        "non_streaming_accuracy": "non_streaming_accuracy"
+                    },
                     every_n_iter=100
                 )
             ]
