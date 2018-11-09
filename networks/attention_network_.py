@@ -28,6 +28,7 @@ class AttentionNetwork(object):
 
         with tf.variable_scope(name, reuse=reuse):
 
+            print(magenta("-" * 64))
             print(magenta("building attention network: {}".format(name)))
 
             for i, conv_param in enumerate(self.conv_params):
