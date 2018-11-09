@@ -5,7 +5,7 @@ import itertools
 import cv2
 from utils.attr_dict import AttrDict
 from data.multi_mjsynth import Dataset
-from models.hacnn import Model
+from models.acnn import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
