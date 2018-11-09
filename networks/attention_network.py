@@ -3,6 +3,7 @@ import numpy as np
 from algorithms.sequence import *
 from fabric.colors import magenta
 
+
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params, rnn_params, data_format):
@@ -109,7 +110,7 @@ class AttentionNetwork(object):
                 )
 
                 print(magenta("-" * 64))
-                print(magenta("dense: num_units: {}".format(np.prod(shape[1:]))))
+                print(magenta("dense: num_units={}".format(np.prod(shape[1:]))))
 
                 inputs = map_innermost(
                     function=lambda inputs: tf.nn.relu(inputs),
