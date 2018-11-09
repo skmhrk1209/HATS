@@ -1,17 +1,17 @@
 import tensorflow as tf
 import numpy as np
-from . import dataset
+from . import base
 
 
-class Dataset(dataset.Dataset):
+class Dataset(base.Dataset):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size,
-                 data_format, image_size, sequence_length, string_length):
+                 image_size, sequence_length, string_length, data_format):
 
-        self.data_format = data_format
         self.image_size = image_size
         self.sequence_length = sequence_length
         self.string_length = string_length
+        self.data_format = data_format
 
         super(Dataset, self).__init__(filenames, num_epochs, batch_size, buffer_size)
 

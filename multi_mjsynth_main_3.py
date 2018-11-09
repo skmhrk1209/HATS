@@ -7,10 +7,10 @@ from utils.attr_dict import AttrDict
 from data.multi_mjsynth import Dataset
 from models.hacnn import Model
 from networks.residual_network import ResidualNetwork
-from networks.hierarchical_attention_network import HierarchicalAttentionNetwork
+from networks.attention_network_ import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model_2", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model_3", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -39,7 +39,7 @@ def main(unused_argv):
                 num_classes=None,
                 data_format=args.data_format
             ),
-            attention_network=HierarchicalAttentionNetwork(
+            attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
@@ -48,10 +48,10 @@ def main(unused_argv):
                     AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
-                global_sequence_length=4,
-                global_bottleneck_units=64,
-                local_sequence_length=10,
-                local_bottleneck_units=8,
+                rnn_params=[
+                    AttrDict(sequence_length=4, num_units=[64, 64]),
+                    AttrDict(sequence_length=10, num_units=[8, 8])
+                ]
                 data_format=args.data_format
             ),
             num_classes=63,
