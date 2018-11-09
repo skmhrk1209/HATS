@@ -78,7 +78,7 @@ class AttentionNetwork(object):
                     ) for inputs in inputs_sequence
                 ]
 
-            for i, deconv_param in enumerate(self.deconv_params)[:-1]:
+            for i, deconv_param in enumerate(self.deconv_params[:-1]):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
@@ -117,7 +117,7 @@ class AttentionNetwork(object):
                         for inputs in inputs_sequence
                     ]
 
-            for i, deconv_param in enumerate(self.deconv_params)[-1:]:
+            for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
