@@ -3,6 +3,18 @@ import numpy as np
 import functools
 
 
+def map_innermost(function, sequence, classes=(list,)):
+
+    return ([map_innermost(function, element) for element in sequence]
+            if isinstance(sequence, classes) else function(sequence))
+
+
+def nest_depth(sequence, classes=(list,)):
+
+    return (max([nest_depth(element, classes) for element in sequence]) + 1
+            if isinstance(sequence, classes) else 0)
+
+
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params, rnn_params, data_format):
@@ -15,6 +27,8 @@ class AttentionNetwork(object):
     def __call__(self, inputs, training, name="attention_network", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
+
+            print("building attention network: {}".format(name))
 
             for i, conv_param in enumerate(self.conv_params):
 
@@ -49,11 +63,6 @@ class AttentionNetwork(object):
             shape = inputs.shape.as_list()
 
             inputs = tf.layers.flatten(inputs)
-
-            def map_innermost(function, sequence):
-
-                return ([map_innermost(function, element) for element in sequence]
-                        if isinstance(sequence, list) else function(sequence))
 
             for i, rnn_param in enumerate(self.rnn_params):
 
@@ -188,5 +197,7 @@ class AttentionNetwork(object):
                         function=lambda inputs: tf.nn.sigmoid(inputs),
                         sequence=inputs
                     )
+
+            print("attention depth: {}".format(nest_depth(inputs)))
 
             return inputs
