@@ -5,12 +5,10 @@ import numpy as np
 class Model(object):
 
     def __init__(self, convolutional_network, attention_network,
-                 string_length, lstm_units, num_classes, data_format, hyper_params):
+                 num_classes, data_format, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
-        self.string_length = string_length
-        self.lstm_units = lstm_units
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
