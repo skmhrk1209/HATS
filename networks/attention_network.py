@@ -131,8 +131,8 @@ class AttentionNetwork(object):
                             data_format=self.data_format,
                             use_bias=False,
                             kernel_initializer=tf.variance_scaling_initializer(
-                                scale=1.0,
-                                mode="fan_avg",
+                                scale=2.0,
+                                mode="fan_in",
                                 distribution="normal",
                             ),
                             name="deconv2d",
@@ -152,7 +152,7 @@ class AttentionNetwork(object):
                     ]
 
                     inputs_sequence = [
-                        tf.nn.sigmoid(inputs)
+                        tf.nn.relu(inputs)
                         for inputs in inputs_sequence
                     ]
 
