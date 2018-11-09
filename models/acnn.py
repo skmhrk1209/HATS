@@ -5,11 +5,12 @@ import numpy as np
 class Model(object):
 
     def __init__(self, convolutional_network, attention_network,
-                 string_length, num_classes, data_format, hyper_params):
+                 string_length, lstm_units, num_classes, data_format, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
         self.string_length = string_length
+        self.lstm_units = lstm_units
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -53,23 +54,31 @@ class Model(object):
             )) for attention_maps in attention_maps_sequence
         ]
 
-        lstm_cell = tf.nn.rnn_cell.LSTMCell(
-            num_units=self.num_classes,
-            use_peepholes=True,
-            initializer=tf.variance_scaling_initializer(
-                scale=2.0,
-                mode="fan_in",
-                distribution="normal",
-            )
+        lstm_cell_forward = tf.nn.rnn_cell.LSTMCell(
+            num_units=self.lstm_units,
+            use_peepholes=True
         )
 
-        multi_logits_sequence = [
-            tf.nn.static_rnn(
-                cell=lstm_cell,
+        lstm_cell_backward = tf.nn.rnn_cell.LSTMCell(
+            num_units=self.lstm_units,
+            use_peepholes=True
+        )
+
+        multi_feature_vectors_sequence = [
+            tf.nn.static_bidirectional_rnn(
+                cell_fw=lstm_cell_forward,
+                cell_bw=lstm_cell_backward,
                 inputs=[feature_vectors] * self.string_length,
                 dtype=tf.float32
             )[0] for feature_vectors in feature_vectors_sequence
         ]
+
+        multi_logits_sequence = [[
+            tf.layers.dense(
+                inputs=feature_vectors,
+                units=self.num_classes
+            ) for feature_vectors in multi_feature_vectors
+        ] for multi_feature_vectors in multi_feature_vectors_sequence]
 
         multi_classes_sequence = [[
             tf.argmax(logits, axis=-1)
