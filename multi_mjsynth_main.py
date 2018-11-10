@@ -27,8 +27,8 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
 
-    # best model
-    
+    # best model (accuracy: 86.6 %)
+    '''
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
@@ -75,8 +75,8 @@ def main(unused_argv):
             )
         )
     )
-    
     '''
+
     # model 1
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=Model(
@@ -123,7 +123,7 @@ def main(unused_argv):
             )
         )
     )
-    '''
+
     if args.train:
 
         multi_mjsynth_classifier.train(
