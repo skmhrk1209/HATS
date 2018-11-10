@@ -120,7 +120,7 @@ class Model(object):
         # ==========================================================================================
         enumerate_map_innermost(
             function=lambda indices, merged_attention_maps: tf.summary.image(
-                name="merged_attention_maps_{}".format("-".join([str(index) for index in indices])),
+                name="merged_attention_maps_{}".format("_".join([str(index) for index in indices])),
                 tensor=merged_attention_maps,
                 max_outputs=2
             ),

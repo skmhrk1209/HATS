@@ -27,6 +27,8 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
 
+    # best model
+    '''
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
@@ -43,6 +45,54 @@ def main(unused_argv):
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                ],
+                deconv_params=[
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                ],
+                rnn_params=[
+                    AttrDict(sequence_length=4, num_units=[256, 256]),
+                    AttrDict(sequence_length=10, num_units=[16, 16])
+                ],
+                data_format=args.data_format
+            ),
+            num_classes=63,
+            data_format=args.data_format,
+            hyper_params=AttrDict(
+                cross_entropy_decay=1e-0,
+                attention_map_decay=1e-2,
+                total_variation_decay=1e-6
+            )
+        ),
+        model_dir=args.model_dir,
+        config=tf.estimator.RunConfig().replace(
+            session_config=tf.ConfigProto(
+                gpu_options=tf.GPUOptions(
+                    visible_device_list=args.gpu,
+                    allow_growth=True
+                )
+            )
+        )
+    )
+    '''
+
+    # model 1
+    multi_mjsynth_classifier = tf.estimator.Estimator(
+        model_fn=Model(
+            convolutional_network=ResidualNetwork(
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                pool_param=None,
+                residual_params=[
+                    AttrDict(filters=64, strides=[2, 2], blocks=2),
+                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                ],
+                num_classes=None,
+                data_format=args.data_format
+            ),
+            attention_network=AttentionNetwork(
+                conv_params=[
+                    AttrDict(filters=4, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=4, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
