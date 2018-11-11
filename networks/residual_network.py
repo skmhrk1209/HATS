@@ -97,7 +97,7 @@ class ResidualNetwork(object):
             return inputs
 
     def residual_block(self, inputs, filters, strides, data_format, training, name="residual_block", reuse=None):
-        ''' preactivation building residual block for spectral normalization
+        ''' preactivation building residual block
 
             normalization then activation then convolution as described by:
             [Identity Mappings in Deep Residual Networks]
