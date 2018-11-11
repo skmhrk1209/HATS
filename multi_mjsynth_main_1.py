@@ -27,6 +27,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
 
+    # best model (accuracy: 86.6 %)
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
             convolutional_network=ResidualNetwork(
@@ -43,10 +44,10 @@ def main(unused_argv):
                 conv_params=[
                     # kernel size shuld be large
                     AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[

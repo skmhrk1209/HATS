@@ -27,6 +27,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
 
+    # best model (accuracy: 86.6 %)
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
             convolutional_network=ResidualNetwork(
@@ -35,6 +36,8 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=256, strides=[1, 1], blocks=2),
+                    AttrDict(filters=512, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -50,8 +53,8 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=4, num_units=[128]),
-                    AttrDict(sequence_length=10, num_units=[16])
+                    AttrDict(sequence_length=4, num_units=[256, 256]),
+                    AttrDict(sequence_length=10, num_units=[16, 16])
                 ],
                 data_format=args.data_format
             ),
