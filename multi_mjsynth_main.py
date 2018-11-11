@@ -84,7 +84,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next(),
@@ -107,7 +107,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -124,7 +124,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next()
