@@ -5,7 +5,7 @@ import itertools
 import cv2
 from utils.attr_dict import AttrDict
 from data.multi_mjsynth import Dataset
-from models.acnn import Model
+from models.acnn import ACNN
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
@@ -29,7 +29,7 @@ def main(unused_argv):
 
     # best model (accuracy: 86.6 %)
     multi_mjsynth_classifier = tf.estimator.Estimator(
-        model_fn=Model(
+        model_fn=ACNN(
             convolutional_network=ResidualNetwork(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,

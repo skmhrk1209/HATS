@@ -3,7 +3,7 @@ import numpy as np
 from algorithms.sequence import *
 
 
-class Model(object):
+class ACNN(object):
 
     def __init__(self, convolutional_network, attention_network,
                  num_classes, data_format, hyper_params):
