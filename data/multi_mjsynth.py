@@ -36,7 +36,7 @@ class Dataset(base.Dataset):
         image = tf.read_file(features["path"])
         image = tf.image.decode_png(image, 3)
         image = tf.image.convert_image_dtype(image, tf.float32)
-        image = tf.ensure_shape(image, [256, 256, 3])
+        image.set_shape([256, 256, 3])
 
         if self.image_size:
             image = tf.image.resize_images(image, self.image_size)
