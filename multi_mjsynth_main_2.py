@@ -36,8 +36,6 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[2, 2], blocks=2),
-                    AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -63,7 +61,7 @@ def main(unused_argv):
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
                 attention_map_decay=1e-2,
-                total_variation_decay=1e-6
+                total_variation_decay=1e-5
             )
         ),
         model_dir=args.model_dir,
@@ -86,7 +84,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next(),
@@ -109,7 +107,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -126,7 +124,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next()

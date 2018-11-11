@@ -31,7 +31,7 @@ def main(unused_argv):
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
@@ -43,8 +43,8 @@ def main(unused_argv):
             attention_network=AttentionNetwork(
                 conv_params=[
                     # kernel size shuld be large
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
@@ -84,7 +84,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next(),
@@ -107,7 +107,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -124,7 +124,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=[256, 256],
+                image_size=None,
                 sequence_length=4,
                 string_length=10
             ).get_next()
