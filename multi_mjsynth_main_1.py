@@ -10,7 +10,7 @@ from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model_1", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -27,7 +27,6 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def main(unused_argv):
 
-    # best model (accuracy: 86.6 %)
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
@@ -43,11 +42,11 @@ def main(unused_argv):
             attention_network=AttentionNetwork(
                 conv_params=[
                     # kernel size shuld be large
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
