@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import itertools
 import cv2
-from attr_dict import AttrDict
+from attrdict import AttrDict
 from data.multi_mjsynth import Dataset
 from models.acnn import ACNN
 from networks.residual_network import ResidualNetwork
