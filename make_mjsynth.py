@@ -21,7 +21,7 @@ def make_multi_thread(func, num_threads):
 
         threads = [threading.Thread(
             target=func,
-            args=[chunk_arg] + args,
+            args=(chunk_arg,) + args,
             kwargs=dict(kwargs, thread_id=i)
         ) for i, chunk_arg in enumerate(chunk_args)]
 
