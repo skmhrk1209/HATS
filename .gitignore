@@ -2,7 +2,7 @@
 .vscode/
 *.pyc
 __pycache__/
-*.tfrecord
-svhn/
-multi_svhn/
-multi_svhn_acnn_model/
+mjsynth/
+multi_mjsynth/
+mjsynth_acnn_model/
+multi_mjsynth_acnn_model/
