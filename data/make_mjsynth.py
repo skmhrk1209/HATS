@@ -43,7 +43,7 @@ def make_multi_thread(func, num_threads, split=False):
 @jit(nopython=False, nogil=True)
 def make_mjsynth(filenames, directory, thread_id):
 
-    for i, filename in trange(filenames):
+    for i, filename in tqdm(filenames):
 
         string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
         shutil.copy(filename, os.path.join(directory, "{}_{}.jpg".format(i, string)))
