@@ -19,7 +19,7 @@ def make_multi_thread(func, num_threads):
 
         threads = [threading.Thread(
             target=func,
-            args=[args[0][size * i: size * (i + 1) if i < num_threads - 1 else len(args[0]) - 1]] + args[1:],
+            args=(args[0][size * i: size * (i + 1) if i < num_threads - 1 else len(args[0]) - 1],) + args[1:],
             kwargs=kwargs
         ) for i in range(num_threads)]
 
