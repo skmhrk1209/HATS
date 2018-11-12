@@ -22,7 +22,7 @@ def make_multi_thread(func, num_threads):
         threads = [threading.Thread(
             target=func,
             args=(chunk_arg,) + args,
-            kwargs=dict(kwargs, thread_id=i)
+            kwargs=kwargs
         ) for i, chunk_arg in enumerate(chunk_args)]
 
         for thread in threads:
@@ -35,7 +35,7 @@ def make_multi_thread(func, num_threads):
 
 
 @jit(nopython=False, nogil=True)
-def make_mjsynth(filenames, directory, string_length, thread_id):
+def make_mjsynth(filenames, directory, string_length):
 
     for i, filename in tqdm(filenames):
 
