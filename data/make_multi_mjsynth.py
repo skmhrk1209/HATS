@@ -82,7 +82,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 if __name__ == "__main__":
 
     filenames = [
-        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg")[:1000])
+        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
             (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
     ]
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     random.seed(0)
     random.shuffle(filenames)
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames[:int(len(filenames) * 0.9)],
         "/home/sakuma/data/multi_mjsynth/train",
         num_data=30000,
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         num_retries=100
     )
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames[int(len(filenames) * 0.9):],
         "/home/sakuma/data/multi_mjsynth/test",
         num_data=3000,
