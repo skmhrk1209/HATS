@@ -19,9 +19,6 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
         string = os.path.splitext(os.path.basename(file))[0].split("_")[1]
 
-        if len(string) > args.string_length:
-            continue
-
         label = np.pad(
             array=string,
             pad_width=[[0, args.string_length - len(string)]],
