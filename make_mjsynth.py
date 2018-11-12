@@ -41,7 +41,7 @@ def make_mjsynth(filenames, directory, string_length, thread_id):
 
         string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
 
-        if len(string) >= string_length:
+        if len(string) > string_length:
             continue
 
         shutil.copy(filename, os.path.join(directory, "{}_{}.jpg".format(i, string)))
