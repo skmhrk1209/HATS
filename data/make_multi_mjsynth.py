@@ -96,7 +96,6 @@ if __name__ == "__main__":
         num_data=30000,
         image_size=(256, 256),
         sequence_length=4,
-        string_length=10,
         num_retries=100
     )
 
@@ -106,6 +105,5 @@ if __name__ == "__main__":
         num_data=3000,
         image_size=(256, 256),
         sequence_length=4,
-        string_length=10,
         num_retries=100
     )
