@@ -52,7 +52,7 @@ def make_mjsynth(filenames, directory, thread_id):
 if __name__ == "__main__":
 
     filenames = [
-        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg")[:1000])
+        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg")[:10000])
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
             (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
     ]
