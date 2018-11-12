@@ -10,7 +10,7 @@ from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model_1", help="model directory")
+parser.add_argument("--model_dir", type=str, default="mjsynth_acnn_model", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -28,14 +28,14 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def main(unused_argv):
 
     # best model (accuracy: 86.6 %)
-    multi_mjsynth_classifier = tf.estimator.Estimator(
+    mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=64, strides=[1, 2], blocks=2),
+                    AttrDict(filters=128, strides=[1, 2], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -77,15 +77,14 @@ def main(unused_argv):
 
     if args.train:
 
-        multi_mjsynth_classifier.train(
+        mjsynth_classifier.train(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=None,
-                sequence_length=4,
+                image_size=[32, 256],
                 string_length=10
             ).get_next(),
             hooks=[
@@ -100,15 +99,14 @@ def main(unused_argv):
 
     if args.eval:
 
-        eval_results = multi_mjsynth_classifier.evaluate(
+        eval_results = mjsynth_classifier.evaluate(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=None,
-                sequence_length=4,
+                image_size=[32, 256],
                 string_length=10
             ).get_next()
         )
@@ -117,15 +115,14 @@ def main(unused_argv):
 
     if args.predict:
 
-        predict_results = multi_mjsynth_classifier.predict(
+        predict_results = mjsynth_classifier.predict(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 data_format=args.data_format,
-                image_size=None,
-                sequence_length=4,
+                image_size=[32, 256],
                 string_length=10
             ).get_next()
         )
