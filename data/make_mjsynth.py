@@ -13,19 +13,19 @@ from shapely.geometry import box
 if __name__ == "__main__":
 
     filenames = [
-        filename for filename in glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg")
+        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
         if len(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) <= 10
     ]
 
     random.seed(0)
     random.shuffle(filenames)
 
-    for i, filename in enumerate(tqdm(filenames[:int(len(filenames) * 0.9)])):
+    [
+        shutil.move(filename, "/home/sakuma/data/mjsynth/train/{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1]))
+        for i, filename in enumerate(tqdm(filenames[:int(len(filenames) * 0.9)]))
+    ]
 
-        shutil.copy(filename, os.path.join("/home/sakuma/data/mjsynth/train",
-                                           "{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1])))
-
-    for i, filename in enumerate(tqdm(filenames[int(len(filenames) * 0.9):])):
-
-        shutil.copy(filename, os.path.join("/home/sakuma/data/mjsynth/test",
-                                           "{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1])))
+    [
+        shutil.move(filename, "/home/sakuma/data/mjsynth/test/{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1]))
+        for i, filename in enumerate(tqdm(filenames[int(len(filenames) * 0.9):]))
+    ]
