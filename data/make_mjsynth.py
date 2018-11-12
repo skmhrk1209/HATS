@@ -15,13 +15,17 @@ def make_multi_thread(func, num_threads):
 
     def func_mt(*args, **kwargs):
 
-        size = len(args[0]) // num_threads
+        chunk_size = len(args[0]) // num_threads
+        chunk_args = [
+            args[0][size * i: size * (i + 1)] if i < num_threads - 1 else
+            args[0][size * i:] for i in range(num_threads)
+        ]
 
         threads = [threading.Thread(
             target=func,
-            args=(args[0][size * i: size * (i + 1) if i < num_threads - 1 else len(args[0]) - 1],) + args[1:],
+            args=(chunk_arg,) + args[1:],
             kwargs=kwargs
-        ) for i in range(num_threads)]
+        ) for chunk_arg in chunk_args]
 
         for thread in threads:
             thread.start()
@@ -37,7 +41,7 @@ def make_mjsynth(filenames, directory):
 
     for i, filename in tqdm(filenames):
 
-        shutil.move(filename, os.path.join(directory, "{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1])))
+        shutil.copy(filename, os.path.join(directory, "{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1])))
 
 
 if __name__ == "__main__":
