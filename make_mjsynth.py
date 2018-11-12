@@ -52,21 +52,13 @@ if __name__ == "__main__":
     filenames = glob.glob("/home/sakuma/data/synth/*/*/*.jpg")
 
     make_multi_thread(make_mjsynth, num_threads=32)(
-        filenames=filenames[:int(len(filenames) * 0.9)],
+        filenames[:int(len(filenames) * 0.9)],
         directory="/home/sakuma/data/mjsynth/train",
-        num_data=3000,
-        image_size=(256, 256),
-        sequence_length=4,
-        string_length=10,
-        num_retries=100
+        string_length=10
     )
 
     make_multi_thread(make_mjsynth, num_threads=32)(
-        filenames=filenames[int(len(filenames) * 0.9):],
+        filenames[int(len(filenames) * 0.9):],
         directory="/home/sakuma/data/mjsynth/test",
-        num_data=300,
-        image_size=(256, 256),
-        sequence_length=4,
-        string_length=10,
-        num_retries=100
+        string_length=10
     )
