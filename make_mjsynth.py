@@ -13,15 +13,15 @@ from shapely.geometry import box
 
 def make_multi_thread(func, num_threads):
 
-    def func_mt(arg, *args, **kwargs):
+    def func_mt(*args, **kwargs):
 
         chunk_size = len(arg) / num_threads
-        chunk_args = [arg[chunk_size * i: chunk_size * (i + 1)] for i in range(num_threads)[:-1]]
-        chunk_args += [arg[chunk_size * i:] for i in range(num_threads)[-1:]]
+        chunk_args = [args[0][chunk_size * i: chunk_size * (i + 1)] for i in range(num_threads)[:-1]]
+        chunk_args += [args[0][chunk_size * i:] for i in range(num_threads)[-1:]]
 
         threads = [threading.Thread(
             target=func,
-            args=(chunk_arg,) + args,
+            args=(chunk_arg,) + args[1:],
             kwargs=kwargs
         ) for i, chunk_arg in enumerate(chunk_args)]
 
