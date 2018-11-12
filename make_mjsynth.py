@@ -47,12 +47,15 @@ if __name__ == "__main__":
         if len(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) <= 10
     ]
 
+    random.seed(0)
+    random.shuffle(filenames)
+
     make_multi_thread(make_mjsynth, num_threads=32)(
         list(enumerate(filenames[:int(len(filenames) * 0.9)])),
-        "/home/sakuma/data/multi_mjsynth/train"
+        "/home/sakuma/data/mjsynth/train"
     )
 
     make_multi_thread(make_mjsynth, num_threads=32)(
         list(enumerate(filenames[int(len(filenames) * 0.9):])),
-        "/home/sakuma/data/multi_mjsynth/test"
+        "/home/sakuma/data/mjsynth/test"
     )

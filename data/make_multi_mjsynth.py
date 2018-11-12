@@ -36,24 +36,14 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
         multi_image = np.zeros(image_size + (3,), dtype=np.uint8)
-        num_strings = random.randint(1, sequence_length)
 
         strings = []
         rects = []
 
-        for _ in range(num_strings):
+        for filename in random.sample(filenames, random.randint(1, sequence_length)):
 
-            while True:
-
-                filename = random.sample(filenames, 1)[0]
-                string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
-
-                if len(string) <= string_length:
-
-                    image = cv2.imread(filename)
-
-                    if image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], image_size)]):
-                        break
+            string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
+            image = cv2.imread(filename)
 
             for _ in range(num_retries):
 
@@ -81,7 +71,11 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 
 if __name__ == "__main__":
 
-    filenames = glob.glob("/home/sakuma/data/mjsynth/*/*/*.jpg")
+    filenames = [
+        filename for filename in glob.glob("/home/sakuma/data/mjsynth/*.jpg")
+        if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
+            (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
+    ]
 
     random.seed(0)
     random.shuffle(filenames)
