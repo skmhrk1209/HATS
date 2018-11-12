@@ -21,11 +21,11 @@ if __name__ == "__main__":
     random.shuffle(filenames)
 
     [
-        shutil.move(filename, "/home/sakuma/data/mjsynth/train/{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1]))
+        shutil.copy(filename, "/home/sakuma/data/mjsynth/train/{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1]))
         for i, filename in enumerate(tqdm(filenames[:int(len(filenames) * 0.9)]))
     ]
 
     [
-        shutil.move(filename, "/home/sakuma/data/mjsynth/test/{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1]))
+        shutil.copy(filename, "/home/sakuma/data/mjsynth/test/{}_{}.jpg".format(i, os.path.splitext(os.path.basename(filename))[0].split("_")[1]))
         for i, filename in enumerate(tqdm(filenames[int(len(filenames) * 0.9):]))
     ]
