@@ -23,7 +23,7 @@ def make_multi_thread(func, num_threads):
             target=func,
             args=(chunk_arg,) + args[1:],
             kwargs=kwargs
-        ) for i, chunk_arg in enumerate(chunk_args)]
+        ) for chunk_arg in chunk_args]
 
         for thread in threads:
             thread.start()
@@ -52,13 +52,13 @@ if __name__ == "__main__":
     filenames = glob.glob("/home/sakuma/data/synth/*/*/*.jpg")
     print(len(filenames))
 
-    make_multi_thread(make_mjsynth, num_threads=32)(
+    make_multi_thread(make_mjsynth, num_threads=16)(
         filenames[:int(len(filenames) * 0.9)],
         directory="/home/sakuma/data/mjsynth/train",
         string_length=10
     )
 
-    make_multi_thread(make_mjsynth, num_threads=32)(
+    make_multi_thread(make_mjsynth, num_threads=16)(
         filenames[int(len(filenames) * 0.9):],
         directory="/home/sakuma/data/mjsynth/test",
         string_length=10
