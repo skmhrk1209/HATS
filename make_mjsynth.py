@@ -23,7 +23,7 @@ def make_multi_thread(func, num_threads):
             target=func,
             args=[chunk_arg] + args,
             kwargs=dict(kwargs, thread_id=i)
-        ) for chunk_arg in range(chunk_args)]
+        ) for i, chunk_arg in enumerate(chunk_args)]
 
         for thread in threads:
             thread.start()
