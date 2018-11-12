@@ -17,19 +17,23 @@ def make_multi_thread(func, num_threads, split=False):
 
         if split:
 
-            threads = [threading.Thread(
-                target=func,
-                args=(arg,) + args[1:],
-                kwargs=dict(kwargs, thread_id=i)
-            ) for i, arg in enumerate(np.array_split(args[0], num_threads))]
+            threads = [
+                threading.Thread(
+                    target=func,
+                    args=(arg,) + args[1:],
+                    kwargs=dict(kwargs, thread_id=i)
+                ) for i, arg in enumerate(np.array_split(args[0], num_threads))
+            ]
 
         else:
 
-            threads = [threading.Thread(
-                target=func,
-                args=args,
-                kwargs=dict(kwargs, thread_id=i)
-            ) for i in range(num_threads)]
+            threads = [
+                threading.Thread(
+                    target=func,
+                    args=args,
+                    kwargs=dict(kwargs, thread_id=i)
+                ) for i in range(num_threads)
+            ]
 
         for thread in threads:
             thread.start()
