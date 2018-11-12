@@ -49,7 +49,7 @@ def make_mjsynth(filenames, directory, string_length):
 
 if __name__ == "__main__":
 
-    filenames = enumerate(glob.glob("/home/sakuma/data/synth/*/*/*.jpg"))
+    filenames = list(enumerate(glob.glob("/home/sakuma/data/synth/*/*/*.jpg")))
 
     make_multi_thread(make_mjsynth, num_threads=16)(
         filenames[:int(len(filenames) * 0.9)],
