@@ -31,7 +31,7 @@ def make_multi_thread(func, num_threads):
 
 
 @jit(nopython=False, nogil=True)
-def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_length, string_length, num_retries, thread_id):
+def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_length, num_retries, thread_id):
 
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
