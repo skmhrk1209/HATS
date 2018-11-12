@@ -72,7 +72,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 if __name__ == "__main__":
 
     filenames = [
-        filename for filename in glob.glob("/home/sakuma/data/mjsynth/*.jpg")
+        filename for filename in glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg")
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
             (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
     ]
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     make_multi_thread(make_multi_mjsynth, num_threads=32)(
         filenames=filenames[:int(len(filenames) * 0.9)],
         directory="/home/sakuma/data/multi_mjsynth/train",
-        num_data=3000,
+        num_data=30000,
         image_size=(256, 256),
         sequence_length=4,
         string_length=10,
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     make_multi_thread(make_multi_mjsynth, num_threads=32)(
         filenames=filenames[int(len(filenames) * 0.9):],
         directory="/home/sakuma/data/multi_mjsynth/test",
-        num_data=300,
+        num_data=3000,
         image_size=(256, 256),
         sequence_length=4,
         string_length=10,
