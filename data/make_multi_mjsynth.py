@@ -7,7 +7,7 @@ import random
 import threading
 import itertools
 from numba import jit
-from tqdm import tqdm
+from tqdm import tqdm, trange
 from shapely.geometry import box
 
 
@@ -82,7 +82,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 if __name__ == "__main__":
 
     filenames = [
-        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
+        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))[:1000]
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
             (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
     ]
