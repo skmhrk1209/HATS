@@ -51,13 +51,13 @@ if __name__ == "__main__":
 
     filenames = list(enumerate(glob.glob("/home/sakuma/data/synth/*/*/*.jpg")))
 
-    make_multi_thread(make_mjsynth, num_threads=16)(
+    make_multi_thread(make_mjsynth, num_threads=32)(
         filenames[:int(len(filenames) * 0.9)],
         directory="/home/sakuma/data/mjsynth/train",
         string_length=10
     )
 
-    make_multi_thread(make_mjsynth, num_threads=16)(
+    make_multi_thread(make_mjsynth, num_threads=32)(
         filenames[int(len(filenames) * 0.9):],
         directory="/home/sakuma/data/mjsynth/test",
         string_length=10
