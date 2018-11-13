@@ -4,17 +4,17 @@ import argparse
 import itertools
 import cv2
 from attrdict import AttrDict
-from data.multi_mjsynth import Dataset
+from data.mjsynth import Dataset
 from models.acnn import ACNN
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="mjsynth_acnn_model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth/train.tfrecord"], help="tfrecord filenames")
+parser.add_argument('--filenames', type=str, nargs="+", default=["mjsynth/train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=100000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=1000000, help="buffer size to shuffle dataset")
 parser.add_argument("--data_format", type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
