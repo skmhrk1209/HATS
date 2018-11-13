@@ -102,8 +102,7 @@ def f(filenames):
 
 if __name__ == "__main__":
 
-    f(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
-
+    
     filenames = [
         filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
