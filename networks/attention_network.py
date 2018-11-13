@@ -234,5 +234,6 @@ class AttentionNetwork(object):
 
             print(color("-" * 64))
             print(color("attention depth: {}".format(nest_depth(inputs))))
+            print(color("-" * 64))
 
             return inputs
