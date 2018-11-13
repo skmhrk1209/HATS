@@ -77,7 +77,7 @@ class ACNN(object):
         while all(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
 
             labels = map_innermost(
-                function=tf.unstack(labels, axis=1),
+                function=lambda labels: tf.unstack(labels, axis=1),
                 sequence=labels
             )
 
