@@ -11,29 +11,17 @@ from tqdm import tqdm, trange
 from shapely.geometry import box
 
 
-def make_multi_thread(func, num_threads, split=False):
+def make_multi_thread(func, num_threads):
 
     def func_mt(*args, **kwargs):
 
-        if split:
-
-            threads = [
-                threading.Thread(
-                    target=func,
-                    args=(arg,) + args[1:],
-                    kwargs=dict(kwargs, thread_id=i)
-                ) for i, arg in enumerate(np.array_split(args[0], num_threads))
-            ]
-
-        else:
-
-            threads = [
-                threading.Thread(
-                    target=func,
-                    args=args,
-                    kwargs=dict(kwargs, thread_id=i)
-                ) for i in range(num_threads)
-            ]
+        threads = [
+            threading.Thread(
+                target=func,
+                args=args,
+                kwargs=dict(kwargs, thread_id=i)
+            ) for i in range(num_threads)
+        ]
 
         for thread in threads:
             thread.start()
@@ -82,27 +70,9 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
         strings = [string for rect, string in sorted(zip(rects, strings))]
         cv2.imwrite(os.path.join(directory, "{}_{}.jpg".format(i, "_".join(strings))), multi_image)
 
-@jit(nopython=False, nogil=True)
-def f(filenames):
-
-    filtered_filenames = []
-
-    for filename in tqdm(filenames):
-
-        string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
-
-        if len(string) <= 10:
-
-            image = cv2.imread(filename)
-
-            if image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]):
-
-                filtered_filenames.append(filename)
-
 
 if __name__ == "__main__":
 
-    
     filenames = [
         filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
@@ -112,7 +82,7 @@ if __name__ == "__main__":
     random.seed(0)
     random.shuffle(filenames)
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32)(
         filenames[:int(len(filenames) * 0.9)],
         "/home/sakuma/data/multi_mjsynth/train",
         num_data=28125,
@@ -121,7 +91,7 @@ if __name__ == "__main__":
         num_retries=100
     )
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32)(
         filenames[int(len(filenames) * 0.9):],
         "/home/sakuma/data/multi_mjsynth/test",
         num_data=3125,
