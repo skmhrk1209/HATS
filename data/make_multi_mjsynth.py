@@ -82,8 +82,27 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
         strings = [string for rect, string in sorted(zip(rects, strings))]
         cv2.imwrite(os.path.join(directory, "{}_{}.jpg".format(i, "_".join(strings))), multi_image)
 
+@jit(nopython=False, nogil=True)
+def f(filenames):
+
+    filtered_filenames = []
+
+    for filename in tqdm(filenames):
+
+        string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
+
+        if len(string) <= 10:
+
+            image = cv2.imread(filename)
+
+            if image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]):
+
+                filtered_filenames.append(filename)
+
 
 if __name__ == "__main__":
+
+    f(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
 
     filenames = [
         filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
