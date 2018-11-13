@@ -132,21 +132,38 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            for j in range(4):
+            merged_attention_maps = [
+                (name, tensor) for name, tensor in predict_result.items()
+                if "merged_attention_maps" in name
+            ]
+
+            for name, merged_attention_map in merged_attention_maps:
 
                 def scale(input, input_min, input_max, output_min, output_max):
                     return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
-                merged_attention_map = predict_result["merged_attention_maps_{}".format(j)]
                 merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                 merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
 
                 image = predict_result["images"]
-                image[:, :, 0] += merged_attention_map
+                merged_attention_map = np.pad(
+                    array=merged_attention_map,
+                    pad_width=[[0, 0], [0, 0], [0, 2]],
+                    mode="constant",
+                    constant_values=0
+                )
 
+                image += merged_attention_map
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                cv2.imwrite("outputs/image_{}_{}.png".format(i, j), image * 255.0)
-                cv2.imwrite("outputs/merged_attention_map_{}_{}.png".format(i, j), merged_attention_map * 255.0)
+
+                cv2.imwrite(
+                    "outputs/multi_mjsynth/merged_attention_map_{}.png".format("_".join(name.split("_")[1:])),
+                    scale(merged_attention_map, 0.0, 1.0, 0.0, 255.0)
+                )
+                cv2.imwrite(
+                    "outputs/multi_mjsynth/image_{}.png".format("_".join(name.split("_")[1:])),
+                    scale(image, 0.0, 1.0, 0.0, 255.0)
+                )
 
 
 if __name__ == "__main__":
