@@ -64,11 +64,11 @@ if __name__ == "__main__":
     random.shuffle(filenames)
 
     make_multi_thread(make_mjsynth, num_threads=32, split=True)(
-        list(enumerate(filenames[:int(len(filenames) * 0.9)])),
+        list(enumerate(filenames[:900000])),
         "/home/sakuma/data/mjsynth/train"
     )
 
     make_multi_thread(make_mjsynth, num_threads=32, split=True)(
-        list(enumerate(filenames[int(len(filenames) * 0.9):])),
+        list(enumerate(filenames[900000:1000000])),
         "/home/sakuma/data/mjsynth/test",
     )
