@@ -28,6 +28,26 @@ def zip_innermost(*sequences, **kwargs):
             if all([isinstance(sequence, kwargs.get("classes", list)) for sequence in sequences]) else sequences)
 
 
+def all_innermost(sequence, **kwargs):
+    ''' 
+    return whether all innermost elements are evaluated as True.
+    innermost element is defined as element which is not instance of "classes" (default: list)
+    '''
+
+    return (all([all_innermost(element, **kwargs) for element in sequence])
+            if isinstance(sequence, kwargs.get("classes", list)) else bool(sequence))
+
+
+def any_innermost(sequence, **kwargs):
+    ''' 
+    return whether any innermost elements are evaluated as True.
+    innermost element is defined as element which is not instance of "classes" (default: list)
+    '''
+
+    return (any([any_innermost(element, **kwargs) for element in sequence])
+            if isinstance(sequence, kwargs.get("classes", list)) else bool(sequence))
+
+
 def nest_depth(sequence, **kwargs):
     ''' 
     return maximum of nest depths of innermost elements.
