@@ -20,7 +20,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
         string = os.path.splitext(os.path.basename(file))[0].split("_")[1]
 
         label = np.pad(
-            array=string,
+            array=[convert(char) for char in string],
             pad_width=[[0, args.string_length - len(string)]],
             mode="constant",
             constant_values=62
