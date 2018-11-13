@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 from algorithms.sequence import *
-from fabric.colors import yellow as color
 
 
 class AttentionNetwork(object):
@@ -16,9 +15,6 @@ class AttentionNetwork(object):
     def __call__(self, inputs, training, name="attention_network", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
-
-            print(color("-" * 64))
-            print(color("building attention network: {}".format(name)))
 
             for i, conv_param in enumerate(self.conv_params):
 
@@ -40,11 +36,6 @@ class AttentionNetwork(object):
                         name="conv2d"
                     )
 
-                    print(color("-" * 64))
-                    print(color("conv2d: filters={}, kernel_size={}, strides={}".format(
-                        conv_param.filters, conv_param.kernel_size, conv_param.strides
-                    )))
-
                     inputs = tf.layers.batch_normalization(
                         inputs=inputs,
                         axis=1 if self.data_format == "channels_first" else 3,
@@ -53,13 +44,7 @@ class AttentionNetwork(object):
                         name="batch_normalization"
                     )
 
-                    print(color("-" * 64))
-                    print(color("batch normalization"))
-
                     inputs = tf.nn.relu(inputs)
-
-                    print(color("-" * 64))
-                    print(color("relu"))
 
             shape = inputs.shape.as_list()
 
@@ -86,11 +71,6 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-                    print(color("-" * 64))
-                    print(color("rnn: cell_type=LSTM, sequence_length={}, num_units: {}".format(
-                        rnn_param.sequence_length, rnn_param.num_units
-                    )))
-
             with tf.variable_scope("projection_block"):
 
                 inputs = map_innermost(
@@ -109,16 +89,10 @@ class AttentionNetwork(object):
                     sequence=inputs
                 )
 
-                print(color("-" * 64))
-                print(color("dense: num_units={}".format(np.prod(shape[1:]))))
-
                 inputs = map_innermost(
                     function=lambda inputs: tf.nn.relu(inputs),
                     sequence=inputs
                 )
-
-                print(color("-" * 64))
-                print(color("relu"))
 
                 inputs = map_innermost(
                     function=lambda inputs: tf.reshape(
@@ -152,11 +126,6 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-                    print(color("-" * 64))
-                    print(color("deconv2d: filters={}, kernel_size={}, strides={}".format(
-                        deconv_param.filters, deconv_param.kernel_size, deconv_param.strides
-                    )))
-
                     inputs = map_innermost(
                         function=lambda inputs: tf.layers.batch_normalization(
                             inputs=inputs,
@@ -169,16 +138,10 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-                    print(color("-" * 64))
-                    print(color("batch normalization"))
-
                     inputs = map_innermost(
                         function=lambda inputs: tf.nn.relu(inputs),
                         sequence=inputs
                     )
-
-                    print(color("-" * 64))
-                    print(color("relu"))
 
             for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
 
@@ -204,11 +167,6 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-                    print(color("-" * 64))
-                    print(color("deconv2d: filters={}, kernel_size={}, strides={}".format(
-                        deconv_param.filters, deconv_param.kernel_size, deconv_param.strides
-                    )))
-
                     inputs = map_innermost(
                         function=lambda inputs: tf.layers.batch_normalization(
                             inputs=inputs,
@@ -221,19 +179,9 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-                    print(color("-" * 64))
-                    print(color("batch normalization"))
-
                     inputs = map_innermost(
                         function=lambda inputs: tf.nn.sigmoid(inputs),
                         sequence=inputs
                     )
-
-                    print(color("-" * 64))
-                    print(color("sigmoid"))
-
-            print(color("-" * 64))
-            print(color("attention depth: {}".format(nest_depth(inputs))))
-            print(color("-" * 64))
 
             return inputs
