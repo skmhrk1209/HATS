@@ -74,7 +74,12 @@ class ACNN(object):
             sequence=logits
         )
 
-        labels = [tf.unstack(labels, axis=1) for labels in tf.unstack(labels, axis=1)]
+        while all(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
+
+            labels = map_innermost(
+                function=lambda labels: labels if len(labels.shape) == 1 else tf.unstack(labels, axis=1),
+                sequence=labels
+            )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
