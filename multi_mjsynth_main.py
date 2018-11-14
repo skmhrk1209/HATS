@@ -25,6 +25,38 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
+def scale(input, input_min, input_max, output_min, output_max):
+
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+
+def bounding_box(image, attention_map, threshold):
+
+    mu = cv2.moments(attention_map, False)
+    x = int(mu["m10"] / mu["m00"])
+    y = int(mu["m01"] / mu["m00"])
+
+    h = 1
+    w = 1
+
+    while attention_map[y - h: y + h, x - w: x + w, :].mean() > threshold:
+
+        if h >= min(y, image.shape[0] - 1 - y) and w >= min(x, image.shape[1] - 1 - x):
+            break
+        elif h >= min(y, image.shape[0] - 1 - y):
+            w += 1
+        elif w >= min(x, image.shape[1] - 1 - x):
+            h += 1
+        else:
+            if (attention_map[y - h - 1: y + h + 1, x - w: x + w, :].mean() >
+                    attention_map[y - h: y + h, x - w - 1: x + w + 1, :].mean()):
+                h += 1
+            else:
+                w += 1
+
+    return cv2.rectangle(image, (x - w, y - h), (x + w, y + h), (0, 0, 255))
+
+
 def main(unused_argv):
 
     # best model (accuracy: 86.6 %)
@@ -139,21 +171,11 @@ def main(unused_argv):
 
             for name, merged_attention_map in merged_attention_maps:
 
-                def scale(input, input_min, input_max, output_min, output_max):
-                    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
-
                 merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                 merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
 
                 image = predict_result["images"]
-                merged_attention_map = np.pad(
-                    array=merged_attention_map,
-                    pad_width=[[0, 0], [0, 0], [0, 2]],
-                    mode="constant",
-                    constant_values=0
-                )
-
-                image += merged_attention_map
+                image = bounding_box(image, merged_attention_map, 0.8)
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                 cv2.imwrite(
