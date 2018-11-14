@@ -33,28 +33,28 @@ def scale(input, input_min, input_max, output_min, output_max):
 def bounding_box(image, attention_map, threshold):
 
     mu = cv2.moments(attention_map, False)
-    x = int(mu["m10"] / mu["m00"])
-    y = int(mu["m01"] / mu["m00"])
+    x, y = (int(mu["m10"] / mu["m00"]), int(mu["m01"] / mu["m00"]))
+    h, w = image.shape[:2]
+    dx, dy = (1, 1)
 
-    h = 1
-    w = 1
+    while attention_map[y - dy: y + dy, x - dx: x + dx, :].mean() > threshold:
 
-    while attention_map[y - h: y + h, x - w: x + w, :].mean() > threshold:
-
-        if h >= min(y, image.shape[0] - 1 - y) and w >= min(x, image.shape[1] - 1 - x):
+        if dy >= min(y, h - y - 1) and dx >= min(x, w - x - 1):
             break
-        elif h >= min(y, image.shape[0] - 1 - y):
-            w += 1
-        elif w >= min(x, image.shape[1] - 1 - x):
-            h += 1
+        elif dy >= min(y, h - y - 1):
+            dx += 1
+        elif dx >= min(x, w - x - 1):
+            dy += 1
         else:
-            if (attention_map[y - h - 1: y + h + 1, x - w: x + w, :].mean() >
-                    attention_map[y - h: y + h, x - w - 1: x + w + 1, :].mean()):
-                h += 1
-            else:
-                w += 1
+            density_1 = attention_map[y - dy - 1: y + dy + 1, x - dx: x + dx].mean()
+            density_2 = attention_map[y - dy: y + dy, x - dx - 1: x + dx + 1].mean()
 
-    return cv2.rectangle(image, (x - w, y - h), (x + w, y + h), (0, 0, 255))
+            if density_1 > density_2:
+                dy += 1
+            else:
+                dx += 1
+
+    return cv2.rectangle(image, (x - dx, y - dy), (x + dx, y + dy), (0, 0, 255))
 
 
 def main(unused_argv):
