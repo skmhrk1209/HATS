@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import itertools
 import cv2
+from operator import itemgetter
 from attrdict import AttrDict
 from data.multi_mjsynth import Dataset
 from models.acnn import ACNN
@@ -30,31 +31,75 @@ def scale(input, input_min, input_max, output_min, output_max):
     return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
 
-def bounding_box(image, attention_map, threshold):
+def search_bounding_box(image, method, threshold):
 
-    mu = cv2.moments(attention_map, False)
-    x, y = (int(mu["m10"] / mu["m00"]), int(mu["m01"] / mu["m00"]))
-    h, w = image.shape[:2]
-    dx, dy = (1, 1)
+    assert(method in ["segment", "density"])
 
-    while attention_map[y - dy: y + dy, x - dx: x + dx, :].mean() > threshold:
+    if len(image.shape) == 3 and image.shape[-1] == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        if dy >= min(y, h - y - 1) and dx >= min(x, w - x - 1):
-            break
-        elif dy >= min(y, h - y - 1):
-            dx += 1
-        elif dx >= min(x, w - x - 1):
-            dy += 1
-        else:
-            density_1 = attention_map[y - dy - 1: y + dy + 1, x - dx: x + dx].mean()
-            density_2 = attention_map[y - dy: y + dy, x - dx - 1: x + dx + 1].mean()
+    if image.dtype == np.uint8:
+        image = image / 255.
+        threshold = threshold / 255.
 
-            if density_1 > density_2:
-                dy += 1
-            else:
+    def segment_search_bounding_box(image, threshold):
+
+        binary = cv2.threshold(image, threshold, 1.0, cv2.THRESH_BINARY)[1]
+        flags = np.ones_like(binary, dtype=np.bool)
+        h, w = binary.shape[:2]
+        segments = []
+
+        def search(y, x):
+
+            segments[-1].append((y, x))
+            flags[y][x] = False
+
+            for dy, dx in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                if 0 <= y + dy < h and 0 <= x + dx < w:
+                    if flags[y + dy, x + dx] and binary[y + dy, x + dx]:
+                        search(y + dy, x + dx)
+
+        for y in range(flags.shape[0]):
+            for x in range(flags.shape[1]):
+                if flags[y, x] and binary[y, x]:
+                    segments.append([])
+                    search(y, x)
+
+        bounding_boxes = [(lambda ls_1, ls_2: ((min(ls_1), min(ls_2)), (max(ls_1), max(ls_2))))(*zip(*segment)) for segment in segments]
+        bounding_boxes = sorted(bounding_boxes, key=lambda box: abs(box[0][0] - box[1][0]) * abs(box[0][1] - box[1][1]))
+
+        return bounding_boxes[-1]
+
+    def density_search_bounding_box(image, threshold):
+
+        mu = cv2.moments(image, False)
+        y, x = (int(mu["m01"] / mu["m00"]), int(mu["m10"] / mu["m00"]))
+        h, w = image.shape[:2]
+        dy, dx = (1, 1)
+
+        while image[y - dy: y + dy, x - dx: x + dx].mean() > threshold:
+
+            if dy >= min(y, h - y - 1) and dx >= min(x, w - x - 1):
+                break
+
+            elif dy >= min(y, h - y - 1):
                 dx += 1
 
-    return cv2.rectangle(image, (x - dx, y - dy), (x + dx, y + dy), (0, 0, 255))
+            elif dx >= min(x, w - x - 1):
+                dy += 1
+
+            else:
+                density_1 = image[y - dy - 1: y + dy + 1, x - dx: x + dx].mean()
+                density_2 = image[y - dy: y + dy, x - dx - 1: x + dx + 1].mean()
+
+                if density_1 > density_2:
+                    dy += 1
+                else:
+                    dx += 1
+
+        return ((y - dy, x - dx), (y + dy, x + dx))
+
+    return (segment_search_bounding_box if method == "segment" else density_search_bounding_box)(image, threshold)
 
 
 def main(unused_argv):
@@ -173,9 +218,10 @@ def main(unused_argv):
 
                 merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                 merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
+                bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
                 image = predict_result["images"]
-                image = bounding_box(image, merged_attention_map, 0.8)
+                image = cv2.rectangle(image, bounding_box[0], bounding_box[1], (255, 0, 0))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                 cv2.imwrite(
