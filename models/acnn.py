@@ -111,12 +111,11 @@ class ACNN(object):
         ))
 
         global_step = tf.train.get_global_step()
-        x = 1e-2 / 100 * global_step
 
         loss = \
-            cross_entropy_loss * self.hyper_params.cross_entropy_decay(global_step) + \
-            attention_map_loss * self.hyper_params.attention_map_decay(global_step) + \
-            total_variation_loss * self.hyper_params.total_variation_decay(global_step)
+            cross_entropy_loss * self.hyper_params.cross_entropy_decay(tf.cast(global_step, tf.float32)) + \
+            attention_map_loss * self.hyper_params.attention_map_decay(tf.cast(global_step, tf.float32)) + \
+            total_variation_loss * self.hyper_params.total_variation_decay(tf.cast(global_step, tf.float32))
 
         accuracy = tf.metrics.accuracy(
             labels=labels,
