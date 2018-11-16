@@ -15,7 +15,7 @@ parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth/
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
-parser.add_argument("--data_format", type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
+parser.add_argument("--num_cpus", type=int, default=32, help="number of logical processors")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
@@ -161,8 +161,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                data_format=args.data_format,
+                num_cpus=args.num_cpus,
                 image_size=None,
+                data_format="channels_last",
                 sequence_length=4,
                 string_length=10
             ).get_next(),
@@ -184,8 +185,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                data_format=args.data_format,
+                num_cpus=args.num_cpus,
                 image_size=None,
+                data_format="channels_last",
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -201,8 +203,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                data_format=args.data_format,
+                num_cpus=args.num_cpus,
                 image_size=None,
+                data_format="channels_last",
                 sequence_length=4,
                 string_length=10
             ).get_next()

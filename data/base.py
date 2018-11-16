@@ -3,13 +3,13 @@ import tensorflow as tf
 
 class Dataset(object):
 
-    def __init__(self, filenames, num_epochs, batch_size, buffer_size):
+    def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus):
 
-        self.dataset = tf.data.TFRecordDataset(filenames)
-        self.dataset = self.dataset.shuffle(buffer_size)
+        self.dataset = tf.data.TFRecordDataset(filenames, num_parallel_reads=num_cpus)
+        self.dataset = self.dataset.shuffle(buffer_size, reshuffle_each_iteration=True)
         self.dataset = self.dataset.repeat(num_epochs)
-        self.dataset = self.dataset.map(self.parse)
-        self.dataset = self.dataset.batch(batch_size)
+        self.dataset = self.dataset.map(self.parse, num_parallel_calls=num_cpus)
+        self.dataset = self.dataset.batch(batch_size, drop_remainder=True)
         self.dataset = self.dataset.prefetch(1)
         self.iterator = self.dataset.make_one_shot_iterator()
 

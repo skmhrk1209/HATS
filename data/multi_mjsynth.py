@@ -5,15 +5,21 @@ from . import base
 
 class Dataset(base.Dataset):
 
-    def __init__(self, filenames, num_epochs, batch_size, buffer_size,
-                 image_size, sequence_length, string_length, data_format):
+    def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus,
+                 image_size, data_format, sequence_length, string_length):
 
         self.image_size = image_size
+        self.data_format = data_format
         self.sequence_length = sequence_length
         self.string_length = string_length
-        self.data_format = data_format
 
-        super(Dataset, self).__init__(filenames, num_epochs, batch_size, buffer_size)
+        super(Dataset, self).__init__(
+            filenames=filenames,
+            num_epochs=num_epochs,
+            batch_size=batch_size,
+            buffer_size=buffer_size,
+            num_cpus=num_cpus
+        )
 
     def parse(self, example):
 
