@@ -111,6 +111,7 @@ class ACNN(object):
         ))
 
         global_step = tf.train.get_global_step()
+        print(global_step.dtype)
 
         loss = \
             cross_entropy_loss * self.hyper_params.cross_entropy_decay(global_step) + \
