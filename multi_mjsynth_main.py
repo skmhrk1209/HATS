@@ -138,7 +138,7 @@ def main(unused_argv):
             hyper_params=AttrDict(
                 cross_entropy_decay=1e-0,
                 attention_map_decay=1e-2,
-                total_variation_decay=1e-5
+                total_variation_decay=1e-6
             )
         ),
         model_dir=args.model_dir,
