@@ -137,7 +137,7 @@ def main(unused_argv):
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                cross_entropy_decay=lambda global_step: tf.constant(1e-0),
+                cross_entropy_decay=lambda global_step: 1e-0,
                 attention_map_decay=lambda global_step: (lambda value: tf.minimum(value, value / num_steps * global_step))(1e-2),
                 total_variation_decay=lambda global_step: (lambda value: tf.minimum(value, value / num_steps * global_step))(1e-6)
             )
