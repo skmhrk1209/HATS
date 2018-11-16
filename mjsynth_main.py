@@ -15,7 +15,7 @@ parser.add_argument('--filenames', type=str, nargs="+", default=["mjsynth/train.
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
-parser.add_argument("--data_format", type=str, choices=["channels_first", "channels_last"], default="channels_last", help="data_format")
+parser.add_argument("--num_cpus", type=int, default=32, help="number of logical processors")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
@@ -103,6 +103,8 @@ def search_bounding_box(image, method, threshold):
 
 def main(unused_argv):
 
+    num_steps = args.buffer_size * args.num_epochs / args.batch_size
+
     # best model (accuracy: 86.6 %)
     mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
@@ -134,9 +136,9 @@ def main(unused_argv):
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                cross_entropy_decay=1e-0,
-                attention_map_decay=1e-2,
-                total_variation_decay=1e-6
+                cross_entropy_decay=lambda global_step: 1e-0,
+                attention_map_decay=lambda global_step: tf.minimum(1e-2, 1e-2 / num_steps * global_step),
+                total_variation_decay=lambda global_step: tf.minimum(1e-6, 1e-6 / num_steps * global_step)
             )
         ),
         model_dir=args.model_dir,
@@ -158,8 +160,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                data_format=args.data_format,
+                num_cpus=args.num_cpus,
                 image_size=[32, 256],
+                data_format="channels_last",
                 string_length=10
             ).get_next(),
             hooks=[
@@ -180,8 +183,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                data_format=args.data_format,
+                num_cpus=args.num_cpus,
                 image_size=[32, 256],
+                data_format="channels_last",
                 string_length=10
             ).get_next()
         )
@@ -196,8 +200,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                data_format=args.data_format,
+                num_cpus=args.num_cpus,
                 image_size=[32, 256],
+                data_format="channels_last",
                 string_length=10
             ).get_next()
         )
