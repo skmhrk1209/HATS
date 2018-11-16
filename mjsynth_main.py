@@ -3,7 +3,6 @@ import numpy as np
 import argparse
 import itertools
 import cv2
-from operator import itemgetter
 from attrdict import AttrDict
 from data.mjsynth import Dataset
 from models.acnn import ACNN
@@ -49,7 +48,7 @@ def search_bounding_box(image, method, threshold):
         h, w = binary.shape[:2]
         segments = []
 
-        def search(y, x):
+        def depth_first_search(y, x):
 
             segments[-1].append((y, x))
             flags[y][x] = False
@@ -57,13 +56,13 @@ def search_bounding_box(image, method, threshold):
             for dy, dx in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
                 if 0 <= y + dy < h and 0 <= x + dx < w:
                     if flags[y + dy, x + dx] and binary[y + dy, x + dx]:
-                        search(y + dy, x + dx)
+                        depth_first_search(y + dy, x + dx)
 
         for y in range(flags.shape[0]):
             for x in range(flags.shape[1]):
                 if flags[y, x] and binary[y, x]:
                     segments.append([])
-                    search(y, x)
+                    depth_first_search(y, x)
 
         bounding_boxes = [(lambda ls_1, ls_2: ((min(ls_1), min(ls_2)), (max(ls_1), max(ls_2))))(*zip(*segment)) for segment in segments]
         bounding_boxes = sorted(bounding_boxes, key=lambda box: abs(box[0][0] - box[1][0]) * abs(box[0][1] - box[1][1]))
