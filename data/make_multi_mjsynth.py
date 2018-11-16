@@ -56,12 +56,10 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
                 proposal = (y, x, y + h, x + w)
 
                 for rect in rects:
-
                     if box(*proposal).intersects(box(*rect)):
                         break
 
                 else:
-
                     multi_image[y:y+h, x:x+w, :] += image
                     strings.append(string)
                     rects.append(proposal)

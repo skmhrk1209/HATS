@@ -110,10 +110,12 @@ class ACNN(object):
             sequence=attention_maps
         ))
 
+        global_step = tf.train.get_global_step()
+
         loss = \
-            cross_entropy_loss * self.hyper_params.cross_entropy_decay + \
-            attention_map_loss * self.hyper_params.attention_map_decay + \
-            total_variation_loss * self.hyper_params.total_variation_decay
+            cross_entropy_loss * self.hyper_params.cross_entropy_decay(global_step) + \
+            attention_map_loss * self.hyper_params.attention_map_decay(global_step) + \
+            total_variation_loss * self.hyper_params.total_variation_decay(global_step)
 
         accuracy = tf.metrics.accuracy(
             labels=labels,
@@ -145,7 +147,7 @@ class ACNN(object):
 
                 train_op = tf.train.AdamOptimizer().minimize(
                     loss=loss,
-                    global_step=tf.train.get_global_step()
+                    global_step=global_step
                 )
 
             return tf.estimator.EstimatorSpec(

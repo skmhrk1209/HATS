@@ -103,6 +103,8 @@ def search_bounding_box(image, method, threshold):
 
 def main(unused_argv):
 
+    num_steps = args.buffer_size * args.num_epochs / args.batch_size
+
     # best model (accuracy: 86.6 %)
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
@@ -135,9 +137,9 @@ def main(unused_argv):
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                cross_entropy_decay=1e-0,
-                attention_map_decay=1e-2,
-                total_variation_decay=1e-6
+                cross_entropy_decay=lambda global_step: 1e-0,
+                attention_map_decay=lambda global_step: min(1e-2, 1e-2 / num_steps * global_step),
+                total_variation_decay=lambda global_step: min(1e-6, 1e-6 / num_steps * global_step)
             )
         ),
         model_dir=args.model_dir,
