@@ -116,7 +116,7 @@ def main(unused_argv):
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
-                data_format=args.data_format
+                data_format="channels_last"
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
@@ -132,10 +132,10 @@ def main(unused_argv):
                     AttrDict(sequence_length=4, num_units=[256, 256]),
                     AttrDict(sequence_length=10, num_units=[16, 16])
                 ],
-                data_format=args.data_format
+                data_format="channels_last"
             ),
             num_classes=63,
-            data_format=args.data_format,
+            data_format="channels_last",
             hyper_params=AttrDict(
                 cross_entropy_decay=lambda global_step: 1e-0,
                 attention_map_decay=lambda global_step: tf.minimum(1e-3, 1e-3 / num_steps * global_step),
