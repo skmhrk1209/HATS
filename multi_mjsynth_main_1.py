@@ -10,7 +10,7 @@ from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model_1", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth/train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
