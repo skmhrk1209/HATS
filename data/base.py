@@ -5,7 +5,7 @@ class Dataset(object):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus):
 
-        self.dataset = tf.data.TFRecordDataset(filenames, num_parallel_reads=num_cpus)
+        self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(buffer_size, reshuffle_each_iteration=True)
         self.dataset = self.dataset.repeat(num_epochs)
         self.dataset = self.dataset.map(self.parse, num_parallel_calls=num_cpus)
