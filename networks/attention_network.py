@@ -3,8 +3,8 @@ import numpy as np
 from algorithms.sequence import *
 
 
-def composite(function, *functions):
-    return lambda *args: composite(*functions)(function(*args)) if functions else function(*args)
+def compose(function, *functions):
+    return lambda *args: compose(*functions)(function(*args)) if functions else function(*args)
 
 
 class AttentionNetwork(object):
