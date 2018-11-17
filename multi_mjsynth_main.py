@@ -139,7 +139,7 @@ def main(unused_argv):
             hyper_params=AttrDict(
                 cross_entropy_decay=lambda global_step: 1e-0,
                 attention_map_decay=lambda global_step: tf.minimum(1e-3, 1e-3 / num_steps * global_step),
-                total_variation_decay=lambda global_step: tf.minimum(1e-6, 1e-6 / num_steps * global_step)
+                total_variation_decay=lambda global_step: tf.minimum(1e-9, 1e-9 / num_steps * global_step)
             )
         ),
         model_dir=args.model_dir,
