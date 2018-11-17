@@ -9,7 +9,7 @@ class Dataset(object):
         self.dataset = self.dataset.shuffle(buffer_size, reshuffle_each_iteration=True)
         self.dataset = self.dataset.repeat(num_epochs)
         self.dataset = self.dataset.map(self.parse, num_parallel_calls=num_cpus)
-        self.dataset = self.dataset.batch(batch_size, drop_remainder=True)
+        self.dataset = self.dataset.batch(batch_size)
         self.dataset = self.dataset.prefetch(1)
         self.iterator = self.dataset.make_one_shot_iterator()
 
