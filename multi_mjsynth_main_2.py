@@ -129,8 +129,8 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=4, num_units=[256, 256]),
-                    AttrDict(sequence_length=10, num_units=[16, 16])
+                    AttrDict(sequence_length=4, num_units=[256]),
+                    AttrDict(sequence_length=10, num_units=[16])
                 ],
                 data_format="channels_last"
             ),
@@ -138,8 +138,8 @@ def main(unused_argv):
             data_format="channels_last",
             hyper_params=AttrDict(
                 cross_entropy_decay=lambda global_step: 1e-0,
-                attention_map_decay=lambda global_step: 1e-3,
-                total_variation_decay=lambda global_step: 1e-9
+                attention_map_decay=lambda global_step: 1e-2,
+                total_variation_decay=lambda global_step: 1e-6
             )
         ),
         model_dir=args.model_dir,
