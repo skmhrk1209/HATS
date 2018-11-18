@@ -103,19 +103,27 @@ class ACNN(object):
             sequence=attention_maps
         ))
 
+        '''
         total_variation_loss = tf.reduce_mean(map_innermost(
             function=lambda attention_maps: tf.reduce_mean(
                 tf.image.total_variation(attention_maps)
             ),
             sequence=attention_maps
         ))
+        '''
 
         global_step = tf.train.get_global_step()
 
+        '''
         loss = \
             cross_entropy_loss * self.hyper_params.cross_entropy_decay(tf.cast(global_step, tf.float32)) + \
             attention_map_loss * self.hyper_params.attention_map_decay(tf.cast(global_step, tf.float32)) + \
             total_variation_loss * self.hyper_params.total_variation_decay(tf.cast(global_step, tf.float32))
+        '''
+
+        loss = \
+            cross_entropy_loss * self.hyper_params.cross_entropy_decay(tf.cast(global_step, tf.float32)) + \
+            attention_map_loss * self.hyper_params.attention_map_decay(tf.cast(global_step, tf.float32))
 
         accuracy = tf.metrics.accuracy(
             labels=labels,
