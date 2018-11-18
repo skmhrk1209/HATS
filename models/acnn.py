@@ -112,15 +112,6 @@ class ACNN(object):
         ))
         '''
 
-        global_step = tf.train.get_global_step()
-
-        '''
-        loss = \
-            cross_entropy_loss * self.hyper_params.cross_entropy_decay(tf.cast(global_step, tf.float32)) + \
-            attention_map_loss * self.hyper_params.attention_map_decay(tf.cast(global_step, tf.float32)) + \
-            total_variation_loss * self.hyper_params.total_variation_decay(tf.cast(global_step, tf.float32))
-        '''
-
         loss = \
             cross_entropy_loss * self.hyper_params.cross_entropy_decay(tf.cast(global_step, tf.float32)) + \
             attention_map_loss * self.hyper_params.attention_map_decay(tf.cast(global_step, tf.float32))
@@ -144,7 +135,6 @@ class ACNN(object):
         tf.summary.image("images", images, max_outputs=2)
         tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
         tf.summary.scalar("attention_map_loss", attention_map_loss)
-        # tf.summary.scalar("total_variation_loss", total_variation_loss)
         tf.summary.scalar("loss", loss)
         tf.summary.scalar("accuracy", accuracy[1])
         # ==========================================================================================
@@ -155,7 +145,7 @@ class ACNN(object):
 
                 train_op = tf.train.AdamOptimizer().minimize(
                     loss=loss,
-                    global_step=global_step
+                    global_step=tf.train.get_global_step()
                 )
 
             return tf.estimator.EstimatorSpec(

@@ -99,8 +99,8 @@ def main(unused_argv):
             num_classes=63,
             data_format="channels_last",
             hyper_params=AttrDict(
-                cross_entropy_decay=lambda global_step: 1.0,
-                attention_map_decay=lambda global_step: 0.01
+                cross_entropy_decay=1.0,
+                attention_map_decay=0.01
             )
         ),
         model_dir=args.model_dir,
