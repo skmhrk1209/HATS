@@ -20,42 +20,7 @@ class AttentionNetwork(object):
 
         with tf.variable_scope(name, reuse=reuse):
 
-            for i, conv_param in enumerate(self.conv_params[:-1]):
-
-                with tf.variable_scope("conv_block_{}".format(i)):
-
-                    inputs = map_innermost(
-                        function=compose(
-                            lambda inputs: tf.layers.conv2d(
-                                inputs=inputs,
-                                filters=conv_param.filters,
-                                kernel_size=conv_param.kernel_size,
-                                strides=conv_param.strides,
-                                padding="same",
-                                data_format=self.data_format,
-                                use_bias=False,
-                                kernel_initializer=tf.variance_scaling_initializer(
-                                    scale=2.0,
-                                    mode="fan_in",
-                                    distribution="normal",
-                                ),
-                                name="conv2d",
-                                reuse=None
-                            ),
-                            lambda inputs: tf.layers.batch_normalization(
-                                inputs=inputs,
-                                axis=1 if self.data_format == "channels_first" else 3,
-                                training=training,
-                                fused=True,
-                                name="batch_normalization",
-                                reuse=None
-                            ),
-                            lambda inputs: tf.nn.relu(inputs)
-                        ),
-                        sequence=inputs
-                    )
-
-            for i, conv_param in enumerate(self.conv_params[-1:], i + 1):
+            for i, conv_param in enumerate(self.conv_params):
 
                 with tf.variable_scope("conv_block_{}".format(i)):
 
@@ -97,43 +62,13 @@ class AttentionNetwork(object):
                 sequence=inputs
             )
 
-            for i, rnn_param in enumerate(self.rnn_params[:-1]):
+            for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
                     cells = [
                         tf.nn.rnn_cell.LSTMCell(
                             num_units=num_units,
-                            use_peepholes=True
-                        ) for num_units in rnn_param.num_units
-                    ]
-
-                    inputs = map_innermost(
-                        function=compose(
-                            lambda inputs: tf.nn.static_rnn(
-                                cell=tf.nn.rnn_cell.MultiRNNCell(cells),
-                                inputs=[inputs] * rnn_param.sequence_length,
-                                dtype=tf.float32,
-                                scope="rnn"
-                            )[0]
-                        ),
-                        sequence=inputs
-                    )
-
-            for i, rnn_param in enumerate(self.rnn_params[-1:], i + 1):
-
-                with tf.variable_scope("rnn_block_{}".format(i)):
-
-                    cells = [
-                        tf.nn.rnn_cell.LSTMCell(
-                            num_units=num_units,
-                            use_peepholes=True
-                        ) for num_units in rnn_param.num_units
-                    ]
-
-                    cells += [
-                        tf.nn.rnn_cell.LSTMCell(
-                            num_units=np.prod(shape[1:]),
                             use_peepholes=True
                         ) for num_units in rnn_param.num_units
                     ]
