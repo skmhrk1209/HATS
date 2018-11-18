@@ -66,22 +66,20 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    cells = [
+                    multi_cell = tf.nn.rnn_cell.MultiRNNCell([
                         tf.nn.rnn_cell.LSTMCell(
                             num_units=num_units,
                             use_peepholes=True
                         ) for num_units in rnn_param.num_units
-                    ]
+                    ])
 
                     inputs = map_innermost(
-                        function=compose(
-                            lambda inputs: tf.nn.static_rnn(
-                                cell=tf.nn.rnn_cell.MultiRNNCell(cells),
-                                inputs=[inputs] * rnn_param.sequence_length,
-                                dtype=tf.float32,
-                                scope="rnn"
-                            )[0]
-                        ),
+                        function=lambda inputs: tf.nn.static_rnn(
+                            cell=multi_cell,
+                            inputs=[inputs] * rnn_param.sequence_length,
+                            dtype=tf.float32,
+                            scope="rnn"
+                        )[0],
                         sequence=inputs
                     )
 

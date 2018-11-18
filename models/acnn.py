@@ -88,42 +88,60 @@ class ACNN(object):
                 predictions={}
             )
 
-        cross_entropy_loss = tf.reduce_mean(map_innermost(
+        cross_entropy_losses = map_innermost(
             function=lambda labels_and_logits: tf.losses.sparse_softmax_cross_entropy(
                 labels=labels_and_logits[0],
                 logits=labels_and_logits[1]
             ),
             sequence=zip_innermost(labels, logits)
-        ))
+        )
 
-        attention_map_loss = tf.reduce_mean(map_innermost(
+        attention_map_losses = map_innermost(
             function=lambda attention_maps: tf.reduce_mean(
                 tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
             ),
             sequence=attention_maps
-        ))
+        )
 
         '''
-        total_variation_loss = tf.reduce_mean(map_innermost(
+        total_variation_losses = map_innermost(
             function=lambda attention_maps: tf.reduce_mean(
                 tf.image.total_variation(attention_maps)
             ),
             sequence=attention_maps
-        ))
+        )
         '''
 
-        loss = \
-            cross_entropy_loss * self.hyper_params.cross_entropy_decay + \
-            attention_map_loss * self.hyper_params.attention_map_decay
-
-        accuracy = tf.metrics.accuracy(
-            labels=labels,
-            predictions=predictions
+        losses = map_innermost(
+            function=lambda cross_entropy_loss_and_attention_map_loss: (
+                cross_entropy_loss_and_attention_map_loss[0] * self.hyper_params.cross_entropy_decay +
+                cross_entropy_loss_and_attention_map_loss[1] * self.hyper_params.attention_map_decay
+            ),
+            sequence=zip_innermost(cross_entropy_losses, attention_map_losses)
         )
 
-        tf.identity(accuracy[0], "accuracy_value")
+        accuracies = map_innermost(
+            function=lambda labels_and_predictions: tf.metrics.accuracy(
+                labels=labels_and_predictions[0],
+                predictions=labels_and_predictions[1]
+            ),
+            sequence=zip_innermost(labels, predictions)
+        )
+
+        enumerate_map_innermost(
+            function=lambda indices, accuracy: tf.identity(
+                input=accuracy[0],
+                name="accuracy_{}".format("_".join([str(index) for index in indices]))
+            ),
+            sequence=accuracies
+        )
 
         # ==========================================================================================
+        tf.summary.image("images", images, max_outputs=2)
+
+        for variable in tf.trainable_variables("attention_network"):
+            tf.summary.histogram(variable.name, variable)
+
         enumerate_map_innermost(
             function=lambda indices, merged_attention_maps: tf.summary.image(
                 name="merged_attention_maps_{}".format("_".join([str(index) for index in indices])),
@@ -132,12 +150,41 @@ class ACNN(object):
             ),
             sequence=merged_attention_maps
         )
-        tf.summary.image("images", images, max_outputs=2)
-        tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
-        tf.summary.scalar("attention_map_loss", attention_map_loss)
-        tf.summary.scalar("loss", loss)
-        tf.summary.scalar("accuracy", accuracy[1])
+
+        enumerate_map_innermost(
+            function=lambda indices, cross_entropy_loss: tf.summary.scalar(
+                name="cross_entropy_loss_{}".format("_".join([str(index) for index in indices])),
+                tensor=cross_entropy_loss
+            ),
+            sequence=cross_entropy_losses
+        )
+
+        enumerate_map_innermost(
+            function=lambda indices, attention_map_loss: tf.summary.scalar(
+                name="attention_map_loss_{}".format("_".join([str(index) for index in indices])),
+                tensor=attention_map_loss
+            ),
+            sequence=attention_map_losses
+        )
+
+        enumerate_map_innermost(
+            function=lambda indices, loss: tf.summary.scalar(
+                name="loss_{}".format("_".join([str(index) for index in indices])),
+                tensor=loss
+            ),
+            sequence=losses
+        )
+
+        enumerate_map_innermost(
+            function=lambda indices, accuracy: tf.summary.scalar(
+                name="accuracy_{}".format("_".join([str(index) for index in indices])),
+                tensor=accuracy[1]
+            ),
+            sequence=accuracies
+        )
         # ==========================================================================================
+
+        loss = tf.reduce_mean(losses)
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
