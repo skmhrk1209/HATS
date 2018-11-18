@@ -78,16 +78,8 @@ def search_bounding_box(image, method, threshold):
 
         while image[y - dy: y + dy, x - dx: x + dx].mean() > threshold:
 
-            if dy >= min(y, h - y - 1) and dx >= min(x, w - x - 1):
-                break
+            if 0 <= y - dy - 1 and y + dy + 1 < h and 0 <= x - dx - 1 and x + dx + 1 < w:
 
-            elif dy >= min(y, h - y - 1):
-                dx += 1
-
-            elif dx >= min(x, w - x - 1):
-                dy += 1
-
-            else:
                 density_1 = image[y - dy - 1: y + dy + 1, x - dx: x + dx].mean()
                 density_2 = image[y - dy: y + dy, x - dx - 1: x + dx + 1].mean()
 
@@ -95,6 +87,15 @@ def search_bounding_box(image, method, threshold):
                     dy += 1
                 else:
                     dx += 1
+
+            elif 0 <= y - dy - 1 and y + dy + 1 < h:
+                dy += 1
+
+            elif 0 <= x - dx - 1 and x + dx + 1 < w:
+                dx += 1
+
+            else:
+                break
 
         return ((y - dy, x - dx), (y + dy, x + dx))
 
@@ -222,10 +223,10 @@ def main(unused_argv):
 
                 merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                 merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                bounding_box = search_bounding_box(merged_attention_map, 0.5)
+                bounding_box = search_bounding_box(merged_attention_map, "density", 0.5)
 
                 image = predict_result["images"]
-                image = cv2.rectangle(image, bounding_box[0], bounding_box[1], (255, 0, 0))
+                image = cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                 cv2.imwrite(
