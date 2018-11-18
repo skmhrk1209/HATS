@@ -30,76 +30,37 @@ def scale(input, input_min, input_max, output_min, output_max):
     return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
 
-def search_bounding_box(image, method, threshold):
-
-    assert(method in ["segment", "density"])
+def search_bounding_box(image, threshold):
 
     if len(image.shape) == 3 and image.shape[-1] == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    if image.dtype == np.uint8:
-        image = image / 255.
-        threshold = threshold / 255.
+    max_value = 1.0 if np.issubdtype(image.dtype, np.floating) else 255
+    binary = cv2.threshold(image, threshold, max_value, cv2.THRESH_BINARY)[1]
+    flags = np.ones_like(binary, dtype=np.bool)
+    h, w = binary.shape[:2]
+    segments = []
 
-    def segment_search_bounding_box(image, threshold):
+    def depth_first_search(y, x):
 
-        binary = cv2.threshold(image, threshold, 1.0, cv2.THRESH_BINARY)[1]
-        flags = np.ones_like(binary, dtype=np.bool)
-        h, w = binary.shape[:2]
-        segments = []
+        segments[-1].append((y, x))
+        flags[y][x] = False
 
-        def depth_first_search(y, x):
+        for dy, dx in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            if 0 <= y + dy < h and 0 <= x + dx < w:
+                if flags[y + dy, x + dx] and binary[y + dy, x + dx]:
+                    depth_first_search(y + dy, x + dx)
 
-            segments[-1].append((y, x))
-            flags[y][x] = False
+    for y in range(flags.shape[0]):
+        for x in range(flags.shape[1]):
+            if flags[y, x] and binary[y, x]:
+                segments.append([])
+                depth_first_search(y, x)
 
-            for dy, dx in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-                if 0 <= y + dy < h and 0 <= x + dx < w:
-                    if flags[y + dy, x + dx] and binary[y + dy, x + dx]:
-                        depth_first_search(y + dy, x + dx)
+    bounding_boxes = [(lambda ls_1, ls_2: ((min(ls_1), min(ls_2)), (max(ls_1), max(ls_2))))(*zip(*segment)) for segment in segments]
+    bounding_boxes = sorted(bounding_boxes, key=lambda box: abs(box[0][0] - box[1][0]) * abs(box[0][1] - box[1][1]))
 
-        for y in range(flags.shape[0]):
-            for x in range(flags.shape[1]):
-                if flags[y, x] and binary[y, x]:
-                    segments.append([])
-                    depth_first_search(y, x)
-
-        bounding_boxes = [(lambda ls_1, ls_2: ((min(ls_1), min(ls_2)), (max(ls_1), max(ls_2))))(*zip(*segment)) for segment in segments]
-        bounding_boxes = sorted(bounding_boxes, key=lambda box: abs(box[0][0] - box[1][0]) * abs(box[0][1] - box[1][1]))
-
-        return bounding_boxes[-1]
-
-    def density_search_bounding_box(image, threshold):
-
-        mu = cv2.moments(image, False)
-        y, x = (int(mu["m01"] / mu["m00"]), int(mu["m10"] / mu["m00"]))
-        h, w = image.shape[:2]
-        dy, dx = (1, 1)
-
-        while image[y - dy: y + dy, x - dx: x + dx].mean() > threshold:
-
-            if 0 <= y - dy - 1 and y + dy + 1 < h and 0 <= x - dx - 1 and x + dx + 1 < w:
-
-                density_1 = image[y - dy - 1: y + dy + 1, x - dx: x + dx].mean()
-                density_2 = image[y - dy: y + dy, x - dx - 1: x + dx + 1].mean()
-
-                if density_1 > density_2:
-                    dy += 1
-                else:
-                    dx += 1
-
-            elif 0 <= y - dy - 1 and y + dy + 1 < h:
-                dy += 1
-
-            elif 0 <= x - dx - 1 and x + dx + 1 < w:
-                dx += 1
-
-            else:
-                break
-
-        return ((y - dy, x - dx), (y + dy, x + dx))
-
-    return (segment_search_bounding_box if method == "segment" else density_search_bounding_box)(image, threshold)
+    return bounding_boxes[-1]
 
 
 def main(unused_argv):
@@ -223,7 +184,7 @@ def main(unused_argv):
 
                 merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                 merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                bounding_box = search_bounding_box(merged_attention_map, "density", 0.5)
+                bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
                 image = predict_result["images"]
                 image = cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0))
