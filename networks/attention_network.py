@@ -79,7 +79,19 @@ class AttentionNetwork(object):
                         ),
                         sequence=inputs
                     )
+            else:
 
+                inputs = map_innermost(
+                    function=compose(
+                        lambda inputs: tf.reshape(
+                            tensor=inputs,
+                            shape=[-1] + shape[1:]
+                        )
+                    ),
+                    sequence=inputs
+                )
+
+            '''
             with tf.variable_scope("projection_block"):
 
                 inputs = map_innermost(
@@ -104,6 +116,7 @@ class AttentionNetwork(object):
                     ),
                     sequence=inputs
                 )
+            '''
 
             for i, deconv_param in enumerate(self.deconv_params[:-1]):
 

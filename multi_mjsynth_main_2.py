@@ -130,7 +130,7 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=4, num_units=[256]),
-                    AttrDict(sequence_length=10, num_units=[16])
+                    AttrDict(sequence_length=10, num_units=[16, 256])
                 ],
                 data_format="channels_last"
             ),
