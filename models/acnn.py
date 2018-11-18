@@ -89,9 +89,9 @@ class ACNN(object):
             )
 
         cross_entropy_loss = tf.reduce_mean(map_innermost(
-            function=lambda (labels, logits): tf.losses.sparse_softmax_cross_entropy(
-                labels=labels,
-                logits=logits
+            function=lambda labels_and_logits: tf.losses.sparse_softmax_cross_entropy(
+                labels=labels_and_logits[0],
+                logits=labels_and_logits[1]
             ),
             sequence=zip_innermost(labels, logits)
         ))
