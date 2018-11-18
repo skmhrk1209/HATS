@@ -131,8 +131,10 @@ def main(unused_argv):
             hooks=[
                 tf.train.LoggingTensorHook(
                     tensors={
-                        "accuracy_{}_{}".format(i, j): "accuracy_{}_{}".format(i, j)
-                        for i in range(4) for j in range(10)
+                        **{"loss_{}_{}".format(i, j): "loss_{}_{}".format(i, j)
+                            for i in range(4) for j in range(10)},
+                        **{"accuracy_{}_{}".format(i, j): "accuracy_{}_{}".format(i, j)
+                           for i in range(4) for j in range(10)},
                     },
                     every_n_iter=100
                 )

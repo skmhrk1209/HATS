@@ -120,6 +120,14 @@ class ACNN(object):
             sequence=zip_innermost(cross_entropy_losses, attention_map_losses)
         )
 
+        enumerate_map_innermost(
+            function=lambda indices, loss: tf.identity(
+                input=loss,
+                name="loss_{}".format("_".join([str(index) for index in indices]))
+            ),
+            sequence=losses
+        )
+
         accuracies = map_innermost(
             function=lambda labels_and_predictions: tf.metrics.accuracy(
                 labels=labels_and_predictions[0],
