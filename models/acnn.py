@@ -113,8 +113,8 @@ class ACNN(object):
         '''
 
         loss = \
-            cross_entropy_loss * self.hyper_params.cross_entropy_decay(tf.cast(global_step, tf.float32)) + \
-            attention_map_loss * self.hyper_params.attention_map_decay(tf.cast(global_step, tf.float32))
+            cross_entropy_loss * self.hyper_params.cross_entropy_decay + \
+            attention_map_loss * self.hyper_params.attention_map_decay
 
         accuracy = tf.metrics.accuracy(
             labels=labels,
