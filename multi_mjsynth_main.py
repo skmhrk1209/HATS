@@ -100,7 +100,7 @@ def main(unused_argv):
             data_format="channels_last",
             hyper_params=AttrDict(
                 cross_entropy_decay=1.0,
-                attention_map_decay=0.01
+                attention_map_decay=0.001
             )
         ),
         model_dir=args.model_dir,
