@@ -144,7 +144,7 @@ class ACNN(object):
         tf.summary.image("images", images, max_outputs=2)
         tf.summary.scalar("cross_entropy_loss", cross_entropy_loss)
         tf.summary.scalar("attention_map_loss", attention_map_loss)
-        tf.summary.scalar("total_variation_loss", total_variation_loss)
+        # tf.summary.scalar("total_variation_loss", total_variation_loss)
         tf.summary.scalar("loss", loss)
         tf.summary.scalar("accuracy", accuracy[1])
         # ==========================================================================================
