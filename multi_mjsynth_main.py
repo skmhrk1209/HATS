@@ -197,7 +197,7 @@ def main(unused_argv):
                     attention_map_images[-1].append(attention_map_image)
 
                     boundin_box_image = np.copy(predict_result["images"])
-                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2.0)
+                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 1)
                     boundin_box_images[-1].append(boundin_box_image)
 
             attention_map_images = np.concatenate([
