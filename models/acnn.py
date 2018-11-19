@@ -206,7 +206,7 @@ class ACNN(object):
 
         loss = tf.reduce_mean(losses)
         accuracy = tf.metrics.accuracy(labels, predictions)
-        tf.identity(accuracy[0], "accuracy_value")
+        tf.identity(accuracy[1], "accuracy_value")
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
