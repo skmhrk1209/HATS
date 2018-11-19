@@ -193,11 +193,11 @@ def main(unused_argv):
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                 cv2.imwrite(
-                    "outputs/multi_mjsynth/merged_attention_map_{}.png".format("_".join(name.split("_")[1:])),
+                    "outputs/multi_mjsynth/merged_attention_map_{}_{}.png".format(i, "_".join(name.split("_")[4:])),
                     scale(merged_attention_map, 0.0, 1.0, 0.0, 255.0)
                 )
                 cv2.imwrite(
-                    "outputs/multi_mjsynth/image_{}.png".format("_".join(name.split("_")[1:])),
+                    "outputs/multi_mjsynth/bounding_box_image_{}_{}.png".format(i, "_".join(name.split("_")[4:])),
                     scale(image, 0.0, 1.0, 0.0, 255.0)
                 )
 
