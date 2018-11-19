@@ -73,7 +73,7 @@ class ACNN(object):
             ),
             sequence=logits
         )
-
+        print(type(labels))
         while all_innermost(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
 
             labels = map_innermost(
