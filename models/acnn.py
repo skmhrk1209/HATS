@@ -89,9 +89,9 @@ class ACNN(object):
             )
 
         cross_entropy_losses = map_innermost(
-            function=lambda labels_and_logits: tf.losses.sparse_softmax_cross_entropy(
-                labels=labels_and_logits[0],
-                logits=labels_and_logits[1]
+            function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
+                labels=labels_logits[0],
+                logits=labels_logits[1]
             ),
             sequence=zip_innermost(labels, logits)
         )
@@ -113,35 +113,19 @@ class ACNN(object):
         '''
 
         losses = map_innermost(
-            function=lambda cross_entropy_loss_and_attention_map_loss: (
-                cross_entropy_loss_and_attention_map_loss[0] * self.hyper_params.cross_entropy_decay +
-                cross_entropy_loss_and_attention_map_loss[1] * self.hyper_params.attention_map_decay
+            function=lambda cross_entropy_loss_attention_map_loss: (
+                cross_entropy_loss_attention_map_loss[0] * self.hyper_params.cross_entropy_decay +
+                cross_entropy_loss_attention_map_loss[1] * self.hyper_params.attention_map_decay
             ),
             sequence=zip_innermost(cross_entropy_losses, attention_map_losses)
         )
 
-        enumerate_map_innermost(
-            function=lambda indices, loss: tf.identity(
-                input=loss,
-                name="loss_{}".format("_".join([str(index) for index in indices]))
-            ),
-            sequence=losses
-        )
-
         accuracies = map_innermost(
-            function=lambda labels_and_predictions: tf.metrics.accuracy(
-                labels=labels_and_predictions[0],
-                predictions=labels_and_predictions[1]
+            function=lambda labels_predictions: tf.metrics.accuracy(
+                labels=labels_predictions[0],
+                predictions=labels_predictions[1]
             ),
             sequence=zip_innermost(labels, predictions)
-        )
-
-        enumerate_map_innermost(
-            function=lambda indices, accuracy: tf.identity(
-                input=accuracy[0],
-                name="accuracy_{}".format("_".join([str(index) for index in indices]))
-            ),
-            sequence=accuracies
         )
 
         # ==========================================================================================
@@ -150,45 +134,61 @@ class ACNN(object):
         for variable in tf.trainable_variables("attention_network"):
             tf.summary.histogram(variable.name, variable)
 
-        enumerate_map_innermost(
-            function=lambda indices, merged_attention_maps: tf.summary.image(
-                name="merged_attention_maps_{}".format("_".join([str(index) for index in indices])),
-                tensor=merged_attention_maps,
+        map_innermost(
+            function=lambda indices_merged_attention_maps: tf.summary.image(
+                name="merged_attention_maps_{}".format("_".join(map(str, indices_merged_attention_maps[0]))),
+                tensor=indices_merged_attention_maps[1],
                 max_outputs=2
             ),
-            sequence=merged_attention_maps
+            sequence=enumerate_innermost(merged_attention_maps)
         )
 
-        enumerate_map_innermost(
-            function=lambda indices, cross_entropy_loss: tf.summary.scalar(
-                name="cross_entropy_loss_{}".format("_".join([str(index) for index in indices])),
-                tensor=cross_entropy_loss
+        map_innermost(
+            function=lambda indices_cross_entropy_loss: tf.summary.scalar(
+                name="cross_entropy_loss_{}".format("_".join(map(str, indices_cross_entropy_loss[0]))),
+                tensor=indices_cross_entropy_loss[1]
             ),
-            sequence=cross_entropy_losses
+            sequence=enumerate_innermost(cross_entropy_losses)
         )
 
-        enumerate_map_innermost(
-            function=lambda indices, attention_map_loss: tf.summary.scalar(
-                name="attention_map_loss_{}".format("_".join([str(index) for index in indices])),
-                tensor=attention_map_loss
+        map_innermost(
+            function=lambda indices_attention_map_loss: tf.summary.scalar(
+                name="attention_map_loss_{}".format("_".join(map(str, indices_attention_map_loss[0]))),
+                tensor=indices_attention_map_loss[1]
             ),
-            sequence=attention_map_losses
+            sequence=enumerate_innermost(attention_map_losses)
         )
 
-        enumerate_map_innermost(
-            function=lambda indices, loss: tf.summary.scalar(
-                name="loss_{}".format("_".join([str(index) for index in indices])),
-                tensor=loss
+        map_innermost(
+            function=lambda indices_loss: tf.summary.scalar(
+                name="loss_{}".format("_".join(map(str, indices_loss[0]))),
+                tensor=indices_loss[1]
             ),
-            sequence=losses
+            sequence=enumerate_innermost(losses)
         )
 
-        enumerate_map_innermost(
-            function=lambda indices, accuracy: tf.summary.scalar(
-                name="accuracy_{}".format("_".join([str(index) for index in indices])),
-                tensor=accuracy[1]
+        map_innermost(
+            function=lambda indices_accuracy: tf.summary.scalar(
+                name="accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
+                tensor=indices_accuracy[1][1]
             ),
-            sequence=accuracies
+            sequence=enumerate_innermost(accuracies)
+        )
+
+        map_innermost(
+            function=lambda indices_loss: tf.identity(
+                name="loss_{}".format("_".join(map(str, indices_loss[0]))),
+                input=indices_loss[1]
+            ),
+            sequence=enumerate_innermost(losses)
+        )
+
+        map_innermost(
+            function=lambda indices_accuracy: tf.identity(
+                name="accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
+                input=indices_accuracy[1][0]
+            ),
+            sequence=enumerate_innermost(accuracies)
         )
         # ==========================================================================================
 
@@ -214,5 +214,11 @@ class ACNN(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops={"accuracy": accuracy}
+                eval_metric_ops=dict(flatten_innermost(map_innermost(
+                    function=lambda indices_accuracy: (
+                        "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
+                        indices_accuracy[1]
+                    ),
+                    sequence=enumerate_innermost(accuracies)
+                )))
             )
