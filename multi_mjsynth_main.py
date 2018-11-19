@@ -178,14 +178,13 @@ def main(unused_argv):
             ]
 
             for name, merged_attention_map in merged_attention_maps:
-                print(merged_attention_map.shape)
+
                 merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                 merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
                 bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
                 attention_map_image = predict_result["images"]
-                print(merged_attention_map.shape)
-                attention_map_image += np.pad(merged_attention_map, [[0, 0], [0, 0], [0, 2]], "constant")
+                attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
                 attention_map_image = cv2.cvtColor(attention_map_image, cv2.COLOR_BGR2RGB)
 
                 boundin_box_image = predict_result["images"]
