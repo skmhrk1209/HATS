@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import sys
 import argparse
 import itertools
 import cv2
@@ -23,6 +24,8 @@ parser.add_argument("--gpu", type=str, default="0,1,2", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
+
+sys.setrecursionlimit(sys.getrecursionlimit())
 
 
 def scale(input, input_min, input_max, output_min, output_max):
