@@ -73,13 +73,6 @@ class ACNN(object):
             ),
             sequence=logits
         )
-        print(type(labels))
-        while all_innermost(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
-
-            labels = map_innermost(
-                function=lambda labels: tf.unstack(labels, axis=1),
-                sequence=labels
-            )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -96,6 +89,13 @@ class ACNN(object):
                         sequence=enumerate_innermost(merged_attention_maps)
                     )))
                 }
+            )
+
+        while all_innermost(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
+
+            labels = map_innermost(
+                function=lambda labels: tf.unstack(labels, axis=1),
+                sequence=labels
             )
 
         cross_entropy_losses = map_innermost(
