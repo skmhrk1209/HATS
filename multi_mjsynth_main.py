@@ -177,28 +177,47 @@ def main(unused_argv):
                 if "merged_attention_maps" in name
             ]
 
-            for name, merged_attention_map in merged_attention_maps:
+            attention_map_images = []
+            boundin_box_images = []
 
-                merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                bounding_box = search_bounding_box(merged_attention_map, 0.5)
+            for j in range(4):
 
-                attention_map_image = np.copy(predict_result["images"])
-                attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
-                attention_map_image = cv2.cvtColor(attention_map_image, cv2.COLOR_BGR2RGB)
+                attention_map_images.append([])
+                boundin_box_images.append([])
 
-                boundin_box_image = np.copy(predict_result["images"])
-                boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0))
-                boundin_box_image = cv2.cvtColor(boundin_box_image, cv2.COLOR_BGR2RGB)
+                for k in range(10):
 
-                cv2.imwrite(
-                    "outputs/multi_mjsynth/attention_map_image_{}_{}.png".format(i, "_".join(name.split("_")[3:])),
-                    scale(attention_map_image, 0.0, 1.0, 0.0, 255.0)
-                )
-                cv2.imwrite(
-                    "outputs/multi_mjsynth/bounding_box_image_{}_{}.png".format(i, "_".join(name.split("_")[3:])),
-                    scale(boundin_box_image, 0.0, 1.0, 0.0, 255.0)
-                )
+                    merged_attention_map = predict_result["merged_attention_maps_{}_{}".format(j, k)]
+                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
+                    merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
+                    bounding_box = search_bounding_box(merged_attention_map, 0.5)
+
+                    attention_map_image = np.copy(predict_result["images"])
+                    attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
+                    attention_map_images[-1].append(attention_map_image)
+
+                    boundin_box_image = np.copy(predict_result["images"])
+                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0))
+                    boundin_box_images[-1].append(boundin_box_image)
+
+            attention_map_images = np.concatenate([
+                np.concatenate(attention_map_images, axis=1)
+                for attention_map_images in attention_map_images
+            ], axis=0)
+
+            boundin_box_images = np.concatenate([
+                np.concatenate(boundin_box_images, axis=1)
+                for boundin_box_images in boundin_box_images
+            ], axis=0)
+
+            attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
+            attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
+
+            boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
+            boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
+
+            cv2.imwrite("attention_map_images_{}.png".format(i), attention_map_images)
+            cv2.imwrite("boundin_box_images_{}.png".format(i), boundin_box_images)
 
 
 if __name__ == "__main__":
