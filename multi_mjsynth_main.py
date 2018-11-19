@@ -25,8 +25,7 @@ args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-sys.setrecursionlimit(sys.getrecursionlimit())
-print(sys.getrecursionlimit())
+sys.setrecursionlimit(sys.getrecursionlimit(10000))
 
 def scale(input, input_min, input_max, output_min, output_max):
 
