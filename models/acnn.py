@@ -185,6 +185,7 @@ class ACNN(object):
             sequence=enumerate_innermost(accuracies)
         )
 
+        '''
         map_innermost(
             function=lambda indices_loss: tf.identity(
                 name="loss_{}".format("_".join(map(str, indices_loss[0]))),
@@ -200,10 +201,12 @@ class ACNN(object):
             ),
             sequence=enumerate_innermost(accuracies)
         )
+        '''
         # ==========================================================================================
 
         loss = tf.reduce_mean(losses)
         accuracy = tf.metrics.accuracy(labels, predictions)
+        tf.identity(accuracy[0], "accuracy_value")
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
