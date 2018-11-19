@@ -85,7 +85,13 @@ class ACNN(object):
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
-                predictions={}
+                predictions=dict(flatten_innermost(map_innermost(
+                    function=lambda indices_merged_attention_maps: (
+                        "merged_attention_maps_{}".format("_".join(map(str, indices_merged_attention_maps[0]))),
+                        indices_merged_attention_maps[1]
+                    ),
+                    sequence=enumerate_innermost(merged_attention_maps)
+                )), images=images)
             )
 
         cross_entropy_losses = map_innermost(
@@ -193,6 +199,7 @@ class ACNN(object):
         # ==========================================================================================
 
         loss = tf.reduce_mean(losses)
+        accuracy = tf.metrics.accuracy(labels, predictions)
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
@@ -220,5 +227,5 @@ class ACNN(object):
                         indices_accuracy[1]
                     ),
                     sequence=enumerate_innermost(accuracies)
-                )))
+                )), accuracy=accuracy)
             )
