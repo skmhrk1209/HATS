@@ -184,6 +184,7 @@ def main(unused_argv):
                 bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
                 attention_map_image = predict_result["images"]
+                print(merged_attention_map.shape)
                 attention_map_image += np.pad(merged_attention_map, [[0, 0], [0, 0], [0, 2]], "constant")
                 attention_map_image = cv2.cvtColor(attention_map_image, cv2.COLOR_BGR2RGB)
 
