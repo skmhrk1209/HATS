@@ -27,6 +27,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 sys.setrecursionlimit(10000)
 
+
 def scale(input, input_min, input_max, output_min, output_max):
 
     return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
@@ -190,7 +191,7 @@ def main(unused_argv):
                 for k in range(10):
 
                     merged_attention_map = predict_result["merged_attention_maps_{}_{}".format(j, k)]
-                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 2.0)
+                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                     merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
                     bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
@@ -199,7 +200,7 @@ def main(unused_argv):
                     attention_map_images[-1].append(attention_map_image)
 
                     boundin_box_image = np.copy(predict_result["images"])
-                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 1)
+                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
                     boundin_box_images[-1].append(boundin_box_image)
 
             attention_map_images = np.concatenate([
