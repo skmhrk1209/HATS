@@ -58,5 +58,5 @@ def flatten_innermost(sequence, **kwargs):
     innermost element is defined as element which is not instance of "classes" (default: list)
     '''
 
-    return (reduce(add, map(lambda element: flatten(element, **kwargs), sequence))
+    return (reduce(add, map(lambda element: flatten_innermost(element, **kwargs), sequence))
             if isinstance(sequence, kwargs.get("classes", list)) else [sequence])
