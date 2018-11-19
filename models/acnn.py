@@ -85,13 +85,17 @@ class ACNN(object):
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
-                predictions=dict(flatten_innermost(map_innermost(
-                    function=lambda indices_merged_attention_maps: (
-                        "merged_attention_maps_{}".format("_".join(map(str, indices_merged_attention_maps[0]))),
-                        indices_merged_attention_maps[1]
-                    ),
-                    sequence=enumerate_innermost(merged_attention_maps)
-                )), images=images)
+                predictions={
+                    **dict(predictions=tf.stack(flatten_innermost(predictions), axis=1)),
+                    **dict(images=images),
+                    **dict(flatten_innermost(map_innermost(
+                        function=lambda indices_merged_attention_maps: (
+                            "merged_attention_maps_{}".format("_".join(map(str, indices_merged_attention_maps[0]))),
+                            indices_merged_attention_maps[1]
+                        ),
+                        sequence=enumerate_innermost(merged_attention_maps)
+                    )))
+                }
             )
 
         cross_entropy_losses = map_innermost(
@@ -221,11 +225,14 @@ class ACNN(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops=dict(flatten_innermost(map_innermost(
-                    function=lambda indices_accuracy: (
-                        "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                        indices_accuracy[1]
-                    ),
-                    sequence=enumerate_innermost(accuracies)
-                )), accuracy=accuracy)
+                eval_metric_ops={
+                    **dict(accuracy=accuracy),
+                    **dict(flatten_innermost(map_innermost(
+                        function=lambda indices_accuracy: (
+                            "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
+                            indices_accuracy[1]
+                        ),
+                        sequence=enumerate_innermost(accuracies)
+                    )))
+                }
             )
