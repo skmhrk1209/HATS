@@ -39,7 +39,7 @@ class Dataset(base.Dataset):
         )
 
         image = tf.read_file(features["path"])
-        image = tf.image.decode_png(image, 3)
+        image = tf.image.decode_jpeg(image, 3)
         image = tf.image.convert_image_dtype(image, tf.float32)
 
         if self.image_size:

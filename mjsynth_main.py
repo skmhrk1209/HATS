@@ -9,7 +9,6 @@ from data.mjsynth import Dataset
 from models.acnn import ACNN
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
-from tensorflow.python import debug as tf_debug
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="mjsynth_acnn_model", help="model directory")
@@ -131,7 +130,6 @@ def main(unused_argv):
                 string_length=10
             ).get_next(),
             hooks=[
-                tf_debug.LocalCLIDebugHook(),
                 tf.train.LoggingTensorHook(
                     tensors={"accuracy": "accuracy_value"},
                     every_n_iter=100
