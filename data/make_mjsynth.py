@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     make_multi_thread(make_mjsynth, num_threads=32, split=True)(
         list(enumerate(filenames[:900000])),
-        directory="/home/sakuma/data/mjsynth/train"
+        directory="/home/sakuma/data/mjsynth/train",
         image_size=(256, 256)
     )
 
