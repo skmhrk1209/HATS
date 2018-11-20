@@ -61,7 +61,8 @@ def make_mjsynth(filenames, directory, image_size, thread_id):
             array=image,
             pad_width=[
                 [y, image_size[0] - h - y],
-                [x, image_size[1] - w - x]
+                [x, image_size[1] - w - x],
+                [0, 0]
             ],
             mode="constant",
             constant_values=0
