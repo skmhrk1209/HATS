@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames[:int(len(filenames) * 0.9)],
-        "/home/sakuma/data/multi_mjsynth/train",
+        directory="/home/sakuma/data/multi_mjsynth/train",
         num_data=28125,
         image_size=(256, 256),
         sequence_length=4,
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames[int(len(filenames) * 0.9):],
-        "/home/sakuma/data/multi_mjsynth/test",
+        directory="/home/sakuma/data/multi_mjsynth/test",
         num_data=3125,
         image_size=(256, 256),
         sequence_length=4,
