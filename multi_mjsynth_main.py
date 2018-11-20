@@ -70,7 +70,6 @@ def main(unused_argv):
 
     num_steps = args.buffer_size * args.num_epochs / args.batch_size
 
-    # best model (accuracy: 86.6 %)
     multi_mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
             convolutional_network=ResidualNetwork(
@@ -85,7 +84,6 @@ def main(unused_argv):
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    # kernel size shuld be large
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
@@ -212,8 +210,8 @@ def main(unused_argv):
             boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
             boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-            cv2.imwrite("attention_map_images_{}.png".format(i), attention_map_images)
-            cv2.imwrite("boundin_box_images_{}.png".format(i), boundin_box_images)
+            cv2.imwrite("outputs/multi_mjsynth/attention_map_images_{}.png".format(i), attention_map_images)
+            cv2.imwrite("outputs/multi_mjsynth/boundin_box_images_{}.png".format(i), boundin_box_images)
 
 
 if __name__ == "__main__":

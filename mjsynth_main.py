@@ -70,22 +70,20 @@ def main(unused_argv):
 
     num_steps = args.buffer_size * args.num_epochs / args.batch_size
 
-    # best model (accuracy: 86.6 %)
     mjsynth_classifier = tf.estimator.Estimator(
         model_fn=ACNN(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 2]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[1, 2], blocks=2),
-                    AttrDict(filters=128, strides=[1, 2], blocks=2),
+                    AttrDict(filters=64, strides=[2, 2], blocks=2),
+                    AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
                 data_format="channels_last"
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    # kernel size shuld be large
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
@@ -102,7 +100,7 @@ def main(unused_argv):
             data_format="channels_last",
             hyper_params=AttrDict(
                 cross_entropy_decay=1.0,
-                attention_map_decay=0.001
+                attention_map_decay=0.0001
             )
         ),
         model_dir=args.model_dir,
@@ -125,7 +123,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 num_cpus=args.num_cpus,
-                image_size=[32, 256],
+                image_size=[256, 256],
                 data_format="channels_last",
                 string_length=10
             ).get_next(),
@@ -146,7 +144,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 num_cpus=args.num_cpus,
-                image_size=[32, 256],
+                image_size=[256, 256],
                 data_format="channels_last",
                 string_length=10
             ).get_next()
@@ -163,7 +161,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 num_cpus=args.num_cpus,
-                image_size=[32, 256],
+                image_size=[256, 256],
                 data_format="channels_last",
                 string_length=10
             ).get_next()
