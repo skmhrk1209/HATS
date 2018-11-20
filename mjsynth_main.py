@@ -123,7 +123,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 num_cpus=args.num_cpus,
-                image_size=[256, 256],
+                image_size=None,
                 data_format="channels_last",
                 string_length=10
             ).get_next(),
@@ -144,7 +144,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 num_cpus=args.num_cpus,
-                image_size=[256, 256],
+                image_size=None,
                 data_format="channels_last",
                 string_length=10
             ).get_next()
@@ -161,7 +161,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 num_cpus=args.num_cpus,
-                image_size=[256, 256],
+                image_size=None,
                 data_format="channels_last",
                 string_length=10
             ).get_next()
