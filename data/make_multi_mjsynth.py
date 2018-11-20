@@ -11,17 +11,29 @@ from tqdm import tqdm, trange
 from shapely.geometry import box
 
 
-def make_multi_thread(func, num_threads):
+def make_multi_thread(func, num_threads, split=False):
 
     def func_mt(*args, **kwargs):
 
-        threads = [
-            threading.Thread(
-                target=func,
-                args=args,
-                kwargs=dict(kwargs, thread_id=i)
-            ) for i in range(num_threads)
-        ]
+        if split:
+
+            threads = [
+                threading.Thread(
+                    target=func,
+                    args=(arg,) + args[1:],
+                    kwargs=dict(kwargs, thread_id=i)
+                ) for i, arg in enumerate(np.array_split(args[0], num_threads))
+            ]
+
+        else:
+
+            threads = [
+                threading.Thread(
+                    target=func,
+                    args=args,
+                    kwargs=dict(kwargs, thread_id=i)
+                ) for i in range(num_threads)
+            ]
 
         for thread in threads:
             thread.start()
@@ -80,7 +92,7 @@ if __name__ == "__main__":
     random.seed(0)
     random.shuffle(filenames)
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames[:int(len(filenames) * 0.9)],
         "/home/sakuma/data/multi_mjsynth/train",
         num_data=28125,
@@ -89,7 +101,7 @@ if __name__ == "__main__":
         num_retries=100
     )
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32)(
+    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
         filenames[int(len(filenames) * 0.9):],
         "/home/sakuma/data/multi_mjsynth/test",
         num_data=3125,

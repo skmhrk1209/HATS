@@ -45,12 +45,29 @@ def make_multi_thread(func, num_threads, split=False):
 
 
 @jit(nopython=False, nogil=True)
-def make_mjsynth(filenames, directory, thread_id):
+def make_mjsynth(filenames, directory, image_size, thread_id):
 
     for i, filename in tqdm(filenames):
 
         string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
-        shutil.copy(filename, os.path.join(directory, "{}_{}.jpg".format(i, string)))
+        image = cv2.imread(filename)
+
+        h = image.shape[0]
+        w = image.shape[1]
+        y = random.randint(0, image_size[0] - h)
+        x = random.randint(0, image_size[1] - w)
+
+        image = np.pad(
+            array=image,
+            pad_width=[
+                [y, image_size[0] - h - y],
+                [x, image_size[1] - w - x]
+            ],
+            mode="constant",
+            constant_values=0
+        )
+
+        cv2.imwrite(os.path.join(directory, "{}_{}.jpg".format(i, string)), image)
 
 
 if __name__ == "__main__":
