@@ -30,4 +30,4 @@ def accuracy(logits, labels, time_major=True):
         hypothesis=tf.cast(predictions, tf.int32),
         truth=dense_to_sparse(labels, tf.shape(logits)[2] - 1),
         normalize=False
-    ) / tf.shape(labels)[1]))  # tf.cast(tf.shape(labels)[1], tf.float32)
+    ) / tf.cast(tf.shape(labels)[1], tf.float32)))
