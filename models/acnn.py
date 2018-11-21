@@ -4,6 +4,16 @@ from sequential import metrics
 from sequential.algorithms import *
 
 
+def map_innermost_list(function, sequence, **kwargs):
+    '''
+    apply function to innermost lists.
+    innermost list is defined as list which doesn't contain instance of "classes" (default: list)
+    '''
+
+    return (type(sequence)(map(lambda element: map_innermost_list(function, element, **kwargs), sequence))
+            if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
+
+
 class ACNN(object):
 
     def __init__(self, convolutional_network, attention_network,
@@ -35,8 +45,7 @@ class ACNN(object):
                 axis=1 if self.data_format == "channels_first" else 3,
                 keep_dims=True
             ),
-            sequence=attention_maps,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=attention_maps
         )
 
         def flatten_images(inputs, data_format):
@@ -54,8 +63,7 @@ class ACNN(object):
                 transpose_a=False if self.data_format == "channels_first" else True,
                 transpose_b=True if self.data_format == "channels_first" else False
             )),
-            sequence=attention_maps,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=attention_maps
         )
 
         logits = map_innermost(
@@ -65,8 +73,7 @@ class ACNN(object):
                 name="logits",
                 reuse=tf.AUTO_REUSE
             ),
-            sequence=feature_vectors,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=feature_vectors
         )
 
         predictions = map_innermost(
@@ -75,26 +82,23 @@ class ACNN(object):
                 axis=-1,
                 output_type=tf.int32
             ),
-            sequence=logits,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=logits
         )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             while isinstance(predictions, list):
 
-                predictions = map_innermost(
+                predictions = map_innermost_list(
                     function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions,
-                    predicate=lambda sequence: all(map(lambda element: not isinstance(element, list), sequence))
+                    sequence=predictions
                 )
 
             while isinstance(merged_attention_maps, list):
 
-                merged_attention_maps = map_innermost(
+                merged_attention_maps = map_innermost_list(
                     function=lambda merged_attention_maps: tf.stack(merged_attention_maps, axis=1),
-                    sequence=merged_attention_maps,
-                    predicate=lambda sequence: all(map(lambda element: not isinstance(element, list), sequence))
+                    sequence=merged_attention_maps
                 )
 
             return tf.estimator.EstimatorSpec(
@@ -102,25 +106,15 @@ class ACNN(object):
                 predictions=dict(
                     images=images,
                     merged_attention_maps=merged_attention_maps,
-                    predictions=predictions,
+                    predictions=predictions
                 )
             )
 
-        while True:
-
-            if all_innermost(
-                sequence=map_innermost(
-                    function=lambda labels: len(labels.shape) > 1,
-                    sequence=labels,
-                    predicate=lambda sequence: not isinstance(sequence, list)
-                ),
-                predicate=lambda sequence: not isinstance(sequence, list)
-            ): break
+        while all_innermost(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
 
             labels = map_innermost(
                 function=lambda labels: tf.unstack(labels, axis=1),
-                sequence=labels,
-                predicate=lambda sequence: not isinstance(sequence, list)
+                sequence=labels
             )
 
         cross_entropy_losses = map_innermost(
@@ -128,19 +122,14 @@ class ACNN(object):
                 labels=labels_logits[0],
                 logits=labels_logits[1]
             ),
-            sequence=zip_innermost(
-                sequences=(labels, logits),
-                predicate=lambda sequences: any(map(lambda sequence: not isinstance(sequence, list), sequences))
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=zip_innermost(labels, logits)
         )
 
         attention_map_losses = map_innermost(
             function=lambda attention_maps: tf.reduce_mean(
                 tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
             ),
-            sequence=attention_maps,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=attention_maps
         )
 
         '''
@@ -148,8 +137,7 @@ class ACNN(object):
             function=lambda attention_maps: tf.reduce_mean(
                 tf.image.total_variation(attention_maps)
             ),
-            sequence=attention_maps,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=attention_maps
         )
         '''
 
@@ -158,11 +146,7 @@ class ACNN(object):
                 cross_entropy_loss_attention_map_loss[0] * self.hyper_params.cross_entropy_decay +
                 cross_entropy_loss_attention_map_loss[1] * self.hyper_params.attention_map_decay
             ),
-            sequence=zip_innermost(
-                sequences=(cross_entropy_losses, attention_map_losses),
-                predicate=lambda sequences: any(map(lambda sequence: not isinstance(sequence, list), sequences))
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=zip_innermost(cross_entropy_losses, attention_map_losses)
         )
 
         loss = tf.reduce_mean(losses)
@@ -173,24 +157,18 @@ class ACNN(object):
                 labels=labels_predictions[0],
                 predictions=labels_predictions[1]
             ),
-            sequence=zip_innermost(
-                sequences=(labels, predictions),
-                predicate=lambda sequences: any(map(lambda sequence: not isinstance(sequence, list), sequences))
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=zip_innermost(labels, predictions)
         )
         '''
 
-        logits = map_innermost(
+        logits = map_innermost_list(
             function=lambda logits: tf.stack(logits, axis=1),
-            sequence=logits,
-            predicate=all(map(lambda element: not isinstance(element, list), sequence))
+            sequence=logits
         )
 
-        labels = map_innermost(
+        labels = map_innermost_list(
             function=lambda labels: tf.stack(labels, axis=1),
-            sequence=labels,
-            predicate=all(map(lambda element: not isinstance(element, list), sequence))
+            sequence=labels
         )
 
         accuracies = map_innermost(
@@ -199,23 +177,17 @@ class ACNN(object):
                 labels=logits_labels[1],
                 time_major=False
             ),
-            sequence=zip_innermost(
-                sequences=(logits, labels),
-                predicate=lambda sequences: any(map(lambda sequence: not isinstance(sequence, list), sequences))
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=zip_innermost(logits, labels)
         )
 
         map_innermost(
             function=lambda accuracy: tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, accuracy[1]),
-            sequence=accuracies,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=accuracies
         )
 
         accuracy = tf.reduce_mean(map_innermost(
             function=lambda accuracy: accuracy[0],
-            sequence=accuracies,
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=accuracies
         )), tf.no_op()
 
         # ==========================================================================================
@@ -230,11 +202,7 @@ class ACNN(object):
                 tensor=indices_merged_attention_maps[1],
                 max_outputs=2
             ),
-            sequence=enumerate_innermost(
-                sequence=merged_attention_maps,
-                predicate=lambda sequence: not isinstance(sequence, list)
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=enumerate_innermost(merged_attention_maps)
         )
 
         map_innermost(
@@ -242,11 +210,7 @@ class ACNN(object):
                 name="cross_entropy_loss_{}".format("_".join(map(str, indices_cross_entropy_loss[0]))),
                 tensor=indices_cross_entropy_loss[1]
             ),
-            sequence=enumerate_innermost(
-                sequence=cross_entropy_losses,
-                predicate=lambda sequence: not isinstance(sequence, list)
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=enumerate_innermost(cross_entropy_losses)
         )
 
         map_innermost(
@@ -254,11 +218,7 @@ class ACNN(object):
                 name="attention_map_loss_{}".format("_".join(map(str, indices_attention_map_loss[0]))),
                 tensor=indices_attention_map_loss[1]
             ),
-            sequence=enumerate_innermost(
-                sequence=attention_map_losses,
-                predicate=lambda sequence: not isinstance(sequence, list)
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=enumerate_innermost(attention_map_losses)
         )
 
         map_innermost(
@@ -266,11 +226,7 @@ class ACNN(object):
                 name="loss_{}".format("_".join(map(str, indices_loss[0]))),
                 tensor=indices_loss[1]
             ),
-            sequence=enumerate_innermost(
-                sequence=losses,
-                predicate=lambda sequence: not isinstance(sequence, list)
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=enumerate_innermost(losses)
         )
 
         map_innermost(
@@ -278,11 +234,7 @@ class ACNN(object):
                 name="accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
                 tensor=indices_accuracy[1][0]
             ),
-            sequence=enumerate_innermost(
-                sequence=accuracies,
-                predicate=lambda sequence: not isinstance(sequence, list)
-            ),
-            predicate=lambda sequence: not isinstance(sequence, list)
+            sequence=enumerate_innermost(accuracies)
         )
 
         tf.summary.scalar("accuracy_", accuracy[0])
@@ -312,19 +264,12 @@ class ACNN(object):
                 loss=loss,
                 eval_metric_ops={
                     **dict(accuracy=accuracy),
-                    **dict(flatten_innermost(
-                        sequence=map_innermost(
-                            function=lambda indices_accuracy: (
-                                "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                                indices_accuracy[1]
-                            ),
-                            sequence=enumerate_innermost(
-                                sequence=accuracies,
-                                predicate=lambda sequence: not isinstance(sequence, list)
-                            ),
-                            predicate=lambda sequence: not isinstance(sequence, list)
-                        )),
-                        predicate=lambda sequence: not isinstance(sequence, list)
-                    )
+                    **dict(flatten_innermost(map_innermost(
+                        function=lambda indices_accuracy: (
+                            "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
+                            indices_accuracy[1]
+                        ),
+                        sequence=enumerate_innermost(accuracies)
+                    )))
                 }
             )

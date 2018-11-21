@@ -52,16 +52,14 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
-                        sequence=inputs,
-                        predicate=lambda sequence: not isinstance(sequence, list)
+                        sequence=inputs
                     )
 
             shape = inputs.shape.as_list()
 
             inputs = map_innermost(
                 function=lambda inputs: tf.layers.flatten(inputs),
-                sequence=inputs,
-                predicate=lambda sequence: not isinstance(sequence, list)
+                sequence=inputs
             )
 
             for i, rnn_param in enumerate(self.rnn_params):
@@ -82,14 +80,12 @@ class AttentionNetwork(object):
                             dtype=tf.float32,
                             scope="rnn"
                         )[0],
-                        sequence=inputs,
-                        predicate=lambda sequence: not isinstance(sequence, list)
+                        sequence=inputs
                     )
 
             inputs = map_innermost(
                 function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
-                sequence=inputs,
-                predicate=lambda sequence: not isinstance(sequence, list)
+                sequence=inputs
             )
 
             '''
@@ -115,8 +111,7 @@ class AttentionNetwork(object):
                             shape=[-1] + shape[1:]
                         )
                     ),
-                    sequence=inputs,
-                    predicate=lambda sequence: not isinstance(sequence, list)
+                    sequence=inputs
                 )
             '''
 
@@ -152,8 +147,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
-                        sequence=inputs,
-                        predicate=lambda sequence: not isinstance(sequence, list)
+                        sequence=inputs
                     )
 
             for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
@@ -188,8 +182,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.sigmoid(inputs)
                         ),
-                        sequence=inputs,
-                        predicate=lambda sequence: not isinstance(sequence, list)
+                        sequence=inputs
                     )
 
             return inputs
