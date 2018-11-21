@@ -154,12 +154,12 @@ class ACNN(object):
         '''
 
         logits = map_innermost_list(
-            function=lambda logits: tf.stack(labels, axis=0),
+            function=lambda logits: tf.stack(labels, axis=1),
             sequence=logits
         )
 
         labels = map_innermost_list(
-            function=lambda labels: tf.stack(labels, axis=0),
+            function=lambda labels: tf.stack(labels, axis=1),
             sequence=labels
         )
 
@@ -167,7 +167,7 @@ class ACNN(object):
             function=lambda logits_labels: metrics.accuracy(
                 logits=logits,
                 labels=labels,
-                time_major=True
+                time_major=False
             ),
             sequence=zip_innermost(logits, labels)
         )
