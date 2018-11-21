@@ -26,8 +26,13 @@ def accuracy(logits, labels, time_major=True):
         merge_repeated=False
     )[0][0]
 
+    labels = dense_to_sparse(
+        tensor=labels,
+        blank=tf.shape(logits)[2] - 1
+    )
+
     return tf.metrics.mean(tf.reduce_mean(1.0 - tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
-        truth=dense_to_sparse(labels, tf.shape(logits)[2] - 1),
+        truth=tf.cast(labels, tf.int32),
         normalize=False
-    ) / tf.cast(tf.shape(labels)[1], tf.float32)))
+    ) / tf.cast(tf.shape(logits)[0], tf.float32)))
