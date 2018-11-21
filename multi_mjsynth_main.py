@@ -208,23 +208,25 @@ def main(unused_argv):
                 np.concatenate(attention_map_images, axis=1)
                 for attention_map_images in attention_map_images
             ], axis=0)
-            attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
-            attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
 
             boundin_box_images = np.concatenate([
                 np.concatenate(boundin_box_images, axis=1)
                 for boundin_box_images in boundin_box_images
             ], axis=0)
+
+            attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
             boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
-            boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
             prediction = "_".join(["".join([to_char(label) for label in labels]) for labels in predict_result["predictions"]])
 
-            cv2.imwrite("outputs/multi_mjsynth/attention_map_{}.png".format(prediction), attention_map_images)
-            cv2.imwrite("outputs/multi_mjsynth/boundin_box_{}.png".format(prediction), boundin_box_images)
-
             cv2.imshow("attention_map_{}".format(prediction), attention_map_images)
             cv2.imshow("bounding_box_{}".format(prediction), attention_map_images)
+
+            attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
+            boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
+
+            cv2.imwrite("outputs/multi_mjsynth/attention_map_{}.png".format(prediction), attention_map_images)
+            cv2.imwrite("outputs/multi_mjsynth/boundin_box_{}.png".format(prediction), boundin_box_images)
 
             if cv2.waitKey() == ord("q"):
                 break
