@@ -12,8 +12,6 @@ def dense_to_sparse(tensor, blank):
 
 def accuracy(logits, labels, time_major=True):
 
-    print(labels.shape)
-
     if time_major:
         labels = tf.transpose(labels, [1, 0])
     else:

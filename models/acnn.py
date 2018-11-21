@@ -165,8 +165,8 @@ class ACNN(object):
 
         accuracies = map_innermost(
             function=lambda logits_labels: metrics.accuracy(
-                logits=logits,
-                labels=labels,
+                logits=logits_labels[0],
+                labels=logits_labels[1],
                 time_major=False
             ),
             sequence=zip_innermost(logits, labels)
