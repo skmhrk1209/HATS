@@ -85,7 +85,7 @@ class ACNN(object):
             return (type(sequence)(map(lambda element: map_innermost(function, element, **kwargs), sequence))
                     if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
 
-        print(isinstance(logits[0], list))
+        print(any(map(lambda element: isinstance(element, list), logits[0])))
 
         predictions = map_innermost_list(
             function=lambda logits: tf.nn.ctc_greedy_decoder(
