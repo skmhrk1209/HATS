@@ -85,6 +85,7 @@ class ACNN(object):
             return (type(sequence)(map(lambda element: map_innermost(function, element, **kwargs), sequence))
                     if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
 
+        print(logits)
         map_innermost_list(
             function=lambda logits: print(logits),
             sequence=logits
