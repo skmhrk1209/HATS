@@ -5,7 +5,7 @@ import argparse
 import itertools
 import cv2
 from attrdict import AttrDict
-from data.multi_mjsynth import Dataset
+from data import multi_mjsynth
 from models.acnn import ACNN
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
@@ -113,7 +113,7 @@ def main(unused_argv):
     if args.train:
 
         multi_mjsynth_classifier.train(
-            input_fn=lambda: Dataset(
+            input_fn=lambda: multi_mjsynth.Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -135,7 +135,7 @@ def main(unused_argv):
     if args.eval:
 
         eval_results = multi_mjsynth_classifier.evaluate(
-            input_fn=lambda: Dataset(
+            input_fn=lambda: multi_mjsynth.Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -153,7 +153,7 @@ def main(unused_argv):
     if args.predict:
 
         predict_results = multi_mjsynth_classifier.predict(
-            input_fn=lambda: Dataset(
+            input_fn=lambda: multi_mjsynth.Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
