@@ -185,7 +185,7 @@ class ACNN(object):
             ),
             sequence=zip_innermost(predictions, labels)
         )
-
+        '''
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
 
@@ -233,7 +233,6 @@ class ACNN(object):
             sequence=enumerate_innermost(accuracies)
         )
 
-        '''
         map_innermost(
             function=lambda indices_loss: tf.identity(
                 name="loss_{}".format("_".join(map(str, indices_loss[0]))),
@@ -249,8 +248,8 @@ class ACNN(object):
             ),
             sequence=enumerate_innermost(accuracies)
         )
-        '''
         # ==========================================================================================
+        '''
 
         loss = tf.reduce_mean(losses)
 
@@ -259,7 +258,7 @@ class ACNN(object):
         tf.identity(accuracy[1], "accuracy_value")
         '''
 
-        accuracy = tf.reduce_mean(accuracies)
+        accuracy = tf.metrics.mean(tf.reduce_mean(accuracies))
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
@@ -278,6 +277,7 @@ class ACNN(object):
 
         if mode == tf.estimator.ModeKeys.EVAL:
 
+            '''
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
@@ -290,5 +290,14 @@ class ACNN(object):
                         ),
                         sequence=enumerate_innermost(accuracies)
                     )))
+                }
+            )
+            '''
+
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                loss=loss,
+                eval_metric_ops={
+                    **dict(accuracy=accuracy)
                 }
             )
