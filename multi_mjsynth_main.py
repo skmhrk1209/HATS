@@ -28,11 +28,6 @@ tf.logging.set_verbosity(tf.logging.INFO)
 sys.setrecursionlimit(10000)
 
 
-def scale(input, input_min, input_max, output_min, output_max):
-
-    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
-
-
 def search_bounding_box(image, threshold):
 
     if len(image.shape) == 3 and image.shape[-1] == 3:
@@ -171,6 +166,19 @@ def main(unused_argv):
             ).get_next()
         )
 
+        def scale(input, input_min, input_max, output_min, output_max):
+            return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+        def to_label(char):
+            return (ord(char) - ord("0") if char <= "9" else
+                    ord(char) - ord("A") + (to_label("9") + 1) if char <= "Z" else
+                    ord(char) - ord("a") + (to_label("Z") + 1) if char <= "z" else to_label("z") + 1)
+
+        def to_char(label):
+            return (chr(label + ord("0")) if label <= to_label("9") else
+                    chr(label + ord("A") - (to_label("9") + 1)) if label <= to_label("Z") else
+                    chr(label + ord("a") - (to_label("Z") + 1)) if label <= to_label("z") else "")
+
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
             attention_map_images = []
@@ -210,8 +218,16 @@ def main(unused_argv):
             boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
             boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-            cv2.imwrite("outputs/multi_mjsynth/attention_map_images_{}.png".format(i), attention_map_images)
-            cv2.imwrite("outputs/multi_mjsynth/boundin_box_images_{}.png".format(i), boundin_box_images)
+            prediction = "_".join(["".join([to_char(label) for label in labels]) for labels in predict_result["predictions"]])
+
+            cv2.imwrite("outputs/multi_mjsynth/attention_map_{}.png".format(prediction), attention_map_images)
+            cv2.imwrite("outputs/multi_mjsynth/boundin_box_{}.png".format(prediction), boundin_box_images)
+
+            cv2.imshow("attention_map_{}".format(prediction), attention_map_images)
+            cv2.imshow("bounding_box_{}".format(prediction), attention_map_images)
+
+            if cv2.waitKey() == ord("q"):
+                break
 
 
 if __name__ == "__main__":

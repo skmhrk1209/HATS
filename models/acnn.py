@@ -87,10 +87,17 @@ class ACNN(object):
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
+            while isinstance(predictions, list):
+
+                predictions = map_innermost_list(
+                    function=lambda predictions: tf.stack(predictions, axis=1),
+                    sequence=predictions
+                )
+
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions={
-                    **dict(predictions=tf.stack(flatten_innermost(predictions), axis=1)),
+                    **dict(predictions=predictions),
                     **dict(images=images),
                     **dict(flatten_innermost(map_innermost(
                         function=lambda indices_merged_attention_maps: (

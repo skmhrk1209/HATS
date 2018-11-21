@@ -15,14 +15,21 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
-        def convert(char):
-            return ord(char) - 48 if char <= "9" else ord(char) - 55 if char <= "Z" else ord(char) - 61
+        def to_label(char):
+            return (ord(char) - ord("0") if char <= "9" else
+                    ord(char) - ord("A") + (to_label("9") + 1) if char <= "Z" else
+                    ord(char) - ord("a") + (to_label("Z") + 1) if char <= "z" else to_label("z") + 1)
+
+        def to_char(label):
+            return (chr(label + ord("0")) if label <= to_label("9") else
+                    chr(label + ord("A") - (to_label("9") + 1)) if label <= to_label("Z") else
+                    chr(label + ord("a") - (to_label("Z") + 1)) if label <= to_label("z") else "")
 
         strings = os.path.splitext(os.path.basename(file))[0].split("_")[1:]
 
         label = np.pad(
             array=[np.pad(
-                array=[convert(char) for char in string],
+                array=[to_label(char) for char in string],
                 pad_width=[[0, args.string_length - len(string)]],
                 mode="constant",
                 constant_values=62
