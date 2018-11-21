@@ -2,61 +2,31 @@ from operator import *
 from functools import *
 
 
-def map_innermost(function, sequence, **kwargs):
-    '''
-    apply function to innermost elements.
-    innermost element is defined as element which is not instance of "classes" (default: list)
-    '''
+def map_innermost(function, sequence, predicate):
 
-    return (type(sequence)(map(lambda element: map_innermost(function, element, **kwargs), sequence))
-            if isinstance(sequence, kwargs.get("classes", list)) else function(sequence))
+    return function(sequence) if predicate(sequence) else type(sequence)(map(lambda element: map_innermost(function, element, predicate), sequence))
 
 
-def enumerate_innermost(sequence, indices=(), **kwargs):
-    '''
-    make tuple of innermost element and index.
-    innermost element is defined as element which is not instance of "classes" (default: list)
-    '''
+def enumerate_innermost(sequence, indices=(), predicate):
 
-    return (type(sequence)(map(lambda index_element: enumerate_innermost(index_element[1], indices + (index_element[0],), **kwargs), enumerate(sequence)))
-            if isinstance(sequence, kwargs.get("classes", list)) else (indices, sequence))
+    return (indices, sequence) if predicate(sequence) else type(sequence)(map(lambda index_element: enumerate_innermost(index_element[1], indices + (index_element[0],), predicate), enumerate(sequence)))
 
 
-def zip_innermost(*sequences, **kwargs):
-    '''
-    make tuple of innermost elements.
-    innermost element is defined as element which is not instance of "classes" (default: list)
-    '''
+def zip_innermost(sequences, predicate):
 
-    return (list(map(lambda elements: zip_innermost(*elements, **kwargs), zip(*sequences)))
-            if all(map(lambda sequence: isinstance(sequence, kwargs.get("classes", list)), sequences)) else sequences)
+    return sequences if predicate(sequences) else [zip_innermost(elements, predicate) for elements in zip(*sequences)]
 
 
-def all_innermost(sequence, **kwargs):
-    '''
-    return whether all innermost elements are evaluated as True.
-    innermost element is defined as element which is not instance of "classes" (default: list)
-    '''
+def all_innermost(sequence, predicate):
 
-    return (all(map(lambda element: all_innermost(element, **kwargs), sequence))
-            if isinstance(sequence, kwargs.get("classes", list)) else bool(sequence))
+    return bool(sequence) if predicate(sequence) else all(map(lambda element: all_innermost(element, predicate), sequence))
 
 
-def any_innermost(sequence, **kwargs):
-    '''
-    return whether any innermost elements are evaluated as True.
-    innermost element is defined as element which is not instance of "classes" (default: list)
-    '''
+def any_innermost(sequence, predicate):
 
-    return (any(map(lambda element: any_innermost(element, **kwargs), sequence))
-            if isinstance(sequence, kwargs.get("classes", list)) else bool(sequence))
+    return bool(sequence) if predicate(sequence) else any(map(lambda element: any_innermost(element, predicate), sequence))
 
 
-def flatten_innermost(sequence, **kwargs):
-    '''
-    return flattened list of innermost elements.
-    innermost element is defined as element which is not instance of "classes" (default: list)
-    '''
+def flatten_innermost(sequence, predicate):
 
-    return (reduce(add, map(lambda element: flatten_innermost(element, **kwargs), sequence))
-            if isinstance(sequence, kwargs.get("classes", list)) else [sequence])
+    return [sequence] if predicate(sequence) else reduce(add, map(lambda element: flatten_innermost(element, predicate), sequence))
