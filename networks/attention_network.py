@@ -115,7 +115,8 @@ class AttentionNetwork(object):
                             shape=[-1] + shape[1:]
                         )
                     ),
-                    sequence=inputs
+                    sequence=inputs,
+                    predicate=lambda sequence: not isinstance(sequence, list)
                 )
             '''
 
