@@ -173,17 +173,14 @@ class ACNN(object):
         )
 
         map_innermost(
-            function=lambda indices_accuracy: (
-                tf.identity(indices_accuracy[1][0], "accuracy_{}".format("_".join(map(str, indices_accuracy[0])))),
-                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, indices_accuracy[1][1]) or indices_accuracy[1][1]
-            ),
-            sequence=enumerate_innermost(accuracies)
+            function=lambda accuracy: tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, accuracy[1]),
+            sequence=accuracies
         )
 
-        accuracy = tf.identity(tf.reduce_mean(map_innermost(
+        accuracy = tf.reduce_mean(map_innermost(
             function=lambda accuracy: accuracy[0],
-            sequence=accuracies
-        )), "accuracy_"), tf.no_op()
+            sequence=accuracies)
+        ), tf.no_op()
 
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
@@ -233,6 +230,8 @@ class ACNN(object):
         )
 
         tf.summary.scalar("accuracy_", accuracy[0])
+
+        tf.identity("accuracy_", accuracy[0])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
