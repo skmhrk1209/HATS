@@ -90,7 +90,7 @@ class ACNN(object):
                 inputs=logits,
                 sequence_length=tf.tile(
                     input=[tf.shape(logits)[0]],
-                    multiples=tf.shape(logits)[1]
+                    multiples=[tf.shape(logits)[1]]
                 ),
                 merge_repeated=False
             )[0][0],
