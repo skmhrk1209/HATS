@@ -163,10 +163,16 @@ class ACNN(object):
         )
         '''
 
+        def dense_to_sparse(tensor, blank):
+            indices = tf.where(tf.not_equal(tensor, blank))
+            values = tf.gather_nd(tensor, indices)
+            shape = tf.shape(tensor)
+            return tf.SparseTensor(indices, values, shape)
+
         labels = map_innermost_list(
-            function=lambda labels: tf.contrib.layers.dense_to_sparse(
+            function=lambda labels: dense_to_sparse(
                 tensor=tf.stack(labels, axis=1),
-                eos_token=self.num_classes - 1
+                blank=self.num_classes - 1
             ),
             sequence=labels
         )
