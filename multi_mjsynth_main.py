@@ -220,7 +220,7 @@ def main(unused_argv):
             boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
 
             cv2.imshow("attention_map_{}".format(prediction), attention_map_images)
-            cv2.imshow("bounding_box_{}".format(prediction), attention_map_images)
+            cv2.imshow("bounding_box_{}".format(prediction), boundin_box_images)
 
             attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
             boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
