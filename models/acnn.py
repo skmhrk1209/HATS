@@ -179,8 +179,8 @@ class ACNN(object):
 
         accuracy = tf.reduce_mean(map_innermost(
             function=lambda accuracy: accuracy[0],
-            sequence=accuracies)
-        ), tf.no_op()
+            sequence=accuracies
+        )), tf.no_op()
 
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
@@ -231,7 +231,7 @@ class ACNN(object):
 
         tf.summary.scalar("accuracy_", accuracy[0])
 
-        tf.identity("accuracy_", accuracy[0])
+        tf.identity(accuracy[0], "accuracy_")
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
