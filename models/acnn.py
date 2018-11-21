@@ -166,7 +166,7 @@ class ACNN(object):
         def dense_to_sparse(tensor, blank):
             indices = tf.where(tf.not_equal(tensor, blank))
             values = tf.gather_nd(tensor, indices)
-            shape = tf.shape(tensor)
+            shape = tf.shape(tensor, out_type=tf.int64)
             return tf.SparseTensor(indices, values, shape)
 
         labels = map_innermost_list(
