@@ -52,14 +52,16 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
-                        sequence=inputs
+                        sequence=inputs,
+                        predicate=lambda sequence: not isinstance(sequence, list)
                     )
 
             shape = inputs.shape.as_list()
 
             inputs = map_innermost(
                 function=lambda inputs: tf.layers.flatten(inputs),
-                sequence=inputs
+                sequence=inputs,
+                predicate=lambda sequence: not isinstance(sequence, list)
             )
 
             for i, rnn_param in enumerate(self.rnn_params):
@@ -80,12 +82,14 @@ class AttentionNetwork(object):
                             dtype=tf.float32,
                             scope="rnn"
                         )[0],
-                        sequence=inputs
+                        sequence=inputs,
+                        predicate=lambda sequence: not isinstance(sequence, list)
                     )
 
             inputs = map_innermost(
                 function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
-                sequence=inputs
+                sequence=inputs,
+                predicate=lambda sequence: not isinstance(sequence, list)
             )
 
             '''
@@ -147,7 +151,8 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
-                        sequence=inputs
+                        sequence=inputs,
+                        predicate=lambda sequence: not isinstance(sequence, list)
                     )
 
             for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
@@ -182,7 +187,8 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.sigmoid(inputs)
                         ),
-                        sequence=inputs
+                        sequence=inputs,
+                        predicate=lambda sequence: not isinstance(sequence, list)
                     )
 
             return inputs
