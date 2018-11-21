@@ -100,8 +100,8 @@ class ACNN(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=dict(
-                    images=images
-                    merged_attention_maps=merged_attention_maps
+                    images=images,
+                    merged_attention_maps=merged_attention_maps,
                     predictions=predictions,
                 )
             )
