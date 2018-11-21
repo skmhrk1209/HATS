@@ -182,7 +182,7 @@ class ACNN(object):
                 hypothesis=tf.cast(predictions_labels[0], tf.int32),
                 truth=predictions_labels[1],
                 normalize=False
-            ) / tf.shape(predictions_labels[1]),
+            ) / tf.cast(tf.shape(predictions_labels[1]), tf.float32),
             sequence=zip_innermost(predictions, labels)
         )
         '''
