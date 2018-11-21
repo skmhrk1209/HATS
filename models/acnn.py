@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from algorithms.sequence import *
+from algorithms.sequential import *
 
 
 class ACNN(object):
@@ -65,12 +65,35 @@ class ACNN(object):
             sequence=feature_vectors
         )
 
+        '''
         predictions = map_innermost(
             function=lambda logits: tf.argmax(
                 input=logits,
                 axis=-1,
                 output_type=tf.int32
             ),
+            sequence=logits
+        )
+        '''
+
+        def map_innermost_list(function, sequence, **kwargs):
+            '''
+            apply function to innermost lists.
+            innermost list is defined as element which doesn't contain instance of "classes" (default: list)
+            '''
+
+            return (type(sequence)(map(lambda element: map_innermost(function, element, **kwargs), sequence))
+                    if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
+
+        predictions = map_innermost_list(
+            function=lambda logits: tf.nn.ctc_greedy_decoder(
+                inputs=logits,
+                sequence_length=tf.tile(
+                    input=[tf.shape(logits)[0]],
+                    multiples=tf.shape(logits)[1]
+                ),
+                merge_repeated=False
+            )[0][0],
             sequence=logits
         )
 
@@ -130,10 +153,29 @@ class ACNN(object):
             sequence=zip_innermost(cross_entropy_losses, attention_map_losses)
         )
 
+        '''
         accuracies = map_innermost(
             function=lambda labels_predictions: tf.metrics.accuracy(
                 labels=labels_predictions[0],
                 predictions=labels_predictions[1]
+            ),
+            sequence=zip_innermost(labels, predictions)
+        )
+        '''
+
+        labels = map_innermost_list(
+            function=lambda labels: tf.contrib.layers.dense_to_sparse(
+                tensor=tf.stack(labels, axis=1),
+                eos_token=self.num_classes - 1
+            ),
+            sequence=labels
+        )
+
+        accuracies = map_innermost(
+            function=lambda labels_predictions: 1.0 - tf.edit_distance(
+                hypothesis=predictions,
+                truth=labels,
+                normalize=True
             ),
             sequence=zip_innermost(labels, predictions)
         )
@@ -205,8 +247,13 @@ class ACNN(object):
         # ==========================================================================================
 
         loss = tf.reduce_mean(losses)
+
+        '''
         accuracy = tf.metrics.accuracy(labels, predictions)
         tf.identity(accuracy[1], "accuracy_value")
+        '''
+
+        accuracy = tf.reduce_mean(accuracies)
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 

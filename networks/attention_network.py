@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from algorithms.sequence import *
+from algorithms.sequential import *
 
 
 def compose(function, *functions):
