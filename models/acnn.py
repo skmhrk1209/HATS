@@ -164,7 +164,7 @@ class ACNN(object):
         )
 
         accuracies = map_innermost(
-            function=lambda logits_labels: sequential.metrics.accuracy(
+            function=lambda logits_labels: metrics.accuracy(
                 logits=logits,
                 labels=labels,
                 time_major=True
