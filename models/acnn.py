@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
-import metrics
-from algorithms.sequential import *
+import sequential
+from sequential.algorithms import *
 
 
 def map_innermost_list(function, sequence, **kwargs):
@@ -164,7 +164,7 @@ class ACNN(object):
         )
 
         accuracies = map_innermost(
-            function=lambda logits_labels: metrics.sequential.accuracy(
+            function=lambda logits_labels: sequential.metrics.accuracy(
                 logits=logits,
                 labels=labels,
                 time_major=True
