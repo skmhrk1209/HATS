@@ -13,7 +13,7 @@ def dense_to_sparse(tensor, blank):
 def accuracy(logits, labels, time_major=True):
 
     if time_major:
-        labels = tf.transpose(logits, [1, 0])
+        labels = tf.transpose(labels, [1, 0])
     else:
         logits = tf.transpose(logits, [1, 0, 2])
 
