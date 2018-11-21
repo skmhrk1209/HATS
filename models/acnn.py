@@ -10,7 +10,7 @@ def map_innermost_list(function, sequence, classes=(list,)):
     innermost list is defined as list which doesn't contain instance of "classes" (default: list)
     '''
 
-    return (type(sequence)(map(lambda element: map_innermost_list(function, element, classes), sequence))
+    return (type(sequence)(map(lambda element: map_innermost_list(function, element, classes=classes), sequence))
             if any(map(lambda element: isinstance(element, classes), sequence)) else function(sequence))
 
 
@@ -118,11 +118,11 @@ class ACNN(object):
             )
 
         cross_entropy_losses = map_innermost(
-            function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
-                labels=labels_logits[0],
-                logits=labels_logits[1]
+            function=lambda logits_labels: tf.losses.sparse_softmax_cross_entropy(
+                logits=logits_labels[0],
+                labels=logits_labels[1]
             ),
-            sequence=zip_innermost(labels, logits)
+            sequence=zip_innermost(logits, labels)
         )
 
         attention_map_losses = map_innermost(
