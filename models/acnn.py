@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import sequential
+from sequential import metrics
 from sequential.algorithms import *
 
 
