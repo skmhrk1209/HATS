@@ -154,7 +154,7 @@ class ACNN(object):
         '''
 
         logits = map_innermost_list(
-            function=lambda logits: tf.stack(labels, axis=1),
+            function=lambda logits: tf.stack(logits, axis=1),
             sequence=logits
         )
 
