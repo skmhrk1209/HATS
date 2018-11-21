@@ -4,14 +4,14 @@ from sequential import metrics
 from sequential.algorithms import *
 
 
-def map_innermost_list(function, sequence, **kwargs):
+def map_innermost_list(function, sequence, classes=(list,)):
     '''
     apply function to innermost lists.
     innermost list is defined as list which doesn't contain instance of "classes" (default: list)
     '''
 
-    return (type(sequence)(map(lambda element: map_innermost_list(function, element, **kwargs), sequence))
-            if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
+    return (type(sequence)(map(lambda element: map_innermost_list(function, element, classes), sequence))
+            if any(map(lambda element: isinstance(element, classes), sequence)) else function(sequence))
 
 
 class ACNN(object):
