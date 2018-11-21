@@ -27,7 +27,7 @@ def accuracy(logits, labels, time_major=True):
     )[0][0]
 
     return tf.metrics.mean(tf.reduce_mean(1.0 - tf.edit_distance(
-        hypothesis=predictions,  # tf.cast(predictions, tf.int32),
+        hypothesis=tf.cast(predictions, tf.int32),
         truth=dense_to_sparse(labels, tf.shape(logits)[2] - 1),
         normalize=False
     ) / tf.shape(labels)[1]))  # tf.cast(tf.shape(labels)[1], tf.float32)
