@@ -1,6 +1,17 @@
 import tensorflow as tf
 import numpy as np
+import metrics
 from algorithms.sequential import *
+
+
+def map_innermost_list(function, sequence, **kwargs):
+    '''
+    apply function to innermost lists.
+    innermost list is defined as list which doesn't contain instance of "classes" (default: list)
+    '''
+
+    return (type(sequence)(map(lambda element: map_innermost_list(function, element, **kwargs), sequence))
+            if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
 
 
 class ACNN(object):
@@ -65,35 +76,12 @@ class ACNN(object):
             sequence=feature_vectors
         )
 
-        '''
         predictions = map_innermost(
             function=lambda logits: tf.argmax(
                 input=logits,
                 axis=-1,
                 output_type=tf.int32
             ),
-            sequence=logits
-        )
-        '''
-
-        def map_innermost_list(function, sequence, **kwargs):
-            '''
-            apply function to innermost lists.
-            innermost list is defined as element which doesn't contain instance of "classes" (default: list)
-            '''
-
-            return (type(sequence)(map(lambda element: map_innermost_list(function, element, **kwargs), sequence))
-                    if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
-
-        predictions = map_innermost_list(
-            function=lambda logits: tf.nn.ctc_greedy_decoder(
-                inputs=logits,
-                sequence_length=tf.tile(
-                    input=[tf.shape(logits)[0]],
-                    multiples=[tf.shape(logits)[1]]
-                ),
-                merge_repeated=False
-            )[0][0],
             sequence=logits
         )
 
@@ -153,6 +141,8 @@ class ACNN(object):
             sequence=zip_innermost(cross_entropy_losses, attention_map_losses)
         )
 
+        loss = tf.reduce_mean(losses)
+
         '''
         accuracies = map_innermost(
             function=lambda labels_predictions: tf.metrics.accuracy(
@@ -163,29 +153,38 @@ class ACNN(object):
         )
         '''
 
-        def dense_to_sparse(tensor, blank):
-            indices = tf.where(tf.not_equal(tensor, blank))
-            values = tf.gather_nd(tensor, indices)
-            shape = tf.shape(tensor, out_type=tf.int64)
-            return tf.SparseTensor(indices, values, shape)
+        logits = map_innermost_list(
+            function=lambda logits: tf.stack(labels, axis=0),
+            sequence=logits
+        )
 
         labels = map_innermost_list(
-            function=lambda labels: dense_to_sparse(
-                tensor=tf.stack(labels, axis=1),
-                blank=self.num_classes - 1
-            ),
+            function=lambda labels: tf.stack(labels, axis=0),
             sequence=labels
         )
 
         accuracies = map_innermost(
-            function=lambda predictions_labels: 1.0 - tf.edit_distance(
-                hypothesis=tf.cast(predictions_labels[0], tf.int32),
-                truth=predictions_labels[1],
-                normalize=False
-            ) / tf.cast(tf.shape(predictions_labels[1])[1], tf.float32),
-            sequence=zip_innermost(predictions, labels)
+            function=lambda logits_labels: metrics.sequential.accuracy(
+                logits=logits,
+                labels=labels,
+                time_major=True
+            ),
+            sequence=zip_innermost(logits, labels)
         )
-        '''
+
+        map_innermost(
+            function=lambda indices_accuracy: (
+                tf.identity(indices_accuracy[1][0], "accuracy_{}".format("_".join(map(str, indices_accuracy[0])))),
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, indices_accuracy[1][1]) or indices_accuracy[1][1]
+            ),
+            sequence=enumerate_innermost(accuracies)
+        )
+
+        accuracy = tf.identity(tf.reduce_mean(map_innermost(
+            function=lambda accuracy: accuracy[0],
+            sequence=accuracies
+        )), "accuracy_"), tf.no_op()
+
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
 
@@ -228,37 +227,13 @@ class ACNN(object):
         map_innermost(
             function=lambda indices_accuracy: tf.summary.scalar(
                 name="accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                tensor=indices_accuracy[1][1]
+                tensor=indices_accuracy[1][0]
             ),
             sequence=enumerate_innermost(accuracies)
         )
 
-        map_innermost(
-            function=lambda indices_loss: tf.identity(
-                name="loss_{}".format("_".join(map(str, indices_loss[0]))),
-                input=indices_loss[1]
-            ),
-            sequence=enumerate_innermost(losses)
-        )
-
-        map_innermost(
-            function=lambda indices_accuracy: tf.identity(
-                name="accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                input=indices_accuracy[1][0]
-            ),
-            sequence=enumerate_innermost(accuracies)
-        )
+        tf.summary.scalar("accuracy_", accuracy[0])
         # ==========================================================================================
-        '''
-
-        loss = tf.reduce_mean(losses)
-
-        '''
-        accuracy = tf.metrics.accuracy(labels, predictions)
-        tf.identity(accuracy[1], "accuracy_value")
-        '''
-
-        accuracy = tf.metrics.mean(tf.reduce_mean(accuracies))
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
@@ -277,7 +252,6 @@ class ACNN(object):
 
         if mode == tf.estimator.ModeKeys.EVAL:
 
-            '''
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
@@ -290,14 +264,5 @@ class ACNN(object):
                         ),
                         sequence=enumerate_innermost(accuracies)
                     )))
-                }
-            )
-            '''
-
-            return tf.estimator.EstimatorSpec(
-                mode=mode,
-                loss=loss,
-                eval_metric_ops={
-                    **dict(accuracy=accuracy)
                 }
             )
