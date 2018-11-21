@@ -178,11 +178,11 @@ class ACNN(object):
         )
 
         accuracies = map_innermost(
-            function=lambda predictions_labels: tf.edit_distance(
+            function=lambda predictions_labels: 1.0 - tf.edit_distance(
                 hypothesis=tf.cast(predictions_labels[0], tf.int32),
                 truth=predictions_labels[1],
-                normalize=True
-            ),
+                normalize=False
+            ) / tf.shape(predictions_labels[1]),
             sequence=zip_innermost(predictions, labels)
         )
         '''
