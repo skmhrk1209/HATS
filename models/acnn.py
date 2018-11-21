@@ -82,13 +82,8 @@ class ACNN(object):
             innermost list is defined as element which doesn't contain instance of "classes" (default: list)
             '''
 
-            return (type(sequence)(map(lambda element: map_innermost(function, element, **kwargs), sequence))
+            return (type(sequence)(map(lambda element: map_innermost_list(function, element, **kwargs), sequence))
                     if any(map(lambda element: isinstance(element, kwargs.get("classes", list)), sequence)) else function(sequence))
-
-        map_innermost_list(
-            function=lambda logits: print(len(logits)),
-            sequence=logits
-        )
 
         predictions = map_innermost_list(
             function=lambda logits: tf.nn.ctc_greedy_decoder(
