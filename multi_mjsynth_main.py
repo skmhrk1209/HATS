@@ -181,6 +181,8 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
+            prediction = "_".join(["".join([to_char(label) for label in labels]) for labels in predict_result["predictions"]])
+
             attention_map_images = []
             boundin_box_images = []
 
@@ -216,8 +218,6 @@ def main(unused_argv):
 
             attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
             boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
-
-            prediction = "_".join(["".join([to_char(label) for label in labels]) for labels in predict_result["predictions"]])
 
             cv2.imshow("attention_map_{}".format(prediction), attention_map_images)
             cv2.imshow("bounding_box_{}".format(prediction), attention_map_images)
