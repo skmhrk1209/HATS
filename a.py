@@ -4,6 +4,8 @@ import functools
 import os
 import glob
 import cv2
+from tqdm import trange
+
 
 class Dataset(object):
 
@@ -38,15 +40,17 @@ class Dataset(object):
 
         return self.iterator.get_next()
 
+
 dataset = Dataset(filenames=[filename for filename in glob.glob("/home/sakuma/data/fsns/*") if "train" in filename])
 next_element = dataset.get_next()
 
 with tf.Session() as sess:
 
-    while True:
+    for i in trange(1044868):
 
         image, label = sess.run(next_element)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        cv2.imshow("", image)
-        print(label.decode('utf-8'))
-        if cv2.waitKey() == ord("q"):break
+
+        label = label.decode("utf-8")
+        label = label.replace(" ", "_")
+        cv2.imwrite("/home/sakuma/data/fsns_/{}/{}_{}.png".format("train" if i < 1000000 else "test", i, label), image)
