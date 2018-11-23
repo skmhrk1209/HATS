@@ -8,7 +8,7 @@ with tf.Session() as sess:
     label = tf.reshape(label, [-1])
     last_indices = tf.where(tf.equal(label, 0))
     last_indices = tf.reshape(last_indices, [-1])
-    first_indices = tf.concat([[0], last_indices[:-1] + 1])
+    first_indices = tf.concat([[0], last_indices[:-1] + 1], axis=0)
     indices = tf.stack([first_indices, last_indices], axis=-1)
     label = tf.map_fn(lambda indices: label[indices[0], indices[1]], indices)
     print(sess.run(label))
