@@ -2,7 +2,3 @@
 .vscode/
 *.pyc
 __pycache__/
-mjsynth/
-multi_mjsynth/
-mjsynth_acnn_model/
-multi_mjsynth_acnn_model/
