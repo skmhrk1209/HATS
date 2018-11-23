@@ -79,6 +79,8 @@ class Dataset(object):
             constant_values=133
         ))(label)
 
+        label.set_shape([sequence_length, string_length])
+
         return {"image": image}, label
 
     def get_next(self):
