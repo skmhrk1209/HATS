@@ -53,4 +53,4 @@ with tf.Session() as sess:
 
         label = label.decode("utf-8")
         label = label.replace(" ", "_")
-        cv2.imwrite("/home/sakuma/data/fsns_/{}/{}_{}.png".format("train" if i < 1000000 else "test", i, label), image)
+        cv2.imwrite("/home/sakuma/data/fsns_/{}/{}_{}.jpg".format("train" if i < 1000000 else "test", i, label), image)
