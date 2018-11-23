@@ -133,7 +133,6 @@ class Model(object):
                 )
             )
 
-        print(labels.shape)
         while all_innermost(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
 
             labels = map_innermost(
@@ -151,9 +150,9 @@ class Model(object):
 
         attention_map_losses = map_innermost(
             function=lambda attention_maps: tf.reduce_mean(
-                tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
+                tf.reduce_sum(tf.abs(attention_maps), axis=[2, 3, 4])
             ),
-            sequence=attention_maps
+            sequence=zip_innermost(*attention_maps)
         )
 
         '''
