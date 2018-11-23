@@ -15,7 +15,7 @@ parser.add_argument("--output_directory", type=str, required=True, help="path to
 args = parser.parse_args()
 
 
-def make_multi_thread(func, num_threads, split=False):
+def multi_thread(func, num_threads, split=False):
 
     def func_mt(*args, **kwargs):
 
@@ -49,7 +49,7 @@ def make_multi_thread(func, num_threads, split=False):
 
 
 @jit(nopython=False, nogil=True)
-def make_multi_synthetic_word(filenames, directory, num_data, image_size, sequence_length, num_retries, thread_id):
+def make_dataset(filenames, directory, num_data, image_size, sequence_length, num_retries, thread_id):
 
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     random.seed(0)
     random.shuffle(filenames)
 
-    make_multi_thread(make_multi_synthetic_word, num_threads=32, split=False)(
+    multi_thread(make_dataset, num_threads=32, split=False)(
         filenames[:int(len(filenames) * 0.9)],
         directory=os.path.join(args.output_directory, "train"),
         num_data=28125,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         num_retries=100
     )
 
-    make_multi_thread(make_multi_synthetic_word, num_threads=32, split=False)(
+    multi_thread(make_dataset, num_threads=32, split=False)(
         filenames[int(len(filenames) * 0.9):],
         directory=os.path.join(args.output_directory, "test"),
         num_data=3125,
