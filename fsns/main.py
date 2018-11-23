@@ -7,7 +7,6 @@ import cv2
 from attrdict import AttrDict
 import dataset
 import model
-from models import multi_synthetic_word
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
