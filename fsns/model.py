@@ -69,13 +69,16 @@ class Model(object):
             return tf.reshape(inputs, output_shape)
 
         feature_vectors = map_innermost(
-            function=lambda attention_maps: tf.layers.flatten(tf.matmul(
-                a=flatten_images(feature_maps, self.data_format),
-                b=flatten_images(attention_maps, self.data_format),
-                transpose_a=False if self.data_format == "channels_first" else True,
-                transpose_b=True if self.data_format == "channels_first" else False
-            )),
-            sequence=attention_maps
+            function=lambda feature_maps_atention_maps: map_innermost(
+                function=lambda attention_maps: tf.layers.flatten(tf.matmul(
+                    a=flatten_images(feature_maps_atention_maps[0], self.data_format),
+                    b=flatten_images(attention_maps, self.data_format),
+                    transpose_a=False if self.data_format == "channels_first" else True,
+                    transpose_b=True if self.data_format == "channels_first" else False
+                )),
+                sequence=feature_maps_atention_maps[1]
+            )
+            sequence=zip_innermost(feature_maps, attention_maps)
         )
 
         feature_vectors = map_innermost(

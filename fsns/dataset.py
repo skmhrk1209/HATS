@@ -1,11 +1,12 @@
 import tensorflow as tf
 import numpy as np
 import functools
+import os
 
 
 class Dataset(object):
 
-    def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus,
+    def __init__(self, filenames, num_epochs, batch_size, buffer_size,
                  image_size, data_format, sequence_length=9, string_length=35):
 
         self.dataset = tf.data.TFRecordDataset(filenames)
@@ -22,7 +23,7 @@ class Dataset(object):
                 sequence_length=sequence_length,
                 string_length=string_length
             ),
-            num_parallel_calls=num_cpus
+            num_parallel_calls=os.cpu_count()
         )
         self.dataset = self.dataset.batch(batch_size)
         self.dataset = self.dataset.prefetch(1)

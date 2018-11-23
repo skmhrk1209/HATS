@@ -17,7 +17,6 @@ parser.add_argument('--filenames', type=str, nargs="+", default=["../../data/fsn
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=1000000, help="buffer size to shuffle dataset")
-parser.add_argument("--num_cpus", type=int, default=32, help="number of logical processors")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
@@ -67,7 +66,7 @@ def main(unused_argv):
     classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
@@ -91,7 +90,7 @@ def main(unused_argv):
                 ],
                 data_format="channels_last"
             ),
-            num_classes=63,
+            num_classes=134,
             data_format="channels_last",
             hyper_params=AttrDict(
                 cross_entropy_decay=1.0,
@@ -117,7 +116,6 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                num_cpus=args.num_cpus,
                 image_size=[160, 640],
                 data_format="channels_last",
                 sequence_length=9,
@@ -139,7 +137,6 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                num_cpus=args.num_cpus,
                 image_size=[160, 640],
                 data_format="channels_last",
                 sequence_length=9,
@@ -157,7 +154,6 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                num_cpus=args.num_cpus,
                 image_size=[160, 640],
                 data_format="channels_last",
                 sequence_length=9,
