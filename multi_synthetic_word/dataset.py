@@ -1,9 +1,9 @@
 import tensorflow as tf
 import numpy as np
-from . import base
+import functools
 
 
-class Dataset(base.Dataset):
+class Dataset(object):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus,
                  image_size, data_format, sequence_length, string_length):
@@ -13,15 +13,27 @@ class Dataset(base.Dataset):
         self.sequence_length = sequence_length
         self.string_length = string_length
 
-        super(Dataset, self).__init__(
-            filenames=filenames,
-            num_epochs=num_epochs,
-            batch_size=batch_size,
+        self.dataset = tf.data.TFRecordDataset(filenames)
+        self.dataset = self.dataset.shuffle(
             buffer_size=buffer_size,
-            num_cpus=num_cpus
+            reshuffle_each_iteration=True
         )
+        self.dataset = self.dataset.repeat(num_epochs)
+        self.dataset = self.dataset.map(
+            map_func=functools.partial(
+                self.parse,
+                image_size=image_size,
+                data_format=data_format,
+                sequence_length=sequence_length,
+                string_length=string_length
+            ),
+            num_parallel_calls=num_cpus
+        )
+        self.dataset = self.dataset.batch(batch_size)
+        self.dataset = self.dataset.prefetch(1)
+        self.iterator = self.dataset.make_one_shot_iterator()
 
-    def parse(self, example):
+    def parse(self, example, image_size, data_format, sequence_length, string_length):
 
         features = tf.parse_single_example(
             serialized=example,
@@ -54,3 +66,7 @@ class Dataset(base.Dataset):
         label = tf.reshape(label, [self.sequence_length, self.string_length])
 
         return {"image": image}, label
+
+    def get_next(self):
+
+        return self.iterator.get_next()
