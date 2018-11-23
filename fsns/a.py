@@ -13,19 +13,19 @@ with tf.Session() as sess:
     indices = tf.stack([indices[:-1] + 1, indices[1:]], axis=-1)
 
     label = tf.map_fn(
-        fn=lambda range: tf.pad(
-            tensor=label[range[0]: range[1]],
-            paddings=[[0, string_length - tf.shape(label[range[0]: range[1]])[0]]],
+        fn=lambda range: (lambda label: tf.pad(
+            tensor=label,
+            paddings=[[0, string_length - tf.shape(label)[0]]],
             mode="constant",
             constant_values=133
-        ),
+        ))(label[range[0]: range[1]]),
         elems=indices
     )
 
-    label = tf.pad(
+    label = (lambda label: tf.pad(
         tensor=label,
         paddings=[[0, sequence_length - tf.shape(label)[0]], [0, 0]],
         mode="constant",
         constant_values=133
-    )
+    ))(label)
     print(sess.run(label))

@@ -8,11 +8,6 @@ class Dataset(object):
     def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus,
                  image_size, data_format, sequence_length=9, string_length=35):
 
-        self.image_size = image_size
-        self.data_format = data_format
-        self.sequence_length = sequence_length
-        self.string_length = string_length
-
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
             buffer_size=buffer_size,
@@ -40,13 +35,11 @@ class Dataset(object):
             features={
                 "image/encoded": tf.FixedLenFeature(
                     shape=[],
-                    dtype=tf.string,
-                    default_value=""
+                    dtype=tf.string
                 ),
                 "image/class": tf.FixedLenFeature(
                     shape=[37],
-                    dtype=tf.int64,
-                    default_value=[133] * 37
+                    dtype=tf.int64
                 )
             }
         )
@@ -55,10 +48,10 @@ class Dataset(object):
         image = tf.image.convert_image_dtype(image, tf.float32)
         image.set_shape([150, 600, 3])
 
-        if self.image_size:
-            image = tf.image.resize_images(image, self.image_size)
+        if image_size:
+            image = tf.image.resize_images(image, image_size)
 
-        if self.data_format == "channels_first":
+        if data_format == "channels_first":
             image = tf.transpose(image, [2, 0, 1])
 
         label = tf.cast(features["image/class"], tf.int32)
@@ -66,8 +59,24 @@ class Dataset(object):
         label = tf.gather(label, indices)
         label = tf.concat([[0], label, [0]], axis=0)
         indices = tf.cast(tf.squeeze(tf.where(tf.equal(label, 0))), tf.int32)
-        indices = tf.stack([indices[:-1], indices[1:]], axis=-1)
-        label = tf.map_fn(lambda indices: label[indices[0] + 1: indices[1]], indices)
+        indices = tf.stack([indices[:-1] + 1, indices[1:]], axis=-1)
+
+        label = tf.map_fn(
+            fn=lambda range: (lambda label: tf.pad(
+                tensor=label,
+                paddings=[[0, string_length - tf.shape(label)[0]]],
+                mode="constant",
+                constant_values=133
+            ))(label[range[0]: range[1]]),
+            elems=indices
+        )
+
+        label = (lambda label: tf.pad(
+            tensor=label,
+            paddings=[[0, sequence_length - tf.shape(label)[0]], [0, 0]],
+            mode="constant",
+            constant_values=133
+        ))(label)
 
         return {"image": image}, label
 
