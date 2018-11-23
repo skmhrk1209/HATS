@@ -48,4 +48,5 @@ with tf.Session() as sess:
         image, label = sess.run(next_element)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         cv2.imshow("", image)
+        print(label)
         if cv2.waitKey() == ord("q"):break
