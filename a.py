@@ -46,6 +46,6 @@ with tf.Session() as sess:
     while True:
 
         image, label = sess.run(next_element)
-
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         cv2.imshow("", image)
-        cv2.waitKey()
+        if cv2.waitKey() == ord("q"):break
