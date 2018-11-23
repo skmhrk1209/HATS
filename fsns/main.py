@@ -113,7 +113,7 @@ def main(unused_argv):
 
         classifier.train(
             input_fn=lambda: Dataset(
-                filenames=[filename for filename in glob.glob(args.filenames) if "train" in filename],
+                filenames=[filename for filename in glob.glob("../../data/fsns/*") if "train" in filename],
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
