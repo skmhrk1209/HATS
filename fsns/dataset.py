@@ -6,7 +6,7 @@ import functools
 class Dataset(object):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus,
-                 image_size, data_format, sequence_length, string_length):
+                 image_size, data_format, sequence_length=9, string_length=35):
 
         self.image_size = image_size
         self.data_format = data_format
@@ -38,23 +38,22 @@ class Dataset(object):
         features = tf.parse_single_example(
             serialized=example,
             features={
-                "path": tf.FixedLenFeature(
+                "image/encoded": tf.FixedLenFeature(
                     shape=[],
                     dtype=tf.string,
                     default_value=""
                 ),
-                "label": tf.FixedLenFeature(
-                    shape=[self.sequence_length * self.string_length],
+                "image/class": tf.FixedLenFeature(
+                    shape=[37],
                     dtype=tf.int64,
-                    default_value=[62] * (self.sequence_length * self.string_length)
+                    default_value=[133] * 37
                 )
             }
         )
 
-        image = tf.read_file(features["path"])
-        image = tf.image.decode_jpeg(image, 3)
+        image = tf.image.decode_png(features["image/encoded"], 3)
         image = tf.image.convert_image_dtype(image, tf.float32)
-        image.set_shape([256, 256, 3])
+        image.set_shape([150, 600, 3])
 
         if self.image_size:
             image = tf.image.resize_images(image, self.image_size)
@@ -62,8 +61,13 @@ class Dataset(object):
         if self.data_format == "channels_first":
             image = tf.transpose(image, [2, 0, 1])
 
-        label = tf.cast(features["label"], tf.int32)
-        label = tf.reshape(label, [self.sequence_length, self.string_length])
+        label = tf.cast(features["image/class"], tf.int32)
+        indices = tf.cast(tf.squeeze(tf.where(tf.not_equal(label, 133))), tf.int32)
+        label = tf.gather(label, indices)
+        label = tf.concat([[0], label, [0]], axis=0)
+        indices = tf.cast(tf.squeeze(tf.where(tf.equal(label, 0))), tf.int32)
+        indices = tf.stack([indices[:-1], indices[1:]], axis=-1)
+        label = tf.map_fn(lambda indices: label[indices[0] + 1: indices[1]], indices)
 
         return {"image": image}, label
 
