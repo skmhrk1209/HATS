@@ -14,7 +14,7 @@ for filename in [filename for filename in glob.glob("/home/sakuma/data/fsns/*") 
         label = example.features.feature["image/text"].bytes_list.value[0]
     
         image = np.fromstring(image, dtype=np.uint8)
-        image = image.reshape([150, 600])
+        image = image.reshape([150, 600, 3])
         
         cv2.imshow("", image)
         cv2.waitKey()
