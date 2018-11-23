@@ -5,8 +5,8 @@ import argparse
 import itertools
 import cv2
 from attrdict import AttrDict
-import dataset
-import model
+from dataset import Dataset
+from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
