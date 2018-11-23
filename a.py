@@ -38,7 +38,7 @@ class Dataset(object):
 
         return self.iterator.get_next()
 
-dataset = Dataset(filenames=[filename for filename glob.glob("/home/sakuma/data/fsns/*") if "train" in filename])
+dataset = Dataset(filenames=[filename for filename in glob.glob("/home/sakuma/data/fsns/*") if "train" in filename])
 next_element = dataset.get_next()
 
 with tf.Session() as sess:
