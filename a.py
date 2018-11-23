@@ -1,6 +1,7 @@
 import tensorflow as tf
 import glob
 import cv2
+import numpy as np
 
 for filename in [filename for filename in glob.glob("/home/sakuma/data/fsns/*") if "train" in filename]:
 
