@@ -3,7 +3,7 @@ import numpy as np
 import functools
 import os
 import glob
-
+import cv2
 
 class Dataset(object):
 
@@ -43,6 +43,9 @@ next_element = dataset.get_next()
 
 with tf.Session() as sess:
 
-    image, label = sess.run(next_element)
+    while True:
 
-    print(image, label)
+        image, label = sess.run(next_element)
+
+        cv2.imshow("", image)
+        cv2.waitKey()
