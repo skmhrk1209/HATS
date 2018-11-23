@@ -11,7 +11,7 @@ with tf.Session() as sess:
     label = tf.map_fn(
         fn=lambda indices: tf.pad(
             tensor=label[indices[0] + 1: indices[1]],
-            paddings=[0, 4 - (indices[1] - (indices[0] + 1))],
+            paddings=[[0, 4 - (indices[1] - (indices[0] + 1))]],
             mode="constant",
             constant_values=133
         ), 
