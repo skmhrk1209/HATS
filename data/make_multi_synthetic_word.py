@@ -2,13 +2,17 @@ import numpy as np
 import cv2
 import os
 import glob
-import shutil
 import random
 import threading
-import itertools
+import argparse
 from numba import jit
 from tqdm import tqdm, trange
 from shapely.geometry import box
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--synthetic_word_directory", type=str, required=True, help="path to synthetic word directory")
+parser.add_argument("--multi_synthetic_word_directory", type=str, required=True, help="path to multi synthetic word directory")
+args = parser.parse_args()
 
 
 def make_multi_thread(func, num_threads, split=False):
@@ -45,7 +49,7 @@ def make_multi_thread(func, num_threads, split=False):
 
 
 @jit(nopython=False, nogil=True)
-def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_length, num_retries, thread_id):
+def make_multi_synthetic_word(filenames, directory, num_data, image_size, sequence_length, num_retries, thread_id):
 
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
@@ -84,7 +88,7 @@ def make_multi_mjsynth(filenames, directory, num_data, image_size, sequence_leng
 if __name__ == "__main__":
 
     filenames = [
-        filename for filename in tqdm(glob.glob("/home/sakuma/data/mnt/*/*/*/*/*/*.jpg"))
+        filename for filename in tqdm(glob.glob(os.path.join(args.synthetic_word_directory, "*")))
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
             (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
     ]
@@ -92,18 +96,18 @@ if __name__ == "__main__":
     random.seed(0)
     random.shuffle(filenames)
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
+    make_multi_thread(make_multi_synthetic_word, num_threads=32, split=False)(
         filenames[:int(len(filenames) * 0.9)],
-        directory="/home/sakuma/data/multi_mjsynth/train",
+        directory=os.path.join(args.multi_synthetic_word_directory, "train"),
         num_data=28125,
         image_size=(256, 256),
         sequence_length=4,
         num_retries=100
     )
 
-    make_multi_thread(make_multi_mjsynth, num_threads=32, split=False)(
+    make_multi_thread(make_multi_synthetic_word, num_threads=32, split=False)(
         filenames[int(len(filenames) * 0.9):],
-        directory="/home/sakuma/data/multi_mjsynth/test",
+        directory=os.path.join(args.multi_synthetic_word_directory, "test"),
         num_data=3125,
         image_size=(256, 256),
         sequence_length=4,

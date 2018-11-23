@@ -14,7 +14,7 @@ def map_innermost_list(function, sequence, classes=(list,)):
             if any(map(lambda element: isinstance(element, classes), sequence)) else function(sequence))
 
 
-class ACNN(object):
+class Model(object):
 
     def __init__(self, convolutional_network, attention_network,
                  num_classes, data_format, hyper_params):

@@ -5,14 +5,14 @@ import argparse
 import itertools
 import cv2
 from attrdict import AttrDict
-from data import multi_mjsynth
-from models.acnn import ACNN
+from data import multi_synthetic_word
+from models import multi_synthetic_word
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_mjsynth_acnn_model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["multi_mjsynth/train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_model", help="model directory")
+parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
@@ -63,10 +63,8 @@ def search_bounding_box(image, threshold):
 
 def main(unused_argv):
 
-    num_steps = args.buffer_size * args.num_epochs / args.batch_size
-
-    multi_mjsynth_classifier = tf.estimator.Estimator(
-        model_fn=ACNN(
+    multi_synthetic_word_classifier = tf.estimator.Estimator(
+        model_fn=multi_synthetic_word.Model(
             convolutional_network=ResidualNetwork(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
@@ -112,8 +110,8 @@ def main(unused_argv):
 
     if args.train:
 
-        multi_mjsynth_classifier.train(
-            input_fn=lambda: multi_mjsynth.Dataset(
+        multi_synthetic_word_classifier.train(
+            input_fn=lambda: multi_synthetic_word.Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -134,8 +132,8 @@ def main(unused_argv):
 
     if args.eval:
 
-        eval_results = multi_mjsynth_classifier.evaluate(
-            input_fn=lambda: multi_mjsynth.Dataset(
+        eval_results = multi_synthetic_word_classifier.evaluate(
+            input_fn=lambda: multi_synthetic_word.Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -152,8 +150,8 @@ def main(unused_argv):
 
     if args.predict:
 
-        predict_results = multi_mjsynth_classifier.predict(
-            input_fn=lambda: multi_mjsynth.Dataset(
+        predict_results = multi_synthetic_word_classifier.predict(
+            input_fn=lambda: multi_synthetic_word.Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -222,8 +220,8 @@ def main(unused_argv):
 
             prediction = "_".join(["".join([to_char(label) for label in labels]) for labels in predict_result["predictions"]])
 
-            cv2.imwrite("outputs/multi_mjsynth/attention_map_{}.png".format(prediction), attention_map_images)
-            cv2.imwrite("outputs/multi_mjsynth/boundin_box_{}.png".format(prediction), boundin_box_images)
+            cv2.imwrite("outputs/multi_synthetic_word/attention_map_{}.jpg".format(prediction), attention_map_images)
+            cv2.imwrite("outputs/multi_synthetic_word/boundin_box_{}.jpg".format(prediction), boundin_box_images)
 
 
 if __name__ == "__main__":
