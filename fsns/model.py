@@ -89,6 +89,10 @@ class Model(object):
             sequence=zip_innermost(*feature_vectors)
         )
 
+        print(len(feature_vectors))
+        print(len(feature_vectors[0]))
+        print(len(feature_vectors[0][0]))
+
         logits = map_innermost(
             function=lambda feature_vectors: tf.layers.dense(
                 inputs=feature_vectors,

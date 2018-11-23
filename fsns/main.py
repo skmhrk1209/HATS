@@ -13,7 +13,7 @@ from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["../../data/fsns/*"], help="tfrecord filenames")
+parser.add_argument('--data_dir', type=str, default="../../fsns", help="tfrecords directory")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=1000000, help="buffer size to shuffle dataset")
@@ -112,7 +112,7 @@ def main(unused_argv):
 
         classifier.train(
             input_fn=lambda: Dataset(
-                filenames=[filename for filename in glob.glob("../../data/fsns/*") if "train" in filename],
+                filenames=[filename for filename in glob.glob(args.data_dir) if "train" in filename],
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
