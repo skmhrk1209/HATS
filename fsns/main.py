@@ -50,7 +50,7 @@ def search_bounding_box(image, threshold):
                     depth_first_search(y + dy, x + dx)
 
     for y in range(flags.shape[0]):
-        for x in range(flags.shape[1]):
+        for x in range(flags.shape[1]): 
             if flags[y, x] and binary[y, x]:
                 segments.append([])
                 depth_first_search(y, x)

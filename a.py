@@ -1,20 +1,48 @@
 import tensorflow as tf
-import glob
-import cv2
 import numpy as np
+import functools
+import os
+import glob
 
-for filename in [filename for filename in glob.glob("/home/sakuma/data/fsns/*") if "train" in filename]:
 
-    for record  in tf.python_io.tf_record_iterator(filename):
+class Dataset(object):
 
-        example = tf.train.Example()
-        example.ParseFromString(record)
-    
-        image = example.features.feature["image/encoded"].bytes_list.value[0]
-        label = example.features.feature["image/text"].bytes_list.value[0]
-    
-        image = np.fromstring(image, dtype=np.uint8)
-        image = image.reshape([150, 600, 3])
-        
-        cv2.imshow("", image)
-        cv2.waitKey()
+    def __init__(self, filenames):
+
+        self.dataset = tf.data.TFRecordDataset(filenames)
+        self.dataset = self.dataset.map(self.parse)
+        self.iterator = self.dataset.make_one_shot_iterator()
+
+    def parse(self, example):
+
+        features = tf.parse_single_example(
+            serialized=example,
+            features={
+                "image/encoded": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.string
+                ),
+                "image/text": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.string
+                )
+            }
+        )
+
+        image = tf.image.decode_png(features["image/encoded"], 3)
+        label = features["image/text"]
+
+        return image, label
+
+    def get_next(self):
+
+        return self.iterator.get_next()
+
+dataset = Dataset(filenames=[filename for filename glob.glob("/home/sakuma/data/fsns/*") if "train" in filename])
+next_element = dataset.get_next()
+
+with tf.Session() as sess:
+
+    image, label = sess.run(next_element)
+
+    print(image, label)
