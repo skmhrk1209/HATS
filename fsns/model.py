@@ -77,7 +77,7 @@ class Model(object):
                     transpose_b=True if self.data_format == "channels_first" else False
                 )),
                 sequence=feature_maps_atention_maps[1]
-            )
+            ),
             sequence=zip_innermost(feature_maps, attention_maps)
         )
 
