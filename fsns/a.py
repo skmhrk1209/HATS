@@ -9,7 +9,7 @@ with tf.Session() as sess:
     indices = tf.cast(tf.squeeze(tf.where(tf.equal(label, 0))), tf.int32)
     indices = tf.stack([indices[:-1], indices[1:]], axis=-1)
     label = tf.map_fn(
-        map_fn=lambda indices: tf.pad(
+        fn=lambda indices: tf.pad(
             tensor=label[indices[0] + 1: indices[1]],
             paddings=[0, 4 - (indices[1] - (indices[0] + 1))],
             mode="constant",
