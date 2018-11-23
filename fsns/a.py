@@ -8,5 +8,13 @@ with tf.Session() as sess:
     label = tf.concat([[0], label, [0]], axis=0)
     indices = tf.cast(tf.squeeze(tf.where(tf.equal(label, 0))), tf.int32)
     indices = tf.stack([indices[:-1], indices[1:]], axis=-1)
-    label = tf.map_fn(lambda indices: label[indices[0] + 1: indices[1]], indices)
+    label = tf.map_fn(
+        map_dn=lambda indices: tf.pad(
+            tensor=label[indices[0] + 1: indices[1]],
+            paddings=[0, indices[1] - (indices[0] + 1)],
+            mode="constant",
+            constant_values=133
+        ), 
+        elems=indices
+    )
     print(sess.run(label))
