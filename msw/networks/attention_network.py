@@ -3,10 +3,6 @@ import numpy as np
 from sequential.algorithms import *
 
 
-def compose(function, *functions):
-    return lambda *args: compose(*functions)(function(*args)) if functions else function(*args)
-
-
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params, rnn_params, data_format):

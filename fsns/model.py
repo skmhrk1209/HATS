@@ -29,14 +29,26 @@ class Model(object):
 
         images = features["image"]
 
-        feature_maps = self.convolutional_network(
-            inputs=images,
-            training=mode == tf.estimator.ModeKeys.TRAIN
+        images = tf.split(images, num_or_size_splits=150, axis=2)
+
+        feature_maps = map_innermost(
+            function=lambda images: self.convolutional_network(
+                inputs=images,
+                training=mode == tf.estimator.ModeKeys.TRAIN,
+                name="convolutional_network",
+                reuse=tf.AUTO_REUSE
+            ),
+            sequence=images
         )
 
-        attention_maps = self.attention_network(
-            inputs=feature_maps,
-            training=mode == tf.estimator.ModeKeys.TRAIN
+        attention_maps = map_innermost(
+            function=lambda feature_maps: self.attention_network(
+                inputs=feature_maps,
+                training=mode == tf.estimator.ModeKeys.TRAIN,
+                name="attention_network",
+                reuse=tf.AUTO_REUSE
+            ),
+            sequence=feature_maps
         )
 
         merged_attention_maps = map_innermost(
@@ -64,6 +76,14 @@ class Model(object):
                 transpose_b=True if self.data_format == "channels_first" else False
             )),
             sequence=attention_maps
+        )
+
+        feature_vectors = map_innermost(
+            function=lambda feature_vectors: tf.concat(
+                values=feature_vectors,
+                axis=-1
+            ),
+            sequence=zip_innermost(*feature_vectors)
         )
 
         logits = map_innermost(

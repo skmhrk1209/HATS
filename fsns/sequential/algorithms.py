@@ -2,6 +2,14 @@ from operator import *
 from functools import *
 
 
+def compose(function, *functions):
+    '''
+    conpose functions from left to right
+    '''
+
+    return lambda *args: compose(*functions)(function(*args)) if functions else function(*args)
+
+
 def map_innermost(function, sequence, classes=(list,)):
     '''
     apply function to innermost elements.
