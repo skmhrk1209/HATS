@@ -10,8 +10,8 @@ from tqdm import tqdm, trange
 from shapely.geometry import box
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--synthetic_word_directory", type=str, required=True, help="path to synthetic word directory")
-parser.add_argument("--multi_synthetic_word_directory", type=str, required=True, help="path to multi synthetic word directory")
+parser.add_argument("--input_directory", type=str, required=True, help="path to input directory")
+parser.add_argument("--output_directory", type=str, required=True, help="path to output directory")
 args = parser.parse_args()
 
 
@@ -88,7 +88,7 @@ def make_multi_synthetic_word(filenames, directory, num_data, image_size, sequen
 if __name__ == "__main__":
 
     filenames = [
-        filename for filename in tqdm(glob.glob(os.path.join(args.synthetic_word_directory, "*")))
+        filename for filename in tqdm(glob.glob(os.path.join(args.input_directory, "*")))
         if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
             (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
     ]
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     make_multi_thread(make_multi_synthetic_word, num_threads=32, split=False)(
         filenames[:int(len(filenames) * 0.9)],
-        directory=os.path.join(args.multi_synthetic_word_directory, "train"),
+        directory=os.path.join(args.output_directory, "train"),
         num_data=28125,
         image_size=(256, 256),
         sequence_length=4,
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     make_multi_thread(make_multi_synthetic_word, num_threads=32, split=False)(
         filenames[int(len(filenames) * 0.9):],
-        directory=os.path.join(args.multi_synthetic_word_directory, "test"),
+        directory=os.path.join(args.output_directory, "test"),
         num_data=3125,
         image_size=(256, 256),
         sequence_length=4,
