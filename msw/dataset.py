@@ -8,11 +8,6 @@ class Dataset(object):
     def __init__(self, filenames, num_epochs, batch_size, buffer_size, num_cpus,
                  image_size, data_format, sequence_length, string_length):
 
-        self.image_size = image_size
-        self.data_format = data_format
-        self.sequence_length = sequence_length
-        self.string_length = string_length
-
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
             buffer_size=buffer_size,
@@ -44,9 +39,9 @@ class Dataset(object):
                     default_value=""
                 ),
                 "label": tf.FixedLenFeature(
-                    shape=[self.sequence_length * self.string_length],
+                    shape=[sequence_length * string_length],
                     dtype=tf.int64,
-                    default_value=[62] * (self.sequence_length * self.string_length)
+                    default_value=[62] * (sequence_length * string_length)
                 )
             }
         )
@@ -56,14 +51,14 @@ class Dataset(object):
         image = tf.image.convert_image_dtype(image, tf.float32)
         image.set_shape([256, 256, 3])
 
-        if self.image_size:
-            image = tf.image.resize_images(image, self.image_size)
+        if image_size:
+            image = tf.image.resize_images(image, image_size)
 
-        if self.data_format == "channels_first":
+        if data_format == "channels_first":
             image = tf.transpose(image, [2, 0, 1])
 
         label = tf.cast(features["label"], tf.int32)
-        label = tf.reshape(label, [self.sequence_length, self.string_length])
+        label = tf.reshape(label, [sequence_length, string_length])
 
         return {"image": image}, label
 
