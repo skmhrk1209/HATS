@@ -2,7 +2,7 @@ import tensorflow as tf
 import glob
 import cv2
 
-for filename in [filename for filename in glob.glob("/home/sakuma/data/fsns") if "train" in filename]:
+for filename in [filename for filename in glob.glob("/home/sakuma/data/fsns/*") if "train" in filename]:
 
     for record  in tf.python_io.tf_record_iterator(filename):
 
