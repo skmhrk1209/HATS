@@ -3,7 +3,6 @@ import tensorflow as tf
 with tf.Session() as sess:
 
     label = [1, 2, 0, 3, 4, 0, 5, 6, 133, 133]
-    label = tf.cast(features["image/class"], tf.int32)
     indices = tf.cast(tf.squeeze(tf.where(tf.not_equal(label, 133))), tf.int32)
     label = tf.gather(label, indices)
     label = tf.concat([[0], label, [0]], axis=0)
