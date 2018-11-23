@@ -29,7 +29,7 @@ class Model(object):
 
         images = features["image"]
 
-        images = tf.split(images, num_or_size_splits=images.shape[2] // 4, axis=2)
+        images = tf.split(images, num_or_size_splits=images.shape[2] // images.shape[1], axis=2)
 
         feature_maps = map_innermost(
             function=lambda images: self.convolutional_network(
