@@ -16,6 +16,7 @@ with tf.Session() as sess:
     first_indices = tf.concat([[0], last_indices[:-1] + 1], axis=0)
     print(first_indices)
     indices = tf.stack([first_indices, last_indices], axis=-1)
+    indices = tf.cast(indices, tf.int32)
     print(indices)
     label = tf.map_fn(lambda indices: label[indices[0]:indices[1]], indices)
     print(sess.run(label))
