@@ -13,17 +13,20 @@ args = parser.parse_args()
 
 with tf.python_io.TFRecordWriter(args.filename) as writer:
 
+    class_ids = {}
+
+    for i in range(ord("0"), ord("z") + 1):
+
+        if i <= ord("9"):
+            class_ids[chr(i)] = i - ord("0")
+        elif i <= ord("Z"):
+            class_ids[chr(i)] = i - ord("A") + class_ids["9"] + 1
+        elif i <= ord("z"):
+            class_ids[chr(i)] = i - ord("a") + class_ids["Z"] + 1
+
+    null_class_id = max(class_ids.values()) + 1
+
     for file in glob.glob(os.path.join(args.directory, "*")):
-
-        def to_label(char):
-            return (ord(char) - ord("0") if char <= "9" else
-                    ord(char) - ord("A") + (to_label("9") + 1) if char <= "Z" else
-                    ord(char) - ord("a") + (to_label("Z") + 1) if char <= "z" else to_label("z") + 1)
-
-        def to_char(label):
-            return (chr(label + ord("0")) if label <= to_label("9") else
-                    chr(label + ord("A") - (to_label("9") + 1)) if label <= to_label("Z") else
-                    chr(label + ord("a") - (to_label("Z") + 1)) if label <= to_label("z") else "")
 
         strings = os.path.splitext(os.path.basename(file))[0].split("_")[1:]
 
@@ -33,12 +36,12 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                     array=[to_label(char) for char in string],
                     pad_width=[[0, args.string_length - len(string)]],
                     mode="constant",
-                    constant_values=62
+                    constant_values=null_class_id
                 ) for string in strings
             ],
             pad_width=[[0, args.sequence_length - len(strings)], [0, 0]],
             mode="constant",
-            constant_values=62
+            constant_values=null_class_id
         )
 
         writer.write(
