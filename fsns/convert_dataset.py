@@ -17,6 +17,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
     class_ids = {}
 
     with open(args.class_ids, "r") as f:
+
         for line in f:
             class_id, char = line.split()
             class_ids[char] = int(class_id)
