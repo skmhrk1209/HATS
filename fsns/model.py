@@ -41,8 +41,7 @@ class Model(object):
             sequence=images
         )
 
-        print(type(feature_maps))
-
+        '''
         attention_maps = map_innermost(
             function=lambda feature_maps: self.attention_network(
                 inputs=feature_maps,
@@ -52,8 +51,14 @@ class Model(object):
             ),
             sequence=feature_maps
         )
+        '''
 
-        print("attention map")
+        attention_maps = self.attention_network(
+            inputs=feature_maps,
+            training=mode == tf.estimator.ModeKeys.TRAIN,
+            name="attention_network",
+            reuse=None
+        )
 
         merged_attention_maps = map_innermost(
             function=lambda attention_maps: tf.reduce_sum(
