@@ -33,6 +33,6 @@ with tf.Session() as sess:
 
     image, label = sess.run(next_elem)
 
-    print(type(label))
+    print(label.decode("utf-8"))
     cv2.imshow("", image)
     cv2.waitKey()
