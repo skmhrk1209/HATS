@@ -1,6 +1,7 @@
 import tensorflow as tf
 import glob
 import cv2
+import itertools
 
 def parse(example):
 
@@ -31,8 +32,8 @@ next_elem = dataset.make_one_shot_iterator().get_next()
 
 with tf.Session() as sess:
 
-    image, label = sess.run(next_elem)
+    for i in itertools.count()
 
-    print(label.decode("utf-8"))
-    cv2.imshow("", image)
-    cv2.waitKey()
+        image, label = sess.run(next_elem)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        cv2.imwrite("{}_{}.jpg".format(i, label.decode("utf-8")), image)
