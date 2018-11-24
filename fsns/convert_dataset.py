@@ -30,7 +30,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
         label = np.pad(
             array=[
                 np.pad(
-                    array=[class_ids(char) for char in string],
+                    array=[class_ids[char] for char in string],
                     pad_width=[[0, args.string_length - len(string)]],
                     mode="constant",
                     constant_values=null_class_id
