@@ -41,7 +41,7 @@ class Model(object):
             sequence=images
         )
 
-        print("feature map")
+        print(type(feature_maps))
 
         attention_maps = map_innermost(
             function=lambda feature_maps: self.attention_network(
