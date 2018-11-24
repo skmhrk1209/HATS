@@ -51,7 +51,7 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-            shape = inputs.shape.as_list()
+            shape = inputs[0].shape.as_list()
 
             inputs = map_innermost(
                 function=lambda inputs: tf.layers.flatten(inputs),
