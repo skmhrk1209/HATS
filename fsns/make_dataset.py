@@ -19,7 +19,7 @@ def parse(example):
         )
 
         image = tf.image.decode_png(features["image/encoded"], 3)
-        label = features["label"]
+        label = features["image/text"]
 
         return image, label
 
