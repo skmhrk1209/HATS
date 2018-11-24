@@ -2,7 +2,7 @@ import tensorflow as tf
 import glob
 import cv2
 
-def parse(self, example):
+def parse(example):
 
         features = tf.parse_single_example(
             serialized=example,
