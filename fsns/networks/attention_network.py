@@ -44,7 +44,7 @@ class AttentionNetwork(object):
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
-                                reuse=None
+                                reuse=tf.AUTO_REUSE
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
