@@ -36,13 +36,11 @@ class Dataset(object):
             features={
                 "path": tf.FixedLenFeature(
                     shape=[],
-                    dtype=tf.string,
-                    default_value=""
+                    dtype=tf.string
                 ),
                 "label": tf.FixedLenFeature(
                     shape=[sequence_length * string_length],
-                    dtype=tf.int64,
-                    default_value=[62] * (sequence_length * string_length)
+                    dtype=tf.int64
                 )
             }
         )
