@@ -36,7 +36,7 @@ class AttentionNetwork(object):
                                     distribution="normal",
                                 ),
                                 name="conv2d",
-                                reuse=tf.AUTO_REUSE
+                                reuse=None
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
@@ -44,14 +44,14 @@ class AttentionNetwork(object):
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
-                                reuse=tf.AUTO_REUSE
+                                reuse=None
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
                         sequence=inputs
                     )
 
-            shape = inputs[0].shape.as_list()
+            shape = inputs.shape.as_list()
 
             inputs = map_innermost(
                 function=lambda inputs: tf.layers.flatten(inputs),
