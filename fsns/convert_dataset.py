@@ -19,7 +19,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
     with open(args.class_ids, "r") as f:
         for line in f:
             class_id, char = line.split()
-            class_ids[char] = class_id
+            class_ids[char] = int(class_id)
 
     null_class_id = max(class_ids.values()) + 1
 
