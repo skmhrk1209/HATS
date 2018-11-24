@@ -23,7 +23,7 @@ def parse(self, example):
 
         return image, label
 
-train_filenames = [f for f in glob.glob("/home/sakuma/data/fsns/*") if "train" in f]
+train_filenames = [f for f in glob.glob("/home/sakuma/data/fsns_raw/*") if "train" in f]
 
 dataset = tf.data.TFRecordDataset(train_filenames)
 dataset = dataset.map(parse)
