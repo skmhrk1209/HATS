@@ -41,7 +41,7 @@ class Dataset(object):
         return self.iterator.get_next()
 
 
-dataset = Dataset(filenames=[filename for filename in glob.glob("/home/sakuma/data/fsns/*") if "train" in filename])
+dataset = Dataset(filenames=[filename for filename in glob.glob("/home/sakuma/data/fsns/*") if "test" in filename or "validation" in filename])
 next_element = dataset.get_next()
 
 with tf.Session() as sess:
@@ -53,4 +53,4 @@ with tf.Session() as sess:
 
         label = label.decode("utf-8")
         label = label.replace(" ", "_")
-        cv2.imwrite("/home/sakuma/data/fsns_/{}/{}_{}.jpg".format("train", i, label), image)
+        cv2.imwrite("/home/sakuma/data/fsns_/{}/{}_{}.jpg".format("test", i, label), image)
