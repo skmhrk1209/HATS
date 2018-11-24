@@ -36,7 +36,7 @@ class AttentionNetwork(object):
                                     distribution="normal",
                                 ),
                                 name="conv2d",
-                                reuse=None
+                                reuse=tf.AUTO_REUSE
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
