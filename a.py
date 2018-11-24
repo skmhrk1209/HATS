@@ -46,11 +46,11 @@ next_element = dataset.get_next()
 
 with tf.Session() as sess:
 
-    for i in trange(1044868):
+    for i in trange(1100000):
 
         image, label = sess.run(next_element)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
         label = label.decode("utf-8")
         label = label.replace(" ", "_")
-        cv2.imwrite("/home/sakuma/data/fsns_/{}/{}_{}.jpg".format("train" if i < 1000000 else "test", i, label), image)
+        cv2.imwrite("/home/sakuma/data/fsns_/{}/{}_{}.jpg".format("train", i, label), image)

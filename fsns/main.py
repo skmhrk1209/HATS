@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 import sys
-import glob
 import argparse
 import itertools
 import cv2
@@ -13,7 +12,7 @@ from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="model", help="model directory")
-parser.add_argument('--data_dir', type=str, default="../../fsns", help="tfrecords directory")
+parser.add_argument('--filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=1000000, help="buffer size to shuffle dataset")
@@ -50,7 +49,7 @@ def search_bounding_box(image, threshold):
                     depth_first_search(y + dy, x + dx)
 
     for y in range(flags.shape[0]):
-        for x in range(flags.shape[1]): 
+        for x in range(flags.shape[1]):
             if flags[y, x] and binary[y, x]:
                 segments.append([])
                 depth_first_search(y, x)
@@ -66,7 +65,7 @@ def main(unused_argv):
     classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
@@ -112,10 +111,7 @@ def main(unused_argv):
 
         classifier.train(
             input_fn=lambda: Dataset(
-                filenames=[
-                    filename for filename in glob.glob(args.data_dir)
-                    if "train" in filename
-                ],
+                filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
@@ -136,10 +132,7 @@ def main(unused_argv):
 
         eval_results = classifier.evaluate(
             input_fn=lambda: Dataset(
-                filenames=[
-                    filename for filename in glob.glob(args.data_dir)
-                    if "test" in filename
-                ],
+                filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
@@ -156,10 +149,7 @@ def main(unused_argv):
 
         predict_results = classifier.predict(
             input_fn=lambda: Dataset(
-                filenames=[
-                    filename for filename in glob.glob(args.data_dir)
-                    if "test" in filename
-                ],
+                filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
