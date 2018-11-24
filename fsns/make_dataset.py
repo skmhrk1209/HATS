@@ -32,7 +32,7 @@ next_elem = dataset.make_one_shot_iterator().get_next()
 
 with tf.Session() as sess:
 
-    for i in itertools.count()
+    for i in itertools.count():
 
         image, label = sess.run(next_elem)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
