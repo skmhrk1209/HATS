@@ -29,7 +29,11 @@ class Model(object):
 
         images = features["image"]
 
-        images = tf.split(images, num_or_size_splits=images.shape[2] // images.shape[1], axis=2)
+        images = tf.split(
+            value=images,
+            num_or_size_splits=images.shape[2] // images.shape[1],
+            axis=2
+        )
 
         feature_maps = map_innermost(
             function=lambda images: self.convolutional_network(
@@ -41,7 +45,6 @@ class Model(object):
             sequence=images
         )
 
-        '''
         attention_maps = map_innermost(
             function=lambda feature_maps: self.attention_network(
                 inputs=feature_maps,
@@ -50,14 +53,6 @@ class Model(object):
                 reuse=tf.AUTO_REUSE
             ),
             sequence=feature_maps
-        )
-        '''
-
-        attention_maps = self.attention_network(
-            inputs=feature_maps,
-            training=mode == tf.estimator.ModeKeys.TRAIN,
-            name="attention_network",
-            reuse=None
         )
 
         merged_attention_maps = map_innermost(
@@ -93,7 +88,7 @@ class Model(object):
         feature_vectors = map_innermost(
             function=lambda feature_vectors: tf.concat(
                 values=feature_vectors,
-                axis=-1
+                axis=1
             ),
             sequence=zip_innermost(*feature_vectors)
         )
@@ -111,7 +106,7 @@ class Model(object):
         predictions = map_innermost(
             function=lambda logits: tf.argmax(
                 input=logits,
-                axis=-1,
+                axis=1,
                 output_type=tf.int32
             ),
             sequence=logits
@@ -119,11 +114,11 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
-            while isinstance(predictions, list):
+            while isinstance(images, list):
 
-                predictions = map_innermost_list(
-                    function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions
+                images = map_innermost_list(
+                    function=lambda images: tf.stack(images, axis=1),
+                    sequence=images
                 )
 
             while isinstance(merged_attention_maps, list):
@@ -131,6 +126,13 @@ class Model(object):
                 merged_attention_maps = map_innermost_list(
                     function=lambda merged_attention_maps: tf.stack(merged_attention_maps, axis=1),
                     sequence=merged_attention_maps
+                )
+
+            while isinstance(predictions, list):
+
+                predictions = map_innermost_list(
+                    function=lambda predictions: tf.stack(predictions, axis=1),
+                    sequence=predictions
                 )
 
             return tf.estimator.EstimatorSpec(
@@ -158,9 +160,12 @@ class Model(object):
         )
 
         attention_map_losses = map_innermost(
-            function=lambda attention_maps: tf.reduce_mean(
-                tf.reduce_sum(tf.abs(attention_maps), axis=[2, 3, 4])
-            ),
+            function=lambda attention_maps: tf.reduce_mean(map(
+                function=lambda attention_maps: tf.reduce_mean(
+                    tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
+                ),
+                sequence=attention_maps
+            )),
             sequence=zip_innermost(*attention_maps)
         )
 

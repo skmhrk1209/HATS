@@ -65,11 +65,11 @@ def main(unused_argv):
     classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=64, strides=[1, 1], blocks=2),
+                    AttrDict(filters=128, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format="channels_last"
@@ -84,8 +84,8 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=9, num_units=[256]),
-                    AttrDict(sequence_length=35, num_units=[256])
+                    AttrDict(sequence_length=1, num_units=[256]),
+                    AttrDict(sequence_length=37, num_units=[256])
                 ],
                 data_format="channels_last"
             ),
@@ -117,8 +117,8 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[160, 640],
                 data_format="channels_last",
-                sequence_length=9,
-                string_length=35
+                sequence_length=1,
+                string_length=37
             ).get_next(),
             hooks=[
                 tf.train.LoggingTensorHook(
@@ -138,8 +138,8 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[160, 640],
                 data_format="channels_last",
-                sequence_length=9,
-                string_length=35
+                sequence_length=1,
+                string_length=37
             ).get_next()
         )
 
@@ -155,23 +155,13 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[160, 640],
                 data_format="channels_last",
-                sequence_length=9,
-                string_length=35
+                sequence_length=1,
+                string_length=37
             ).get_next()
         )
 
         def scale(input, input_min, input_max, output_min, output_max):
             return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
-
-        def to_label(char):
-            return (ord(char) - ord("0") if char <= "9" else
-                    ord(char) - ord("A") + (to_label("9") + 1) if char <= "Z" else
-                    ord(char) - ord("a") + (to_label("Z") + 1) if char <= "z" else to_label("z") + 1)
-
-        def to_char(label):
-            return (chr(label + ord("0")) if label <= to_label("9") else
-                    chr(label + ord("A") - (to_label("9") + 1)) if label <= to_label("Z") else
-                    chr(label + ord("a") - (to_label("Z") + 1)) if label <= to_label("z") else "")
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
@@ -183,20 +173,22 @@ def main(unused_argv):
                 attention_map_images.append([])
                 boundin_box_images.append([])
 
-                for k in range(10):
+                for k in range(1):
 
-                    merged_attention_map = predict_result["merged_attention_maps"][j, k]
-                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                    merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                    bounding_box = search_bounding_box(merged_attention_map, 0.5)
+                    for l in range(37):
 
-                    attention_map_image = np.copy(predict_result["images"])
-                    attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
-                    attention_map_images[-1].append(attention_map_image)
+                        merged_attention_map = predict_result["merged_attention_maps"][j, k, l]
+                        merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
+                        merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
+                        bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
-                    boundin_box_image = np.copy(predict_result["images"])
-                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
-                    boundin_box_images[-1].append(boundin_box_image)
+                        attention_map_image = np.copy(predict_result["images"])
+                        attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
+                        attention_map_images[-1].append(attention_map_image)
+
+                        boundin_box_image = np.copy(predict_result["images"])
+                        boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
+                        boundin_box_images[-1].append(boundin_box_image)
 
             attention_map_images = np.concatenate([
                 np.concatenate(attention_map_images, axis=1)
@@ -214,10 +206,8 @@ def main(unused_argv):
             attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
             boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-            prediction = "_".join(["".join([to_char(label) for label in labels]) for labels in predict_result["predictions"]])
-
-            cv2.imwrite("outputs/attention_map_{}.jpg".format(prediction), attention_map_images)
-            cv2.imwrite("outputs/boundin_box_{}.jpg".format(prediction), boundin_box_images)
+            cv2.imwrite("outputs/attention_map_{}.jpg".format(i), attention_map_images)
+            cv2.imwrite("outputs/boundin_box_{}.jpg".format(i), boundin_box_images)
 
 
 if __name__ == "__main__":

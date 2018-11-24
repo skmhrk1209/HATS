@@ -7,14 +7,14 @@ import glob
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, required=True, help="tfrecord filename")
 parser.add_argument("--directory", type=str, required=True, help="path to data directory")
-parser.add_argument("--sequence_length", type=int, default=9, help="max sequence length")
-parser.add_argument("--string_length", type=int, default=35, help="max string length")
+parser.add_argument("--sequence_length", type=int, default=1, help="max sequence length")
+parser.add_argument("--string_length", type=int, default=37, help="max string length")
 parser.add_argument("--class_ids", type=str, default="class_ids.txt", help="class ids file")
 args = parser.parse_args()
 
 with tf.python_io.TFRecordWriter(args.filename) as writer:
 
-    class_ids = {}
+    class_ids = {" ": 0}
 
     with open(args.class_ids, "r") as f:
 
