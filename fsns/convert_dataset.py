@@ -26,7 +26,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
-        string = os.path.splitext(os.path.basename(file))[0].split("_")[1:]
+        strings = os.path.splitext(os.path.basename(file))[0].split("_")[1:]
 
         label = np.pad(
             array=[
