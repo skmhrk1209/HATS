@@ -90,6 +90,7 @@ def main(unused_argv):
                 data_format="channels_last"
             ),
             num_classes=134,
+            num_tiles=4,
             data_format="channels_last",
             hyper_params=AttrDict(
                 cross_entropy_decay=1.0,

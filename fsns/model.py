@@ -17,11 +17,12 @@ def map_innermost_list(function, sequence, classes=(list,)):
 class Model(object):
 
     def __init__(self, convolutional_network, attention_network,
-                 num_classes, data_format, hyper_params):
+                 num_classes, num_tiles, data_format, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
         self.num_classes = num_classes
+        self.num_tiles = num_tiles
         self.data_format = data_format
         self.hyper_params = hyper_params
 
@@ -31,10 +32,7 @@ class Model(object):
 
         images = tf.split(
             value=images,
-            num_or_size_splits=(
-                images.shape[3] // images.shape[2] if self.data_format == "channels_first" else
-                images.shape[2] // images.shape[1]
-            ),
+            num_or_size_splits=self.num_tiles,
             axis=3 if self.data_format == "channels_first" else 2
         )
 
