@@ -174,7 +174,7 @@ class Model(object):
                 tf.image.total_variation(attention_maps)
             ),
             sequence=attention_maps
-        )
+        ) 
         '''
 
         losses = map_innermost(
@@ -227,10 +227,17 @@ class Model(object):
         )), tf.no_op()
 
         # ==========================================================================================
-        tf.summary.image("images", images, max_outputs=2)
-
         for variable in tf.trainable_variables("attention_network"):
             tf.summary.histogram(variable.name, variable)
+
+        map_innermost(
+            function=lambda indices_images: tf.summary.image(
+                name="images_{}".format("_".join(map(str, indices_images[0]))),
+                tensor=indices_images[1],
+                max_outputs=2
+            ),
+            sequence=enumerate_innermost(images)
+        )
 
         map_innermost(
             function=lambda indices_merged_attention_maps: tf.summary.image(
