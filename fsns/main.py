@@ -84,8 +84,8 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=1, num_units=[256]),
-                    AttrDict(sequence_length=37, num_units=[256])
+                    AttrDict(sequence_length=1, num_units=[400]),
+                    AttrDict(sequence_length=37, num_units=[400])
                 ],
                 data_format="channels_last"
             ),
