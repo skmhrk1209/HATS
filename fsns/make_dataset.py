@@ -27,7 +27,7 @@ def parse(example):
     return image, label
 
 
-train_filenames = [f for f in glob.glob("/home/sakuma/data/fsns_raw/*") if "train" in f]
+train_filenames = [f for f in glob.glob("/home/sakuma/data/fsns_raw/*") if "test" in f or "validation" in f]
 
 dataset = tf.data.TFRecordDataset(train_filenames)
 dataset = dataset.map(parse)
@@ -35,11 +35,11 @@ next_elem = dataset.make_one_shot_iterator().get_next()
 
 with tf.Session() as sess:
 
-    for i in trange(1044868):
+    for i in trange(16150 + 20404):
 
         image, label = sess.run(next_elem)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         label = label.decode("utf-8")
         if "_" in label:
             continue
-        cv2.imwrite("/home/sakuma/data/fsns/train/{}_{}.jpg".format(i, label), image)
+        cv2.imwrite("/home/sakuma/data/fsns/test/{}_{}.jpg".format(i, label), image)
