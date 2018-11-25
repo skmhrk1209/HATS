@@ -161,10 +161,10 @@ class Model(object):
 
         attention_map_losses = map_innermost(
             function=lambda attention_maps: tf.reduce_mean(map(
-                function=lambda attention_maps: tf.reduce_mean(
+                lambda attention_maps: tf.reduce_mean(
                     tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
                 ),
-                sequence=attention_maps
+                attention_maps
             )),
             sequence=zip_innermost(*attention_maps)
         )
