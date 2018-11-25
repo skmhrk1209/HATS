@@ -31,7 +31,7 @@ class Model(object):
 
         images = tf.split(
             value=images,
-            num_or_size_splits=images.shape[2] // images.shape[1],
+            num_or_size_splits=4,
             axis=2
         )
 
