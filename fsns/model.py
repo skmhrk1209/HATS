@@ -31,8 +31,11 @@ class Model(object):
 
         images = tf.split(
             value=images,
-            num_or_size_splits=4,
-            axis=2
+            num_or_size_splits=(
+                images.shape[3] // images.shape[2] if self.data_format == "channels_first" else
+                images.shape[2] // images.shape[1]
+            ),
+            axis=3 if self.data_format == "channels_first" else 2
         )
 
         feature_maps = map_innermost(
@@ -44,6 +47,8 @@ class Model(object):
             ),
             sequence=images
         )
+
+        print(type(feature_maps))
 
         attention_maps = map_innermost(
             function=lambda feature_maps: self.attention_network(
