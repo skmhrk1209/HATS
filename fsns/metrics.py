@@ -44,7 +44,11 @@ def sequence_accuracy(logits, labels, time_major=True):
         logits = tf.transpose(labels, [1, 0, 2])
         labels = tf.transpose(labels, [1, 0])
 
-    predictions = tf.argmax(logits, axis=2)
+    predictions = tf.argmax(
+        input=logits,
+        axis=2,
+        output_type=tf.int32
+    )
 
     return tf.metrics.mean(tf.reduce_all(
         input_tensor=tf.equal(labels, predictions),
