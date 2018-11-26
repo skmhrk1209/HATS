@@ -10,7 +10,7 @@ def dense_to_sparse(tensor, null):
     return tf.SparseTensor(indices, values, shape)
 
 
-def sequence_accuracy(logits, labels, time_major):
+def full_sequence_accuracy(logits, labels, time_major):
 
     if time_major:
         logits = tf.transpose(labels, [1, 0, 2])
