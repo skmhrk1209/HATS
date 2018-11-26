@@ -170,6 +170,8 @@ def main(unused_argv):
             attention_map_images = []
             boundin_box_images = []
 
+            print(predict_result["merged_attention_maps"].shape)
+
             for j in range(4):
 
                 attention_map_images.append([])
