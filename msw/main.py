@@ -167,10 +167,10 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            attention_map_images = []
-            boundin_box_images = []
-
             for j in range(1):
+
+                attention_map_images = []
+                boundin_box_images = []
 
                 for k in range(4):
 
@@ -192,24 +192,24 @@ def main(unused_argv):
                         boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
                         boundin_box_images[-1].append(boundin_box_image)
 
-            attention_map_images = np.concatenate([
-                np.concatenate(attention_map_images, axis=1)
-                for attention_map_images in attention_map_images
-            ], axis=0)
+                attention_map_images = np.concatenate([
+                    np.concatenate(attention_map_images, axis=1)
+                    for attention_map_images in attention_map_images
+                ], axis=0)
 
-            boundin_box_images = np.concatenate([
-                np.concatenate(boundin_box_images, axis=1)
-                for boundin_box_images in boundin_box_images
-            ], axis=0)
+                boundin_box_images = np.concatenate([
+                    np.concatenate(boundin_box_images, axis=1)
+                    for boundin_box_images in boundin_box_images
+                ], axis=0)
 
-            attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
-            boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
+                attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
+                boundin_box_images = cv2.cvtColor(boundin_box_images, cv2.COLOR_BGR2RGB)
 
-            attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
-            boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
+                attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
+                boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-            cv2.imwrite("outputs/attention_map_{}.jpg".format(i), attention_map_images)
-            cv2.imwrite("outputs/boundin_box_{}.jpg".format(i), boundin_box_images)
+                cv2.imwrite("outputs/attention_map_{}_{}.jpg".format(i, j), attention_map_images)
+                cv2.imwrite("outputs/boundin_box_{}_{}.jpg".format(i, j), boundin_box_images)
 
 
 if __name__ == "__main__":
