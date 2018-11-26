@@ -22,7 +22,7 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
             class_id, char = line.split()
             class_ids[char] = int(class_id)
 
-    null_class_id = max(class_ids.values()) + 1
+    class_ids["null"] = max(class_ids.values()) + 1
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
@@ -34,12 +34,12 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                     array=[class_ids[char] for char in string],
                     pad_width=[[0, args.string_length - len(string)]],
                     mode="constant",
-                    constant_values=null_class_id
+                    constant_values=class_ids["null"]
                 ) for string in strings
             ],
             pad_width=[[0, args.sequence_length - len(strings)], [0, 0]],
             mode="constant",
-            constant_values=null_class_id
+            constant_values=class_ids["null"]
         )
 
         writer.write(

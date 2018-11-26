@@ -17,14 +17,14 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     for i in range(ord("0"), ord("z") + 1):
 
-        if i <= ord("9"):
+        if ord("0") <= i <= ord("9"):
             class_ids[chr(i)] = i - ord("0")
-        elif i <= ord("Z"):
+        elif ord("A") <= i <= ord("Z"):
             class_ids[chr(i)] = i - ord("A") + class_ids["9"] + 1
-        elif i <= ord("z"):
+        elif ord("a") <= i <= ord("z"):
             class_ids[chr(i)] = i - ord("a") + class_ids["Z"] + 1
 
-    null_class_id = max(class_ids.values()) + 1
+    class_ids["null"] = max(class_ids.values()) + 1
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
@@ -36,12 +36,12 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                     array=[class_ids[char] for char in string],
                     pad_width=[[0, args.string_length - len(string)]],
                     mode="constant",
-                    constant_values=null_class_id
+                    constant_values=class_ids["null"]
                 ) for string in strings
             ],
             pad_width=[[0, args.sequence_length - len(strings)], [0, 0]],
             mode="constant",
-            constant_values=null_class_id
+            constant_values=class_ids["null"]
         )
 
         writer.write(

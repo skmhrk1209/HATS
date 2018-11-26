@@ -87,18 +87,18 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
-            while isinstance(predictions, list):
-
-                predictions = map_innermost_list(
-                    function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions
-                )
-
             while isinstance(merged_attention_maps, list):
 
                 merged_attention_maps = map_innermost_list(
                     function=lambda merged_attention_maps: tf.stack(merged_attention_maps, axis=1),
                     sequence=merged_attention_maps
+                )
+
+            while isinstance(predictions, list):
+
+                predictions = map_innermost_list(
+                    function=lambda predictions: tf.stack(predictions, axis=1),
+                    sequence=predictions
                 )
 
             return tf.estimator.EstimatorSpec(
@@ -191,10 +191,10 @@ class Model(object):
         )), tf.no_op()
 
         # ==========================================================================================
-        tf.summary.image("images", images, max_outputs=2)
-
         for variable in tf.trainable_variables("attention_network"):
             tf.summary.histogram(variable.name, variable)
+
+        tf.summary.image("images", images, max_outputs=2)
 
         map_innermost(
             function=lambda indices_merged_attention_maps: tf.summary.image(
