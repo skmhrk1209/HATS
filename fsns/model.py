@@ -16,14 +16,18 @@ def map_innermost_list(function, sequence, classes=(list,)):
 
 class Model(object):
 
+    class AccuracyType:
+        CHARACTER, SEQUENCE, EDIT_DISTANCE = range(3)
+
     def __init__(self, convolutional_network, attention_network,
-                 num_classes, num_tiles, data_format, hyper_params):
+                 num_classes, num_tiles, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
         self.num_classes = num_classes
         self.num_tiles = num_tiles
         self.data_format = data_format
+        self.accuracy_type = accuracy_type
         self.hyper_params = hyper_params
 
     def __call__(self, features, labels, mode):
@@ -208,19 +212,14 @@ class Model(object):
             sequence=labels
         )
 
-        '''
-        accuracies = map_innermost(
-            function=lambda logits_labels: metrics.edit_accuracy(
-                logits=logits_labels[0],
-                labels=logits_labels[1],
-                time_major=False
-            ),
-            sequence=zip_innermost(logits, labels)
-        )
-        '''
+        accuracy_function = {
+            Model.AccuracyType.CHARACTER: metrics.character_accuracy,
+            Model.AccuracyType.SEQUENCE: metrics.sequence_accuracy,
+            Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
+        }
 
         accuracies = map_innermost(
-            function=lambda logits_labels: metrics.sequence_accuracy(
+            function=lambda logits_labels: accuracy_function[self.accuracy_type](
                 logits=logits_labels[0],
                 labels=logits_labels[1],
                 time_major=False

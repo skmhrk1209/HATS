@@ -16,8 +16,11 @@ def map_innermost_list(function, sequence, classes=(list,)):
 
 class Model(object):
 
+    class AccuracyType:
+        CHARACTER, SEQUENCE, EDIT_DISTANCE = range(3)
+
     def __init__(self, convolutional_network, attention_network,
-                 num_classes, data_format, hyper_params):
+                 num_classes, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network

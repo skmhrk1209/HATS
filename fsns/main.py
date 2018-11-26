@@ -92,6 +92,7 @@ def main(unused_argv):
             num_classes=134,
             num_tiles=4,
             data_format="channels_last",
+            accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(
                 cross_entropy_decay=1.0,
                 attention_map_decay=0.001

@@ -10,7 +10,36 @@ def dense_to_sparse(tensor, null):
     return tf.SparseTensor(indices, values, shape)
 
 
-def edit_accuracy(logits, labels, time_major=True):
+def character_accuracy(logits, labels, time_major=True):
+
+    predictions = tf.argmax(
+        input=logits,
+        axis=2,
+        output_type=tf.int32
+    )
+
+    return tf.metrics.mean(tf.equal(labels, predictions))
+
+
+def sequence_accuracy(logits, labels, time_major=True):
+
+    if time_major:
+        logits = tf.transpose(labels, [1, 0, 2])
+        labels = tf.transpose(labels, [1, 0])
+
+    predictions = tf.argmax(
+        input=logits,
+        axis=2,
+        output_type=tf.int32
+    )
+
+    return tf.metrics.mean(tf.reduce_all(
+        input_tensor=tf.equal(labels, predictions),
+        axis=1
+    ))
+
+
+def edit_distance_accuracy(logits, labels, time_major=True):
 
     if time_major:
         labels = tf.transpose(labels, [1, 0])
@@ -36,21 +65,3 @@ def edit_accuracy(logits, labels, time_major=True):
         truth=tf.cast(labels, tf.int32),
         normalize=False
     ) / tf.cast(tf.shape(logits)[0], tf.float32))
-
-
-def sequence_accuracy(logits, labels, time_major=True):
-
-    if time_major:
-        logits = tf.transpose(labels, [1, 0, 2])
-        labels = tf.transpose(labels, [1, 0])
-
-    predictions = tf.argmax(
-        input=logits,
-        axis=2,
-        output_type=tf.int32
-    )
-
-    return tf.metrics.mean(tf.reduce_all(
-        input_tensor=tf.equal(labels, predictions),
-        axis=1
-    ))
