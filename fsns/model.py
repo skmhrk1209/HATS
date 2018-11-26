@@ -4,20 +4,10 @@ import metrics
 from algorithms import *
 
 
-def map_innermost_list(function, sequence, classes=(list,)):
-    '''
-    apply function to innermost lists.
-    innermost list is defined as list which doesn't contain instance of "classes" (default: list)
-    '''
-
-    return (type(sequence)(map(lambda element: map_innermost_list(function, element, classes=classes), sequence))
-            if any(map(lambda element: isinstance(element, classes), sequence)) else function(sequence))
-
-
 class Model(object):
 
     class AccuracyType:
-        CHARACTER, SEQUENCE, EDIT_DISTANCE = range(3)
+        SEQUENCE, EDIT_DISTANCE = range(2)
 
     def __init__(self, convolutional_network, attention_network,
                  num_classes, num_tiles, data_format, accuracy_type, hyper_params):
@@ -40,7 +30,7 @@ class Model(object):
             axis=3 if self.data_format == "channels_first" else 2
         )
 
-        feature_maps = map_innermost(
+        feature_maps = map_innermost_element(
             function=lambda images: self.convolutional_network(
                 inputs=images,
                 training=mode == tf.estimator.ModeKeys.TRAIN,
@@ -50,7 +40,7 @@ class Model(object):
             sequence=images
         )
 
-        attention_maps = map_innermost(
+        attention_maps = map_innermost_element(
             function=lambda feature_maps: self.attention_network(
                 inputs=feature_maps,
                 training=mode == tf.estimator.ModeKeys.TRAIN,
@@ -60,7 +50,7 @@ class Model(object):
             sequence=feature_maps
         )
 
-        merged_attention_maps = map_innermost(
+        merged_attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
                 input_tensor=attention_maps,
                 axis=1 if self.data_format == "channels_first" else 3,
@@ -77,8 +67,8 @@ class Model(object):
 
             return tf.reshape(inputs, output_shape)
 
-        feature_vectors = map_innermost(
-            function=lambda feature_maps_atention_maps: map_innermost(
+        feature_vectors = map_innermost_element(
+            function=lambda feature_maps_atention_maps: map_innermost_element(
                 function=lambda attention_maps: tf.layers.flatten(tf.matmul(
                     a=flatten_images(feature_maps_atention_maps[0], self.data_format),
                     b=flatten_images(attention_maps, self.data_format),
@@ -87,18 +77,18 @@ class Model(object):
                 )),
                 sequence=feature_maps_atention_maps[1]
             ),
-            sequence=zip_innermost(feature_maps, attention_maps)
+            sequence=zip_innermost_element(feature_maps, attention_maps)
         )
 
-        feature_vectors = map_innermost(
+        feature_vectors = map_innermost_element(
             function=lambda feature_vectors: tf.concat(
                 values=feature_vectors,
                 axis=1
             ),
-            sequence=zip_innermost(*feature_vectors)
+            sequence=zip_innermost_element(*feature_vectors)
         )
 
-        logits = map_innermost(
+        logits = map_innermost_element(
             function=lambda feature_vectors: tf.layers.dense(
                 inputs=feature_vectors,
                 units=self.num_classes,
@@ -108,7 +98,7 @@ class Model(object):
             sequence=feature_vectors
         )
 
-        predictions = map_innermost(
+        predictions = map_innermost_element(
             function=lambda logits: tf.argmax(
                 input=logits,
                 axis=1,
@@ -149,59 +139,41 @@ class Model(object):
                 )
             )
 
-        while all_innermost(map_innermost(lambda labels: len(labels.shape) > 1, labels)):
+        while all(flatten_innermost_element(map_innermost_element(lambda labels: len(labels.shape) > 1, labels))):
 
-            labels = map_innermost(
+            labels = map_innermost_element(
                 function=lambda labels: tf.unstack(labels, axis=1),
                 sequence=labels
             )
 
-        cross_entropy_losses = map_innermost(
+        cross_entropy_losses = map_innermost_element(
             function=lambda logits_labels: tf.losses.sparse_softmax_cross_entropy(
                 logits=logits_labels[0],
                 labels=logits_labels[1]
             ),
-            sequence=zip_innermost(logits, labels)
+            sequence=zip_innermost_element(logits, labels)
         )
 
-        attention_map_losses = map_innermost(
+        attention_map_losses = map_innermost_element(
             function=lambda attention_maps: tf.reduce_mean([
                 tf.reduce_mean(
                     tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
                 ) for attention_maps in attention_maps
             ]),
-            sequence=zip_innermost(*attention_maps)
+            sequence=zip_innermost_element(*attention_maps)
         )
 
-        '''
-        total_variation_losses = map_innermost(
-            function=lambda attention_maps: tf.reduce_mean(
-                tf.image.total_variation(attention_maps)
-            ),
-            sequence=attention_maps
-        ) 
-        '''
-
-        losses = map_innermost(
+        losses = map_innermost_element(
             function=lambda cross_entropy_loss_attention_map_loss: (
                 cross_entropy_loss_attention_map_loss[0] * self.hyper_params.cross_entropy_decay +
                 cross_entropy_loss_attention_map_loss[1] * self.hyper_params.attention_map_decay
             ),
-            sequence=zip_innermost(cross_entropy_losses, attention_map_losses)
+            sequence=zip_innermost_element(cross_entropy_losses, attention_map_losses)
         )
 
         loss = tf.reduce_mean(losses)
 
         '''
-        accuracies = map_innermost(
-            function=lambda labels_predictions: tf.metrics.accuracy(
-                labels=labels_predictions[0],
-                predictions=labels_predictions[1]
-            ),
-            sequence=zip_innermost(labels, predictions)
-        )
-        '''
-
         logits = map_innermost_list(
             function=lambda logits: tf.stack(logits, axis=1),
             sequence=logits
@@ -211,28 +183,28 @@ class Model(object):
             function=lambda labels: tf.stack(labels, axis=1),
             sequence=labels
         )
+        '''
 
         accuracy_function = {
-            Model.AccuracyType.CHARACTER: metrics.character_accuracy,
             Model.AccuracyType.SEQUENCE: metrics.sequence_accuracy,
             Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
         }
 
-        accuracies = map_innermost(
+        accuracies = map_innermost_element(
             function=lambda logits_labels: accuracy_function[self.accuracy_type](
-                logits=logits_labels[0],
-                labels=logits_labels[1],
+                logits=tf.stack(logits_labels[0], axis=1),
+                labels=tf.stack(logits_labels[1], axis=1),
                 time_major=False
             ),
-            sequence=zip_innermost(logits, labels)
+            sequence=zip_innermost_list(logits, labels)
         )
 
-        map_innermost(
+        map_innermost_element(
             function=lambda accuracy: tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, accuracy[1]),
             sequence=accuracies
         )
 
-        accuracy = tf.reduce_mean(map_innermost(
+        accuracy = tf.reduce_mean(map_innermost_element(
             function=lambda accuracy: accuracy[0],
             sequence=accuracies
         )), tf.no_op()
@@ -241,54 +213,54 @@ class Model(object):
         for variable in tf.trainable_variables("attention_network"):
             tf.summary.histogram(variable.name, variable)
 
-        map_innermost(
+        map_innermost_element(
             function=lambda indices_images: tf.summary.image(
                 name="images_{}".format("_".join(map(str, indices_images[0]))),
                 tensor=indices_images[1],
                 max_outputs=2
             ),
-            sequence=enumerate_innermost(images)
+            sequence=enumerate_innermost_element(images)
         )
 
-        map_innermost(
+        map_innermost_element(
             function=lambda indices_merged_attention_maps: tf.summary.image(
                 name="merged_attention_maps_{}".format("_".join(map(str, indices_merged_attention_maps[0]))),
                 tensor=indices_merged_attention_maps[1],
                 max_outputs=2
             ),
-            sequence=enumerate_innermost(merged_attention_maps)
+            sequence=enumerate_innermost_element(merged_attention_maps)
         )
 
-        map_innermost(
+        map_innermost_element(
             function=lambda indices_cross_entropy_loss: tf.summary.scalar(
                 name="cross_entropy_loss_{}".format("_".join(map(str, indices_cross_entropy_loss[0]))),
                 tensor=indices_cross_entropy_loss[1]
             ),
-            sequence=enumerate_innermost(cross_entropy_losses)
+            sequence=enumerate_innermost_element(cross_entropy_losses)
         )
 
-        map_innermost(
+        map_innermost_element(
             function=lambda indices_attention_map_loss: tf.summary.scalar(
                 name="attention_map_loss_{}".format("_".join(map(str, indices_attention_map_loss[0]))),
                 tensor=indices_attention_map_loss[1]
             ),
-            sequence=enumerate_innermost(attention_map_losses)
+            sequence=enumerate_innermost_element(attention_map_losses)
         )
 
-        map_innermost(
+        map_innermost_element(
             function=lambda indices_loss: tf.summary.scalar(
                 name="loss_{}".format("_".join(map(str, indices_loss[0]))),
                 tensor=indices_loss[1]
             ),
-            sequence=enumerate_innermost(losses)
+            sequence=enumerate_innermost_element(losses)
         )
 
-        map_innermost(
+        map_innermost_element(
             function=lambda indices_accuracy: tf.summary.scalar(
                 name="accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
                 tensor=indices_accuracy[1][0]
             ),
-            sequence=enumerate_innermost(accuracies)
+            sequence=enumerate_innermost_element(accuracies)
         )
 
         tf.summary.scalar("accuracy_", accuracy[0])
@@ -318,12 +290,12 @@ class Model(object):
                 loss=loss,
                 eval_metric_ops={
                     **dict(accuracy=accuracy),
-                    **dict(flatten_innermost(map_innermost(
+                    **dict(flatten_innermost_element(map_innermost_element(
                         function=lambda indices_accuracy: (
                             "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
                             indices_accuracy[1]
                         ),
-                        sequence=enumerate_innermost(accuracies)
+                        sequence=enumerate_innermost_element(accuracies)
                     )))
                 }
             )

@@ -20,7 +20,7 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("conv_block_{}".format(i)):
 
-                    inputs = map_innermost(
+                    inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d(
                                 inputs=inputs,
@@ -53,7 +53,7 @@ class AttentionNetwork(object):
 
             shape = inputs.shape.as_list()
 
-            inputs = map_innermost(
+            inputs = map_innermost_element(
                 function=lambda inputs: tf.layers.flatten(inputs),
                 sequence=inputs
             )
@@ -69,7 +69,7 @@ class AttentionNetwork(object):
                         ) for num_units in rnn_param.num_units
                     ])
 
-                    inputs = map_innermost(
+                    inputs = map_innermost_element(
                         function=lambda inputs: tf.nn.static_rnn(
                             cell=multi_cell,
                             inputs=[inputs] * rnn_param.sequence_length,
@@ -79,43 +79,16 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-            inputs = map_innermost(
+            inputs = map_innermost_element(
                 function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
                 sequence=inputs
             )
-
-            '''
-            with tf.variable_scope("projection_block"):
-
-                inputs = map_innermost(
-                    function=compose(
-                        lambda inputs: tf.layers.dense(
-                            inputs=inputs,
-                            units=np.prod(shape[1:]),
-                            kernel_initializer=tf.variance_scaling_initializer(
-                                scale=2.0,
-                                mode="fan_in",
-                                distribution="normal",
-                            ),
-                            bias_initializer=tf.zeros_initializer(),
-                            name="projection",
-                            reuse=tf.AUTO_REUSE
-                        ),
-                        lambda inputs: tf.nn.relu(inputs),
-                        lambda inputs: tf.reshape(
-                            tensor=inputs,
-                            shape=[-1] + shape[1:]
-                        )
-                    ),
-                    sequence=inputs
-                )
-            '''
 
             for i, deconv_param in enumerate(self.deconv_params[:-1]):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
-                    inputs = map_innermost(
+                    inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
                                 inputs=inputs,
@@ -150,7 +123,7 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
-                    inputs = map_innermost(
+                    inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
                                 inputs=inputs,

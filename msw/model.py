@@ -17,7 +17,7 @@ def map_innermost_list(function, sequence, classes=(list,)):
 class Model(object):
 
     class AccuracyType:
-        CHARACTER, SEQUENCE, EDIT_DISTANCE = range(3)
+        SEQUENCE, EDIT_DISTANCE = range(2)
 
     def __init__(self, convolutional_network, attention_network,
                  num_classes, data_format, accuracy_type, hyper_params):
@@ -176,7 +176,6 @@ class Model(object):
         )
 
         accuracy_function = {
-            Model.AccuracyType.CHARACTER: metrics.character_accuracy,
             Model.AccuracyType.SEQUENCE: metrics.sequence_accuracy,
             Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
         }

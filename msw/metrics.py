@@ -10,7 +10,7 @@ def dense_to_sparse(tensor, null):
     return tf.SparseTensor(indices, values, shape)
 
 
-def character_accuracy(logits, labels, time_major=True):
+def character_accuracy(logits, labels, time_major):
 
     predictions = tf.argmax(
         input=logits,
@@ -21,7 +21,7 @@ def character_accuracy(logits, labels, time_major=True):
     return tf.metrics.mean(tf.equal(labels, predictions))
 
 
-def sequence_accuracy(logits, labels, time_major=True):
+def sequence_accuracy(logits, labels, time_major):
 
     if time_major:
         logits = tf.transpose(labels, [1, 0, 2])
@@ -39,7 +39,7 @@ def sequence_accuracy(logits, labels, time_major=True):
     ))
 
 
-def edit_distance_accuracy(logits, labels, time_major=True):
+def edit_distance_accuracy(logits, labels, time_major):
 
     if time_major:
         labels = tf.transpose(labels, [1, 0])
