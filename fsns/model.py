@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
-from sequential import metrics
-from sequential.algorithms import *
+import metrics
+from algorithms import *
 
 
 def map_innermost_list(function, sequence, classes=(list,)):
@@ -208,8 +208,19 @@ class Model(object):
             sequence=labels
         )
 
+        '''
         accuracies = map_innermost(
-            function=lambda logits_labels: metrics.accuracy(
+            function=lambda logits_labels: metrics.edit_accuracy(
+                logits=logits_labels[0],
+                labels=logits_labels[1],
+                time_major=False
+            ),
+            sequence=zip_innermost(logits, labels)
+        )
+        '''
+
+        accuracies = map_innermost(
+            function=lambda logits_labels: metrics.sequence_accuracy(
                 logits=logits_labels[0],
                 labels=logits_labels[1],
                 time_major=False

@@ -1,16 +1,16 @@
 import tensorflow as tf
 
 
-def dense_to_sparse(tensor, blank):
+def dense_to_sparse(tensor, null):
 
-    indices = tf.where(tf.not_equal(tensor, blank))
+    indices = tf.where(tf.not_equal(tensor, null))
     values = tf.gather_nd(tensor, indices)
     shape = tf.shape(tensor, out_type=tf.int64)
 
     return tf.SparseTensor(indices, values, shape)
 
 
-def accuracy(logits, labels, time_major=True):
+def edit_accuracy(logits, labels, time_major=True):
 
     if time_major:
         labels = tf.transpose(labels, [1, 0])
@@ -28,11 +28,25 @@ def accuracy(logits, labels, time_major=True):
 
     labels = dense_to_sparse(
         tensor=labels,
-        blank=tf.shape(logits)[2] - 1
+        null=tf.shape(logits)[2] - 1
     )
 
-    return tf.metrics.mean(tf.reduce_mean(1.0 - tf.edit_distance(
+    return tf.metrics.mean(1.0 - tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
         truth=tf.cast(labels, tf.int32),
         normalize=False
-    ) / tf.cast(tf.shape(logits)[0], tf.float32)))
+    ) / tf.cast(tf.shape(logits)[0], tf.float32))
+
+
+def sequence_accuracy(logits, labels, time_major=True):
+
+    if time_major:
+        logits = tf.transpose(labels, [1, 0, 2])
+        labels = tf.transpose(labels, [1, 0])
+
+    predictions = tf.argmax(logits, axis=2)
+
+    return tf.metrics.mean(tf.reduce_all(
+        input_tensor=tf.equal(labels, predictions),
+        axis=1
+    ))

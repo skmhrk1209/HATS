@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from sequential.algorithms import *
+from algorithms import *
 
 
 class AttentionNetwork(object):
