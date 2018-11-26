@@ -208,9 +208,6 @@ class Model(object):
         )), tf.no_op()
 
         # ==========================================================================================
-        for variable in tf.trainable_variables("attention_network"):
-            tf.summary.histogram(variable.name, variable)
-
         map_innermost_element(
             function=lambda indices_images: tf.summary.image(
                 name="images_{}".format("_".join(map(str, indices_images[0]))),
