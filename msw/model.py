@@ -26,6 +26,7 @@ class Model(object):
         self.attention_network = attention_network
         self.num_classes = num_classes
         self.data_format = data_format
+        self.accuracy_type = accuracy_type
         self.hyper_params = hyper_params
 
     def __call__(self, features, labels, mode):
@@ -174,8 +175,14 @@ class Model(object):
             sequence=labels
         )
 
+        accuracy_function = {
+            Model.AccuracyType.CHARACTER: metrics.character_accuracy,
+            Model.AccuracyType.SEQUENCE: metrics.sequence_accuracy,
+            Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
+        }
+
         accuracies = map_innermost(
-            function=lambda logits_labels: metrics.edit_accuracy(
+            function=lambda logits_labels: accuracy_function[self.accuracy_type](
                 logits=logits_labels[0],
                 labels=logits_labels[1],
                 time_major=False
