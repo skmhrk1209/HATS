@@ -172,10 +172,10 @@ def main(unused_argv):
 
             for j in range(4):
 
-                attention_map_images.append([])
-                boundin_box_images.append([])
-
                 for k in range(1):
+
+                    attention_map_images.append([])
+                    boundin_box_images.append([])
 
                     for l in range(37):
 

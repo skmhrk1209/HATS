@@ -170,25 +170,27 @@ def main(unused_argv):
             attention_map_images = []
             boundin_box_images = []
 
-            for j in range(4):
+            for j in range(1):
 
-                attention_map_images.append([])
-                boundin_box_images.append([])
+                for k in range(4):
 
-                for k in range(10):
+                    attention_map_images.append([])
+                    boundin_box_images.append([])
 
-                    merged_attention_map = predict_result["merged_attention_maps"][j, k]
-                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                    merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                    bounding_box = search_bounding_box(merged_attention_map, 0.5)
+                    for l in range(10):
 
-                    attention_map_image = np.copy(predict_result["images"])
-                    attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
-                    attention_map_images[-1].append(attention_map_image)
+                        merged_attention_map = predict_result["merged_attention_maps"][j, k, l]
+                        merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
+                        merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
+                        bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
-                    boundin_box_image = np.copy(predict_result["images"])
-                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
-                    boundin_box_images[-1].append(boundin_box_image)
+                        attention_map_image = np.copy(predict_result["images"][j])
+                        attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
+                        attention_map_images[-1].append(attention_map_image)
+
+                        boundin_box_image = np.copy(predict_result["images"][j])
+                        boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
+                        boundin_box_images[-1].append(boundin_box_image)
 
             attention_map_images = np.concatenate([
                 np.concatenate(attention_map_images, axis=1)
