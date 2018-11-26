@@ -34,7 +34,6 @@ class Model(object):
             function=lambda images: self.convolutional_network(
                 inputs=images,
                 training=mode == tf.estimator.ModeKeys.TRAIN,
-                name="convolutional_network",
                 reuse=tf.AUTO_REUSE
             ),
             sequence=images
@@ -44,7 +43,6 @@ class Model(object):
             function=lambda feature_maps: self.attention_network(
                 inputs=feature_maps,
                 training=mode == tf.estimator.ModeKeys.TRAIN,
-                name="attention_network",
                 reuse=tf.AUTO_REUSE
             ),
             sequence=feature_maps
