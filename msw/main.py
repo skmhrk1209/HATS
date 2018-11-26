@@ -90,6 +90,7 @@ def main(unused_argv):
                 data_format="channels_last"
             ),
             num_classes=63,
+            num_tiles=1,
             data_format="channels_last",
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(
