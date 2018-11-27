@@ -171,18 +171,6 @@ class Model(object):
 
         loss = tf.reduce_mean(losses)
 
-        '''
-        logits = map_innermost_list(
-            function=lambda logits: tf.stack(logits, axis=1),
-            sequence=logits
-        )
-
-        labels = map_innermost_list(
-            function=lambda labels: tf.stack(labels, axis=1),
-            sequence=labels
-        )
-        '''
-
         accuracy_function = {
             Model.AccuracyType.FULL_SEQUENCE: metrics.full_sequence_accuracy,
             Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
