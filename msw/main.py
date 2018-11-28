@@ -195,9 +195,10 @@ def main(unused_argv):
                 boundin_box_images = []
 
                 for k in range(merged_attention_maps.shape[2]):
-                    print(k)
 
                     if not k % (int(math.sqrt(merged_attention_maps.shape[2]))):
+
+                        print(k)
 
                         attention_map_images.append([])
                         boundin_box_images.append([])
