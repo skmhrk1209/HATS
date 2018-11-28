@@ -70,11 +70,11 @@ def main(unused_argv):
     classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[1, 1], blocks=2),
-                    AttrDict(filters=128, strides=[1, 1], blocks=2),
+                    AttrDict(filters=64, strides=[2, 2], blocks=2),
+                    AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
                 data_format="channels_last"
