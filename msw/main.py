@@ -204,17 +204,21 @@ def main(unused_argv):
                         merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
                         bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
-                        attention_map_images[-1].append(images[0] + np.pad(merged_attention_map[:, :, np.newaxis],
-                                                                           [[0, 0], [0, 0], [0, 2]], "constant"))
-                        boundin_box_images[-1].append(cv2.rectangle(images[0], bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2))
+                        attention_map_image = np.copy(images[0])
+                        attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
+                        attention_map_images[-1].append(attention_map_image)
+
+                        boundin_box_image = np.copy(images[0])
+                        boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
+                        boundin_box_images[-1].append(boundin_box_image)
 
                 else:
 
                     while len(attention_map_images[0]) != len(attention_map_images[-1]):
-                        attention_map_images[-1].append(np.zeros_like(attention_map_images[-1][-1]))
+                        attention_map_images[-1].append(np.zeros_like(attention_map_image))
 
                     while len(boundin_box_images[0]) != len(boundin_box_images[-1]):
-                        boundin_box_images[-1].append(np.zeros_like(boundin_box_images[-1][-1]))
+                        boundin_box_images[-1].append(np.zeros_like(boundin_box_image))
 
                 attention_map_images = np.concatenate([
                     np.concatenate(attention_map_images, axis=1)
