@@ -79,7 +79,7 @@ class AttentionNetwork(object):
                     )
 
             inputs = map_innermost_element(
-                function=lambda inputs: tf.reshape(inputs, [-1] + output_shape),
+                function=lambda inputs: tf.reshape(inputs, [-1] + self.output_shape),
                 sequence=inputs
             )
 
