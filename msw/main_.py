@@ -9,7 +9,7 @@ from attrdict import AttrDict
 from dataset import Dataset
 from model_ import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network import AttentionNetwork
+from networks.attention_network_ import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="model_", help="model directory")
@@ -90,8 +90,9 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=4, num_units=[256]),
-                    AttrDict(sequence_length=10, num_units=[256])
+                    AttrDict(sequence_length=10, num_units=[64])
                 ],
+                output_shape=[8, 8, 1]
                 data_format="channels_last"
             ),
             num_classes=63,
