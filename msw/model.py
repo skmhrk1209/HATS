@@ -195,7 +195,10 @@ class Model(object):
             sequence=accuracies
         )), tf.no_op()
 
-        print(accuracy)
+        map_innermost_element(
+            function=lambda accuracy: print(accuracy),
+            sequence=accuracies
+        )
 
         # ==========================================================================================
         map_innermost_element(
