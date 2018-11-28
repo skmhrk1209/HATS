@@ -218,8 +218,8 @@ def main(unused_argv):
                 attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
                 boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-                cv2.imwrite("outputs/attention_map_{}_{}.jpg".format(i, j), attention_map_images)
-                cv2.imwrite("outputs/boundin_box_{}_{}.jpg".format(i, j), boundin_box_images)
+                cv2.imwrite("a/attention_map_{}_{}.jpg".format(i, j), attention_map_images)
+                cv2.imwrite("a/boundin_box_{}_{}.jpg".format(i, j), boundin_box_images)
 
 
 if __name__ == "__main__":
