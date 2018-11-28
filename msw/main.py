@@ -194,31 +194,33 @@ def main(unused_argv):
 
                 for k in range(merged_attention_maps.shape[2]):
 
-                    if not k % (int(math.sqrt(merged_attention_maps.shape[2]))):
+                    width = int(math.sqrt(merged_attention_maps.shape[2]))
+
+                    if not k % width:
 
                         attention_map_images.append([])
                         boundin_box_images.append([])
 
-                        merged_attention_map = merged_attention_maps[0, j, k]
-                        merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                        merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                        bounding_box = search_bounding_box(merged_attention_map, 0.5)
+                    merged_attention_map = merged_attention_maps[0, j, k]
+                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
+                    merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
+                    bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
-                        attention_map_image = np.copy(images[0])
-                        attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
-                        attention_map_images[-1].append(attention_map_image)
+                    attention_map_image = np.copy(images[0])
+                    attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
+                    attention_map_images[-1].append(attention_map_image)
 
-                        boundin_box_image = np.copy(images[0])
-                        boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
-                        boundin_box_images[-1].append(boundin_box_image)
+                    boundin_box_image = np.copy(images[0])
+                    boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
+                    boundin_box_images[-1].append(boundin_box_image)
 
                 else:
 
-                    while len(attention_map_images[0]) != len(attention_map_images[-1]):
+                    while len(attention_map_images[-1]) != width:
                         print("a")
                         attention_map_images[-1].append(np.zeros_like(attention_map_image))
 
-                    while len(boundin_box_images[0]) != len(boundin_box_images[-1]):
+                    while len(boundin_box_images[-1]) != width:
                         boundin_box_images[-1].append(np.zeros_like(boundin_box_image))
 
                 attention_map_images = np.concatenate([
