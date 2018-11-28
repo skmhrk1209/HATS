@@ -171,20 +171,6 @@ class Model(object):
 
         loss = tf.reduce_mean(losses)
 
-        accuracy_function = {
-            Model.AccuracyType.FULL_SEQUENCE: metrics.full_sequence_accuracy,
-            Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
-        }
-
-        accuracies = map_innermost_element(
-            function=lambda logits_labels: accuracy_function[self.accuracy_type](
-                logits=tf.stack(logits_labels[0], axis=1),
-                labels=tf.stack(logits_labels[1], axis=1),
-                time_major=False
-            ),
-            sequence=zip_innermost_list(logits, labels)
-        )
-
         # ==========================================================================================
         map_innermost_element(
             function=lambda indices_images: tf.summary.image(
@@ -245,6 +231,20 @@ class Model(object):
             )
 
         if mode == tf.estimator.ModeKeys.EVAL:
+
+            accuracy_function = {
+                Model.AccuracyType.FULL_SEQUENCE: metrics.full_sequence_accuracy,
+                Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
+            }
+
+            accuracies = map_innermost_element(
+                function=lambda logits_labels: accuracy_function[self.accuracy_type](
+                    logits=tf.stack(logits_labels[0], axis=1),
+                    labels=tf.stack(logits_labels[1], axis=1),
+                    time_major=False
+                ),
+                sequence=zip_innermost_list(logits, labels)
+            )
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
