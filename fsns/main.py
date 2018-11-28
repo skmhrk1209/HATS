@@ -121,13 +121,7 @@ def main(unused_argv):
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
-            ).get_next(),
-            hooks=[
-                tf.train.LoggingTensorHook(
-                    tensors={"accuracy": "accuracy_"},
-                    every_n_iter=100
-                )
-            ]
+            ).get_next()
         )
 
     if args.eval:
