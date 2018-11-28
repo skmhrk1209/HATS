@@ -185,16 +185,6 @@ class Model(object):
             sequence=zip_innermost_list(logits, labels)
         )
 
-        map_innermost_element(
-            function=lambda accuracy: tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, accuracy[1]),
-            sequence=accuracies
-        )
-
-        accuracy = tf.reduce_mean(map_innermost_element(
-            function=lambda accuracy: accuracy[0],
-            sequence=accuracies
-        )), tf.no_op()
-
         # ==========================================================================================
         map_innermost_element(
             function=lambda indices_images: tf.summary.image(
@@ -237,18 +227,6 @@ class Model(object):
             ),
             sequence=enumerate_innermost_element(losses)
         )
-
-        map_innermost_element(
-            function=lambda indices_accuracy: tf.summary.scalar(
-                name="accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                tensor=indices_accuracy[1][0]
-            ),
-            sequence=enumerate_innermost_element(accuracies)
-        )
-
-        tf.summary.scalar("accuracy_", accuracy[0])
-
-        tf.identity(accuracy[0], "accuracy_")
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
@@ -271,14 +249,11 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops={
-                    **dict(accuracy=accuracy),
-                    **dict(flatten_innermost_element(map_innermost_element(
-                        function=lambda indices_accuracy: (
-                            "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                            indices_accuracy[1]
-                        ),
-                        sequence=enumerate_innermost_element(accuracies)
-                    )))
-                }
+                eval_metric_ops=dict(flatten_innermost_element(map_innermost_element(
+                    function=lambda indices_accuracy: (
+                        "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
+                        indices_accuracy[1]
+                    ),
+                    sequence=enumerate_innermost_element(accuracies)
+                )))
             )
