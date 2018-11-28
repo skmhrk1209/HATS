@@ -70,11 +70,11 @@ def main(unused_argv):
     classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=64, strides=[1, 1], blocks=2),
+                    AttrDict(filters=128, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format="channels_last"
@@ -122,7 +122,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=[256, 1024],
+                image_size=None,
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
@@ -137,7 +137,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=[256, 1024],
+                image_size=None,
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
@@ -154,7 +154,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=[256, 1024],
+                image_size=None,
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
