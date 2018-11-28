@@ -3,6 +3,7 @@ import numpy as np
 import sys
 import argparse
 import itertools
+import math
 import cv2
 from attrdict import AttrDict
 from dataset import Dataset
@@ -162,45 +163,57 @@ def main(unused_argv):
 
         class_ids = {}
 
-        for i in range(ord("0"), ord("z") + 1):
+        for j in range(ord("0"), ord("z") + 1):
 
-            if ord("0") <= i <= ord("9"):
-                class_ids[chr(i)] = i - ord("0")
-            elif ord("A") <= i <= ord("Z"):
-                class_ids[chr(i)] = i - ord("A") + class_ids["9"] + 1
-            elif ord("a") <= i <= ord("z"):
-                class_ids[chr(i)] = i - ord("a") + class_ids["Z"] + 1
+            if ord("0") <= j <= ord("9"):
+                class_ids[chr(j)] = j - ord("0")
+            elif ord("A") <= j <= ord("Z"):
+                class_ids[chr(j)] = j - ord("A") + class_ids["9"] + 1
+            elif ord("a") <= j <= ord("z"):
+                class_ids[chr(j)] = j - ord("a") + class_ids["Z"] + 1
 
         class_ids[""] = max(class_ids.values()) + 1
 
         chars = {class_id: char for char, class_id in class_ids.items()}
 
-        for predict_result in itertools.islice(predict_results, 10):
+        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            for i in range(1):
+            images = predict_result["images"]
+            merged_attention_maps = predict_result["merged_attention_maps"]
+            predictions = predict_result["predictions"]
+
+            for j in range(merged_attention_maps.shape[1]):
 
                 attention_map_images = []
                 boundin_box_images = []
 
-                for j in range(4):
+                for k in range(merged_attention_maps.shape[2]):
 
-                    attention_map_images.append([])
-                    boundin_box_images.append([])
+                    if not k % (int(math.sqrt(merged_attention_maps.shape[2]))):
 
-                    for k in range(10):
+                        attention_map_images.append([])
+                        boundin_box_images.append([])
 
-                        merged_attention_map = predict_result["merged_attention_maps"][i, j, k]
+                        merged_attention_map = merged_attention_maps[0, j, k]
                         merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                         merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
                         bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
-                        attention_map_image = np.copy(predict_result["images"][i])
+                        attention_map_image = images[0]
                         attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
                         attention_map_images[-1].append(attention_map_image)
 
-                        boundin_box_image = np.copy(predict_result["images"][i])
+                        boundin_box_image = images[0]
                         boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
                         boundin_box_images[-1].append(boundin_box_image)
+
+                else:
+
+                    while len(attention_map_images[0]) != len(attention_map_images[-1]):
+                        attention_map_images[-1].append(np.zeros_like(attention_map_image))
+
+                    while len(boundin_box_images[0]) != len(boundin_box_images[-1]):
+                        boundin_box_images[-1].append(np.zeros_like(boundin_box_image))
 
                 attention_map_images = np.concatenate([
                     np.concatenate(attention_map_images, axis=1)
@@ -218,9 +231,9 @@ def main(unused_argv):
                 attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
                 boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-                prediction = "_".join(["".join([chars[class_id] for class_id in class_ids]) for class_ids in predict_result["predictions"]])
-                cv2.imwrite("outputs/{}_attention_map_{}.jpg".format(prediction, i), attention_map_images)
-                cv2.imwrite("outputs/{}_boundin_box_{}.jpg".format(prediction, i), boundin_box_images)
+                prediction = "".join([chars[class_id] for class_id in predictions[j]])
+                cv2.imwrite("outputs/{}_{}_attention_map_{}.jpg".format(i, prediction), attention_map_images)
+                cv2.imwrite("outputs/{}_{}_boundin_box_{}.jpg".format(i, prediction), boundin_box_images)
 
 
 if __name__ == "__main__":
