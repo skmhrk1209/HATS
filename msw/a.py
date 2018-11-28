@@ -13,7 +13,7 @@ from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecord filenames")
+parser.add_argument('--filenames', type=str, nargs="+", default=["a.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
@@ -66,11 +66,76 @@ class Dataset(object):
     def __init__(self, filenames, num_epochs, batch_size, buffer_size,
                  image_size, data_format, sequence_length, string_length):
 
-        images = [cv2.resize(cv2.imread(f), (256, 256)) for f in glob.glob("/home/sakuma/data/svt/*")]
+        with tf.python_io.TFRecordWriter("a.tfrecord") as writer:
 
-        self.dataset = tf.data.Dataset.from_tensor_slices(images)
-        self.dataset = self.dataset.batch(128)
+            for file in glob.glob("/home/sakuma/data/svt/*"):
+
+                writer.write(
+                    record=tf.train.Example(
+                        features=tf.train.Features(
+                            feature={
+                                "path": tf.train.Feature(
+                                    bytes_list=tf.train.BytesList(
+                                        value=[file.encode("utf-8")]
+                                    )
+                                )
+                            }
+                        )
+                    ).SerializeToString()
+                )
+
+
+        self.dataset = tf.data.TFRecordDataset(filenames)
+        self.dataset = self.dataset.shuffle(
+            buffer_size=buffer_size,
+            reshuffle_each_iteration=True
+        )
+        self.dataset = self.dataset.repeat(num_epochs)
+        self.dataset = self.dataset.map(
+            map_func=functools.partial(
+                self.parse,
+                image_size=image_size,
+                data_format=data_format,
+                sequence_length=sequence_length,
+                string_length=string_length
+            ),
+            num_parallel_calls=os.cpu_count()
+        )
+        self.dataset = self.dataset.batch(batch_size)
+        self.dataset = self.dataset.prefetch(1)
         self.iterator = self.dataset.make_one_shot_iterator()
+
+    def parse(self, example, image_size, data_format, sequence_length, string_length):
+
+        features = tf.parse_single_example(
+            serialized=example,
+            features={
+                "path": tf.FixedLenFeature(
+                    shape=[],
+                    dtype=tf.string
+                ),
+                "label": tf.FixedLenFeature(
+                    shape=[sequence_length * string_length],
+                    dtype=tf.int64
+                )
+            }
+        )
+
+        image = tf.read_file(features["path"])
+        image = tf.image.decode_jpeg(image, 3)
+        image = tf.image.convert_image_dtype(image, tf.float32)
+        image.set_shape([256, 256, 3])
+
+        if image_size:
+            image = tf.image.resize_images(image, image_size)
+
+        if data_format == "channels_first":
+            image = tf.transpose(image, [2, 0, 1])
+
+        label = tf.cast(features["label"], tf.int32)
+        label = tf.reshape(label, [sequence_length, string_length])
+
+        return {"image": image}, label
 
     def get_next(self):
 
@@ -166,7 +231,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=None,
+                image_size=[256, 256],
                 data_format="channels_last",
                 sequence_length=4,
                 string_length=10
