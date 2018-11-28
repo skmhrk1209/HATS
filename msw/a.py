@@ -5,6 +5,7 @@ import argparse
 import itertools
 import cv2
 import glob
+import functools
 from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
