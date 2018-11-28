@@ -66,7 +66,7 @@ class Dataset(object):
     def __init__(self, filenames, num_epochs, batch_size, buffer_size,
                  image_size, data_format, sequence_length, string_length):
 
-        images = [cv2.resize(cv2.imread(f), (256, 256)) for f in glob.glob("/home/sakuma/data/svt")]
+        images = [cv2.resize(cv2.imread(f), (256, 256)) for f in glob.glob("/home/sakuma/data/svt/*")]
 
         self.dataset = tf.data.Dataset.from_tensor_slices(images)
         self.iterator = self.dataset.make_one_shot_iterator()
