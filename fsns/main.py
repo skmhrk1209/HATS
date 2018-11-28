@@ -65,7 +65,7 @@ def main(unused_argv):
     classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
@@ -84,8 +84,8 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=1, num_units=[400]),
-                    AttrDict(sequence_length=37, num_units=[400])
+                    AttrDict(sequence_length=1, num_units=[256]),
+                    AttrDict(sequence_length=37, num_units=[256])
                 ],
                 data_format="channels_last"
             ),
@@ -117,7 +117,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=[160, 640],
+                image_size=[256, 1024],
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
@@ -138,7 +138,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=[160, 640],
+                image_size=[256, 1024],
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
@@ -155,7 +155,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=[160, 640],
+                image_size=[256, 1024],
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
@@ -167,21 +167,21 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
-            for j in range(1):
+            for j in range(4):
 
                 attention_map_images = []
                 boundin_box_images = []
 
-                for k in range(4):
+                for k in range(1):
 
                     attention_map_images.append([])
                     boundin_box_images.append([])
 
-                    for l in range(10):
+                    for l in range(37):
 
                         merged_attention_map = predict_result["merged_attention_maps"][j, k, l]
                         merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                        merged_attention_map = cv2.resize(merged_attention_map, (160, 160))
+                        merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
                         bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
                         attention_map_image = np.copy(predict_result["images"][j])
