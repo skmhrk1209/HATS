@@ -100,7 +100,7 @@ def main(unused_argv):
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(
                 cross_entropy_decay=1.0,
-                attention_map_decay=0.001
+                attention_map_decay=0.0002
             )
         ),
         model_dir=args.model_dir,
