@@ -7,9 +7,9 @@ import math
 import cv2
 from attrdict import AttrDict
 from dataset import Dataset
-from model_ import Model
+from model import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network_ import AttentionNetwork
+from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="model_", help="model directory")
@@ -70,7 +70,7 @@ def main(unused_argv):
     classifier = tf.estimator.Estimator(
         model_fn=Model(
             convolutional_network=ResidualNetwork(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
@@ -89,10 +89,9 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=4, num_units=[256]),
-                    AttrDict(sequence_length=10, num_units=[64])
+                    AttrDict(sequence_length=4, num_units=[1024]),
+                    AttrDict(sequence_length=10, num_units=[1024])
                 ],
-                output_shape=[8, 8, 1],
                 data_format="channels_last"
             ),
             num_classes=63,
