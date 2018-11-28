@@ -122,7 +122,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=None,
+                image_size=[160, 640],
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
@@ -137,7 +137,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=None,
+                image_size=[160, 640],
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
@@ -154,7 +154,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=None,
+                image_size=[160, 640],
                 data_format="channels_last",
                 sequence_length=1,
                 string_length=37
