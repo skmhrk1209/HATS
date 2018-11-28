@@ -184,6 +184,11 @@ def main(unused_argv):
 
             for j in range(merged_attention_maps.shape[1]):
 
+                prediction = "".join([chars[class_id] for class_id in predictions[j]])
+
+                if not prediction:
+                    continue
+
                 attention_map_images = []
                 boundin_box_images = []
 
@@ -231,7 +236,6 @@ def main(unused_argv):
                 attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
                 boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-                prediction = "".join([chars[class_id] for class_id in predictions[j]])
                 cv2.imwrite("outputs/{}_{}_attention_map.jpg".format(i, prediction), attention_map_images)
                 cv2.imwrite("outputs/{}_{}_boundin_box.jpg".format(i, prediction), boundin_box_images)
 
