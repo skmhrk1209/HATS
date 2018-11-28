@@ -92,7 +92,7 @@ def main(unused_argv):
                     AttrDict(sequence_length=4, num_units=[256]),
                     AttrDict(sequence_length=10, num_units=[64])
                 ],
-                output_shape=[8, 8, 1]
+                output_shape=[8, 8, 1],
                 data_format="channels_last"
             ),
             num_classes=63,
