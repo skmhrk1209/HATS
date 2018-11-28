@@ -115,11 +115,6 @@ class Dataset(object):
                 "path": tf.FixedLenFeature(
                     shape=[],
                     dtype=tf.string
-                ),
-                "label": tf.FixedLenFeature(
-                    shape=[sequence_length * string_length],
-                    dtype=tf.int64,
-                    default_value=[0] * sequence_length * string_length
                 )
             }
         )
@@ -135,7 +130,7 @@ class Dataset(object):
         if data_format == "channels_first":
             image = tf.transpose(image, [2, 0, 1])
 
-        label = tf.cast(features["label"], tf.int32)
+        label = tf.cast([0] * sequence_length * string_length, tf.int32)
         label = tf.reshape(label, [sequence_length, string_length])
 
         return {"image": image}, label
