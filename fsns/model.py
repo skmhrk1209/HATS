@@ -195,6 +195,8 @@ class Model(object):
             sequence=accuracies
         )), tf.no_op()
 
+        print(accuracy)
+
         # ==========================================================================================
         map_innermost_element(
             function=lambda indices_images: tf.summary.image(
