@@ -184,8 +184,6 @@ def main(unused_argv):
 
             for j in range(merged_attention_maps.shape[1]):
 
-                print(j)
-
                 prediction = "".join([chars[class_id] for class_id in predictions[j]])
 
                 if not prediction:
@@ -197,8 +195,6 @@ def main(unused_argv):
                 for k in range(merged_attention_maps.shape[2]):
 
                     if not k % (int(math.sqrt(merged_attention_maps.shape[2]))):
-
-                        print(k)
 
                         attention_map_images.append([])
                         boundin_box_images.append([])
@@ -219,6 +215,7 @@ def main(unused_argv):
                 else:
 
                     while len(attention_map_images[0]) != len(attention_map_images[-1]):
+                        print("a")
                         attention_map_images[-1].append(np.zeros_like(attention_map_image))
 
                     while len(boundin_box_images[0]) != len(boundin_box_images[-1]):
