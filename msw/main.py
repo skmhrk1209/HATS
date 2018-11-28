@@ -217,7 +217,6 @@ def main(unused_argv):
                 else:
 
                     while len(attention_map_images[-1]) != width:
-                        print("a")
                         attention_map_images[-1].append(np.zeros_like(attention_map_image))
 
                     while len(boundin_box_images[-1]) != width:
