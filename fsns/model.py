@@ -96,16 +96,16 @@ class Model(object):
             sequence=feature_vectors
         )
 
-        predictions = map_innermost_element(
-            function=lambda logits: tf.argmax(
-                input=logits,
-                axis=1,
-                output_type=tf.int32
-            ),
-            sequence=logits
-        )
-
         if mode == tf.estimator.ModeKeys.PREDICT:
+
+            predictions = map_innermost_element(
+                function=lambda logits: tf.argmax(
+                    input=logits,
+                    axis=1,
+                    output_type=tf.int32
+                ),
+                sequence=logits
+            )
 
             while isinstance(images, list):
 
