@@ -232,13 +232,13 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.EVAL:
 
-            accuracy_function = {
+            accuracy_functions = {
                 Model.AccuracyType.FULL_SEQUENCE: metrics.full_sequence_accuracy,
                 Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
             }
 
             accuracies = map_innermost_element(
-                function=lambda logits_labels: accuracy_function[self.accuracy_type](
+                function=lambda logits_labels: accuracy_functions[self.accuracy_type](
                     logits=tf.stack(logits_labels[0], axis=1),
                     labels=tf.stack(logits_labels[1], axis=1),
                     time_major=False

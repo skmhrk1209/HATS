@@ -5,24 +5,23 @@ import os
 import glob
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--filename", type=str, required=True, help="tfrecord filename")
+parser.add_argument("--file", type=str, required=True, help="path to tfrecord file")
 parser.add_argument("--directory", type=str, required=True, help="path to data directory")
 parser.add_argument("--sequence_length", type=int, default=1, help="max sequence length")
 parser.add_argument("--string_length", type=int, default=37, help="max string length")
-parser.add_argument("--class_ids", type=str, default="class_ids.txt", help="class ids file")
 args = parser.parse_args()
 
 with tf.python_io.TFRecordWriter(args.filename) as writer:
 
     class_ids = {" ": 0}
 
-    with open(args.class_ids, "r") as f:
+    with open("class_ids.txt", "r") as f:
 
         for line in f:
             class_id, char = line.split()
             class_ids[char] = int(class_id)
 
-    class_ids["null"] = max(class_ids.values()) + 1
+    class_ids[""] = max(class_ids.values()) + 1
 
     for file in glob.glob(os.path.join(args.directory, "*")):
 
@@ -34,12 +33,12 @@ with tf.python_io.TFRecordWriter(args.filename) as writer:
                     array=[class_ids[char] for char in string],
                     pad_width=[[0, args.string_length - len(string)]],
                     mode="constant",
-                    constant_values=class_ids["null"]
+                    constant_values=class_ids[""]
                 ) for string in strings
             ],
             pad_width=[[0, args.sequence_length - len(strings)], [0, 0]],
             mode="constant",
-            constant_values=class_ids["null"]
+            constant_values=class_ids[""]
         )
 
         writer.write(

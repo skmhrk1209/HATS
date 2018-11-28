@@ -27,6 +27,10 @@ tf.logging.set_verbosity(tf.logging.INFO)
 sys.setrecursionlimit(10000)
 
 
+def scale(input, input_min, input_max, output_min, output_max):
+    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+
+
 def search_bounding_box(image, threshold):
 
     if len(image.shape) == 3 and image.shape[-1] == 3:
@@ -156,33 +160,42 @@ def main(unused_argv):
             ).get_next()
         )
 
-        def scale(input, input_min, input_max, output_min, output_max):
-            return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
+        class_ids = {" ": 0}
 
-        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
+        with open("class_ids.txt", "r") as f:
 
-            for j in range(4):
+            for line in f:
+                class_id, char = line.split()
+                class_ids[char] = int(class_id)
+
+        class_ids[""] = max(class_ids.values()) + 1
+
+        chars = {class_id: char for char, class_id in class_ids.items()}
+
+        for predict_result in itertools.islice(predict_results, 10):
+
+            for i in range(4):
 
                 attention_map_images = []
                 boundin_box_images = []
 
-                for k in range(1):
+                for j in range(1):
 
                     attention_map_images.append([])
                     boundin_box_images.append([])
 
-                    for l in range(37):
+                    for k in range(37):
 
-                        merged_attention_map = predict_result["merged_attention_maps"][j, k, l]
+                        merged_attention_map = predict_result["merged_attention_maps"][i, j, k]
                         merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                         merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
                         bounding_box = search_bounding_box(merged_attention_map, 0.5)
 
-                        attention_map_image = np.copy(predict_result["images"][j])
+                        attention_map_image = np.copy(predict_result["images"][i])
                         attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
                         attention_map_images[-1].append(attention_map_image)
 
-                        boundin_box_image = np.copy(predict_result["images"][j])
+                        boundin_box_image = np.copy(predict_result["images"][i])
                         boundin_box_image = cv2.rectangle(boundin_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
                         boundin_box_images[-1].append(boundin_box_image)
 
@@ -202,8 +215,9 @@ def main(unused_argv):
                 attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
                 boundin_box_images = scale(boundin_box_images, 0.0, 1.0, 0.0, 255.0)
 
-                cv2.imwrite("outputs/attention_map_{}_{}.jpg".format(i, j), attention_map_images)
-                cv2.imwrite("outputs/boundin_box_{}_{}.jpg".format(i, j), boundin_box_images)
+                prediction = "_".join(["".join([chars[class_id] for class_id in class_ids]) for class_ids in predict_result["predictions"]])
+                cv2.imwrite("outputs/{}_attention_map_{}.jpg".format(prediction, i), attention_map_images)
+                cv2.imwrite("outputs/{}_boundin_box_{}.jpg".format(prediction, i), boundin_box_images)
 
 
 if __name__ == "__main__":
