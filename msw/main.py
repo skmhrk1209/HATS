@@ -176,7 +176,7 @@ def main(unused_argv):
 
         chars = {class_id: char for char, class_id in class_ids.items()}
 
-        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
+        for i, predict_result in enumerate(itertools.islice(predict_results, 1)):
 
             images = predict_result["images"]
             merged_attention_maps = predict_result["merged_attention_maps"]
