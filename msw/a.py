@@ -69,6 +69,7 @@ class Dataset(object):
         images = [cv2.resize(cv2.imread(f), (256, 256)) for f in glob.glob("/home/sakuma/data/svt/*")]
 
         self.dataset = tf.data.Dataset.from_tensor_slices(images)
+        self.dataset = self.dataset.batch(128)
         self.iterator = self.dataset.make_one_shot_iterator()
 
     def get_next(self):
