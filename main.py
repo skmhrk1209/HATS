@@ -185,7 +185,7 @@ def main(unused_argv):
                 attention_map_images.append([])
                 bounding_box_images.append([])
 
-                for j in range(predict_result["merged_attention_maps"].shape[2]):
+                for j in range(predict_result["merged_attention_maps"].shape[1]):
 
                     merged_attention_map = predict_result["merged_attention_maps"][i, j]
                     merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
