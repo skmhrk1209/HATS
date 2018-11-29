@@ -10,12 +10,11 @@ class Model(object):
         FULL_SEQUENCE, EDIT_DISTANCE = range(2)
 
     def __init__(self, convolutional_network, attention_network,
-                 num_classes, num_tiles, data_format, accuracy_type, hyper_params):
+                 num_classes, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
         self.num_classes = num_classes
-        self.num_tiles = num_tiles
         self.data_format = data_format
         self.accuracy_type = accuracy_type
         self.hyper_params = hyper_params
@@ -24,28 +23,14 @@ class Model(object):
 
         images = features["image"]
 
-        images = tf.split(
-            value=images,
-            num_or_size_splits=self.num_tiles,
-            axis=3 if self.data_format == "channels_first" else 2
+        feature_maps = self.convolutional_network(
+            inputs=images,
+            training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        feature_maps = map_innermost_element(
-            function=lambda images: self.convolutional_network(
-                inputs=images,
-                training=mode == tf.estimator.ModeKeys.TRAIN,
-                reuse=tf.AUTO_REUSE
-            ),
-            sequence=images
-        )
-
-        attention_maps = map_innermost_element(
-            function=lambda feature_maps: self.attention_network(
-                inputs=feature_maps,
-                training=mode == tf.estimator.ModeKeys.TRAIN,
-                reuse=tf.AUTO_REUSE
-            ),
-            sequence=feature_maps
+        attention_maps = self.attention_network(
+            inputs=feature_maps,
+            training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
         merged_attention_maps = map_innermost_element(
@@ -66,24 +51,13 @@ class Model(object):
             return tf.reshape(inputs, output_shape)
 
         feature_vectors = map_innermost_element(
-            function=lambda feature_maps_atention_maps: map_innermost_element(
-                function=lambda attention_maps: tf.layers.flatten(tf.matmul(
-                    a=flatten_images(feature_maps_atention_maps[0], self.data_format),
-                    b=flatten_images(attention_maps, self.data_format),
-                    transpose_a=False if self.data_format == "channels_first" else True,
-                    transpose_b=True if self.data_format == "channels_first" else False
-                )),
-                sequence=feature_maps_atention_maps[1]
-            ),
-            sequence=zip_innermost_element(feature_maps, attention_maps)
-        )
-
-        feature_vectors = map_innermost_element(
-            function=lambda feature_vectors: tf.concat(
-                values=feature_vectors,
-                axis=1
-            ),
-            sequence=zip_innermost_element(*feature_vectors)
+            function=lambda atention_maps: tf.layers.flatten(tf.matmul(
+                a=flatten_images(feature_maps, self.data_format),
+                b=flatten_images(attention_maps, self.data_format),
+                transpose_a=False if self.data_format == "channels_first" else True,
+                transpose_b=True if self.data_format == "channels_first" else False
+            )),
+            sequence=attention_maps
         )
 
         logits = map_innermost_element(
@@ -101,18 +75,10 @@ class Model(object):
             predictions = map_innermost_element(
                 function=lambda logits: tf.argmax(
                     input=logits,
-                    axis=1,
-                    output_type=tf.int32
+                    axis=1
                 ),
                 sequence=logits
             )
-
-            while isinstance(images, list):
-
-                images = map_innermost_list(
-                    function=lambda images: tf.stack(images, axis=1),
-                    sequence=images
-                )
 
             while isinstance(merged_attention_maps, list):
 
@@ -172,14 +138,7 @@ class Model(object):
         loss = tf.reduce_mean(losses)
 
         # ==========================================================================================
-        map_innermost_element(
-            function=lambda indices_images: tf.summary.image(
-                name="images_{}".format("_".join(map(str, indices_images[0]))),
-                tensor=indices_images[1],
-                max_outputs=2
-            ),
-            sequence=enumerate_innermost_element(images)
-        )
+        tf.summary.image("images", images, max_outputs=2)
 
         map_innermost_element(
             function=lambda indices_merged_attention_maps: tf.summary.image(
