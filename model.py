@@ -51,7 +51,7 @@ class Model(object):
             return tf.reshape(inputs, output_shape)
 
         feature_vectors = map_innermost_element(
-            function=lambda atention_maps: tf.layers.flatten(tf.matmul(
+            function=lambda attention_maps: tf.layers.flatten(tf.matmul(
                 a=flatten_images(feature_maps, self.data_format),
                 b=flatten_images(attention_maps, self.data_format),
                 transpose_a=False if self.data_format == "channels_first" else True,
