@@ -49,11 +49,6 @@ class Model(object):
                 axis=[2, 3] if data_format == "channels_first" else [1, 2]
             )
 
-        map_innermost_element(
-            function=lambda attention_maps: print(feature_maps, attention_maps),
-            sequence=attention_maps
-        )
-
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: global_average_pooling2d(
                 inputs=tf.multiply(feature_maps, attention_maps),
