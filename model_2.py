@@ -50,11 +50,9 @@ class Model(object):
             )
 
         map_innermost_element(
-            function=lambda attention_maps: print(attention_maps.shape),
+            function=lambda attention_maps: print(feature_maps, attention_maps),
             sequence=attention_maps
         )
-
-        print(feature_maps.shape)
 
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: global_average_pooling2d(
