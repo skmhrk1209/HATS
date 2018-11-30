@@ -53,7 +53,7 @@ class Model(object):
 
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: global_average_pooling2d(
-                inputs=feature_maps * attention_maps,
+                inputs=tf.multiply(feature_maps, attention_maps),
                 data_format=self.data_format
             ),
             sequence=attention_maps
