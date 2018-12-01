@@ -80,9 +80,9 @@ class Model(object):
                 axis=1
             )
 
-            sequence_lengths = tf.map_fn(
-                fn=lambda is_not_null: tf.count_nonzero(is_not_null),
-                elems=tf.not_equal(input_labels, self.num_classes - 1)
+            sequence_lengths = tf.count_nonzero(
+                input_tensor=tf.not_equal(input_labels, self.num_classes - 1),
+                axis=1
             )
 
             helper = tf.contrib.seq2seq.TrainingHelper(
