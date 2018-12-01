@@ -13,6 +13,7 @@ class Model(object):
     def __init__(self, convolutional_network, num_units, num_classes, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
+        self.num_units = num_units
         self.num_classes = num_classes
         self.data_format = data_format
         self.accuracy_type = accuracy_type
@@ -38,12 +39,12 @@ class Model(object):
         feature_vectors = flatten_images(feature_maps, self.data_format)
 
         lstm_cell = tf.nn.rnn_cell.LSTMCell(
-            num_units=num_units,
+            num_units=self.num_units,
             use_peepholes=True
         )
 
         attention_mechanism = tf.contrib.seq2seq.BahdanauAttention(
-            num_units=num_units,
+            num_units=self.num_units,
             memory=feature_vectors
         )
 
@@ -61,8 +62,8 @@ class Model(object):
             cell=lstm_cell,
             attention_mechanism=attention_mechanism,
             cell_input_fn=lambda inputs, attention: f.layers.dense(
-                inputs=tf.concat([inputs, attention[:, num_units:]], axis=-1),
-                units=num_units
+                inputs=tf.concat([inputs, attention[:, self.num_units:]], axis=-1),
+                units=self.num_units
             ),
             output_attention=True,
             attention_layer=lambda inputs: inputs
