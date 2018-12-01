@@ -82,7 +82,8 @@ class Model(object):
 
             sequence_lengths = tf.count_nonzero(
                 input_tensor=tf.not_equal(input_labels, self.num_classes - 1),
-                axis=1
+                axis=1,
+                dtype=tf.int32
             )
 
             helper = tf.contrib.seq2seq.TrainingHelper(
