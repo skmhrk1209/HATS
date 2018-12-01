@@ -61,12 +61,12 @@ class Model(object):
         attention_lstm_cell = tf.contrib.seq2seq.AttentionWrapper(
             cell=lstm_cell,
             attention_mechanism=attention_mechanism,
+            attention_layer_size=num_units,
             cell_input_fn=lambda inputs, attention: f.layers.dense(
                 inputs=tf.concat([inputs, attention[:, self.num_units:]], axis=-1),
                 units=self.num_units
             ),
-            output_attention=True,
-            attention_layer=lambda inputs: inputs
+            output_attention=True
         )
 
         batch_size = tf.shape(feature_vectors)[0]
