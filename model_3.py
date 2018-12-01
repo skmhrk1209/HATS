@@ -13,7 +13,6 @@ class Model(object):
     def __init__(self, convolutional_network, num_classes, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
-        self.attention_network = attention_network
         self.num_classes = num_classes
         self.data_format = data_format
         self.accuracy_type = accuracy_type
