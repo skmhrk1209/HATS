@@ -63,7 +63,7 @@ class Model(object):
             attention_mechanism=attention_mechanism,
             attention_layer_size=self.num_units,
             cell_input_fn=lambda inputs, attention: f.layers.dense(
-                inputs=tf.concat([inputs, attention[:, self.num_units:]], axis=-1),
+                inputs=tf.concat([inputs, attention], axis=-1),
                 units=self.num_units
             ),
             output_attention=True
