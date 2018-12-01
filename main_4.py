@@ -79,6 +79,7 @@ def main(unused_argv):
                 num_classes=None,
                 data_format="channels_last"
             ),
+            num_units=128,
             num_classes=63,
             data_format="channels_last",
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,

@@ -10,7 +10,7 @@ class Model(object):
     class AccuracyType:
         FULL_SEQUENCE, EDIT_DISTANCE = range(2)
 
-    def __init__(self, convolutional_network, num_classes, data_format, accuracy_type, hyper_params):
+    def __init__(self, convolutional_network, num_units, num_classes, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.num_classes = num_classes
