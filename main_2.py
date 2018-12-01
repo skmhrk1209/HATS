@@ -89,7 +89,6 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=1, num_units=[256]),
                     AttrDict(sequence_length=10, num_units=[256])
                 ],
                 data_format="channels_last"
@@ -123,7 +122,6 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[256, 256],
                 data_format="channels_last",
-                sequence_length=1,
                 string_length=10
             ).get_next()
         )
@@ -138,7 +136,6 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[256, 256],
                 data_format="channels_last",
-                sequence_length=1,
                 string_length=10
             ).get_next()
         )
@@ -155,7 +152,6 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[256, 256],
                 data_format="channels_last",
-                sequence_length=1,
                 string_length=10
             ).get_next()
         )

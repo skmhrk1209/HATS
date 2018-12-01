@@ -7,7 +7,7 @@ import os
 class Dataset(object):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size,
-                 image_size, data_format, sequence_length, string_length):
+                 image_size, data_format, string_length):
 
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
@@ -20,7 +20,6 @@ class Dataset(object):
                 self.parse,
                 image_size=image_size,
                 data_format=data_format,
-                sequence_length=sequence_length,
                 string_length=string_length
             ),
             num_parallel_calls=os.cpu_count()
@@ -29,7 +28,7 @@ class Dataset(object):
         self.dataset = self.dataset.prefetch(1)
         self.iterator = self.dataset.make_one_shot_iterator()
 
-    def parse(self, example, image_size, data_format, sequence_length, string_length):
+    def parse(self, example, image_size, data_format, string_length):
 
         features = tf.parse_single_example(
             serialized=example,
@@ -39,7 +38,7 @@ class Dataset(object):
                     dtype=tf.string
                 ),
                 "label": tf.FixedLenFeature(
-                    shape=[sequence_length * string_length],
+                    shape=[string_length],
                     dtype=tf.int64
                 )
             }
@@ -56,7 +55,6 @@ class Dataset(object):
             image = tf.transpose(image, [2, 0, 1])
 
         label = tf.cast(features["label"], tf.int32)
-        label = tf.reshape(label, [sequence_length, string_length])
 
         return {"image": image}, label
 
