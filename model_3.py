@@ -62,7 +62,7 @@ class Model(object):
             cell=lstm_cell,
             attention_mechanism=attention_mechanism,
             attention_layer_size=self.num_units,
-            cell_input_fn=lambda inputs, attention: f.layers.dense(
+            cell_input_fn=lambda inputs, attention: tf.layers.dense(
                 inputs=tf.concat([inputs, attention], axis=-1),
                 units=self.num_units
             ),
