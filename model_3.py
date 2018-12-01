@@ -35,7 +35,7 @@ class Model(object):
 
             return tf.reshape(inputs, output_shape)
 
-        feature_vectors = flatten_images(feature_maps)
+        feature_vectors = flatten_images(feature_maps, self.data_format)
 
         lstm_cell = tf.nn.rnn_cell.LSTMCell(
             num_units=num_units,
