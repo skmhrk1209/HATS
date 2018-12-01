@@ -134,7 +134,7 @@ class Model(object):
             cross_entropy_loss = tf.contrib.seq2seq.sequence_loss(
                 logits=logits,
                 targets=output_labels,
-                weights=tf.sequence_mask(sequence_lengths, dtype=tf.int32),
+                weights=tf.sequence_mask(sequence_lengths),
                 average_across_timesteps=True,
                 average_across_batch=True
             )
