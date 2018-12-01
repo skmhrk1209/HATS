@@ -109,10 +109,7 @@ class Model(object):
             cell=attention_lstm_cell,
             helper=helper,
             initial_state=attention_lstm_cell.zero_state(batch_size, tf.float32),
-            output_layer=lambda inputs: tf.layers.dense(
-                inputs=inputs,
-                units=self.num_classes
-            )
+            output_layer=lambda inputs: tf.layers.Dense(self.num_classes)
         )
 
         outputs, state, sequence_lengths = tf.contrib.seq2seq.dynamic_decode(
