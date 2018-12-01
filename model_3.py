@@ -70,8 +70,8 @@ class Model(object):
         )
 
         batch_size = tf.shape(feature_vectors)[0]
-        start_tokens = tf.constant(-1, shape=[batch_size])
-        end_tokens = tf.constant(self.num_classes - 1, shape=[batch_size])
+        start_tokens = tf.tile([-1], [batch_size])
+        end_tokens = tf.tile([self.num_classes - 1], [batch_size])
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
