@@ -10,8 +10,7 @@ class Model(object):
     class AccuracyType:
         FULL_SEQUENCE, EDIT_DISTANCE = range(2)
 
-    def __init__(self, convolutional_network, attention_network,
-                 num_classes, data_format, accuracy_type, hyper_params):
+    def __init__(self, convolutional_network, num_classes, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
@@ -70,34 +69,40 @@ class Model(object):
             attention_layer=lambda inputs: inputs
         )
 
-        sequence_length = tf.map_fn(
-            fn=lambda is_not_blank: tf.count_nonzero(is_not_blank),
-            elems=tf.not_equal(labels, self.num_classes - 1)
-        )
-
-        batch_size = tf.shape(sequence_length)[0]
+        batch_size = tf.shape(feature_vectors)[0]
         start_tokens = tf.constant(-1, shape=[batch_size])
+        end_tokens = tf.constant(self.num_classes - 1, shape=[batch_size])
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
+            input_labels = tf.concat(
+                values=[tf.expand_dims(start_tokens, axis=1), labels],
+                axis=1
+            )
+
+            sequence_lengths = tf.map_fn(
+                fn=lambda is_not_null: tf.count_nonzero(is_not_null),
+                elems=tf.not_equal(input_labels, self.num_classes - 1)
+            )
+
             helper = tf.contrib.seq2seq.TrainingHelper(
                 inputs=tf.one_hot(
-                    indices=tf.concat([tf.expand_dims(start_tokens, axis=1), labels], axis=1),
+                    indices=input_labels,
                     depth=self.num_classes
                 ),
-                sequence_length=sequence_length,
+                sequence_length=sequence_lengths,
                 time_major=False
             )
 
         else:
 
             helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
-                embedding=lambda labels: tf.one_hot(
-                    indices=labels,
+                embedding=lambda output_labels: tf.one_hot(
+                    indices=output_labels,
                     depth=self.num_classes
                 ),
                 start_tokens=start_tokens,
-                end_token=self.num_classes - 1
+                end_token=end_tokens[0]
             )
 
         decoder = tf.contrib.seq2seq.BasicDecoder(
@@ -110,118 +115,31 @@ class Model(object):
             )
         )
 
-        logits = tf.contrib.seq2seq.dynamic_decode(
+        outputs, state, sequence_lengths = tf.contrib.seq2seq.dynamic_decode(
             decoder=decoder,
             output_time_major=False,
             impute_finished=True,
             maximum_iterations=None,
             parallel_iterations=os.cpu_count(),
             swap_memory=False,
-        )[0].rnn_output
-
-        if mode == tf.estimator.ModeKeys.PREDICT:
-
-            predictions = map_innermost_element(
-                function=lambda logits: tf.argmax(
-                    input=logits,
-                    axis=1
-                ),
-                sequence=logits
-            )
-
-            while isinstance(merged_attention_maps, list):
-
-                merged_attention_maps = map_innermost_list(
-                    function=lambda merged_attention_maps: tf.stack(merged_attention_maps, axis=1),
-                    sequence=merged_attention_maps
-                )
-
-            while isinstance(predictions, list):
-
-                predictions = map_innermost_list(
-                    function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions
-                )
-
-            return tf.estimator.EstimatorSpec(
-                mode=mode,
-                predictions=dict(
-                    images=images,
-                    merged_attention_maps=merged_attention_maps,
-                    predictions=predictions
-                )
-            )
-
-        while all(flatten_innermost_element(map_innermost_element(lambda labels: len(labels.shape) > 1, labels))):
-
-            labels = map_innermost_element(
-                function=lambda labels: tf.unstack(labels, axis=1),
-                sequence=labels
-            )
-
-        cross_entropy_losses = map_innermost_element(
-            function=lambda logits_labels: tf.losses.sparse_softmax_cross_entropy(
-                logits=logits_labels[0],
-                labels=logits_labels[1]
-            ),
-            sequence=zip_innermost_element(logits, labels)
         )
 
-        attention_map_losses = map_innermost_element(
-            function=lambda attention_maps: tf.reduce_mean(
-                tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
-            ),
-            sequence=attention_maps
-        )
-
-        losses = map_innermost_element(
-            function=lambda cross_entropy_loss_attention_map_loss: (
-                cross_entropy_loss_attention_map_loss[0] * self.hyper_params.cross_entropy_decay +
-                cross_entropy_loss_attention_map_loss[1] * self.hyper_params.attention_map_decay
-            ),
-            sequence=zip_innermost_element(cross_entropy_losses, attention_map_losses)
-        )
-
-        loss = tf.reduce_mean(losses)
-
-        # ==========================================================================================
-        tf.summary.image("images", images, max_outputs=2)
-
-        map_innermost_element(
-            function=lambda indices_merged_attention_maps: tf.summary.image(
-                name="merged_attention_maps_{}".format("_".join(map(str, indices_merged_attention_maps[0]))),
-                tensor=indices_merged_attention_maps[1],
-                max_outputs=2
-            ),
-            sequence=enumerate_innermost_element(merged_attention_maps)
-        )
-
-        map_innermost_element(
-            function=lambda indices_cross_entropy_loss: tf.summary.scalar(
-                name="cross_entropy_loss_{}".format("_".join(map(str, indices_cross_entropy_loss[0]))),
-                tensor=indices_cross_entropy_loss[1]
-            ),
-            sequence=enumerate_innermost_element(cross_entropy_losses)
-        )
-
-        map_innermost_element(
-            function=lambda indices_attention_map_loss: tf.summary.scalar(
-                name="attention_map_loss_{}".format("_".join(map(str, indices_attention_map_loss[0]))),
-                tensor=indices_attention_map_loss[1]
-            ),
-            sequence=enumerate_innermost_element(attention_map_losses)
-        )
-
-        map_innermost_element(
-            function=lambda indices_loss: tf.summary.scalar(
-                name="loss_{}".format("_".join(map(str, indices_loss[0]))),
-                tensor=indices_loss[1]
-            ),
-            sequence=enumerate_innermost_element(losses)
-        )
-        # ==========================================================================================
+        logits = outputs.rnn_output
 
         if mode == tf.estimator.ModeKeys.TRAIN:
+
+            output_labels = tf.concat(
+                values=[labels, tf.expand_dims(end_tokens, axis=1)],
+                axis=1
+            )
+
+            cross_entropy_loss = tf.contrib.seq2seq.sequence_loss(
+                logits=logits,
+                targets=output_labels,
+                weights=tf.sequence_mask(sequence_lengths),
+                average_across_timesteps=True,
+                average_across_batch=True
+            )
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
@@ -234,32 +152,4 @@ class Model(object):
                 mode=mode,
                 loss=loss,
                 train_op=train_op
-            )
-
-        if mode == tf.estimator.ModeKeys.EVAL:
-
-            accuracy_functions = {
-                Model.AccuracyType.FULL_SEQUENCE: metrics.full_sequence_accuracy,
-                Model.AccuracyType.EDIT_DISTANCE: metrics.edit_distance_accuracy,
-            }
-
-            accuracies = map_innermost_element(
-                function=lambda logits_labels: accuracy_functions[self.accuracy_type](
-                    logits=tf.stack(logits_labels[0], axis=1),
-                    labels=tf.stack(logits_labels[1], axis=1),
-                    time_major=False
-                ),
-                sequence=zip_innermost_list(logits, labels)
-            )
-
-            return tf.estimator.EstimatorSpec(
-                mode=mode,
-                loss=loss,
-                eval_metric_ops=dict(flatten_innermost_element(map_innermost_element(
-                    function=lambda indices_accuracy: (
-                        "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                        indices_accuracy[1]
-                    ),
-                    sequence=enumerate_innermost_element(accuracies)
-                )))
             )
