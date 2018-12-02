@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import metrics
+from networks import ops
 from algorithms import *
 
 
@@ -42,18 +43,10 @@ class Model(object):
             sequence=attention_maps
         )
 
-        def flatten_images(inputs, data_format):
-
-            input_shape = inputs.get_shape().as_list()
-            output_shape = ([-1, input_shape[1], np.prod(input_shape[2:4])] if self.data_format == "channels_first" else
-                            [-1, np.prod(input_shape[1:3]), input_shape[3]])
-
-            return tf.reshape(inputs, output_shape)
-
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
-                a=flatten_images(feature_maps, self.data_format),
-                b=flatten_images(attention_maps, self.data_format),
+                a=ops.spatial_flatten(feature_maps, self.data_format),
+                b=ops.spatial_flatten(attention_maps, self.data_format),
                 transpose_a=False if self.data_format == "channels_first" else True,
                 transpose_b=True if self.data_format == "channels_first" else False
             )),

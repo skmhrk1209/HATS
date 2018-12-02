@@ -1,10 +1,6 @@
 import tensorflow as tf
-import numpy as np
+import ops
 from algorithms import *
-
-
-def softmax(inputs, axis):
-    return tf.exp(inputs) / tf.reduce_sum(tf.exp(inputs), axis)
 
 
 class AttentionNetwork(object):
@@ -153,9 +149,9 @@ class AttentionNetwork(object):
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
                             ),
-                            lambda inputs: softmax(
+                            lambda inputs: ops.spatial_softmax(
                                 inputs=inputs,
-                                axis=[2, 3] if self.data_format == "channels_first" else [1, 2]
+                                data_format=self.data_format
                             )
                         ),
                         sequence=inputs
