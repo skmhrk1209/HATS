@@ -151,7 +151,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.softmax(
                                 logits=inputs,
-                                axis=[2, 3] if self.data_format == "channels_first" else [1, 2]
+                                dim=[2, 3] if self.data_format == "channels_first" else [1, 2]
                             )
                         ),
                         sequence=inputs
