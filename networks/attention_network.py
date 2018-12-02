@@ -3,6 +3,10 @@ import numpy as np
 from algorithms import *
 
 
+def softmax(inputs, axis):
+    return tf.exp(inputs) / tf.reduce_sum(tf.exp(inputs), axis)
+
+
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params, rnn_params, data_format):
@@ -149,9 +153,9 @@ class AttentionNetwork(object):
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
                             ),
-                            lambda inputs: tf.nn.softmax(
-                                logits=inputs,
-                                dim=[2, 3] if self.data_format == "channels_first" else [1, 2]
+                            lambda inputs: softmax(
+                                inputs=inputs,
+                                axis=[2, 3] if self.data_format == "channels_first" else [1, 2]
                             )
                         ),
                         sequence=inputs
