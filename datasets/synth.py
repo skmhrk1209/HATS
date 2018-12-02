@@ -64,7 +64,7 @@ class Dataset(object):
         return self.iterator.get_next()
 
 
-def convert_dataset(input_directory, output_filename, sequence_length, string_length):
+def convert_dataset(input_directory, output_filename, string_length):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
