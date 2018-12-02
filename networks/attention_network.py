@@ -149,7 +149,10 @@ class AttentionNetwork(object):
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
                             ),
-                            lambda inputs: tf.nn.sigmoid(inputs)
+                            lambda inputs: tf.nn.softmax(
+                                logits=inputs,
+                                axis=[2, 3] if self.data_format == "channels_first" else [1, 2]
+                            )
                         ),
                         sequence=inputs
                     )
