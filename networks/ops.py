@@ -43,6 +43,6 @@ def spatial_softmax(inputs, data_format):
             logits=spatial_flatten(inputs, data_format),
             dim=2 if channels_first(data_format) else 1
         ),
-        spatial_shape=inputs_shape[2:] if channels_first(data_format) else inputs_shape[1:-1]
+        spatial_shape=inputs_shape[2:] if channels_first(data_format) else inputs_shape[1:-1],
         data_format=data_format
     )
