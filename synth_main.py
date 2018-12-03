@@ -96,10 +96,7 @@ def main(unused_argv):
             num_classes=63,
             data_format="channels_last",
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
-            hyper_params=AttrDict(
-                cross_entropy_decay=1.0,
-                attention_map_decay=0.0001
-            )
+            hyper_params=AttrDict()
         ),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(

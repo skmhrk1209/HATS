@@ -103,30 +103,13 @@ class Model(object):
                 sequence=labels
             )
 
-        cross_entropy_losses = map_innermost_element(
+        loss = tf.reduce_mean(map_innermost_element(
             function=lambda logits_labels: tf.losses.sparse_softmax_cross_entropy(
                 logits=logits_labels[0],
                 labels=logits_labels[1]
             ),
             sequence=zip_innermost_element(logits, labels)
-        )
-
-        attention_map_losses = map_innermost_element(
-            function=lambda attention_maps: tf.reduce_mean(
-                tf.reduce_sum(tf.abs(attention_maps), axis=[1, 2, 3])
-            ),
-            sequence=attention_maps
-        )
-
-        losses = map_innermost_element(
-            function=lambda cross_entropy_loss_attention_map_loss: (
-                cross_entropy_loss_attention_map_loss[0] * self.hyper_params.cross_entropy_decay +
-                cross_entropy_loss_attention_map_loss[1] * self.hyper_params.attention_map_decay
-            ),
-            sequence=zip_innermost_element(cross_entropy_losses, attention_map_losses)
-        )
-
-        loss = tf.reduce_mean(losses)
+        ))
 
         # ==========================================================================================
         tf.summary.image("images", images, max_outputs=2)
@@ -138,30 +121,6 @@ class Model(object):
                 max_outputs=2
             ),
             sequence=enumerate_innermost_element(merged_attention_maps)
-        )
-
-        map_innermost_element(
-            function=lambda indices_cross_entropy_loss: tf.summary.scalar(
-                name="cross_entropy_loss_{}".format("_".join(map(str, indices_cross_entropy_loss[0]))),
-                tensor=indices_cross_entropy_loss[1]
-            ),
-            sequence=enumerate_innermost_element(cross_entropy_losses)
-        )
-
-        map_innermost_element(
-            function=lambda indices_attention_map_loss: tf.summary.scalar(
-                name="attention_map_loss_{}".format("_".join(map(str, indices_attention_map_loss[0]))),
-                tensor=indices_attention_map_loss[1]
-            ),
-            sequence=enumerate_innermost_element(attention_map_losses)
-        )
-
-        map_innermost_element(
-            function=lambda indices_loss: tf.summary.scalar(
-                name="loss_{}".format("_".join(map(str, indices_loss[0]))),
-                tensor=indices_loss[1]
-            ),
-            sequence=enumerate_innermost_element(losses)
         )
         # ==========================================================================================
 
