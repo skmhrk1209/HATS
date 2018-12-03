@@ -48,7 +48,7 @@ class Model(object):
                 inputs=tf.multiply(
                     x=feature_maps,
                     y=attention_maps
-                )
+                ),
                 data_format=self.data_format
             ),
             sequence=attention_maps
