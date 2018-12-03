@@ -74,7 +74,7 @@ class AttentionNetwork(object):
                         function=lambda inputs: tf.unstack(
                             value=tf.nn.dynamic_rnn(
                                 cell=multi_cell,
-                                inputs=[inputs] * rnn_param.sequence_length,
+                                inputs=tf.tile([inputs], [rnn_param.sequence_length, 1, 1]),
                                 initial_state=multi_cell.zero_state(
                                     batch_size=tf.shape(inputs)[0],
                                     dtype=tf.float32
