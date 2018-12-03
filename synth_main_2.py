@@ -7,7 +7,7 @@ import math
 import cv2
 from attrdict import AttrDict
 from datasets.synth import Dataset
-from model import Model
+from model_2 import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
