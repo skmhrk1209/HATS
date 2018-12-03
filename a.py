@@ -9,7 +9,7 @@ from attrdict import AttrDict
 from datasets.synth import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network_2 import AttentionNetwork
+from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth_model", help="model directory")
