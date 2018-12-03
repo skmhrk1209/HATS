@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 from . import ops
 from algorithms import *
 
@@ -70,15 +71,21 @@ class AttentionNetwork(object):
                     ])
 
                     inputs = map_innermost_element(
-                        function=lambda inputs: tf.nn.static_rnn(
-                            cell=multi_cell,
-                            inputs=[inputs] * rnn_param.sequence_length,
-                            initial_state=multi_cell.zero_state(
-                                batch_size=tf.shape(inputs)[0],
-                                dtype=tf.float32
-                            ),
-                            scope="rnn"
-                        )[0],
+                        function=lambda inputs: tf.unstack(
+                            value=tf.nn.dynamic_rnn(
+                                cell=multi_cell,
+                                inputs=[inputs] * rnn_param.sequence_length,
+                                initial_state=multi_cell.zero_state(
+                                    batch_size=tf.shape(inputs)[0],
+                                    dtype=tf.float32
+                                ),
+                                parallel_iterations=os.cpu_count(),
+                                swap_memory=True,
+                                time_major=True,
+                                scope="rnn"
+                            )[0],
+                            axis=0
+                        ),
                         sequence=inputs
                     )
 
