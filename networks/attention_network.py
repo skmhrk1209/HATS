@@ -1,6 +1,6 @@
 import tensorflow as tf
 import os
-from . import ops
+import ops
 from algorithms import *
 
 
@@ -41,7 +41,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.data_format == "channels_first" else 3,
+                                axis=1 if ops.channels_first(self.data_format) else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
@@ -52,7 +52,7 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-            shape = inputs.shape.as_list()
+            shape = ops.static_shape(inputs)
 
             inputs = map_innermost_element(
                 function=lambda inputs: tf.layers.flatten(inputs),
@@ -136,7 +136,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.data_format == "channels_first" else 3,
+                                axis=1 if ops.channels_first(self.data_format) else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
@@ -171,7 +171,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.data_format == "channels_first" else 3,
+                                axis=1 if ops.channels_first(self.data_format) else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",

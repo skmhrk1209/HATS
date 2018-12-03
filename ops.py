@@ -46,3 +46,11 @@ def spatial_softmax(inputs, data_format):
         spatial_shape=inputs_shape[2:] if channels_first(data_format) else inputs_shape[1:-1],
         data_format=data_format
     )
+
+
+def global_average_pooling2d(inputs, data_format):
+
+    return tf.reduce_mean(
+        input_tensor=inputs,
+        axis=[2, 3] if channels_first(data_format) else [1, 2]
+    )

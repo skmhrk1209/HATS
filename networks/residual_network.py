@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import ops
 
 
 class ResidualNetwork(object):
@@ -67,7 +68,7 @@ class ResidualNetwork(object):
 
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
-                axis=1 if self.data_format == "channels_first" else 3,
+                axis=1 if ops.channels_first(self.data_format) else 3,
                 training=training,
                 fused=True
             )
@@ -78,10 +79,7 @@ class ResidualNetwork(object):
 
                 return inputs
 
-            inputs = tf.reduce_mean(
-                input_tensor=inputs,
-                axis=[2, 3] if self.data_format == "channels_first" else [1, 2]
-            )
+            inputs = ops.global_average_pooling2d(inputs, self.data_format)
 
             inputs = tf.layers.dense(
                 inputs=inputs,
@@ -107,7 +105,7 @@ class ResidualNetwork(object):
 
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
-                axis=1 if data_format == "channels_first" else 3,
+                axis=1 if ops.channels_first(self.data_format) else 3,
                 training=training,
                 fused=True
             )
@@ -146,7 +144,7 @@ class ResidualNetwork(object):
 
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
-                axis=1 if data_format == "channels_first" else 3,
+                axis=1 if ops.channels_first(self.data_format) else 3,
                 training=training,
                 fused=True
             )

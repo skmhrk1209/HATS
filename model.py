@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import metrics
-from networks import ops
+import ops
 from algorithms import *
 
 
@@ -37,7 +37,7 @@ class Model(object):
         merged_attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
                 input_tensor=attention_maps,
-                axis=1 if self.data_format == "channels_first" else 3,
+                axis=1 if ops.channels_first(self.data_format) else 3,
                 keep_dims=True
             ),
             sequence=attention_maps
@@ -47,8 +47,8 @@ class Model(object):
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
                 a=ops.spatial_flatten(feature_maps, self.data_format),
                 b=ops.spatial_flatten(attention_maps, self.data_format),
-                transpose_a=False if self.data_format == "channels_first" else True,
-                transpose_b=True if self.data_format == "channels_first" else False
+                transpose_a=False if ops.channels_first(self.data_format) else True,
+                transpose_b=True if ops.channels_first(self.data_format) else False
             )),
             sequence=attention_maps
         )
