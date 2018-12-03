@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 from . import ops
 from algorithms import *
 
