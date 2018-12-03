@@ -69,6 +69,7 @@ class AttentionNetwork(object):
                         ) for num_units in rnn_param.num_units
                     ])
 
+                    '''
                     inputs = map_innermost_element(
                         function=lambda inputs: tf.nn.static_rnn(
                             cell=multi_cell,
@@ -79,6 +80,29 @@ class AttentionNetwork(object):
                             ),
                             scope="rnn"
                         )[0],
+                        sequence=inputs
+                    )
+                    '''
+
+                    inputs = map_innermost_element(
+                        function=lambda inputs: tf.unstack(
+                            value=tf.nn.dynamic_rnn(
+                                cell=multi_cell,
+                                inputs=tf.tile(
+                                    input=[inputs],
+                                    multiples=[rnn_param.sequence_length, 1, 1]
+                                ),
+                                initial_state=multi_cell.zero_state(
+                                    batch_size=tf.shape(inputs)[0],
+                                    dtype=tf.float32
+                                ),
+                                parallel_iterations=os.cpu_count(),
+                                swap_memory=True,
+                                time_major=True,
+                                scope="rnn"
+                            )[0],
+                            axis=0
+                        ),
                         sequence=inputs
                     )
 
