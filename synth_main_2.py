@@ -81,15 +81,15 @@ def main(unused_argv):
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=128, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=64, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=32, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=64, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=128, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=10, num_units=[4096])
+                    AttrDict(sequence_length=10, num_units=[2048])
                 ],
                 data_format="channels_last"
             ),
