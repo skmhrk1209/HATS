@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import metrics
-from networks import ops
+import ops
 from algorithms import *
 
 
@@ -43,18 +43,14 @@ class Model(object):
             sequence=attention_maps
         )
 
-        def global_average_pooling2d(inputs, data_format):
-
-            return tf.reduce_mean(
-                input_tensor=inputs,
-                axis=[2, 3] if self.data_format == "channels_first" else [1, 2]
-            )
-
         feature_vectors = map_innermost_element(
-            function=lambda attention_maps: global_average_pooling2d(tf.multiply(
-                x=feature_maps,
-                y=attention_maps
-            )),
+            function=lambda attention_maps: ops.global_average_pooling2d(
+                inputs=tf.multiply(
+                    x=feature_maps,
+                    y=attention_maps
+                )
+                data_format=self.data_format
+            ),
             sequence=attention_maps
         )
 
