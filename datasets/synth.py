@@ -81,9 +81,9 @@ def convert_dataset(input_directory, output_filename, string_length):
 
         class_ids[""] = max(class_ids.values()) + 1
 
-        for filename in glob.glob(os.path.join(input_directory, "*")):
+        for input_filename in glob.glob(os.path.join(input_directory, "*")):
 
-            string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
+            string = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1]
 
             label = np.pad(
                 array=[class_ids[char] for char in string],
@@ -98,7 +98,7 @@ def convert_dataset(input_directory, output_filename, string_length):
                         feature={
                             "path": tf.train.Feature(
                                 bytes_list=tf.train.BytesList(
-                                    value=[filename.encode("utf-8")]
+                                    value=[input_filename.encode("utf-8")]
                                 )
                             ),
                             "label": tf.train.Feature(

@@ -90,9 +90,9 @@ def convert_dataset(input_directory, output_filename, sequence_length, string_le
 
         class_ids[""] = max(class_ids.values()) + 1
 
-        for filename in glob.glob(os.path.join(input_directory, "*")):
+        for input_filename in glob.glob(os.path.join(input_directory, "*")):
 
-            strings = os.path.splitext(os.path.basename(filename))[0].split("_")[1:]
+            strings = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
 
             label = np.pad(
                 array=[
@@ -114,7 +114,7 @@ def convert_dataset(input_directory, output_filename, sequence_length, string_le
                         feature={
                             "path": tf.train.Feature(
                                 bytes_list=tf.train.BytesList(
-                                    value=[filename.encode("utf-8")]
+                                    value=[input_filename.encode("utf-8")]
                                 )
                             ),
                             "label": tf.train.Feature(
@@ -128,55 +128,46 @@ def convert_dataset(input_directory, output_filename, sequence_length, string_le
             )
 
 
-def make_dataset(input_directory, output_directory):
+def make_dataset(input_directory, output_directory, num_data, image_size, sequence_length, string_length, num_retries):
 
-    filenames = [
+    input_filenames = [
         filename for filename in tqdm(glob.glob(os.path.join(input_directory, "*")))
-        if ((lambda string: len(string) <= 10)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
-            (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], [256, 256])]))(cv2.imread(filename)))
+        if ((lambda string: len(string) <= string_length)(os.path.splitext(os.path.basename(filename))[0].split("_")[1]) and
+            (lambda image: image is not None and all([l1 <= l2 for l1, l2 in zip(image.shape[:2], image_size)]))(cv2.imread(filename)))
     ]
 
     random.seed(0)
-    random.shuffle(filenames)
+    random.shuffle(input_filenames)
 
-    multi_thread(make_dataset_impl, num_threads=32, split=False)(
-        filenames[:int(len(filenames) * 0.9)],
-        directory=os.path.join(output_directory, "train"),
-        num_data=28125,
-        image_size=(256, 256),
-        sequence_length=4,
-        num_retries=100
-    )
-
-    multi_thread(make_dataset_impl, num_threads=32, split=False)(
-        filenames[int(len(filenames) * 0.9):],
-        directory=os.path.join(output_directory, "test"),
-        num_data=3125,
-        image_size=(256, 256),
-        sequence_length=4,
-        num_retries=100
+    multi_thread(make_dataset_impl, num_threads=os.cpu_count())(
+        input_filenames=input_filenames,
+        output_directory=output_directory,
+        num_data=num_data,
+        image_size=image_size,
+        sequence_length=sequence_length,
+        num_retries=num_retries
     )
 
 
 @jit(nopython=False, nogil=True)
-def make_dataset_impl(filenames, directory, num_data, image_size, sequence_length, num_retries, thread_id):
+def make_dataset_impl(input_filenames, output_directory, num_data, image_size, sequence_length, num_retries, thread_id):
 
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
-        multi_image = np.zeros(image_size + (3,), dtype=np.uint8)
+        output_image = np.zeros(image_size + (3,), dtype=np.uint8)
 
         strings = []
         rects = []
 
-        for filename in random.sample(filenames, random.randint(1, sequence_length)):
+        for input_filename in random.sample(input_filenames, random.randint(1, sequence_length)):
 
-            string = os.path.splitext(os.path.basename(filename))[0].split("_")[1]
-            image = cv2.imread(filename)
+            string = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1]
+            input_image = cv2.imread(input_filename)
 
             for _ in range(num_retries):
 
-                h = image.shape[0]
-                w = image.shape[1]
+                h = input_image.shape[0]
+                w = input_image.shape[1]
                 y = random.randint(0, image_size[0] - h)
                 x = random.randint(0, image_size[1] - w)
                 proposal = (y, x, y + h, x + w)
@@ -186,38 +177,27 @@ def make_dataset_impl(filenames, directory, num_data, image_size, sequence_lengt
                         break
 
                 else:
-                    multi_image[y:y+h, x:x+w, :] += image
+                    output_image[y:y+h, x:x+w, :] += input_image
                     strings.append(string)
                     rects.append(proposal)
                     break
 
         strings = [string for rect, string in sorted(zip(rects, strings))]
-        cv2.imwrite(os.path.join(directory, "{}_{}.jpg".format(i, "_".join(strings))), multi_image)
+        output_filename = "{}_{}.jpg".format(i, "_".join(strings))
+        cv2.imwrite(os.path.join(output_directory, output_filename), output_image)
 
 
-def multi_thread(func, num_threads, split=False):
+def multi_thread(func, num_threads):
 
     def func_mt(*args, **kwargs):
 
-        if split:
-
-            threads = [
-                threading.Thread(
-                    target=func,
-                    args=(arg,) + args[1:],
-                    kwargs=dict(kwargs, thread_id=i)
-                ) for i, arg in enumerate(np.array_split(args[0], num_threads))
-            ]
-
-        else:
-
-            threads = [
-                threading.Thread(
-                    target=func,
-                    args=args,
-                    kwargs=dict(kwargs, thread_id=i)
-                ) for i in range(num_threads)
-            ]
+        threads = [
+            threading.Thread(
+                target=func,
+                args=args,
+                kwargs=dict(kwargs, thread_id=i)
+            ) for i in range(num_threads)
+        ]
 
         for thread in threads:
             thread.start()
