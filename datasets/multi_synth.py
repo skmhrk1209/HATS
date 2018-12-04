@@ -154,7 +154,7 @@ def make_dataset_impl(input_filenames, output_directory, num_data, image_size, s
 
     for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
 
-        output_image = np.zeros(image_size + (3,), dtype=np.uint8)
+        output_image = np.zeros(image_size + [3], dtype=np.uint8)
 
         strings = []
         rects = []
