@@ -2,14 +2,14 @@ import tensorflow as tf
 import numpy as np
 
 
-def static_shape(inputs):
-
-    return inputs.get_shape().as_list()
-
-
 def channels_first(data_format):
 
     return data_format == "channels_first"
+
+
+def static_shape(inputs):
+
+    return inputs.get_shape().as_list()
 
 
 def spatial_shape(inputs, data_format):
