@@ -12,6 +12,13 @@ def channels_first(data_format):
     return data_format == "channels_first"
 
 
+def spatial_shape(inputs, data_format):
+
+    inputs_shape = static_shape(inputs)
+
+    return inputs_shape[2:] if channels_first(data_format) else inputs_shape[1:-1]
+
+
 def spatial_flatten(inputs, data_format):
 
     inputs_shape = static_shape(inputs)

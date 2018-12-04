@@ -34,15 +34,6 @@ class Model(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        merged_attention_maps = map_innermost_element(
-            function=lambda attention_maps: tf.reduce_sum(
-                input_tensor=attention_maps,
-                axis=1 if ops.channels_first(self.data_format) else 3,
-                keep_dims=True
-            ),
-            sequence=attention_maps
-        )
-
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
                 a=ops.spatial_flatten(feature_maps, self.data_format),
@@ -63,6 +54,15 @@ class Model(object):
             sequence=feature_vectors
         )
 
+        attention_maps = map_innermost_element(
+            function=lambda attention_maps: tf.reduce_sum(
+                input_tensor=attention_maps,
+                axis=1 if ops.channels_first(self.data_format) else 3,
+                keep_dims=True
+            ),
+            sequence=attention_maps
+        )
+
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             predictions = map_innermost_element(
@@ -73,11 +73,11 @@ class Model(object):
                 sequence=logits
             )
 
-            while isinstance(merged_attention_maps, list):
+            while isinstance(attention_maps, list):
 
-                merged_attention_maps = map_innermost_list(
-                    function=lambda merged_attention_maps: tf.stack(merged_attention_maps, axis=1),
-                    sequence=merged_attention_maps
+                attention_maps = map_innermost_list(
+                    function=lambda attention_maps: tf.stack(attention_maps, axis=1),
+                    sequence=attention_maps
                 )
 
             while isinstance(predictions, list):
@@ -91,7 +91,7 @@ class Model(object):
                 mode=mode,
                 predictions=dict(
                     images=images,
-                    merged_attention_maps=merged_attention_maps,
+                    attention_maps=attention_maps,
                     predictions=predictions
                 )
             )
@@ -115,12 +115,12 @@ class Model(object):
         tf.summary.image("images", images, max_outputs=2)
 
         map_innermost_element(
-            function=lambda indices_merged_attention_maps: tf.summary.image(
-                name="merged_attention_maps_{}".format("_".join(map(str, indices_merged_attention_maps[0]))),
-                tensor=indices_merged_attention_maps[1],
+            function=lambda indices_attention_maps: tf.summary.image(
+                name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0]))),
+                tensor=indices_attention_maps[1],
                 max_outputs=2
             ),
-            sequence=enumerate_innermost_element(merged_attention_maps)
+            sequence=enumerate_innermost_element(attention_maps)
         )
         # ==========================================================================================
 
