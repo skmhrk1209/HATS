@@ -147,7 +147,7 @@ def main(unused_argv):
                 for j in range(predict_result["attention_maps"].shape[1]):
 
                     attention_map = predict_result["attention_maps"][i, j]
-                    attention_map = scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
+                    attention_map = image.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
                     attention_map = cv2.resize(attention_map, (256, 256))
                     bounding_box = image.search_bounding_box(attention_map, 0.5)
 
