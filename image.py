@@ -1,6 +1,4 @@
-import numpy as np
 import cv2
-import sys
 
 
 def scale(input, input_min, input_max, output_min, output_max):
@@ -8,8 +6,6 @@ def scale(input, input_min, input_max, output_min, output_max):
 
 
 def search_bounding_box(image, threshold):
-
-    sys.setrecursionlimit(10000)
 
     if len(image.shape) == 3 and image.shape[-1] == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

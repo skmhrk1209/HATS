@@ -4,6 +4,22 @@ import metrics
 from algorithms import *
 
 
+def spatial_shape(inputs, channels_first):
+
+    inputs_shape = inputs.get_shape().as_list()
+
+    return inputs_shape[2:] if channels_first else inputs_shape[1:-1]
+
+
+def spatial_flatten(inputs, channels_first):
+
+    inputs_shape = inputs.get_shape().as_list()
+    outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if channels_first else
+                     [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
+
+    return tf.reshape(inputs, outputs_shape)
+
+
 class Model(object):
 
     class AccuracyType:
@@ -33,14 +49,6 @@ class Model(object):
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
-
-        def spatial_flatten(inputs, channels_first):
-
-            inputs_shape = inputs.get_shape().as_list()
-            outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if channels_first else
-                             [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
-
-            return tf.reshape(inputs, outputs_shape)
 
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(

@@ -26,6 +26,8 @@ args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
+sys.setrecursionlimit(10000)
+
 
 def main(unused_argv):
 
