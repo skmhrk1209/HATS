@@ -144,13 +144,13 @@ def main(unused_argv):
 
                 for j in range(predict_result["attention_maps"].shape[1]):
 
-                    merged_attention_map = predict_result["attention_maps"][i, j]
-                    merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
-                    merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                    image.bounding_box = search_bounding_box(merged_attention_map, 0.5)
+                    attention_map = predict_result["attention_maps"][i, j]
+                    attention_map = image.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
+                    attention_map = cv2.resize(attention_map, (256, 256))
+                    image.bounding_box = search_bounding_box(attention_map, 0.5)
 
                     attention_map_image = np.copy(predict_result["images"])
-                    attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
+                    attention_map_image += np.pad(np.expand_dims(attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
                     attention_map_images[-1].append(attention_map_image)
 
                     bounding_box_image = np.copy(predict_result["images"])
