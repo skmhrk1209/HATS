@@ -1,17 +1,17 @@
 import tensorflow as tf
 import os
-import ops
 from algorithms import *
 
 
 class AttentionNetwork(object):
 
-    def __init__(self, conv_params, deconv_params, rnn_params, data_format):
+    def __init__(self, conv_params, deconv_params, rnn_params, channels_first):
 
         self.conv_params = conv_params
         self.deconv_params = deconv_params
         self.rnn_params = rnn_params
-        self.data_format = data_format
+        self.channels_first = channels_first
+        self.data_format = "channels_first" if channels_first else "channels_last"
 
     def __call__(self, inputs, training, name="attention_network", reuse=None):
 
@@ -41,7 +41,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if ops.channels_first(self.data_format) else 3,
+                                axis=1 if self.channels_first else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
@@ -52,7 +52,7 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-            shape = ops.static_shape(inputs)
+            shape = inputs.get_shape().as_list()
 
             inputs = map_innermost_element(
                 function=lambda inputs: tf.layers.flatten(inputs),
@@ -136,7 +136,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if ops.channels_first(self.data_format) else 3,
+                                axis=1 if self.channels_first else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
@@ -171,16 +171,13 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if ops.channels_first(self.data_format) else 3,
+                                axis=1 if self.channels_first else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
                             ),
-                            lambda inputs: ops.spatial_softmax(
-                                inputs=inputs,
-                                data_format=self.data_format
-                            )
+                            lambda inputs: tf.nn.sigmoid(inputs)
                         ),
                         sequence=inputs
                     )

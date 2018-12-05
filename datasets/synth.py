@@ -8,7 +8,7 @@ import os
 class Dataset(object):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size,
-                 image_size, data_format, string_length):
+                 image_size, channels_first, string_length):
 
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
@@ -20,7 +20,7 @@ class Dataset(object):
             map_func=functools.partial(
                 self.parse,
                 image_size=image_size,
-                data_format=data_format,
+                channels_first=channels_first,
                 string_length=string_length
             ),
             num_parallel_calls=os.cpu_count()
@@ -29,7 +29,7 @@ class Dataset(object):
         self.dataset = self.dataset.prefetch(1)
         self.iterator = self.dataset.make_one_shot_iterator()
 
-    def parse(self, example, image_size, data_format, string_length):
+    def parse(self, example, image_size, channels_first, string_length):
 
         features = tf.parse_single_example(
             serialized=example,
@@ -52,7 +52,7 @@ class Dataset(object):
         if image_size:
             image = tf.image.resize_images(image, image_size)
 
-        if data_format == "channels_first":
+        if channels_first:
             image = tf.transpose(image, [2, 0, 1])
 
         label = tf.cast(features["label"], tf.int32)

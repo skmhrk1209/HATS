@@ -5,6 +5,7 @@ import argparse
 import itertools
 import math
 import cv2
+import image
 from attrdict import AttrDict
 from datasets.multi_synth import Dataset
 from model import Model
@@ -28,43 +29,6 @@ tf.logging.set_verbosity(tf.logging.INFO)
 sys.setrecursionlimit(10000)
 
 
-def scale(input, input_min, input_max, output_min, output_max):
-    return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
-
-
-def search_bounding_box(image, threshold):
-
-    if len(image.shape) == 3 and image.shape[-1] == 3:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    max_value = 1.0 if np.issubdtype(image.dtype, np.floating) else 255
-    binary = cv2.threshold(image, threshold, max_value, cv2.THRESH_BINARY)[1]
-    flags = np.ones_like(binary, dtype=np.bool)
-    h, w = binary.shape[:2]
-    segments = []
-
-    def depth_first_search(y, x):
-
-        segments[-1].append((y, x))
-        flags[y][x] = False
-
-        for dy, dx in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            if 0 <= y + dy < h and 0 <= x + dx < w:
-                if flags[y + dy, x + dx] and binary[y + dy, x + dx]:
-                    depth_first_search(y + dy, x + dx)
-
-    for y in range(flags.shape[0]):
-        for x in range(flags.shape[1]):
-            if flags[y, x] and binary[y, x]:
-                segments.append([])
-                depth_first_search(y, x)
-
-    bounding_boxes = [(lambda ls_1, ls_2: ((min(ls_1), min(ls_2)), (max(ls_1), max(ls_2))))(*zip(*segment)) for segment in segments]
-    bounding_boxes = sorted(bounding_boxes, key=lambda box: abs(box[0][0] - box[1][0]) * abs(box[0][1] - box[1][1]))
-
-    return bounding_boxes[-1]
-
-
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
@@ -77,7 +41,7 @@ def main(unused_argv):
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
-                data_format="channels_last"
+                channels_first=False
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
@@ -92,10 +56,10 @@ def main(unused_argv):
                     AttrDict(sequence_length=4, num_units=[256]),
                     AttrDict(sequence_length=10, num_units=[256])
                 ],
-                data_format="channels_last"
+                channels_first=False
             ),
             num_classes=63,
-            data_format="channels_last",
+            channels_first=False,
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(attention_map_decay=0.001)
         ),
@@ -119,7 +83,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 image_size=None,
-                data_format="channels_last",
+                channels_first=False,
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -134,7 +98,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 image_size=None,
-                data_format="channels_last",
+                channels_first=False,
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -151,7 +115,7 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
                 image_size=None,
-                data_format="channels_last",
+                channels_first=False,
                 sequence_length=4,
                 string_length=10
             ).get_next()
@@ -177,17 +141,17 @@ def main(unused_argv):
             attention_map_images = []
             bounding_box_images = []
 
-            for i in range(predict_result["merged_attention_maps"].shape[0]):
+            for i in range(predict_result["attention_maps"].shape[0]):
 
                 attention_map_images.append([])
                 bounding_box_images.append([])
 
-                for j in range(predict_result["merged_attention_maps"].shape[1]):
+                for j in range(predict_result["attention_maps"].shape[1]):
 
-                    merged_attention_map = predict_result["merged_attention_maps"][i, j]
+                    merged_attention_map = predict_result["attention_maps"][i, j]
                     merged_attention_map = scale(merged_attention_map, merged_attention_map.min(), merged_attention_map.max(), 0.0, 1.0)
                     merged_attention_map = cv2.resize(merged_attention_map, (256, 256))
-                    bounding_box = search_bounding_box(merged_attention_map, 0.5)
+                    bounding_box = image.search_bounding_box(merged_attention_map, 0.5)
 
                     attention_map_image = np.copy(predict_result["images"])
                     attention_map_image += np.pad(np.expand_dims(merged_attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
@@ -210,8 +174,8 @@ def main(unused_argv):
             attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
             bounding_box_images = cv2.cvtColor(bounding_box_images, cv2.COLOR_BGR2RGB)
 
-            attention_map_images = scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
-            bounding_box_images = scale(bounding_box_images, 0.0, 1.0, 0.0, 255.0)
+            attention_map_images = image.scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
+            bounding_box_images = image.scale(bounding_box_images, 0.0, 1.0, 0.0, 255.0)
 
             prediction = "_".join(["".join([chars[class_id] for class_id in predictions]) for predictions in predict_result["predictions"]])
 

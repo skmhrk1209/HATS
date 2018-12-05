@@ -1,17 +1,17 @@
 import tensorflow as tf
 import numpy as np
-import ops
 
 
 class ResidualNetwork(object):
 
-    def __init__(self, conv_param, pool_param, residual_params, num_classes, data_format):
+    def __init__(self, conv_param, pool_param, residual_params, num_classes, channels_first):
 
         self.conv_param = conv_param
         self.pool_param = pool_param
         self.residual_params = residual_params
         self.num_classes = num_classes
-        self.data_format = data_format
+        self.channels_first = channels_first
+        self.data_format = "channels_first" if channels_first else "channels_last"
 
     def __call__(self, inputs, training, name="residual_network", reuse=None):
 
@@ -68,7 +68,7 @@ class ResidualNetwork(object):
 
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
-                axis=1 if ops.channels_first(self.data_format) else 3,
+                axis=1 if self.channels_first else 3,
                 training=training,
                 fused=True
             )
@@ -79,7 +79,10 @@ class ResidualNetwork(object):
 
                 return inputs
 
-            inputs = ops.global_average_pooling2d(inputs, self.data_format)
+            inputs = tf.reduce_mean(
+                input_tensor=inputs,
+                axis=[2, 3] if self.channels_first else [1, 2]
+            )
 
             inputs = tf.layers.dense(
                 inputs=inputs,
@@ -105,7 +108,7 @@ class ResidualNetwork(object):
 
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
-                axis=1 if ops.channels_first(self.data_format) else 3,
+                axis=1 if self.channels_first else 3,
                 training=training,
                 fused=True
             )
@@ -144,7 +147,7 @@ class ResidualNetwork(object):
 
             inputs = tf.layers.batch_normalization(
                 inputs=inputs,
-                axis=1 if ops.channels_first(self.data_format) else 3,
+                axis=1 if self.channels_first else 3,
                 training=training,
                 fused=True
             )
