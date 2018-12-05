@@ -177,8 +177,8 @@ def main(unused_argv):
 
             prediction = "_".join(["".join([chars[class_id] for class_id in predictions]) for predictions in predict_result["predictions"]])
 
-            cv2.imwrite("outputs/{}_attention_map.jpg".format(prediction), attention_map_images)
-            cv2.imwrite("outputs/{}_bounding_box.jpg".format(prediction), bounding_box_images)
+            cv2.imwrite("outputs/multi_synth/{}_attention_map.jpg".format(prediction), attention_map_images)
+            cv2.imwrite("outputs/multi_synth/{}_bounding_box.jpg".format(prediction), bounding_box_images)
 
 
 if __name__ == "__main__":
