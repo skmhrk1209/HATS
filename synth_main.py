@@ -145,7 +145,7 @@ def main(unused_argv):
                     attention_map = predict_result["attention_maps"][i, j]
                     attention_map = image.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
                     attention_map = cv2.resize(attention_map, (256, 256))
-                    image.bounding_box = image.search_bounding_box(attention_map, 0.5)
+                    bounding_box = image.search_bounding_box(attention_map, 0.5)
 
                     attention_map_image = np.copy(predict_result["images"])
                     attention_map_image += np.pad(np.expand_dims(attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
