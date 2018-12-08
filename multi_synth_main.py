@@ -122,19 +122,12 @@ def main(unused_argv):
         )
 
         class_ids = {}
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("a"), ord("z") + 1), class_ids["Z"] + 1)}),
+        class_ids.update({"": max(class_ids.values()) + 1})
 
-        for i in range(ord("0"), ord("z") + 1):
-
-            if ord("0") <= i <= ord("9"):
-                class_ids[chr(i)] = i - ord("0")
-            elif ord("A") <= i <= ord("Z"):
-                class_ids[chr(i)] = i - ord("A") + class_ids["9"] + 1
-            elif ord("a") <= i <= ord("z"):
-                class_ids[chr(i)] = i - ord("a") + class_ids["Z"] + 1
-
-        class_ids[""] = max(class_ids.values()) + 1
-
-        chars = {class_id: char for char, class_id in class_ids.items()}
+        class_chars = dict(map(lambda key_value: key_value[::-1], class_ids.items()))
 
         for predict_result in itertools.islice(predict_results, 10):
 
@@ -177,10 +170,10 @@ def main(unused_argv):
             attention_map_images = img.scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
             bounding_box_images = img.scale(bounding_box_images, 0.0, 1.0, 0.0, 255.0)
 
-            prediction = "_".join(["".join([chars[class_id] for class_id in predictions]) for predictions in predict_result["predictions"]])
+            predictions = "_".join(["".join([class_chars[class_id] for class_id in class_ids]) for class_ids in predict_result["predictions"]])
 
-            cv2.imwrite("outputs/multi_synth/{}_attention_map.jpg".format(prediction), attention_map_images)
-            cv2.imwrite("outputs/multi_synth/{}_bounding_box.jpg".format(prediction), bounding_box_images)
+            cv2.imwrite("outputs/multi_synth/{}_attention_map.jpg".format(predictions), attention_map_images)
+            cv2.imwrite("outputs/multi_synth/{}_bounding_box.jpg".format(predictions), bounding_box_images)
 
 
 if __name__ == "__main__":
