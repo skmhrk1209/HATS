@@ -76,7 +76,7 @@ def flatten_innermost_element(sequence, classes=(list,)):
     innermost element is defined as element which is not instance of "classes" (default: list)
     '''
 
-    return (reduce(add, map(lambda element: flatten_innermost_element(element, classes=classes), sequence), initial=[])
+    return (reduce(add, map(lambda element: flatten_innermost_element(element, classes=classes), sequence), [])
             if isinstance(sequence, classes) else [sequence])
 
 
