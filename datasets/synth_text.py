@@ -132,7 +132,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
                             feature={
                                 "path": tf.train.Feature(
                                     bytes_list=tf.train.BytesList(
-                                        value=[filenames[0].encode("utf-8")]
+                                        value=[os.path.join(input_directory, filenames[0]).encode("utf-8")]
                                     )
                                 ),
                                 "label": tf.train.Feature(
