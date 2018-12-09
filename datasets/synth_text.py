@@ -82,8 +82,9 @@ def convert_dataset(input_directory, output_filename, *sequence_lengths):
         for filenames, texts, bounding_boxes in zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0]):
 
             bounding_box_indices = [0] + list(accumulate([len(text.split()) for text in texts]))[:-1]
-            print(bounding_boxes.shape)
-            print(filenames[0])
+
+            if len(bounding_boxes.shape) < 3:
+                bounding_boxes = bounding_boxes[:, :, None]
             bounding_boxes = bounding_boxes.transpose([2, 1, 0])
             bounding_boxes = [bounding_boxes[i] for i in bounding_box_indices]
 
