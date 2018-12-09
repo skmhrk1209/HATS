@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import sys
 import os
 import scipy.io
 from itertools import *
@@ -125,3 +126,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
                     )
                 ).SerializeToString()
             )
+
+if __name__ == "__main__":
+    
+    convert_dataset(*sys.argv)
