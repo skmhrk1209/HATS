@@ -84,7 +84,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
             bounding_boxes = bounding_boxes.transpose(2, 1, 0)
             bounding_boxes = [bounding_boxes[i] for i in bounding_box_indices]
 
-            texts = [text for text, bounding_box in sorted(zip(texts, bounding_boxes), key=lambda t: t[1][0][::-1])]
+            texts = [text for text, bounding_box in sorted(zip(texts, bounding_boxes), key=lambda t: t[1][0][::-1].tolist())]
             texts = [[[char for char in string.strip(" ")] for string in sequence.split("\n")] for sequence in texts]
 
             label = map_innermost_element(lambda char: class_ids[char], texts)
