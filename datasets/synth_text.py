@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import scipy
 import os
 from itertools import *
 from algorithms import *
@@ -88,17 +89,23 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
 
             label = map_innermost_element(lambda char: class_ids[char], texts)
 
-            for i, sequence_length in enumerate(sequence_lengths):
+            try:
 
-                label = map_innermost_list(
-                    function=lambda sequence: np.pad(
-                        array=sequence,
-                        pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
-                        mode="constant",
-                        constant_values=class_ids[""]
-                    ),
-                    sequence=label
-                )
+                for i, sequence_length in enumerate(sequence_lengths):
+
+                    label = map_innermost_list(
+                        function=lambda sequence: np.pad(
+                            array=sequence,
+                            pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                            mode="constant",
+                            constant_values=class_ids[""]
+                        ),
+                        sequence=label
+                    )
+
+            except IndexError:
+
+                continue
 
             writer.write(
                 record=tf.train.Example(
