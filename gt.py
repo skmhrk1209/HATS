@@ -10,29 +10,28 @@ bounding_boxes = dataset["wordBB"][0]
 num_data = len(filenames)
 print("num_data: ".format(num_data))
 
+
+def count(sequence_lengths):
+
+    sequence_length_counter = Counter(sequence_lengths)
+    total_num_sequences = len(sequence_lengths)
+    partial_num_sequences = 0
+    for sequence_length, num_sequences in sorted(sequence_length_counter.items()):
+        partial_num_sequences += num_sequences
+        ratio = partial_num_sequences / total_num_sequences
+        if ratio > 0.9:
+            print("max sequence length: {} (first over 90% of dataset ({}%))".format(sequence_length, int(ratio * 100)))
+            break
+
+
 sequence_lengths = [len(sequence) for sequence in texts]
-sequence_length_counter = Counter(sequence_lengths)
+count(sequence_lengths)
 
-total_num_sequences = len(sequence_lengths)
-partial_num_sequences = 0
-for sequence_length, num_sequences in sorted(sequence_length_counter.items()):
-    partial_num_sequences += num_sequences
-    ratio = partial_num_sequences / total_num_sequences
-    if ratio > 0.9:
-        print("max sequence length: {} (first over 90% of dataset ({}%))".format(sequence_length, int(ratio * 100)))
-        break
+sequence_lengths = [len(sequence.split("\n")) for sequences in texts for sequence in sequences]
+count(sequence_lengths)
 
-string_lengths = [len(string.strip()) for sequence in texts for string in sequence]
-string_length_counter = Counter(string_lengths)
-
-total_num_strings = len(string_lengths)
-partial_num_strings = 0
-for string_length, num_strings in sorted(string_length_counter.items()):
-    partial_num_strings += num_strings
-    ratio = partial_num_strings / total_num_strings
-    if ratio > 0.9:
-        print("max string length: {} (first over 90% of dataset ({}%))".format(string_length, int(ratio * 100)))
-        break
+sequence_lengths = [len(sequence.strip(" ")) for sequencess in texts for sequences in sequencess for sequence in sequence.split("\n")]
+count(sequence_lengths)
 
 chars = [char for sequence in texts for string in sequence for char in string]
 char_counter = Counter(chars)

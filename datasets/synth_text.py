@@ -84,7 +84,8 @@ def convert_dataset(input_directory, output_filename, *sequence_lengths):
             bounding_box_indices = [0] + list(accumulate([len(text.split()) for text in texts]))[:-1]
 
             if len(bounding_boxes.shape) < 3:
-                bounding_boxes = bounding_boxes[:, :, None]
+                bounding_boxes = bounding_boxes[:, :, np.newaxis]
+                
             bounding_boxes = bounding_boxes.transpose([2, 1, 0])
             bounding_boxes = [bounding_boxes[i] for i in bounding_box_indices]
 
