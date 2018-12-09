@@ -73,9 +73,10 @@ class Dataset(object):
 def convert_dataset(input_directory, output_filename, sequence_lengths):
 
     dataset = scipy.io.loadmat(os.path.join(input_directory, "gt.mat"))
+    dataset = list(zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0]))
 
     random.seed(0)
-    dataset = random.shuffle(list(zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0])))
+    random.shuffle(dataset)
 
     print(len(dataset))
 
