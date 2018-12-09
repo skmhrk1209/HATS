@@ -4,7 +4,7 @@ import sys
 import os
 import scipy.io
 from itertools import *
-from ..algorithms import *
+from algorithms import *
 
 
 class Dataset(object):
