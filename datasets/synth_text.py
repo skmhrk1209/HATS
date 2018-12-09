@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
-import scipy
 import os
+import scipy.io
 from itertools import *
 from algorithms import *
 
