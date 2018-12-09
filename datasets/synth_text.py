@@ -77,6 +77,8 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
     random.seed(0)
     dataset = random.shuffle(list(zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0])))
 
+    print(len(dataset))
+
     train_dataset = dataset[:int(len(dataset) * 0.9)]
     test_dataset = dataset[int(len(dataset) * 0.9):]
 
