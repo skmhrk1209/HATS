@@ -1,2 +1,0 @@
-import attention_network
-import residual_network

@@ -126,8 +126,3 @@ def convert_dataset(input_directory, output_filename, *sequence_lengths):
                     )
                 ).SerializeToString()
             )
-
-
-if __name__ == "__main__":
-
-    convert_dataset(*sys.argv)
