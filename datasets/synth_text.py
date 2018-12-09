@@ -103,7 +103,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
                         sequence=label
                     )
 
-            except IndexError:
+            except ValueError:
 
                 continue
 
