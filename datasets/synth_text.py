@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import sys
 import os
+import random
 import scipy.io
 from itertools import *
 from algorithms import *
@@ -71,62 +72,77 @@ class Dataset(object):
 
 def convert_dataset(input_directory, output_filename, sequence_lengths):
 
-    with tf.python_io.TFRecordWriter(output_filename) as writer:
+    dataset = scipy.io.loadmat(os.path.join(input_directory, "gt.mat"))
 
-        class_ids = {}
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord(" "), ord("~") + 1), 0)})
-        class_ids.update({"": max(class_ids.values()) + 1})
+    random.seed(0)
+    dataset = random.shuffle(list(zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0])))
 
-        dataset = scipy.io.loadmat(os.path.join(input_directory, "gt.mat"))
+    train_dataset = dataset[:int(len(dataset) * 0.9)]
+    test_dataset = dataset[int(len(dataset) * 0.9):]
 
-        for filenames, texts, bounding_boxes in zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0]):
+    root, ext = os.path.splitext(output_filename)
+    train_filename = "{}_train{}".format(root, ext)
+    test_filename = "{}_test{}".format(root, ext)
 
-            bounding_box_indices = [0] + list(accumulate([len(text.split()) for text in texts]))[:-1]
+    def convert_dataset_impl(input_dataset, output_filename):
 
-            if len(bounding_boxes.shape) < 3:
-                bounding_boxes = bounding_boxes[:, :, np.newaxis]
+        with tf.python_io.TFRecordWriter(output_filename) as writer:
 
-            bounding_boxes = bounding_boxes.transpose([2, 1, 0])
-            bounding_boxes = [bounding_boxes[i] for i in bounding_box_indices]
+            class_ids = {}
+            class_ids.update({chr(j): i for i, j in enumerate(range(ord(" "), ord("~") + 1), 0)})
+            class_ids.update({"": max(class_ids.values()) + 1})
 
-            texts = [text for text, bounding_box in sorted(zip(texts, bounding_boxes), key=lambda t: t[1][0][::-1].tolist())]
-            texts = [[[char for char in string.strip(" ")] for string in sequence.split("\n")] for sequence in texts]
+            for filenames, texts, bounding_boxes in zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0]):
 
-            label = map_innermost_element(lambda char: class_ids[char], texts)
+                bounding_box_indices = [0] + list(accumulate([len(text.split()) for text in texts]))[:-1]
 
-            try:
+                if len(bounding_boxes.shape) < 3:
+                    bounding_boxes = bounding_boxes[:, :, np.newaxis]
 
-                for i, sequence_length in enumerate(sequence_lengths):
+                bounding_boxes = bounding_boxes.transpose([2, 1, 0])
+                bounding_boxes = [bounding_boxes[i] for i in bounding_box_indices]
 
-                    label = map_innermost_list(
-                        function=lambda sequence: np.pad(
-                            array=sequence,
-                            pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
-                            mode="constant",
-                            constant_values=class_ids[""]
-                        ),
-                        sequence=label
-                    )
+                texts = [text for text, bounding_box in sorted(zip(texts, bounding_boxes), key=lambda t: t[1][0][::-1].tolist())]
+                texts = [[[char for char in string.strip(" ")] for string in sequence.split("\n")] for sequence in texts]
 
-            except ValueError:
+                label = map_innermost_element(lambda char: class_ids[char], texts)
 
-                continue
+                try:
 
-            writer.write(
-                record=tf.train.Example(
-                    features=tf.train.Features(
-                        feature={
-                            "path": tf.train.Feature(
-                                bytes_list=tf.train.BytesList(
-                                    value=[filenames[0].encode("utf-8")]
-                                )
+                    for i, sequence_length in enumerate(sequence_lengths):
+
+                        label = map_innermost_list(
+                            function=lambda sequence: np.pad(
+                                array=sequence,
+                                pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                                mode="constant",
+                                constant_values=class_ids[""]
                             ),
-                            "label": tf.train.Feature(
-                                int64_list=tf.train.Int64List(
-                                    value=label.astype(np.int32).reshape([-1]).tolist()
+                            sequence=label
+                        )
+
+                except ValueError:
+
+                    continue
+
+                writer.write(
+                    record=tf.train.Example(
+                        features=tf.train.Features(
+                            feature={
+                                "path": tf.train.Feature(
+                                    bytes_list=tf.train.BytesList(
+                                        value=[filenames[0].encode("utf-8")]
+                                    )
+                                ),
+                                "label": tf.train.Feature(
+                                    int64_list=tf.train.Int64List(
+                                        value=label.astype(np.int32).reshape([-1]).tolist()
+                                    )
                                 )
-                            )
-                        }
-                    )
-                ).SerializeToString()
-            )
+                            }
+                        )
+                    ).SerializeToString()
+                )
+
+    convert_dataset_impl(train_dataset, train_filename)
+    convert_dataset_impl(test_dataset, test_filename)
