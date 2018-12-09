@@ -21,7 +21,7 @@ def count(sequence_lengths):
         ratio = partial_num_sequences / total_num_sequences
         if ratio > 0.9:
             print("max sequence length: {} (first over 90% of dataset ({}%))".format(sequence_length, int(ratio * 100)))
-
+			break
 
 sequence_lengths = [len(regions) for regions in texts]
 count(sequence_lengths)
