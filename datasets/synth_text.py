@@ -69,7 +69,7 @@ class Dataset(object):
         return self.iterator.get_next()
 
 
-def convert_dataset(input_directory, output_filename, *sequence_lengths):
+def convert_dataset(input_directory, output_filename, sequence_lengths):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
@@ -85,7 +85,7 @@ def convert_dataset(input_directory, output_filename, *sequence_lengths):
 
             if len(bounding_boxes.shape) < 3:
                 bounding_boxes = bounding_boxes[:, :, np.newaxis]
-                
+
             bounding_boxes = bounding_boxes.transpose([2, 1, 0])
             bounding_boxes = [bounding_boxes[i] for i in bounding_box_indices]
 

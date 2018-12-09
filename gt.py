@@ -33,7 +33,7 @@ count(sequence_lengths)
 sequence_lengths = [len(chars.strip(" ")) for regions in texts for strings in regions for chars in strings.split("\n")]
 count(sequence_lengths)
 
-chars = [char for regions in texts for strings in regions for chars in strings.split("\n") for char in chars]
+chars = [char for regions in texts for strings in regions for chars in strings.split("\n") for char in chars.strip(" ")]
 char_counter = Counter(chars)
 
 num_char_classes = len(char_counter)
