@@ -3,8 +3,9 @@ import numpy as np
 import sys
 import os
 import random
+import functools
+import itertools
 import scipy.io
-from itertools import *
 from algorithms import *
 
 
@@ -94,7 +95,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
 
             for filenames, texts, bounding_boxes in input_dataset:
 
-                bounding_box_indices = [0] + list(accumulate([len(text.split()) for text in texts]))[:-1]
+                bounding_box_indices = [0] + list(itertools.accumulate([len(text.split()) for text in texts]))[:-1]
 
                 if len(bounding_boxes.shape) < 3:
                     bounding_boxes = bounding_boxes[:, :, np.newaxis]
