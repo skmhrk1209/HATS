@@ -90,16 +90,9 @@ def convert_dataset(input_directory, output_filename, *sequence_lengths):
 
             label = map_innermost_element(lambda char: class_ids[char], texts)
 
-            print(label)
-
             try:
 
                 for i, sequence_length in enumerate(sequence_lengths):
-
-                    label = map_innermost_list(
-                        function=lambda sequence: print(sequence),
-                        sequence=label
-                    )
 
                     label = map_innermost_list(
                         function=lambda sequence: np.pad(
