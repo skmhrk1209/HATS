@@ -56,7 +56,7 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=9, num_units=[1024]),
-                    AttrDict(sequence_length=3, num_units=[1024])
+                    AttrDict(sequence_length=3, num_units=[1024]),
                     AttrDict(sequence_length=12, num_units=[1024])
                 ],
                 channels_first=False
