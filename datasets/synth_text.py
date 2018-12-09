@@ -87,15 +87,15 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
     train_filename = "{}_train{}".format(root, ext)
     test_filename = "{}_test{}".format(root, ext)
 
+    class_ids = {}
+    class_ids.update({chr(j): i for i, j in enumerate(range(ord(" "), ord("~") + 1), 0)})
+    class_ids.update({"": max(class_ids.values()) + 1})
+
     def convert_dataset_impl(input_dataset, output_filename):
 
         with tf.python_io.TFRecordWriter(output_filename) as writer:
 
-            class_ids = {}
-            class_ids.update({chr(j): i for i, j in enumerate(range(ord(" "), ord("~") + 1), 0)})
-            class_ids.update({"": max(class_ids.values()) + 1})
-
-            for filenames, texts, bounding_boxes in zip(dataset["imnames"][0],  dataset["txt"][0], dataset["wordBB"][0]):
+            for filenames, texts, bounding_boxes in input_dataset:
 
                 bounding_box_indices = [0] + list(accumulate([len(text.split()) for text in texts]))[:-1]
 
