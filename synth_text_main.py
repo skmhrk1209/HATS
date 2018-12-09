@@ -83,7 +83,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=None,
+                image_size=[256, 256],
                 channels_first=False,
                 sequence_lengths=[8, 2, 8]
             ).get_next()
@@ -97,7 +97,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=None,
+                image_size=[256, 256],
                 channels_first=False,
                 sequence_lengths=[8, 2, 8]
             ).get_next()
@@ -113,7 +113,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                image_size=None,
+                image_size=[256, 256],
                 channels_first=False,
                 sequence_lengths=[8, 2, 8]
             ).get_next()
