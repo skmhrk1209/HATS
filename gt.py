@@ -2,7 +2,7 @@ import scipy.io
 import cv2
 from collections import Counter
 
-dataset = scipy.io.loadmat("/home/sakuma/data/SynthText/gt.mat")
+dataset = scipy.io.loadmat("gt.mat")
 filenames = dataset["imnames"][0]
 texts = dataset["txt"][0]
 bounding_boxes = dataset["wordBB"][0]
