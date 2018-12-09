@@ -120,9 +120,7 @@ def main(unused_argv):
         )
 
         class_ids = {}
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("a"), ord("z") + 1), class_ids["Z"] + 1)}),
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord(" "), ord("~") + 1), 0)})
         class_ids.update({"": max(class_ids.values()) + 1})
 
         class_chars = dict(map(lambda key_value: key_value[::-1], class_ids.items()))
