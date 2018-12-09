@@ -96,7 +96,10 @@ def convert_dataset(input_directory, output_filename, *sequence_lengths):
 
                 for i, sequence_length in enumerate(sequence_lengths):
 
-                    print(i)
+                    label = map_innermost_list(
+                        function=lambda sequence: print(sequence),
+                        sequence=label
+                    )
 
                     label = map_innermost_list(
                         function=lambda sequence: np.pad(
