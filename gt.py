@@ -23,16 +23,16 @@ def count(sequence_lengths):
             print("max sequence length: {} (first over 90% of dataset ({}%))".format(sequence_length, int(ratio * 100)))
 
 
-sequence_lengths = [len(sequence) for sequence in texts]
+sequence_lengths = [len(regions) for regions in texts]
 count(sequence_lengths)
 
-sequence_lengths = [len(sequence.split("\n")) for sequences in texts for sequence in sequences]
+sequence_lengths = [len(strings.split("\n")) for regions in texts for strings in regions]
 count(sequence_lengths)
 
-sequence_lengths = [len(sequence.strip(" ")) for sequencess in texts for sequences in sequencess for sequence in sequences.split("\n")]
+sequence_lengths = [len(chars.strip(" ")) for regions in texts for strings in regions for chars in strings.split("\n")]
 count(sequence_lengths)
 
-chars = [char for sequence in texts for string in sequence for char in string]
+chars = [char for regions in texts for strings in regions for chars in strings.split("\n") for char in chars]
 char_counter = Counter(chars)
 
 num_char_classes = len(char_counter)
