@@ -19,7 +19,7 @@ def count(sequence_lengths):
     for sequence_length, num_sequences in sorted(sequence_length_counter.items()):
         partial_num_sequences += num_sequences
         ratio = partial_num_sequences / total_num_sequences
-        if ratio > 0.9:
+        if ratio > 0.95:
             print("max sequence length: {} (first over 90% of dataset ({}%))".format(sequence_length, int(ratio * 100)))
             break
 
