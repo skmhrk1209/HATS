@@ -17,7 +17,7 @@ parser.add_argument("--model_dir", type=str, default="synth_text_acnn_model", he
 parser.add_argument('--filenames', type=str, nargs="+", default=["synth_text_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=500000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=400000, help="buffer size to shuffle dataset")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
