@@ -90,7 +90,7 @@ class AttentionNetwork(object):
                             initial_state=multi_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
-                            ),
+                            ),
                             scope="rnn"
                         ),
                         sequence=inputs
