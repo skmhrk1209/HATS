@@ -84,18 +84,13 @@ class AttentionNetwork(object):
                     ])
 
                     inputs = map_innermost_element(
-                        function=lambda inputs: (None, multi_cell.zero_state(
-                            batch_size=tf.shape(inputs)[0],
-                            dtype=tf.float32
-                        )),
-                        sequence=inputs
-                    )
-
-                    inputs = map_innermost_element(
-                        function=lambda outputs_state: static_rnn(
+                        function=lambda inputs: static_rnn(
                             cell=multi_cell,
                             inputs=[feature_vectors] * rnn_param.sequence_length,
-                            initial_state=outputs_state[1],
+                            initial_state=multi_cell.zero_state(
+                                batch_size=tf.shape(inputs)[0],
+                                dtype=tf.float32
+                            ),
                             scope="rnn"
                         ),
                         sequence=inputs
@@ -113,10 +108,10 @@ class AttentionNetwork(object):
                     ])
 
                     inputs = map_innermost_element(
-                        function=lambda outputs_state: static_rnn(
+                        function=lambda inputs: static_rnn(
                             cell=multi_cell,
                             inputs=[feature_vectors] * rnn_param.sequence_length,
-                            initial_state=outputs_state[1],
+                            initial_state=inputs[1],
                             scope="rnn"
                         ),
                         sequence=inputs
@@ -134,10 +129,10 @@ class AttentionNetwork(object):
                     ])
 
                     inputs = map_innermost_element(
-                        function=lambda outputs_state: tuple(map(list, zip(*static_rnn(
+                        function=lambda inputs: tuple(map(list, zip(*static_rnn(
                             cell=multi_cell,
                             inputs=[feature_vectors] * rnn_param.sequence_length,
-                            initial_state=outputs_state[1],
+                            initial_state=inputs[1],
                             scope="rnn"
                         ))))[0],
                         sequence=inputs
