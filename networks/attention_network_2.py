@@ -100,10 +100,15 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
+                    if i == 0:
+                        map_innermost_element(
+                            function=lambda inputs: print(inputs),
+                            sequence=inputs
+                        )
             else:
 
                 inputs = map_innermost_element(
-                    function=lambda inputs: print(inputs),
+                    function=lambda inputs: inputs.h,
                     sequence=inputs
                 )
 
