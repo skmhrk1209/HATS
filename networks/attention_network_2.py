@@ -5,17 +5,7 @@ from itertools import *
 from algorithms import *
 
 
-def static_rnn(cell, inputs, initial_state, scope):
-
-    # with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
-
-    print(list(accumulate(
-        iterable=[initial_state] + inputs,
-        func=lambda state, inputs: cell(
-            inputs=inputs,
-            state=state
-        )[1]
-    ))[1:])
+def static_rnn(cell, inputs, initial_state):
 
     return list(accumulate(
         iterable=[initial_state] + inputs,
@@ -101,8 +91,7 @@ class AttentionNetwork(object):
                             initial_state=inputs if i else lstm_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
-                            ),
-                            scope="rnn"
+                            )
                         ),
                         sequence=inputs
                     )
