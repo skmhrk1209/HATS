@@ -62,17 +62,11 @@ class AttentionNetwork(object):
             )
 
             # ==========================================================================================
-            feature_vectors = inputs
+            references = inputs
 
             def static_rnn(cell, inputs, initial_state):
 
-                return list(accumulate(
-                    iterable=[initial_state] + inputs,
-                    func=lambda state, inputs: cell(
-                        inputs=inputs,
-                        state=state
-                    )[1]
-                ))[1:]
+                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
 
             for i, rnn_param in enumerate(self.rnn_params):
 
@@ -86,7 +80,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
-                            inputs=[feature_vectors] * rnn_param.sequence_length,
+                            inputs=[references] * rnn_param.sequence_length,
                             initial_state=inputs if i else lstm_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
