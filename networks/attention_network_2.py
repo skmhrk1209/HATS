@@ -5,17 +5,6 @@ from itertools import *
 from algorithms import *
 
 
-def static_rnn(cell, inputs, initial_state):
-
-    return list(accumulate(
-        iterable=[initial_state] + inputs,
-        func=lambda state, inputs: cell(
-            inputs=inputs,
-            state=state
-        )[1]
-    ))[1:]
-
-
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params, rnn_params, channels_first):
@@ -74,6 +63,16 @@ class AttentionNetwork(object):
 
             # ==========================================================================================
             feature_vectors = inputs
+
+            def static_rnn(cell, inputs, initial_state):
+
+                return list(accumulate(
+                    iterable=[initial_state] + inputs,
+                    func=lambda state, inputs: cell(
+                        inputs=inputs,
+                        state=state
+                    )[1]
+                ))[1:]
 
             for i, rnn_param in enumerate(self.rnn_params):
 
