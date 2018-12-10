@@ -6,12 +6,10 @@ from algorithms import *
 
 def static_rnn(cell, inputs, initial_state, scope):
 
-    print("a")
-
     # with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
 
     return list(accumulate(
-        iterable=inputs + [initial_state],
+        iterable=[initial_state] + inputs,
         func=lambda inputs, state: cell(
             inputs=inputs,
             state=state
