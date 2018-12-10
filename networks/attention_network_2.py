@@ -87,13 +87,14 @@ class AttentionNetwork(object):
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
-
+                    '''
                     multi_cell = tf.nn.rnn_cell.MultiRNNCell([
                         tf.nn.rnn_cell.LSTMCell(
                             num_units=num_units,
                             use_peepholes=True
                         ) for num_units in rnn_param.num_units
                     ])
+                    '''
 
                     multi_cell = tf.nn.rnn_cell.LSTMCell(
                         num_units=rnn_param.num_units[0],
