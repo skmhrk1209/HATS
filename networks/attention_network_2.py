@@ -86,6 +86,11 @@ class AttentionNetwork(object):
                         ) for num_units in rnn_param.num_units
                     ])
 
+                    print(multi_cell.zero_state(
+                        batch_size=tf.shape(inputs)[0],
+                        dtype=tf.float32
+                    ))
+
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=multi_cell,
