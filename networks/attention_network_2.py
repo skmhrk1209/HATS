@@ -162,6 +162,14 @@ class AttentionNetwork(object):
                         num_proj=np.prod(shape[1:])
                     )
 
+                    map_innermost_element(
+                        function=lambda inputs: print(lstm_cell.zero_state(
+                            batch_size=tf.shape(inputs)[0],
+                            dtype=tf.float32
+                        ))
+                        sequence=inputs
+                    )
+
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
