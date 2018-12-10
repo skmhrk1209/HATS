@@ -95,6 +95,11 @@ class AttentionNetwork(object):
                         ) for num_units in rnn_param.num_units
                     ])
 
+                    multi_cell = tf.nn.rnn_cell.LSTMCell(
+                        num_units=rnn_param.num_units[0],
+                        use_peepholes=True
+                    )
+
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=multi_cell,
