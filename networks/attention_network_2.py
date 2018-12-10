@@ -83,7 +83,6 @@ class AttentionNetwork(object):
                         ) for num_units in rnn_param.num_units
                     ])
 
-                    """
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=multi_cell,
@@ -96,7 +95,6 @@ class AttentionNetwork(object):
                         ),
                         sequence=inputs
                     )
-                    """
 
             for i, rnn_param in enumerate(self.rnn_params[1:-1], i + 1):
 
