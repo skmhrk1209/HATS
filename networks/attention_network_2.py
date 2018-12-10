@@ -163,7 +163,8 @@ class AttentionNetwork(object):
                     )
 
                     map_innermost_element(
-                        function=lambda inputs: print(inputs)
+                        function=lambda inputs: print(inputs),
+                        sequence=inputs
                     )
 
                     inputs = map_innermost_element(
