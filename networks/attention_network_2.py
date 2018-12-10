@@ -169,7 +169,7 @@ class AttentionNetwork(object):
                             initial_state=tf.nn.rnn_cell.LSTMStateTuple(
                                 c=tf.layers.dense(
                                     inputs=inputs.c,
-                                    units=rnn_param.num_units,
+                                    units=16,
                                     activation=tf.nn.tanh,
                                     kernel_initializer=tf.variance_scaling_initializer(
                                         scale=1.0,
@@ -177,12 +177,12 @@ class AttentionNetwork(object):
                                         distribution="normal",
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
-                                    name="c_projection_1",
+                                    name="c_projection",
                                     reuse=tf.AUTO_REUSE
                                 ),
                                 h=tf.layers.dense(
                                     inputs=inputs.h,
-                                    units=rnn_param.num_units,
+                                    units=16,
                                     activation=tf.nn.tanh,
                                     kernel_initializer=tf.variance_scaling_initializer(
                                         scale=1.0,
@@ -190,7 +190,7 @@ class AttentionNetwork(object):
                                         distribution="normal",
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
-                                    name="h_projection_2",
+                                    name="h_projection",
                                     reuse=tf.AUTO_REUSE
                                 )
                             )
