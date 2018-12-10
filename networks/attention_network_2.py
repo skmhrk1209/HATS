@@ -68,20 +68,26 @@ class AttentionNetwork(object):
 
                 return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
 
-            for i, rnn_param in enumerate(self.rnn_params):
+            for i, rnn_param in enumerate(self.rnn_params[:1]):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         num_units=rnn_param.num_units,
-                        use_peepholes=True
+                        use_peepholes=True,
+                        activation=tf.nn.tanh,
+                        initializer=tf.variance_scaling_initializer(
+                            scale=1.0,
+                            mode="fan_avg",
+                            distribution="normal",
+                        )
                     )
 
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
                             inputs=[references] * rnn_param.sequence_length,
-                            initial_state=inputs if i else lstm_cell.zero_state(
+                            initial_state=lstm_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
                             )
@@ -89,41 +95,113 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-            else:
+            for i, rnn_param in enumerate(self.rnn_params[1:-1], i + 1):
 
-                inputs = map_innermost_element(
-                    function=lambda inputs: inputs.h,
-                    sequence=inputs
-                )
+                with tf.variable_scope("rnn_block_{}".format(i)):
 
-            with tf.variable_scope("projection_block"):
+                    lstm_cell = tf.nn.rnn_cell.LSTMCell(
+                        num_units=rnn_param.num_units,
+                        use_peepholes=True,
+                        activation=tf.nn.tanh,
+                        initializer=tf.variance_scaling_initializer(
+                            scale=1.0,
+                            mode="fan_avg",
+                            distribution="normal",
+                        )
+                    )
 
-                inputs = map_innermost_element(
-                    function=compose(
-                        lambda inputs: tf.layers.dense(
-                            inputs=inputs,
-                            units=np.prod(shape[1:]),
-                            use_bias=False,
-                            kernel_initializer=tf.variance_scaling_initializer(
-                                scale=2.0,
-                                mode="fan_in",
-                                distribution="normal",
-                            ),
-                            name="dense",
-                            reuse=tf.AUTO_REUSE
+                    inputs = map_innermost_element(
+                        function=lambda inputs: static_rnn(
+                            cell=lstm_cell,
+                            inputs=[references] * rnn_param.sequence_length,
+                            initial_state=tf.nn.rnn_cell.LSTMStateTuple(
+                                c=tf.layers.dense(
+                                    inputs=inputs.c,
+                                    units=rnn_param.num_units,
+                                    activation=tf.nn.tanh,
+                                    kernel_initializer=tf.variance_scaling_initializer(
+                                        scale=1.0,
+                                        mode="fan_avg",
+                                        distribution="normal",
+                                    ),
+                                    bias_initializer=tf.zeros_initializer(),
+                                    name="c_projection",
+                                    reuse=tf.AUTO_REUSE
+                                ),
+                                h=tf.layers.dense(
+                                    inputs=inputs.h,
+                                    units=rnn_param.num_units,
+                                    activation=tf.nn.tanh,
+                                    kernel_initializer=tf.variance_scaling_initializer(
+                                        scale=1.0,
+                                        mode="fan_avg",
+                                        distribution="normal",
+                                    ),
+                                    bias_initializer=tf.zeros_initializer(),
+                                    name="h_projection",
+                                    reuse=tf.AUTO_REUSE
+                                )
+                            )
                         ),
-                        lambda inputs: tf.layers.batch_normalization(
-                            inputs=inputs,
-                            axis=1,
-                            training=training,
-                            fused=True,
-                            name="batch_normalization",
-                            reuse=tf.AUTO_REUSE
+                        sequence=inputs
+                    )
+
+            for i, rnn_param in enumerate(self.rnn_params[-1:], i + 1):
+
+                with tf.variable_scope("rnn_block_{}".format(i)):
+
+                    lstm_cell = tf.nn.rnn_cell.LSTMCell(
+                        num_units=rnn_param.num_units,
+                        use_peepholes=True,
+                        activation=tf.nn.tanh,
+                        initializer=tf.variance_scaling_initializer(
+                            scale=1.0,
+                            mode="fan_avg",
+                            distribution="normal",
                         ),
-                        lambda inputs: tf.nn.relu(inputs)
-                    ),
-                    sequence=inputs
-                )
+                        num_proj=np.prod(shape[1:])
+                    )
+
+                    inputs = map_innermost_element(
+                        function=lambda inputs: static_rnn(
+                            cell=lstm_cell,
+                            inputs=[references] * rnn_param.sequence_length,
+                            initial_state=tf.nn.rnn_cell.LSTMStateTuple(
+                                c=tf.layers.dense(
+                                    inputs=inputs.c,
+                                    units=rnn_param.num_units,
+                                    activation=tf.nn.tanh,
+                                    kernel_initializer=tf.variance_scaling_initializer(
+                                        scale=1.0,
+                                        mode="fan_avg",
+                                        distribution="normal",
+                                    ),
+                                    bias_initializer=tf.zeros_initializer(),
+                                    name="c_projection",
+                                    reuse=tf.AUTO_REUSE
+                                ),
+                                h=tf.layers.dense(
+                                    inputs=inputs.h,
+                                    units=rnn_param.num_units,
+                                    activation=tf.nn.tanh,
+                                    kernel_initializer=tf.variance_scaling_initializer(
+                                        scale=1.0,
+                                        mode="fan_avg",
+                                        distribution="normal",
+                                    ),
+                                    bias_initializer=tf.zeros_initializer(),
+                                    name="h_projection",
+                                    reuse=tf.AUTO_REUSE
+                                )
+                            )
+                        ),
+                        sequence=inputs
+                    )
+
+            inputs = map_innermost_element(
+                function=lambda inputs: inputs.h,
+                sequence=inputs
+            )
 
             # ==========================================================================================
 
