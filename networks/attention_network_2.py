@@ -166,7 +166,7 @@ class AttentionNetwork(object):
                         function=lambda inputs: print(lstm_cell.zero_state(
                             batch_size=tf.shape(inputs)[0],
                             dtype=tf.float32
-                        )),
+                        ), inputs.shape),
                         sequence=inputs
                     )
 
