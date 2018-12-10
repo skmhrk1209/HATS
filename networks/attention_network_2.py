@@ -159,7 +159,7 @@ class AttentionNetwork(object):
                             mode="fan_avg",
                             distribution="normal",
                         ),
-                        num_proj=np.prod(shape[1:])
+                        #num_proj=np.prod(shape[1:])
                     )
 
                     map_innermost_element(
