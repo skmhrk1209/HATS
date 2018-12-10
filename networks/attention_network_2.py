@@ -8,6 +8,14 @@ def static_rnn(cell, inputs, initial_state, scope):
 
     # with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
 
+    print(list(accumulate(
+        iterable=[initial_state] + inputs,
+        func=lambda state, inputs: cell(
+            inputs=inputs,
+            state=state
+        )[1]
+    ))[1:])
+
     return list(accumulate(
         iterable=[initial_state] + inputs,
         func=lambda state, inputs: cell(
@@ -100,11 +108,6 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-                    if i == 0:
-                        map_innermost_element(
-                            function=lambda inputs: print(inputs),
-                            sequence=inputs
-                        )
             else:
 
                 inputs = map_innermost_element(
