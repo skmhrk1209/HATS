@@ -103,7 +103,7 @@ class AttentionNetwork(object):
             else:
 
                 inputs = map_innermost_element(
-                    function=lambda inputs: inputs.h,
+                    function=lambda inputs: print(inputs),
                     sequence=inputs
                 )
 
