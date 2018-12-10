@@ -162,11 +162,6 @@ class AttentionNetwork(object):
                         num_proj=np.prod(shape[1:])
                     )
 
-                    map_innermost_element(
-                        function=lambda inputs: print(inputs),
-                        sequence=inputs
-                    )
-
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
@@ -182,7 +177,7 @@ class AttentionNetwork(object):
                                         distribution="normal",
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
-                                    name="c_projection",
+                                    name="c_projection_1",
                                     reuse=tf.AUTO_REUSE
                                 ),
                                 h=tf.layers.dense(
@@ -195,7 +190,7 @@ class AttentionNetwork(object):
                                         distribution="normal",
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
-                                    name="h_projection",
+                                    name="h_projection_2",
                                     reuse=tf.AUTO_REUSE
                                 )
                             )
