@@ -77,6 +77,8 @@ class AttentionNetwork(object):
 
             for i, rnn_param in enumerate(self.rnn_params):
 
+                print(i)
+
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
                     multi_cell = tf.nn.rnn_cell.MultiRNNCell([
