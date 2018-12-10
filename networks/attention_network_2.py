@@ -4,6 +4,21 @@ from itertools import *
 from algorithms import *
 
 
+def static_rnn(cell, inputs, initial_state, scope):
+
+    print("a")
+
+    # with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
+
+    return list(accumulate(
+        iterable=inputs + [initial_state],
+        func=lambda inputs, state: cell(
+            inputs=inputs,
+            state=state
+        )[1])
+    )
+
+
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, deconv_params, rnn_params, channels_first):
@@ -63,21 +78,7 @@ class AttentionNetwork(object):
             # ==========================================================================================
             feature_vectors = inputs
 
-            def static_rnn(cell, inputs, initial_state, scope):
-
-                # with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
-
-                return list(accumulate(
-                    iterable=inputs + [initial_state],
-                    func=lambda inputs, state: cell(
-                        inputs=inputs,
-                        state=state
-                    )[1])
-                )
-
             for i, rnn_param in enumerate(self.rnn_params):
-
-                print(i)
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
