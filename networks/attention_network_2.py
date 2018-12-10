@@ -67,10 +67,10 @@ class AttentionNetwork(object):
 
                 # with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
 
-                return accumulate(inputs, lambda inputs, outputs_state: cell(
+                return list(accumulate(inputs, lambda inputs, outputs_state: cell(
                     inputs=inputs + [initial_state],
                     state=outputs_state[1]
-                ))
+                )))
 
             for i, rnn_param in enumerate(self.rnn_params[:1]):
 
