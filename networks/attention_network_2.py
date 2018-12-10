@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 import os
 from itertools import *
 from algorithms import *
@@ -87,25 +88,17 @@ class AttentionNetwork(object):
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
-                    '''
-                    multi_cell = tf.nn.rnn_cell.MultiRNNCell([
-                        tf.nn.rnn_cell.LSTMCell(
-                            num_units=num_units,
-                            use_peepholes=True
-                        ) for num_units in rnn_param.num_units
-                    ])
-                    '''
 
-                    multi_cell = tf.nn.rnn_cell.LSTMCell(
-                        num_units=rnn_param.num_units[0],
+                    lstm_cell = tf.nn.rnn_cell.LSTMCell(
+                        num_units=rnn_param.num_units,
                         use_peepholes=True
                     )
 
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
-                            cell=multi_cell,
+                            cell=lstm_cell,
                             inputs=[feature_vectors] * rnn_param.sequence_length,
-                            initial_state=inputs if i else multi_cell.zero_state(
+                            initial_state=inputs if i else lstm_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
                             ),
@@ -118,6 +111,35 @@ class AttentionNetwork(object):
 
                 inputs = map_innermost_element(
                     function=lambda inputs: inputs.h,
+                    sequence=inputs
+                )
+
+            with tf.variable_scope("projection_block"):
+
+                inputs = map_innermost_element(
+                    function=compose(
+                        lambda inputs: tf.layers.dense(
+                            inputs=inputs,
+                            units=np.prod(shape[1:]),
+                            use_bias=False,
+                            kernel_initializer=tf.variance_scaling_initializer(
+                                scale=2.0,
+                                mode="fan_in",
+                                distribution="normal",
+                            ),
+                            name="dense",
+                            reuse=tf.AUTO_REUSE
+                        ),
+                        lambda inputs: tf.layers.batch_normalization(
+                            inputs=inputs,
+                            axis=1,
+                            training=training,
+                            fused=True,
+                            name="batch_normalization",
+                            reuse=tf.AUTO_REUSE
+                        ),
+                        lambda inputs: tf.nn.relu(inputs)
+                    ),
                     sequence=inputs
                 )
 
