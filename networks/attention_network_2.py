@@ -83,6 +83,8 @@ class AttentionNetwork(object):
                         )
                     )
 
+                    print(lstm_cell.state_size)
+
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
