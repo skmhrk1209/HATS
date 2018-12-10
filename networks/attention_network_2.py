@@ -69,13 +69,13 @@ class AttentionNetwork(object):
 
                 return list(accumulate(
                     iterable=inputs + [initial_state],
-                    func=lambda inputs, outputs_state: cell(
+                    func=lambda inputs, state: cell(
                         inputs=inputs,
-                        state=outputs_state[1]
-                    ))
+                        state=state
+                    )[1])
                 )
 
-            for i, rnn_param in enumerate(self.rnn_params[:1]):
+            for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
@@ -86,16 +86,11 @@ class AttentionNetwork(object):
                         ) for num_units in rnn_param.num_units
                     ])
 
-                    print(multi_cell.zero_state(
-                        batch_size=tf.shape(inputs)[0],
-                        dtype=tf.float32
-                    ))
-
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=multi_cell,
                             inputs=[feature_vectors] * rnn_param.sequence_length,
-                            initial_state=multi_cell.zero_state(
+                            initial_state=inputs if i else multi_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
                             ),
@@ -104,49 +99,14 @@ class AttentionNetwork(object):
                         sequence=inputs
                     )
 
-            for i, rnn_param in enumerate(self.rnn_params[1:-1], i + 1):
+            else:
 
-                with tf.variable_scope("rnn_block_{}".format(i)):
+                inputs = map_innermost_element(
+                    function=lambda inputs: inputs.h,
+                    sequence=inputs
+                )
 
-                    multi_cell = tf.nn.rnn_cell.MultiRNNCell([
-                        tf.nn.rnn_cell.LSTMCell(
-                            num_units=num_units,
-                            use_peepholes=True
-                        ) for num_units in rnn_param.num_units
-                    ])
-
-                    inputs = map_innermost_element(
-                        function=lambda inputs: static_rnn(
-                            cell=multi_cell,
-                            inputs=[feature_vectors] * rnn_param.sequence_length,
-                            initial_state=inputs[1],
-                            scope="rnn"
-                        ),
-                        sequence=inputs
-                    )
-
-            for i, rnn_param in enumerate(self.rnn_params[-1:], i + 1):
-
-                with tf.variable_scope("rnn_block_{}".format(i)):
-
-                    multi_cell = tf.nn.rnn_cell.MultiRNNCell([
-                        tf.nn.rnn_cell.LSTMCell(
-                            num_units=num_units,
-                            use_peepholes=True
-                        ) for num_units in rnn_param.num_units
-                    ])
-
-                    inputs = map_innermost_element(
-                        function=lambda inputs: tuple(map(list, zip(*static_rnn(
-                            cell=multi_cell,
-                            inputs=[feature_vectors] * rnn_param.sequence_length,
-                            initial_state=inputs[1],
-                            scope="rnn"
-                        ))))[0],
-                        sequence=inputs
-                    )
-
-             # ==========================================================================================
+            # ==========================================================================================
 
             inputs = map_innermost_element(
                 function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
