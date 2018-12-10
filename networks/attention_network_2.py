@@ -10,11 +10,11 @@ def static_rnn(cell, inputs, initial_state, scope):
 
     return list(accumulate(
         iterable=[initial_state] + inputs,
-        func=lambda inputs, state: cell(
+        func=lambda state, inputs: cell(
             inputs=inputs,
             state=state
-        )[1])
-    )
+        )[1]
+    ))[1:]
 
 
 class AttentionNetwork(object):
