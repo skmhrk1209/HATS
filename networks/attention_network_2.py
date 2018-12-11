@@ -164,12 +164,11 @@ class AttentionNetwork(object):
                             distribution="normal",
                         ),
                         bias_initializer=tf.zeros_initializer(),
-                        name="projection",
+                        name="dense",
                         reuse=tf.AUTO_REUSE
                     ),
                     sequence=inputs
                 )
-
             # ==========================================================================================
 
             inputs = map_innermost_element(
