@@ -118,7 +118,7 @@ class AttentionNetwork(object):
                                 c=tf.layers.dense(
                                     inputs=inputs.c,
                                     units=rnn_param.num_units,
-                                    activation=tf.nn.tanh,
+                                    activation=None,
                                     kernel_initializer=tf.variance_scaling_initializer(
                                         scale=1.0,
                                         mode="fan_avg",

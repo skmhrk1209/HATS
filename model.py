@@ -137,7 +137,7 @@ class Model(object):
 
         map_innermost_element(
             function=lambda indices_attention_maps: tf.summary.image(
-                name="indices_attention_maps_{}".format("_".join(map(str, indices_attention_maps[0]))),
+                name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0]))),
                 tensor=indices_attention_maps[1],
                 max_outputs=2
             ),
