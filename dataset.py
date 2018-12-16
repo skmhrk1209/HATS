@@ -3,12 +3,13 @@ import numpy as np
 import functools
 import glob
 import os
+from algorithms import *
 
 
 class Dataset(object):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size,
-                 image_size, channels_first, string_length):
+                 image_size, channels_first, sequence_lengths):
 
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
@@ -21,7 +22,7 @@ class Dataset(object):
                 self.parse,
                 image_size=image_size,
                 channels_first=channels_first,
-                string_length=string_length
+                sequence_lengths=sequence_lengths
             ),
             num_parallel_calls=os.cpu_count()
         )
@@ -29,7 +30,7 @@ class Dataset(object):
         self.dataset = self.dataset.prefetch(1)
         self.iterator = self.dataset.make_one_shot_iterator()
 
-    def parse(self, example, image_size, channels_first, string_length):
+    def parse(self, example, image_size, channels_first, sequence_lengths):
 
         features = tf.parse_single_example(
             serialized=example,
@@ -39,7 +40,7 @@ class Dataset(object):
                     dtype=tf.string
                 ),
                 "label": tf.FixedLenFeature(
-                    shape=[string_length],
+                    shape=[np.prod(sequence_lengths)],
                     dtype=tf.int64
                 )
             }
@@ -56,6 +57,7 @@ class Dataset(object):
             image = tf.transpose(image, [2, 0, 1])
 
         label = tf.cast(features["label"], tf.int32)
+        label = tf.reshape(label, sequence_lengths)
 
         return {"image": image}, label
 
@@ -64,7 +66,7 @@ class Dataset(object):
         return self.iterator.get_next()
 
 
-def convert_dataset(input_directory, output_filename, string_length):
+def convert_dataset(input_directory, output_filename, sequence_lengths):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
@@ -76,14 +78,22 @@ def convert_dataset(input_directory, output_filename, string_length):
 
         for input_filename in glob.glob(os.path.join(input_directory, "*")):
 
-            string = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1]
+            label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
+            label = map_innermost_element(list, label)
 
-            label = np.pad(
-                array=[class_ids[char] for char in string],
-                pad_width=[[0, string_length - len(string)]],
-                mode="constant",
-                constant_values=class_ids[""]
-            )
+            for i, sequence_length in enumerate(sequence_lengths[::-1]):
+
+                label = map_innermost_list(
+                    function=lambda sequence: np.pad(
+                        array=sequence,
+                        pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                        mode="constant",
+                        constant_values=""
+                    ),
+                    sequence=label
+                )
+
+            label = map_innermost_element(lambda char: class_ids[char], label)
 
             writer.write(
                 record=tf.train.Example(

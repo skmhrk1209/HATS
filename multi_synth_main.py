@@ -7,7 +7,7 @@ import math
 import cv2
 import image as img
 from attrdict import AttrDict
-from datasets.multi_synth import Dataset
+from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
@@ -84,8 +84,7 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=None,
                 channels_first=False,
-                sequence_length=4,
-                string_length=10
+                sequence_lengths=[4, 10]
             ).get_next()
         )
 
@@ -99,8 +98,7 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=None,
                 channels_first=False,
-                sequence_length=4,
-                string_length=10
+                sequence_lengths=[4, 10]
             ).get_next()
         )
 
@@ -116,8 +114,7 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=None,
                 channels_first=False,
-                sequence_length=4,
-                string_length=10
+                sequence_lengths=[4, 10]
             ).get_next()
         )
 
