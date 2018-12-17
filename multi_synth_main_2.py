@@ -43,21 +43,10 @@ def main(unused_argv):
                 num_classes=None,
                 channels_first=False
             ),
-            attention_network=AttentionNetwork(
-                conv_params=[
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                ],
-                deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                ],
-                rnn_params=[
-                    AttrDict(sequence_length=4, num_units=[256, 256]),
-                    AttrDict(sequence_length=10, num_units=[256, 256])
-                ],
-                channels_first=False
-            ),
+            rnn_params=[
+                AttrDict(sequence_length=4, num_units=[256, 256]),
+                AttrDict(sequence_length=10, num_units=[256, 256])
+            ],
             num_classes=63,
             channels_first=False,
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
