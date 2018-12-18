@@ -10,7 +10,7 @@ from attrdict import AttrDict
 from dataset import Dataset
 from model_2 import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network_2 import AttentionNetwork
+from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synth_acnn_model_2", help="model directory")
@@ -37,10 +37,8 @@ def main(unused_argv):
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[1, 1]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=3),
+                    AttrDict(filters=64, strides=[2, 2], blocks=4),
                     AttrDict(filters=128, strides=[2, 2], blocks=4),
-                    AttrDict(filters=256, strides=[2, 2], blocks=6),
-                    AttrDict(filters=512, strides=[2, 2], blocks=3)
                 ],
                 num_classes=None,
                 channels_first=False
@@ -48,11 +46,11 @@ def main(unused_argv):
             attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2])
+                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2])
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[1, 1]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[1, 1]),
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=4, num_units=256),
