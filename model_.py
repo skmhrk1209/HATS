@@ -25,11 +25,11 @@ class Model(object):
     class AccuracyType:
         FULL_SEQUENCE, EDIT_DISTANCE = range(2)
 
-    def __init__(self, convolutional_network, rnn_params,
+    def __init__(self, convolutional_network, attention_network,
                  num_classes, channels_first, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
-        self.rnn_params = rnn_params
+        self.attention_network = attention_network
         self.num_classes = num_classes
         self.channels_first = channels_first
         self.data_format = "channels_first" if channels_first else "channels_last"
@@ -38,47 +38,36 @@ class Model(object):
 
     def __call__(self, features, labels, mode):
 
-        inputs = features["image"]
+        images = features["image"]
 
-        inputs = self.convolutional_network(
-            inputs=inputs,
+        feature_maps = self.convolutional_network(
+            inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        inputs = tf.layers.flatten(inputs)
+        attention_maps = self.attention_network(
+            inputs=images,
+            training=mode == tf.estimator.ModeKeys.TRAIN
+        )
 
-        for i, rnn_param in enumerate(self.rnn_params):
-
-            with tf.variable_scope("rnn_block_{}".format(i)):
-
-                multi_cell = tf.nn.rnn_cell.MultiRNNCell([
-                    tf.nn.rnn_cell.LSTMCell(
-                        num_units=num_units,
-                        use_peepholes=True
-                    ) for num_units in rnn_param.num_units
-                ])
-
-                inputs = map_innermost_element(
-                    function=lambda inputs: tf.nn.static_rnn(
-                        cell=multi_cell,
-                        inputs=[inputs] * rnn_param.sequence_length,
-                        initial_state=multi_cell.zero_state(
-                            batch_size=tf.shape(inputs)[0],
-                            dtype=tf.float32
-                        ),
-                        scope="rnn"
-                    )[0],
-                    sequence=inputs
-                )
+        feature_vectors = map_innermost_element(
+            function=lambda attention_maps: tf.layers.flatten(tf.matmul(
+                a=spatial_flatten(feature_maps, self.channels_first),
+                b=spatial_flatten(attention_maps, self.channels_first),
+                transpose_a=False if self.channels_first else True,
+                transpose_b=True if self.channels_first else False
+            )),
+            sequence=attention_maps
+        )
 
         logits = map_innermost_element(
-            function=lambda inputs: tf.layers.dense(
-                inputs=inputs,
+            function=lambda feature_vectors: tf.layers.dense(
+                inputs=feature_vectors,
                 units=self.num_classes,
                 name="logits",
                 reuse=tf.AUTO_REUSE
             ),
-            sequence=inputs
+            sequence=feature_vectors
         )
 
         predictions = map_innermost_element(
@@ -89,7 +78,23 @@ class Model(object):
             sequence=logits
         )
 
+        attention_maps = map_innermost_element(
+            function=lambda attention_maps: tf.reduce_sum(
+                input_tensor=attention_maps,
+                axis=1 if self.channels_first else 3,
+                keep_dims=True
+            ),
+            sequence=attention_maps
+        )
+
         if mode == tf.estimator.ModeKeys.PREDICT:
+
+            while isinstance(attention_maps, list):
+
+                attention_maps = map_innermost_list(
+                    function=lambda attention_maps: tf.stack(attention_maps, axis=1),
+                    sequence=attention_maps
+                )
 
             while isinstance(predictions, list):
 
@@ -121,6 +126,24 @@ class Model(object):
             ),
             sequence=zip_innermost_element(logits, labels)
         ))
+
+        loss += tf.reduce_mean(map_innermost_element(
+            function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
+            sequence=attention_maps
+        )) * self.hyper_params.attention_map_decay
+
+        # ==========================================================================================
+        tf.summary.image("images", images, max_outputs=2)
+
+        map_innermost_element(
+            function=lambda indices_attention_maps: tf.summary.image(
+                name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0]))),
+                tensor=indices_attention_maps[1],
+                max_outputs=2
+            ),
+            sequence=enumerate_innermost_element(attention_maps)
+        )
+        # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
