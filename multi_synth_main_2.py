@@ -65,15 +65,7 @@ def main(unused_argv):
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(attention_map_decay=0.001)
         ),
-        model_dir=args.model_dir,
-        config=tf.estimator.RunConfig().replace(
-            session_config=tf.ConfigProto(
-                gpu_options=tf.GPUOptions(
-                    visible_device_list=args.gpu,
-                    allow_growth=True
-                )
-            )
-        )
+        model_dir=args.model_dir
     )
 
     if args.train:
