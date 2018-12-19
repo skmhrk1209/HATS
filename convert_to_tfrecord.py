@@ -10,11 +10,19 @@ def main(input_directory, output_filename, sequence_lengths):
     filenames = glob.glob(os.path.join(input_directory, "*"))
     datasets = [scipy.io.loadmat(filename) for filename in filenames]
 
+    max_sequence_length = 0
+    max_string_length = 0
+
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
         for filename, dataset in zip(filenames, datasets):
 
             label = np.concatenate(dataset["rectgt"][:, -2])
+
+            max_sequence_length = max(max_sequence_length, len(label))
+            max_string_length = max(max_string_length, max(map(len, label)))
+
+            '''
             label = map_innermost_element(list, label)
             label = map_innermost_element(lambda char: ord(char) - 32, label)
 
@@ -48,7 +56,7 @@ def main(input_directory, output_filename, sequence_lengths):
                     )
                 ).SerializeToString()
             )
-
+            '''
 
 if __name__ == "__main__":
 
