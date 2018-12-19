@@ -21,7 +21,7 @@ def main(input_directory, output_filename, sequence_lengths):
             label = np.concatenate(dataset["rectgt"][:, -2])
 
             max_sequence_lengths += [len(label)]
-            max_string_lengths += list(map(len, label)))
+            max_string_lengths += list(map(len, label))
 
             '''
             label = map_innermost_element(list, label)
