@@ -1,5 +1,5 @@
 import numpy as np
-import scipy
+import scipy.io
 import glob
 import sys
 import os
