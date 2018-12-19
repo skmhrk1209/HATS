@@ -4,16 +4,12 @@ import scipy.io
 import glob
 import sys
 import os
-import collections
 
 
 def main(input_directory, output_filename, sequence_lengths):
 
     filenames = glob.glob(os.path.join(input_directory, "*"))
     datasets = [scipy.io.loadmat(filename) for filename in filenames]
-
-    max_sequence_lengths = []
-    max_string_lengths = []
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
