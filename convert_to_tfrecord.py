@@ -17,7 +17,6 @@ def main(input_directory, output_filename, sequence_lengths):
         for filename, dataset in zip(filenames, datasets):
 
             label = np.concatenate(dataset["rectgt"][:, -2]).tolist()
-
             label = map_innermost_element(list, label)
             label = map_innermost_element(lambda char: ord(char) - 32, label)
 
