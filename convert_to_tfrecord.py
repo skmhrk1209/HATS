@@ -36,7 +36,7 @@ def main(input_directory, output_filename, sequence_lengths):
                         feature={
                             "path": tf.train.Feature(
                                 bytes_list=tf.train.BytesList(
-                                    value=[filename.replace("images", "labels").replace("mat", "jpg").encode("utf-8")]
+                                    value=[filename.replace("labels", "images").replace("mat", "jpg").encode("utf-8")]
                                 )
                             ),
                             "label": tf.train.Feature(
