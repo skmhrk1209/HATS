@@ -4,6 +4,7 @@ import scipy.io
 import glob
 import sys
 import os
+from algorithms import *
 
 
 def main(input_directory, output_filename, sequence_lengths):
