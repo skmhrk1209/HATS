@@ -24,6 +24,8 @@ def main(input_directory, output_filename, sequence_lengths):
 
                 for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
+                    print(sequence_length)
+
                     label = map_innermost_list(
                         function=lambda sequence: np.pad(
                             array=sequence,
