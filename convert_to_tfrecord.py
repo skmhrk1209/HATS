@@ -59,6 +59,8 @@ def main(input_directory, output_filename, sequence_lengths):
             )
             '''
 
+    print(max_sequence_length, max_string_length)
+
 if __name__ == "__main__":
 
     main(*sys.argv[1:3], sys.argv[3:])
