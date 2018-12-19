@@ -20,9 +20,9 @@ def main(input_directory, output_filename, sequence_lengths):
             label = map_innermost_element(list, label)
             label = map_innermost_element(lambda char: ord(char) - 32, label)
 
-            try:
+            for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
-                for i, sequence_length in enumerate(sequence_lengths[::-1]):
+                try:
 
                     label = map_innermost_list(
                         function=lambda sequence: np.pad(
@@ -34,9 +34,9 @@ def main(input_directory, output_filename, sequence_lengths):
                         sequence=label
                     )
 
-            except ValueError:
+                except ValueError:
 
-                pass
+                    pass
 
             writer.write(
                 record=tf.train.Example(
