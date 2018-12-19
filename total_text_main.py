@@ -58,7 +58,7 @@ def main(unused_argv):
                 ],
                 channels_first=False
             ),
-            num_classes=63,
+            num_classes=96,
             channels_first=False,
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(attention_map_decay=0.001)
