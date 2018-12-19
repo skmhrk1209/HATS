@@ -84,7 +84,7 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[256, 256],
                 channels_first=False,
-                sequence_lengths=[20, 15]
+                sequence_lengths=[15, 15]
             ).get_next()
         )
 
@@ -98,7 +98,7 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[256, 256],
                 channels_first=False,
-                sequence_lengths=[20, 15]
+                sequence_lengths=[15, 15]
             ).get_next()
         )
 
@@ -114,7 +114,7 @@ def main(unused_argv):
                 buffer_size=args.buffer_size,
                 image_size=[256, 256],
                 channels_first=False,
-                sequence_lengths=[20, 15]
+                sequence_lengths=[15, 15]
             ).get_next()
         )
 
