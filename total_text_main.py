@@ -53,7 +53,7 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=20, num_units=256),
+                    AttrDict(sequence_length=15, num_units=256),
                     AttrDict(sequence_length=15, num_units=256)
                 ],
                 channels_first=False
