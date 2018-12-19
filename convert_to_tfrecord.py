@@ -6,6 +6,7 @@ import sys
 import os
 import collections
 
+
 def main(input_directory, output_filename, sequence_lengths):
 
     filenames = glob.glob(os.path.join(input_directory, "*"))
@@ -20,24 +21,26 @@ def main(input_directory, output_filename, sequence_lengths):
 
             label = np.concatenate(dataset["rectgt"][:, -2])
 
-            max_sequence_lengths += [len(label)]
-            max_string_lengths += list(map(len, label))
-
-            '''
             label = map_innermost_element(list, label)
             label = map_innermost_element(lambda char: ord(char) - 32, label)
 
-            for i, sequence_length in enumerate(sequence_lengths[::-1]):
+            try:
 
-                label = map_innermost_list(
-                    function=lambda sequence: np.pad(
-                        array=sequence,
-                        pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
-                        mode="constant",
-                        constant_values=95
-                    ),
-                    sequence=label
-                )
+                for i, sequence_length in enumerate(sequence_lengths[::-1]):
+
+                    label = map_innermost_list(
+                        function=lambda sequence: np.pad(
+                            array=sequence,
+                            pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                            mode="constant",
+                            constant_values=95
+                        ),
+                        sequence=label
+                    )
+
+            except ValueError:
+
+                pass
 
             writer.write(
                 record=tf.train.Example(
@@ -57,10 +60,7 @@ def main(input_directory, output_filename, sequence_lengths):
                     )
                 ).SerializeToString()
             )
-            '''
 
-    print(collections.Counter(max_sequence_lengths))
-    print(collections.Counter(max_string_lengths))
 
 if __name__ == "__main__":
 
