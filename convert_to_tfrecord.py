@@ -34,6 +34,8 @@ def main(input_directory, output_filename, sequence_lengths):
                         sequence=label
                     )
 
+                    print("aaaaaaaaa")
+
                 except ValueError:
 
                     pass
