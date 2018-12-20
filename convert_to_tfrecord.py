@@ -7,15 +7,6 @@ import os
 from algorithms import *
 
 
-def resize_with_crop_or_pad(ls, size, value):
-
-    while len(ls) < size:
-        ls.append(value)
-
-    while len(ls) > size:
-        ls.pop()
-
-
 def main(input_directory, output_filename, sequence_lengths):
 
     filenames = glob.glob(os.path.join(input_directory, "*"))
