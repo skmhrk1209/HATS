@@ -7,6 +7,15 @@ import os
 from algorithms import *
 
 
+def resize_with_crop_or_pad(ls, size, value):
+
+    while len(ls) < size:
+        ls.append(value)
+
+    while len(ls) > size:
+        ls.pop()
+
+
 def main(input_directory, output_filename, sequence_lengths):
 
     filenames = glob.glob(os.path.join(input_directory, "*"))
@@ -18,25 +27,21 @@ def main(input_directory, output_filename, sequence_lengths):
 
             label = np.concatenate(dataset["rectgt"][:, -2]).tolist()
             label = map_innermost_element(list, label)
-            label = map_innermost_element(lambda char: ord(char) - 32, label)
+            label = map_innermost_element(lambda c: ord(c) - 32, label)
 
-            try:
+            for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
-                for i, sequence_length in enumerate(sequence_lengths[::-1]):
-
-                    label = map_innermost_list(
-                        function=lambda sequence: np.pad(
-                            array=sequence,
-                            pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
-                            mode="constant",
-                            constant_values=95
-                        ),
-                        sequence=label
-                    )
-
-            except ValueError:
-
-                continue
+                label = map_innermost_list(
+                    function=lambda sequence: np.pad(
+                        array=sequence,
+                        pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                        mode="constant",
+                        constant_values=95
+                    ) if len(sequence) < sequence_length else np.array(
+                        object=sequence[:sequence_length]
+                    ),
+                    sequence=label
+                )
 
             writer.write(
                 record=tf.train.Example(
