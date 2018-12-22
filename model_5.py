@@ -1,7 +1,7 @@
 import tensorflow as tf
+import tensorlayer as tl
 import numpy as np
 import metrics
-from amsgrad import AMSGrad
 from algorithms import *
 
 
@@ -150,7 +150,7 @@ class Model(object):
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                train_op = AMSGrad().minimize(
+                train_op = tl.optimizers.AMSGrad(learning_rate=0.001, beta2=0.999).minimize(
                     loss=loss,
                     global_step=tf.train.get_global_step()
                 )
