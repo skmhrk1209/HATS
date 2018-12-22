@@ -20,7 +20,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
 
             label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
             label = map_innermost_element(list, label)
-            #label = map_innermost_element(lambda char: class_ids[char], label)
+            label = map_innermost_element(lambda char: class_ids[char], label)
 
             for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
@@ -29,12 +29,10 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
                         array=sequence,
                         pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
                         mode="constant",
-                        constant_values=""
+                        constant_values=class_id[""]
                     ),
                     sequence=label
                 )
-
-            label = np.apply_along_axis(lambda c: print(c), -1, label)
 
             writer.write(
                 record=tf.train.Example(
