@@ -5,7 +5,7 @@ import os
 import cv2
 import random
 from tqdm import trange
-
+from shapely import box
 
 def make_dataset(input_directory, output_directory, num_data, image_size, sequence_lengths, num_retries):
 
