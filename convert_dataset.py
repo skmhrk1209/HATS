@@ -29,7 +29,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
                         array=sequence,
                         pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
                         mode="constant",
-                        constant_values=class_id[""]
+                        constant_values=class_ids[""]
                     ),
                     sequence=label
                 )
