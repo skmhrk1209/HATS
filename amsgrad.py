@@ -11,7 +11,7 @@ from tensorflow.python.training import optimizer
 
 
 class AMSGrad(optimizer.Optimizer):
-    def __init__(self, learning_rate=0.01, beta1=0.9, beta2=0.99, epsilon=1e-8, use_locking=False, name="AMSGrad"):
+    def __init__(self, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8, use_locking=False, name="AMSGrad"):
         super(AMSGrad, self).__init__(use_locking, name)
         self._lr = learning_rate
         self._beta1 = beta1
