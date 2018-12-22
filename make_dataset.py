@@ -8,7 +8,7 @@ from tqdm import trange
 from numba import jit
 
 
-@jit(nopython=False, nogil=True)
+@jit
 def make_dataset(input_directory, output_directory, num_data, image_size, sequence_lengths, num_retries):
 
     input_filenames = glob.glob(os.path.join(input_directory, "*"))
