@@ -1,33 +1,19 @@
-import tensorflow as tf
 import numpy as np
 import glob
 import sys
 import os
-
-
-def multi_thread(func, num_threads):
-
-    def func_mt(*args, **kwargs):
-
-        threads = [threading.Thread(
-            target=func,
-            args=args,
-            kwargs=dict(kwargs, thread_id=i)
-        ) for i in range(num_threads)]
-
-        for thread in threads:
-            thread.start()
-
-        for thread in threads:
-            thread.join()
-
-    return func_mt
+import cv2
+import random
+from tqdm import trange
+from numba import jit
 
 
 @jit(nopython=False, nogil=True)
-def make_dataset(input_filenames, output_directory, num_data, image_size, sequence_lengths, num_retries, thread_id):
+def make_dataset(input_directory, output_directory, num_data, image_size, sequence_lengths, num_retries):
 
-    for i in trange(num_data * thread_id, num_data * (thread_id + 1)):
+    input_filenames = glob.glob(os.path.join(input_directory, "*"))
+
+    for i in trange(num_data):
 
         output_image = np.zeros(image_size + [3], dtype=np.uint8)
 
@@ -64,11 +50,4 @@ def make_dataset(input_filenames, output_directory, num_data, image_size, sequen
 
 if __name__ == "__main__":
 
-    multi_thread(make_dataset, num_threads=os.cpu_count())(
-        input_filenames=glob.glob(os.path.join(sys.argv[1], "*")),
-        output_directory=sys.argv[2],
-        num_data=int(sys.argv[3]),
-        image_size=[256, 256],
-        sequence_lengths=[4, 10],
-        num_retries=100
-    )
+    make_dataset(*sys.argv[1:3], int(sys.argv[3]), list(map(int, sys.argv[4:6])), list(map(int, sys.argv[6:8])), int(sys.argv[8]))
