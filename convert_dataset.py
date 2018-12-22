@@ -34,7 +34,7 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
                     sequence=label
                 )
 
-            label = np.apply_along_axis(lambda c: class_ids[c], -1, label)
+            label = np.apply_along_axis(lambda c: class_ids[c], 1, label)
 
             writer.write(
                 record=tf.train.Example(
