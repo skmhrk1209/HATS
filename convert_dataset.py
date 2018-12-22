@@ -1,24 +1,25 @@
 import tensorflow as tf
 import numpy as np
-import scipy.io
 import glob
 import sys
 import os
 from algorithms import *
 
 
-def main(input_directory, output_filename, sequence_lengths):
-
-    filenames = glob.glob(os.path.join(input_directory, "*"))
-    datasets = [scipy.io.loadmat(filename) for filename in filenames]
+def convert_dataset(input_directory, output_filename, sequence_lengths):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
-        for filename, dataset in zip(filenames, datasets):
+        class_ids = {}
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("a"), ord("z") + 1), class_ids["Z"] + 1)}),
+        class_ids.update({"": max(class_ids.values()) + 1})
 
-            label = np.concatenate(dataset["rectgt"][:, -2]).tolist()
+        for input_filename in glob.glob(os.path.join(input_directory, "*")):
+
+            label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
             label = map_innermost_element(list, label)
-            label = map_innermost_element(lambda c: ord(c) - 32, label)
 
             for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
@@ -27,12 +28,12 @@ def main(input_directory, output_filename, sequence_lengths):
                         array=sequence,
                         pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
                         mode="constant",
-                        constant_values=95
-                    ) if len(sequence) < sequence_length else np.array(
-                        object=sequence[:sequence_length]
+                        constant_values=""
                     ),
                     sequence=label
                 )
+
+            label = map_innermost_element(lambda char: class_ids[char], label)
 
             writer.write(
                 record=tf.train.Example(
@@ -40,7 +41,7 @@ def main(input_directory, output_filename, sequence_lengths):
                         feature={
                             "path": tf.train.Feature(
                                 bytes_list=tf.train.BytesList(
-                                    value=[filename.replace("labels", "images").replace("mat", "jpg").encode("utf-8")]
+                                    value=[input_filename.encode("utf-8")]
                                 )
                             ),
                             "label": tf.train.Feature(
@@ -56,4 +57,4 @@ def main(input_directory, output_filename, sequence_lengths):
 
 if __name__ == "__main__":
 
-    main(*sys.argv[1:3], list(map(int, sys.argv[3:])))
+    convert_dataset(*sys.argv[1:3], list(map(int, sys.argv[3:])))
