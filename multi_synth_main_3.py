@@ -8,12 +8,12 @@ import cv2
 import image as img
 from attrdict import AttrDict
 from dataset import Dataset
-from model_ import Model
+from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synth_acnn_model_2", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_synth_acnn_model_3", help="model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -37,8 +37,10 @@ def main(unused_argv):
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=64, strides=[2, 2], blocks=3),
+                    AttrDict(filters=128, strides=[2, 2], blocks=4),
+                    AttrDict(filters=256, strides=[1, 1], blocks=6),
+                    AttrDict(filters=512, strides=[1, 1], blocks=3),
                 ],
                 num_classes=None,
                 channels_first=False
