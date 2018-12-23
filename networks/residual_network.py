@@ -28,7 +28,7 @@ class ResidualNetwork(object):
                 kernel_initializer=tf.variance_scaling_initializer(
                     scale=2.0,
                     mode="fan_in",
-                    distribution="normal",
+                    distribution="normal"
                 )
             )
 
@@ -44,19 +44,16 @@ class ResidualNetwork(object):
 
             for i, residual_param in enumerate(self.residual_params):
 
-                for j in range(residual_param.blocks)[:1]:
+                inputs = self.residual_block(
+                    inputs=inputs,
+                    filters=residual_param.filters,
+                    strides=residual_param.strides,
+                    projection_shortcut=True,
+                    data_format=self.data_format,
+                    training=training
+                )
 
-                    inputs = self.residual_block(
-                        inputs=inputs,
-                        filters=residual_param.filters,
-                        strides=residual_param.strides,
-                        projection_shortcut=True,
-                        data_format=self.data_format,
-                        training=training,
-                        name="residual_block_{}_{}".format(i, j)
-                    )
-
-                for j in range(residual_param.blocks)[1:]:
+                for j in range(1, residual_param.blocks):
 
                     inputs = self.residual_block(
                         inputs=inputs,
@@ -64,8 +61,7 @@ class ResidualNetwork(object):
                         strides=[1, 1],
                         projection_shortcut=False,
                         data_format=self.data_format,
-                        training=training,
-                        name="residual_block_{}_{}".format(i, j)
+                        training=training
                     )
 
             inputs = ops.batch_normalization(
@@ -90,7 +86,7 @@ class ResidualNetwork(object):
                 kernel_initializer=tf.variance_scaling_initializer(
                     scale=1.0,
                     mode="fan_avg",
-                    distribution="normal",
+                    distribution="normal"
                 ),
                 bias_initializer=tf.zeros_initializer()
             )
@@ -130,7 +126,7 @@ class ResidualNetwork(object):
                     kernel_initializer=tf.variance_scaling_initializer(
                         scale=2.0,
                         mode="fan_in",
-                        distribution="normal",
+                        distribution="normal"
                     )
                 )
 
@@ -145,7 +141,7 @@ class ResidualNetwork(object):
                 kernel_initializer=tf.variance_scaling_initializer(
                     scale=2.0,
                     mode="fan_in",
-                    distribution="normal",
+                    distribution="normal"
                 )
             )
 
@@ -168,7 +164,7 @@ class ResidualNetwork(object):
                 kernel_initializer=tf.variance_scaling_initializer(
                     scale=2.0,
                     mode="fan_in",
-                    distribution="normal",
+                    distribution="normal"
                 )
             )
 
