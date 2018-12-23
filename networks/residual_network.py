@@ -98,10 +98,10 @@ class ResidualNetwork(object):
             return inputs
 
     def residual_block(self, inputs, filters, strides, projection_shortcut, data_format, training, name="residual_block", reuse=None):
-        """A single block for ResNet v2, without a bottleneck.
-        Batch normalization then ReLu then convolution as described by:
+        """ A single block for ResNet v2, without a bottleneck.
+            Batch normalization then ReLu then convolution as described by:
             Identity Mappings in Deep Residual Networks
-            https://arxiv.org/pdf/1603.05027.pdf
+            (https://arxiv.org/pdf/1603.05027.pdf)
             by Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun, Jul 2016.
         """
 
