@@ -20,9 +20,9 @@ class Dataset(object):
         self.dataset = self.dataset.map(
             map_func=functools.partial(
                 self.parse,
-                sequence_lengths=sequence_lengths
+                sequence_lengths=sequence_lengths,
                 image_size=image_size,
-                data_format=data_format,
+                data_format=data_format
             ),
             num_parallel_calls=os.cpu_count()
         )
