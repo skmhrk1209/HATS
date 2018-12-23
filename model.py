@@ -147,9 +147,15 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
+            optimizer = tf.train.AdamOptimizer(
+                learning_rate=self.hyper_params.learning_rate,
+                beta1=self.hyper_params.beta1,
+                beta2=self.hyper_params.beta2
+            )
+
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                train_op = tf.train.AdamOptimizer().minimize(
+                train_op = optimizer.minimize(
                     loss=loss,
                     global_step=tf.train.get_global_step()
                 )
