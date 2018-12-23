@@ -49,14 +49,10 @@ int main(int argc, char* argv[]) {
         while (strings.size() < sequence_length) {
             const auto& filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
 
-            std::regex regex(R"([0-9]+_([0-9A-Za-z]*))");
             std::smatch match;
-            if (!std::regex_match(filename.stem().string(), match, regex)) {
-                std::cout << "invalid filename: " << filename << std::endl;
-                std::exit(EXIT_FAILURE);
-            }
-
-            if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) continue;
+            std::regex regex(R"([0-9]+_([0-9A-Za-z]*))");
+            if (!std::regex_match(filename.stem().string(), match, regex) || match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1])
+                continue;
 
             boost::gil::rgb8_image_t image;
             boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
