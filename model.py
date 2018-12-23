@@ -148,7 +148,8 @@ class Model(object):
 
             accuracy_function = \
                 metrics.full_sequence_accuracy if self.accuracy_type == Model.AccuracyType.FULL_SEQUENCE else \
-                metrics.edit_distance_accuracy if self.accuracy_type == Model.AccuracyType.EDIT_DISTANCE else None
+                metrics.edit_distance_accuracy if self.accuracy_type == Model.AccuracyType.EDIT_DISTANCE else \
+                None
 
             accuracies = map_innermost_element(
                 function=lambda logits_labels: accuracy_function(
