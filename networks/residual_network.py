@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import ops
+from . import ops
 
 
 class ResidualNetwork(object):
