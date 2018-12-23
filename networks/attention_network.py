@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from . import ops
 from algorithms import *
+from itertools import *
 
 
 class AttentionNetwork(object):
