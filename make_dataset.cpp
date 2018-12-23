@@ -7,6 +7,7 @@
 #include <boost/gil/extension/io/jpeg.hpp>
 #include <boost/gil/extension/io/png.hpp>
 #include <boost/program_options.hpp>
+#include <boost/progress.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <random>
@@ -40,7 +41,8 @@ int main(int argc, char* argv[]) {
     std::random_device seed;
     std::mt19937 engine(seed());
 
-    for (auto i = 0; i < variables_map["num_data"].as<int>(); ++i) {
+    boost::progress_display progress_display(variables_map["num_data"].as<int>());
+    for (auto i = 0; i < variables_map["num_data"].as<int>(); ++i, ++progress_display) {
         boost::gil::rgb8_image_t multi_image(variables_map["image_width"].as<int>(), variables_map["image_height"].as<int>());
         boost::gil::fill_pixels(boost::gil::view(multi_image), boost::gil::rgb8_pixel_t(0, 0, 0));
         std::vector<std::pair<std::string, boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>>>> strings;
