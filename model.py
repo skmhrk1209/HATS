@@ -8,7 +8,7 @@ def spatial_flatten(inputs, data_format):
 
     inputs_shape = inputs.get_shape().as_list()
     outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
-                     [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
+                     [-1, np.prod(inputs_shape[1:3]), inputs_shape[3]])
 
     return tf.reshape(inputs, outputs_shape)
 
@@ -79,16 +79,6 @@ class Model(object):
             sequence=attention_maps
         )
 
-        if self.data_format == "channels_first":
-
-            attention_maps = map_innermost_element(
-                function=lambda attention_maps: tf.transpose(
-                    a=attention_maps,
-                    perm=[0, 2, 3, 1]
-                ),
-                sequence=attention_maps
-            )
-
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             while isinstance(attention_maps, list):
@@ -135,12 +125,16 @@ class Model(object):
         )) * self.hyper_params.attention_map_decay
 
         # ==========================================================================================
-        tf.summary.image("images", images, max_outputs=2)
+        tf.summary.image(
+            name="images",
+            tensor=tf.transpose(images, [0, 2, 3, 1]) if self.data_format == "channels_first" else images,
+            max_outputs=2
+        )
 
         map_innermost_element(
             function=lambda indices_attention_maps: tf.summary.image(
                 name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0]))),
-                tensor=indices_attention_maps[1],
+                tensor=tf.transpose(indices_attention_maps[1], [0, 2, 3, 1]) if self.data_format == "channels_first" else indices_attention_maps[1],
                 max_outputs=2
             ),
             sequence=enumerate_innermost_element(attention_maps)
