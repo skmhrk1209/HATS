@@ -8,7 +8,7 @@ def spatial_flatten(inputs, data_format):
 
     inputs_shape = inputs.get_shape().as_list()
     outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
-                     [-1, np.prod(inputs_shape[1:3]), inputs_shape[3]])
+                     [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
 
     return tf.reshape(inputs, outputs_shape)
 
@@ -125,11 +125,7 @@ class Model(object):
         )) * self.hyper_params.attention_map_decay
 
         # ==========================================================================================
-        tf.summary.image(
-            name="images",
-            tensor=tf.transpose(images, [0, 2, 3, 1]) if self.data_format == "channels_first" else images,
-            max_outputs=2
-        )
+        tf.summary.image("images", tf.transpose(images, [0, 2, 3, 1]) if self.data_format == "channels_first" else images, max_outputs=2)
 
         map_innermost_element(
             function=lambda indices_attention_maps: tf.summary.image(
@@ -143,13 +139,13 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
-            optimizer = tf.train.AdamOptimizer(
-                learning_rate=self.hyper_params.learning_rate,
-                beta1=self.hyper_params.beta1,
-                beta2=self.hyper_params.beta2
-            )
-
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+
+                optimizer = tf.train.AdamOptimizer(
+                    learning_rate=self.hyper_params.learning_rate,
+                    beta1=self.hyper_params.beta1,
+                    beta2=self.hyper_params.beta2
+                )
 
                 train_op = optimizer.minimize(
                     loss=loss,

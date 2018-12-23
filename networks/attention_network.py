@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import os
-from itertools import *
+import ops
 from algorithms import *
 
 
@@ -40,11 +39,10 @@ class AttentionNetwork(object):
                                 name="conv2d",
                                 reuse=None
                             ),
-                            lambda inputs: tf.layers.batch_normalization(
+                            lambda inputs: ops.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.data_format == "channels_first" else 3,
+                                data_format=self.data_format,
                                 training=training,
-                                fused=True,
                                 name="batch_normalization",
                                 reuse=None
                             ),
@@ -197,11 +195,10 @@ class AttentionNetwork(object):
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
                             ),
-                            lambda inputs: tf.layers.batch_normalization(
+                            lambda inputs: ops.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.data_format == "channels_first" else 3,
+                                data_format=self.data_format,
                                 training=training,
-                                fused=True,
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
                             ),
@@ -232,11 +229,10 @@ class AttentionNetwork(object):
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
                             ),
-                            lambda inputs: tf.layers.batch_normalization(
+                            lambda inputs: ops.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.data_format == "channels_first" else 3,
+                                data_format=self.data_format,
                                 training=training,
-                                fused=True,
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
                             ),

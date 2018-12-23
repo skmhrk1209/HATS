@@ -18,6 +18,7 @@ parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth_tr
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
+parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
@@ -41,7 +42,7 @@ def main(unused_argv):
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
-                channels_first=False
+                data_format=args.data_format
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
@@ -56,10 +57,10 @@ def main(unused_argv):
                     AttrDict(sequence_length=4, num_units=256),
                     AttrDict(sequence_length=10, num_units=256)
                 ],
-                channels_first=False
+                data_format=args.data_format
             ),
             num_classes=63,
-            channels_first=False,
+            data_format=args.data_format,
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(
                 learning_rate=0.001,
@@ -87,9 +88,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
+                sequence_lengths=[4, 10],
                 image_size=[256, 256],
-                channels_first=False,
-                sequence_lengths=[4, 10]
+                data_format=args.data_format
             ).get_next()
         )
 
@@ -101,81 +102,13 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
+                sequence_lengths=[4, 10],
                 image_size=[256, 256],
-                channels_first=False,
-                sequence_lengths=[4, 10]
+                data_format=args.data_format
             ).get_next()
         )
 
         print(eval_results)
-
-    if args.predict:
-
-        predict_results = classifier.predict(
-            input_fn=lambda: Dataset(
-                filenames=args.filenames,
-                num_epochs=args.num_epochs,
-                batch_size=args.batch_size,
-                buffer_size=args.buffer_size,
-                image_size=[256, 256],
-                channels_first=False,
-                sequence_lengths=[4, 10]
-            ).get_next()
-        )
-
-        class_ids = {}
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("a"), ord("z") + 1), class_ids["Z"] + 1)}),
-        class_ids.update({"": max(class_ids.values()) + 1})
-
-        class_chars = dict(map(lambda key_value: key_value[::-1], class_ids.items()))
-
-        for predict_result in itertools.islice(predict_results, 10):
-
-            attention_map_images = []
-            bounding_box_images = []
-
-            for i in range(predict_result["attention_maps"].shape[0]):
-
-                attention_map_images.append([])
-                bounding_box_images.append([])
-
-                for j in range(predict_result["attention_maps"].shape[1]):
-
-                    attention_map = predict_result["attention_maps"][i, j]
-                    attention_map = img.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
-                    attention_map = cv2.resize(attention_map, (256, 256))
-                    bounding_box = img.search_bounding_box(attention_map, 0.5)
-
-                    attention_map_image = np.copy(predict_result["images"])
-                    attention_map_image += np.pad(np.expand_dims(attention_map, axis=-1), [[0, 0], [0, 0], [0, 2]], "constant")
-                    attention_map_images[-1].append(attention_map_image)
-
-                    bounding_box_image = np.copy(predict_result["images"])
-                    bounding_box_image = cv2.rectangle(bounding_box_image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
-                    bounding_box_images[-1].append(bounding_box_image)
-
-            attention_map_images = np.concatenate([
-                np.concatenate(attention_map_images, axis=1)
-                for attention_map_images in attention_map_images
-            ], axis=0)
-
-            bounding_box_images = np.concatenate([
-                np.concatenate(bounding_box_images, axis=1)
-                for bounding_box_images in bounding_box_images
-            ], axis=0)
-
-            attention_map_images = cv2.cvtColor(attention_map_images, cv2.COLOR_BGR2RGB)
-            bounding_box_images = cv2.cvtColor(bounding_box_images, cv2.COLOR_BGR2RGB)
-
-            attention_map_images = img.scale(attention_map_images, 0.0, 1.0, 0.0, 255.0)
-            bounding_box_images = img.scale(bounding_box_images, 0.0, 1.0, 0.0, 255.0)
-
-            predictions = "_".join(["".join([class_chars[class_id] for class_id in class_ids]) for class_ids in predict_result["predictions"]])
-
-            cv2.imwrite("outputs/multi_synth/{}_attention_map.jpg".format(predictions), attention_map_images)
-            cv2.imwrite("outputs/multi_synth/{}_bounding_box.jpg".format(predictions), bounding_box_images)
 
 
 if __name__ == "__main__":

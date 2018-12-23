@@ -9,15 +9,15 @@ import image as img
 from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
-from networks.residual_network_ import ResidualNetwork
+from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synth_acnn_model_", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth_train.tfrecord"], help="tfrecord filenames")
-parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
+parser.add_argument("--model_dir", type=str, default="synth_acnn_model", help="model directory")
+parser.add_argument('--filenames', type=str, nargs="+", default=["synth_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=7000000, help="buffer size to shuffle dataset")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
@@ -41,7 +41,7 @@ def main(unused_argv):
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
                 num_classes=None,
-                data_format="channels_first"
+                channels_first=False
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
@@ -53,20 +53,14 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=4, num_units=256),
                     AttrDict(sequence_length=10, num_units=256)
                 ],
-                data_format="channels_first"
+                channels_first=False
             ),
             num_classes=63,
-            data_format="channels_first",
+            channels_first=False,
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
-            hyper_params=AttrDict(
-                learning_rate=0.001,
-                beta1=0.9,
-                beta2=0.999,
-                attention_map_decay=0.001
-            )
+            hyper_params=AttrDict(attention_map_decay=0.0001)
         ),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
@@ -87,9 +81,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[4, 10],
                 image_size=[256, 256],
-                data_format="channels_first"
+                channels_first=False,
+                string_length=[10]
             ).get_next()
         )
 
@@ -101,9 +95,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[4, 10],
                 image_size=[256, 256],
-                data_format="channels_first"
+                channels_first=False,
+                string_length=[10]
             ).get_next()
         )
 
@@ -117,9 +111,9 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[4, 10],
                 image_size=[256, 256],
-                data_format="channels_first"
+                channels_first=False,
+                string_length=[10]
             ).get_next()
         )
 
@@ -174,8 +168,8 @@ def main(unused_argv):
 
             predictions = "_".join(["".join([class_chars[class_id] for class_id in class_ids]) for class_ids in predict_result["predictions"]])
 
-            cv2.imwrite("outputs/multi_synth/{}_attention_map.jpg".format(predictions), attention_map_images)
-            cv2.imwrite("outputs/multi_synth/{}_bounding_box.jpg".format(predictions), bounding_box_images)
+            cv2.imwrite("outputs/{}_attention_map.jpg".format(predictions), attention_map_images)
+            cv2.imwrite("outputs/{}_bounding_box.jpg".format(predictions), bounding_box_images)
 
 
 if __name__ == "__main__":
