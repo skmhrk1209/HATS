@@ -4,17 +4,10 @@ import metrics
 from algorithms import *
 
 
-def spatial_shape(inputs, channels_first):
+def spatial_flatten(inputs, data_format):
 
     inputs_shape = inputs.get_shape().as_list()
-
-    return inputs_shape[2:] if channels_first else inputs_shape[1:-1]
-
-
-def spatial_flatten(inputs, channels_first):
-
-    inputs_shape = inputs.get_shape().as_list()
-    outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if channels_first else
+    outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
                      [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
 
     return tf.reshape(inputs, outputs_shape)
@@ -26,13 +19,12 @@ class Model(object):
         FULL_SEQUENCE, EDIT_DISTANCE = range(2)
 
     def __init__(self, convolutional_network, attention_network,
-                 num_classes, channels_first, accuracy_type, hyper_params):
+                 num_classes, data_format, accuracy_type, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
         self.num_classes = num_classes
-        self.channels_first = channels_first
-        self.data_format = "channels_first" if channels_first else "channels_last"
+        self.data_format = data_format
         self.accuracy_type = accuracy_type
         self.hyper_params = hyper_params
 
@@ -52,10 +44,10 @@ class Model(object):
 
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
-                a=spatial_flatten(feature_maps, self.channels_first),
-                b=spatial_flatten(attention_maps, self.channels_first),
-                transpose_a=False if self.channels_first else True,
-                transpose_b=True if self.channels_first else False
+                a=spatial_flatten(feature_maps, self.data_format),
+                b=spatial_flatten(attention_maps, self.data_format),
+                transpose_a=False if self.data_format == "channels_first" else True,
+                transpose_b=True if self.data_format == "channels_first" else False
             )),
             sequence=attention_maps
         )
@@ -81,11 +73,21 @@ class Model(object):
         attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
                 input_tensor=attention_maps,
-                axis=1 if self.channels_first else 3,
+                axis=1 if self.data_format == "channels_first" else 3,
                 keep_dims=True
             ),
             sequence=attention_maps
         )
+
+        if self.data_format == "channels_first":
+
+            attention_maps = map_innermost_element(
+                function=lambda attention_maps: tf.transpose(
+                    a=attention_maps,
+                    perm=[0, 2, 3, 1]
+                ),
+                sequence=attention_maps
+            )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 

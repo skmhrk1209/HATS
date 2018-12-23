@@ -7,13 +7,12 @@ from algorithms import *
 
 class AttentionNetwork(object):
 
-    def __init__(self, conv_params, deconv_params, rnn_params, channels_first):
+    def __init__(self, conv_params, deconv_params, rnn_params, data_format):
 
         self.conv_params = conv_params
         self.deconv_params = deconv_params
         self.rnn_params = rnn_params
-        self.channels_first = channels_first
-        self.data_format = "channels_first" if channels_first else "channels_last"
+        self.data_format = data_format
 
     def __call__(self, inputs, training, name="attention_network", reuse=None):
 
@@ -43,7 +42,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.channels_first else 3,
+                                axis=1 if self.data_format == "channels_first" else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
@@ -200,7 +199,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.channels_first else 3,
+                                axis=1 if self.data_format == "channels_first" else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
@@ -235,7 +234,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.layers.batch_normalization(
                                 inputs=inputs,
-                                axis=1 if self.channels_first else 3,
+                                axis=1 if self.data_format == "channels_first" else 3,
                                 training=training,
                                 fused=True,
                                 name="batch_normalization",
