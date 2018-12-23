@@ -79,31 +79,6 @@ class Model(object):
             sequence=attention_maps
         )
 
-        if mode == tf.estimator.ModeKeys.PREDICT:
-
-            while isinstance(attention_maps, list):
-
-                attention_maps = map_innermost_list(
-                    function=lambda attention_maps: tf.stack(attention_maps, axis=1),
-                    sequence=attention_maps
-                )
-
-            while isinstance(predictions, list):
-
-                predictions = map_innermost_list(
-                    function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions
-                )
-
-            return tf.estimator.EstimatorSpec(
-                mode=mode,
-                predictions=dict(
-                    images=images,
-                    attention_maps=attention_maps,
-                    predictions=predictions
-                )
-            )
-
         while all(flatten_innermost_element(map_innermost_element(lambda labels: len(labels.shape) > 1, labels))):
 
             labels = map_innermost_element(
@@ -125,12 +100,23 @@ class Model(object):
         )) * self.hyper_params.attention_map_decay
 
         # ==========================================================================================
-        tf.summary.image("images", tf.transpose(images, [0, 2, 3, 1]) if self.data_format == "channels_first" else images, max_outputs=2)
+        if self.data_format == "channels_first":
+
+            images = tf.transpose(images, [0, 2, 3, 1])
+
+        tf.summary.image("images", images, max_outputs=2)
+
+        if self.data_format == "channels_first":
+
+            attention_maps = map_innermost_element(
+                function=lambda attention_maps: tf.transpose(attention_maps, [0, 2, 3, 1]),
+                sequence=attention_maps
+            )
 
         map_innermost_element(
             function=lambda indices_attention_maps: tf.summary.image(
                 name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0]))),
-                tensor=tf.transpose(indices_attention_maps[1], [0, 2, 3, 1]) if self.data_format == "channels_first" else indices_attention_maps[1],
+                tensor=indices_attention_maps[1],
                 max_outputs=2
             ),
             sequence=enumerate_innermost_element(attention_maps)
