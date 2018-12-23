@@ -31,8 +31,10 @@ int main(int argc, char* argv[]) {
     boost::program_options::notify(variables_map);
 
     std::vector<boost::filesystem::path> filenames;
-    for (const auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(variables_map["input_directory"].as<std::string>()), {})) {
-        filenames.emplace_back(entry.path());
+    for (const auto& entry : boost::make_iterator_range(boost::filesystem::recursive_directory_iterator(variables_map["input_directory"].as<std::string>()), {})) {
+        if (entry.path().extension().string() == ".jpg") {
+            filenames.emplace_back(entry.path());
+        }
     }
 
     std::random_device seed;
