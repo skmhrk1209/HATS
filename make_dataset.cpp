@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
                                           std::cout << "aaaaaaaaaa" << std::endl;
                                           continue;
                                       }
+                                      std::cout << "bbbbbbbbbbb" << std::endl;
 
                                       boost::gil::rgb8_image_t image;
                                       boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
