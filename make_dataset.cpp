@@ -1,3 +1,4 @@
+#define NDEBUG
 #include <algorithm>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
