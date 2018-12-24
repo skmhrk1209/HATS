@@ -45,12 +45,13 @@ int main(int argc, char* argv[]) {
     auto num_threads = std::thread::hardware_concurrency();
     auto num_data = variables_map["num_data"].as<int>() / num_threads;
 
+    std::cout << num_data << std::endl;
+
     std::vector<std::thread> threads;
     for (auto i = 0; i < num_threads; ++i) {
         threads.emplace_back([&]() {
-            //boost::progress_display progress_display(num_data);
-            for (auto j = num_data * i; j < num_data * (i + 1); ++j/*, ++progress_display*/) {
-                std::cout << j << std::endl;
+            // boost::progress_display progress_display(num_data);
+            for (auto j = num_data * i; j < num_data * (i + 1); ++j /*, ++progress_display*/) {
                 boost::gil::rgb8_image_t multi_image(variables_map["image_width"].as<int>(), variables_map["image_height"].as<int>());
                 boost::gil::fill_pixels(boost::gil::view(multi_image), boost::gil::rgb8_pixel_t(0, 0, 0));
                 std::vector<std::pair<std::string, boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>>>> strings;
