@@ -8,7 +8,9 @@
 #include <boost/gil/extension/io/jpeg.hpp>
 #include <boost/gil/extension/io/png.hpp>
 #include <boost/program_options.hpp>
+#include <boost/progress.hpp>
 #include <iostream>
+#include <mutex>
 #include <random>
 #include <regex>
 #include <string>
@@ -46,10 +48,13 @@ int main(int argc, char *argv[]) {
     std::random_device seed;
     std::mt19937 engine(seed());
 
+    std::mutex mutex;
+    boost::progress_display progress_display(variables_map["num_data"].as<int>());
+
+    std::vector<std::thread> threads;
     auto num_threads = std::thread::hardware_concurrency();
     auto num_data = variables_map["num_data"].as<int>() / num_threads;
 
-    std::vector<std::thread> threads;
     for (auto i = 0; i < num_threads; ++i) {
         threads.emplace_back([&, i]() {
             for (auto j = num_data * i; j < num_data * (i + 1); ++j) {
@@ -110,6 +115,10 @@ int main(int argc, char *argv[]) {
                                             [](const auto &acc, const auto &string) { return acc + "_" + string.first; });
                 boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image),
                                        boost::gil::jpeg_tag());
+
+                mutex.lock();
+                ++progress_display;
+                mutex.unlock();
             }
         });
     }
