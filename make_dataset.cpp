@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
                 std::vector<std::pair<std::string, boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>>>> strings;
 
                 auto sequence_length = std::uniform_int_distribution<int>(1, variables_map["sequence_lengths"].as<std::vector<int>>()[0])(engine);
-                if (![&]() {
+                if (!([&]() {
                         for (auto k = 0; k < variables_map["num_retries"].as<int>(); ++k) {
                             const auto& filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
 
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
                         std::cout << "FFFFFFF" << std::endl;
 
                         return false;
-                    }())
+                    }()))
                     continue;
 
                 std::sort(strings.begin(), strings.end(), [](const auto& string1, const auto& string2) {
