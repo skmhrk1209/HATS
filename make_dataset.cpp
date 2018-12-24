@@ -70,21 +70,12 @@ int main(int argc, char *argv[]) {
 
                                 auto string = filename.stem().string();
                                 std::smatch match;
-                                if (!std::regex_match(string, match, std::regex(R"([0-9]+_([0-9A-Za-z]*))"))) {
-                                    std::cout << "invalid filename: " << filename << std::endl;
-                                    continue;
-                                }
-                                if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
-                                    std::cout << "string length is too long: " << filename << std::endl;
-                                    continue;
-                                }
+                                if (!std::regex_match(string, match, std::regex(R"(.+_([0-9A-Za-z]*)_.+)"))) continue;
+                                if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) continue;
 
                                 boost::gil::rgb8_image_t image;
                                 boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
-                                if (image.height() > multi_image.height() || image.width() > multi_image.width()) {
-                                    std::cout << "image size is too big: " << filename << std::endl;
-                                    continue;
-                                }
+                                if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
 
                                 if ([&]() {
                                         for (auto m = 0; m < variables_map["num_retries"].as<int>(); ++m) {
