@@ -85,11 +85,11 @@ int main(int argc, char* argv[]) {
                             }
                         }
 
-                        std::cout << "FFFFFFF" << std::endl;
-
                         return false;
                     }()))
                     continue;
+
+                std::cout << "FFFFFFF" << std::endl;
 
                 std::sort(strings.begin(), strings.end(), [](const auto& string1, const auto& string2) {
                     return (string1.second.min_corner().y() < string2.second.min_corner().y()) ||
