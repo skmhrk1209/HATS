@@ -8,7 +8,6 @@
 #include <boost/gil/extension/io/jpeg.hpp>
 #include <boost/gil/extension/io/png.hpp>
 #include <boost/program_options.hpp>
-#include <cstdlib>
 #include <iostream>
 #include <random>
 #include <regex>
