@@ -74,7 +74,11 @@ int main(int argc, char *argv[]) {
                                 if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) continue;
 
                                 boost::gil::rgb8_image_t image;
-                                boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
+                                try {
+                                    boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
+                                } catch (...) {
+                                    continue;
+                                }
                                 if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
 
                                 if ([&]() {
