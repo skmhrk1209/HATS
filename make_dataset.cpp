@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::thread> threads;
     for (auto i = 0; i < num_threads; ++i) {
         threads.emplace_back([&, i]() {
-            //boost::progress_display progress_display(num_data);
+            // boost::progress_display progress_display(num_data);
             for (auto j = num_data * i; j < num_data * (i + 1); ++j) {
                 boost::gil::rgb8_image_t multi_image(variables_map["image_width"].as<int>(), variables_map["image_height"].as<int>());
                 boost::gil::fill_pixels(boost::gil::view(multi_image), boost::gil::rgb8_pixel_t(0, 0, 0));
@@ -65,14 +65,14 @@ int main(int argc, char* argv[]) {
                                   {
                                       const auto& filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
 
+                                      auto string = filename.stem().string();
                                       std::smatch match;
-                                      if (!std::regex_match(filename.string(), match, std::regex(R"([0-9]+_([0-9A-Za-z]*)\..+)")) ||
+
+                                      if (!std::regex_match(string, match, std::regex(R"([0-9]+_([0-9A-Za-z]*))")) ||
                                           match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
                                           std::cout << "aaaaaaaaaa" << std::endl;
                                           continue;
                                       }
-                                      std::cout << "bbbbbbbbbbb" << std::endl;
-
                                       boost::gil::rgb8_image_t image;
                                       boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
                                       if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
