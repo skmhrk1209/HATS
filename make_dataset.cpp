@@ -71,8 +71,12 @@ int main(int argc, char *argv[]) {
 
                                 auto string = filename.stem().string();
                                 std::smatch match;
-                                if (!std::regex_match(string, match, std::regex(R"(.*_([0-9A-Za-z]*)_.*)"))) continue;
-                                if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) continue;
+                                if (!std::regex_match(string, match, std::regex(R"(.*_([0-9A-Za-z]*)_.*)"))) {
+                                    continue;
+                                }
+                                if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
+                                    continue;
+                                }
 
                                 boost::gil::rgb8_image_t image;
                                 try {
@@ -80,7 +84,9 @@ int main(int argc, char *argv[]) {
                                 } catch (...) {
                                     continue;
                                 }
-                                if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
+                                if (image.height() > multi_image.height() || image.width() > multi_image.width()) {
+                                    continue;
+                                }
 
                                 if ([&]() {
                                         for (auto m = 0; m < variables_map["num_retries"].as<int>(); ++m) {
