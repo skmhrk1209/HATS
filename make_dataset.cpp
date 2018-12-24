@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     auto num_threads = std::thread::hardware_concurrency();
     auto num_data = variables_map["num_data"].as<int>() / num_threads;
 
-    std::cout << num_data << std::endl;
+    std::cout << num_threads << std::endl;
 
     std::vector<std::thread> threads;
     for (auto i = 0; i < num_threads; ++i) {
