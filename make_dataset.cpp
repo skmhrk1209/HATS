@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 
                 auto sequence_length = std::uniform_int_distribution<int>(1, variables_map["sequence_lengths"].as<std::vector<int>>()[0])(engine);
                 while (strings.size() < sequence_length) {
-                    if ([&]() {
+                    if (![&]() {
                             for (auto l = 0; l < variables_map["num_retries"].as<int>(); ++l) {
                                 const auto &filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
 
