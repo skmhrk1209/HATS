@@ -19,9 +19,9 @@
 #include <vector>
 
 #define FOR_ELSE(condition, for_block, else_block) \
-    [&]() { for                                    \
+    ([&]() { for                                   \
             condition for_block else_block         \
-    }()
+    }())
 
 int main(int argc, char* argv[]) {
     boost::program_options::options_description options_description("option");
