@@ -85,6 +85,8 @@ int main(int argc, char* argv[]) {
                             }
                         }
 
+                        std::cout << "FFFFFFF" << std::endl;
+
                         return false;
                     }())
                     continue;
