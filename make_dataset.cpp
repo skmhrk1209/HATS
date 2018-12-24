@@ -23,7 +23,7 @@
             condition for_block else_block         \
     }())
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     boost::program_options::options_description options_description("option");
     options_description.add_options()("input_directory", boost::program_options::value<std::string>(), "directory of input data")(
         "output_directory", boost::program_options::value<std::string>(), "directory of output data")(
@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
     boost::program_options::notify(variables_map);
 
     std::vector<boost::filesystem::path> filenames;
-    for (const auto& entry : boost::make_iterator_range(boost::filesystem::recursive_directory_iterator(variables_map["input_directory"].as<std::string>()), {})) {
+    for (const auto &entry :
+         boost::make_iterator_range(boost::filesystem::recursive_directory_iterator(variables_map["input_directory"].as<std::string>()), {})) {
         if (entry.path().extension().string() == ".jpg") {
             filenames.emplace_back(entry.path());
         }
@@ -63,7 +64,7 @@ int main(int argc, char* argv[]) {
                 while (strings.size() < sequence_length) {
                     if (!FOR_ELSE((auto l = 0; l < variables_map["num_retries"].as<int>(); ++l),
                                   {
-                                      const auto& filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
+                                      const auto &filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
 
                                       auto string = filename.stem().string();
                                       std::smatch match;
@@ -84,9 +85,10 @@ int main(int argc, char* argv[]) {
                                                            boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
 
                                                        if (std::all_of(strings.begin(), strings.end(),
-                                                                       [&](const auto& string) { return boost::geometry::disjoint(string.second, box); })) {
-                                                           boost::gil::copy_pixels(boost::gil::view(image), boost::gil::subimage_view(boost::gil::view(multi_image), dx,
-                                                                                                                                      dy, image.width(), image.height()));
+                                                                       [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
+                                                           boost::gil::copy_pixels(
+                                                               boost::gil::view(image),
+                                                               boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
                                                            strings.emplace_back(match[1].str(), box);
                                                            return true;
                                                        }
@@ -100,19 +102,21 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
-                std::sort(strings.begin(), strings.end(), [](const auto& string1, const auto& string2) {
+                std::sort(strings.begin(), strings.end(), [](const auto &string1, const auto &string2) {
                     return (string1.second.min_corner().y() < string2.second.min_corner().y()) ||
-                           ((string1.second.min_corner().y() == string2.second.min_corner().y()) && (string1.second.min_corner().x() < string2.second.min_corner().x()));
+                           ((string1.second.min_corner().y() == string2.second.min_corner().y()) &&
+                            (string1.second.min_corner().x() < string2.second.min_corner().x()));
                 });
 
-                auto stem =
-                    std::accumulate(strings.begin(), strings.end(), std::to_string(j), [](const auto& acc, const auto& string) { return acc + "_" + string.first; });
-                boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image), boost::gil::jpeg_tag());
+                auto stem = std::accumulate(strings.begin(), strings.end(), std::to_string(j),
+                                            [](const auto &acc, const auto &string) { return acc + "_" + string.first; });
+                boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image),
+                                       boost::gil::jpeg_tag());
             }
         });
     }
 
-    for (auto& thread : threads) thread.join();
+    for (auto &thread : threads) thread.join();
 
     return 0;
 }
