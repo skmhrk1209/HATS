@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
 #include <boost/geometry/algorithms/disjoint.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
@@ -17,7 +18,10 @@
 #include <utility>
 #include <vector>
 
-using namespace std::literals::string_literals;
+#define FOR_ELSE(condition, for_block, else_block) \
+    [&]() { for                                    \
+            condition for_block else_block         \
+    }()
 
 int main(int argc, char* argv[]) {
     boost::program_options::options_description options_description("option");
@@ -56,39 +60,43 @@ int main(int argc, char* argv[]) {
                 std::vector<std::pair<std::string, boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>>>> strings;
 
                 auto sequence_length = std::uniform_int_distribution<int>(1, variables_map["sequence_lengths"].as<std::vector<int>>()[0])(engine);
-                if (![&]() {
-                        for (auto k = 0; k < variables_map["num_retries"].as<int>(); ++k) {
-                            const auto& filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
+                while (strings.size() < sequence_length) {
+                    if (!FOR_ELSE((auto l = 0; l < variables_map["num_retries"].as<int>(); ++l),
+                                  {
+                                      const auto& filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
 
-                            std::smatch match;
-                            std::regex regex(R"([0-9]+_([0-9A-Za-z]*))");
-                            if (!std::regex_match(filename.stem().string(), match, regex) ||
-                                match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1])
-                                continue;
+                                      std::smatch match;
+                                      if (!std::regex_match(filename.string(), match, std::regex(R"([0-9]+_([0-9A-Za-z]*)\..+)")) ||
+                                          match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1])
+                                          continue;
 
-                            boost::gil::rgb8_image_t image;
-                            boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
+                                      boost::gil::rgb8_image_t image;
+                                      boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
+                                      if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
 
-                            if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
+                                      if (FOR_ELSE((auto m = 0; m < variables_map["num_retries"].as<int>(); ++m),
+                                                   {
+                                                       auto dx = std::uniform_int_distribution<int>(0, multi_image.width() - image.width())(engine);
+                                                       auto dy = std::uniform_int_distribution<int>(0, multi_image.height() - image.height())(engine);
+                                                       boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>> box(
+                                                           boost::geometry::model::d2::point_xy<int>(dx, dy),
+                                                           boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
 
-                            auto dx = std::uniform_int_distribution<int>(0, multi_image.width() - image.width())(engine);
-                            auto dy = std::uniform_int_distribution<int>(0, multi_image.height() - image.height())(engine);
-                            boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>> box(
-                                boost::geometry::model::d2::point_xy<int>(dx, dy), boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
-
-                            if (std::all_of(strings.begin(), strings.end(), [&](const auto& string) { return boost::geometry::disjoint(string.second, box); })) {
-                                boost::gil::copy_pixels(boost::gil::view(image),
-                                                        boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
-                                strings.emplace_back(match[1].str(), box);
-
-                                if (strings.size() == sequence_length) return true;
-                            }
-                        }
-
-                        return false;
-                    }()) {
-                    std::cout << "FFFFFFF" << std::endl;
-                    continue;
+                                                       if (std::all_of(strings.begin(), strings.end(),
+                                                                       [&](const auto& string) { return boost::geometry::disjoint(string.second, box); })) {
+                                                           boost::gil::copy_pixels(boost::gil::view(image), boost::gil::subimage_view(boost::gil::view(multi_image), dx,
+                                                                                                                                      dy, image.width(), image.height()));
+                                                           strings.emplace_back(match[1].str(), box);
+                                                           return true;
+                                                       }
+                                                   },
+                                                   { return false; })) {
+                                          return true;
+                                      }
+                                  },
+                                  { return false; })) {
+                        break;
+                    }
                 }
 
                 std::sort(strings.begin(), strings.end(), [](const auto& string1, const auto& string2) {
