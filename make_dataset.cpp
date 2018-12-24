@@ -67,13 +67,10 @@ int main(int argc, char* argv[]) {
 
                                       std::smatch match;
                                       if (!std::regex_match(filename.string(), match, std::regex(R"([0-9]+_([0-9A-Za-z]*)\..+)")) ||
-                                          match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]){
-                                            continue;
-                                            std::cout << "aaaaaaaaaa" << std::endl;
-                                          }
-                                          
-
-                                      
+                                          match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
+                                          std::cout << "aaaaaaaaaa" << std::endl;
+                                          continue;
+                                      }
 
                                       boost::gil::rgb8_image_t image;
                                       boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
