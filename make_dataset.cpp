@@ -70,6 +70,8 @@ int main(int argc, char* argv[]) {
                                           match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1])
                                           continue;
 
+                                       std::cout << "aaaaaaaaaa" << std::endl;
+
                                       boost::gil::rgb8_image_t image;
                                       boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
                                       if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
