@@ -59,42 +59,43 @@ int main(int argc, char *argv[]) {
 
                 auto sequence_length = std::uniform_int_distribution<int>(1, variables_map["sequence_lengths"].as<std::vector<int>>()[0])(engine);
                 while (strings.size() < sequence_length) {
-                    if (!FOR_ELSE((auto l = 0; l < variables_map["num_retries"].as<int>(); ++l),
-                                  {
-                                      const auto &filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
+                    if ([&]() {
+                            for (auto l = 0; l < variables_map["num_retries"].as<int>(); ++l) {
+                                const auto &filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
 
-                                      auto string = filename.stem().string();
-                                      std::smatch match;
-                                      if (!std::regex_match(string, match, std::regex(R"([0-9]+_([0-9A-Za-z]*))")) ||
-                                          match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1])
-                                          continue;
+                                auto string = filename.stem().string();
+                                std::smatch match;
+                                if (!std::regex_match(string, match, std::regex(R"([0-9]+_([0-9A-Za-z]*))")) ||
+                                    match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1])
+                                    continue;
 
-                                      boost::gil::rgb8_image_t image;
-                                      boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
-                                      if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
+                                boost::gil::rgb8_image_t image;
+                                boost::gil::read_image(filename.string(), image, boost::gil::jpeg_tag());
+                                if (image.height() > multi_image.height() || image.width() > multi_image.width()) continue;
 
-                                      if (FOR_ELSE((auto m = 0; m < variables_map["num_retries"].as<int>(); ++m),
-                                                   {
-                                                       auto dx = std::uniform_int_distribution<int>(0, multi_image.width() - image.width())(engine);
-                                                       auto dy = std::uniform_int_distribution<int>(0, multi_image.height() - image.height())(engine);
-                                                       boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>> box(
-                                                           boost::geometry::model::d2::point_xy<int>(dx, dy),
-                                                           boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
+                                if ([&]() {
+                                        for (auto m = 0; m < variables_map["num_retries"].as<int>(); ++m) {
+                                            auto dx = std::uniform_int_distribution<int>(0, multi_image.width() - image.width())(engine);
+                                            auto dy = std::uniform_int_distribution<int>(0, multi_image.height() - image.height())(engine);
+                                            boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>> box(
+                                                boost::geometry::model::d2::point_xy<int>(dx, dy),
+                                                boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
 
-                                                       if (std::all_of(strings.begin(), strings.end(),
-                                                                       [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
-                                                           boost::gil::copy_pixels(
-                                                               boost::gil::view(image),
-                                                               boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
-                                                           strings.emplace_back(match[1].str(), box);
-                                                           return true;
-                                                       }
-                                                   },
-                                                   { return false; })) {
-                                          return true;
-                                      }
-                                  },
-                                  { return false; })) {
+                                            if (std::all_of(strings.begin(), strings.end(),
+                                                            [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
+                                                boost::gil::copy_pixels(boost::gil::view(image), boost::gil::subimage_view(boost::gil::view(multi_image), dx,
+                                                                                                                           dy, image.width(), image.height()));
+                                                strings.emplace_back(match[1].str(), box);
+                                                return true;
+                                            }
+                                        }
+                                        return false;
+                                    }()) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }()) {
                         break;
                     }
                 }
