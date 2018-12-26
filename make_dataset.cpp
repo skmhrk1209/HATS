@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
                                                 boost::geometry::model::d2::point_xy<int>(dx, dy),
                                                 boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
 
-                                            if (boost::all_of(strings, [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
+                                            if (boost::algorithm::all_of(strings, [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
                                                 boost::gil::copy_pixels(boost::gil::view(image),
                                                                         boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
                                                 strings.emplace_back(match[1].str(), box);
