@@ -10,6 +10,9 @@
 #include <boost/gil/extension/io/png.hpp>
 #include <boost/program_options.hpp>
 #include <boost/progress.hpp>
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+#include <boost/range/algorithm/copy.hpp>
 #include <iostream>
 #include <mutex>
 #include <random>
@@ -39,12 +42,10 @@ int main(int argc, char *argv[]) {
     boost::program_options::notify(variables_map);
 
     std::vector<boost::filesystem::path> filenames;
-    for (const auto &entry :
-         boost::make_iterator_range(boost::filesystem::recursive_directory_iterator(variables_map["input_directory"].as<std::string>()), {})) {
-        if (entry.path().extension().string() == ".jpg") {
-            filenames.emplace_back(entry.path());
-        }
-    }
+    boost::copy(boost::make_iterator_range(boost::filesystem::recursive_directory_iterator(variables_map["input_directory"].as<std::string>()), {}) |
+                    boost::adaptors::transformed([](const auto &entry) { return entry.path(); }) |
+                    boost::adaptors::filtered([](const auto &path) { return path.extension().string() == ".jpg"; }),
+                std::back_inserter(filenames));
 
     std::random_device seed;
     std::mt19937 engine(seed());
