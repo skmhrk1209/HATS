@@ -10,9 +10,9 @@
 #include <boost/gil/extension/io/png.hpp>
 #include <boost/program_options.hpp>
 #include <boost/progress.hpp>
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/adaptor/transformed.hpp>
-#include <boost/range/algorithm/copy.hpp>
+#include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/numeric.hpp>
 #include <iostream>
 #include <mutex>
 #include <random>
@@ -116,14 +116,13 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                std::sort(strings.begin(), strings.end(), [](const auto &string1, const auto &string2) {
+                boost::sort(strings, [](const auto &string1, const auto &string2) {
                     return (string1.second.min_corner().y() < string2.second.min_corner().y()) ||
                            ((string1.second.min_corner().y() == string2.second.min_corner().y()) &&
                             (string1.second.min_corner().x() < string2.second.min_corner().x()));
                 });
 
-                auto stem = std::accumulate(strings.begin(), strings.end(), std::to_string(j),
-                                            [](const auto &acc, const auto &string) { return acc + "_" + string.first; });
+                auto stem = boost::accumulate(strings, std::to_string(j), [](const auto &acc, const auto &string) { return acc + "_" + string.first; });
                 boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image),
                                        boost::gil::jpeg_tag());
 
