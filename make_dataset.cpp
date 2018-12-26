@@ -1,5 +1,6 @@
 #define NDEBUG
 #include <algorithm>
+#include <boost/algorithm/cxx11/all_of.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/geometry/algorithms/disjoint.hpp>
@@ -97,10 +98,9 @@ int main(int argc, char *argv[]) {
                                                 boost::geometry::model::d2::point_xy<int>(dx, dy),
                                                 boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
 
-                                            if (std::all_of(strings.begin(), strings.end(),
-                                                            [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
-                                                boost::gil::copy_pixels(boost::gil::view(image), boost::gil::subimage_view(boost::gil::view(multi_image), dx,
-                                                                                                                           dy, image.width(), image.height()));
+                                            if (boost::all_of(strings, [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
+                                                boost::gil::copy_pixels(boost::gil::view(image),
+                                                                        boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
                                                 strings.emplace_back(match[1].str(), box);
                                                 return true;
                                             }
@@ -118,13 +118,11 @@ int main(int argc, char *argv[]) {
 
                 boost::sort(strings, [](const auto &string1, const auto &string2) {
                     return (string1.second.min_corner().y() < string2.second.min_corner().y()) ||
-                           ((string1.second.min_corner().y() == string2.second.min_corner().y()) &&
-                            (string1.second.min_corner().x() < string2.second.min_corner().x()));
+                           ((string1.second.min_corner().y() == string2.second.min_corner().y()) && (string1.second.min_corner().x() < string2.second.min_corner().x()));
                 });
 
                 auto stem = boost::accumulate(strings, std::to_string(j), [](const auto &acc, const auto &string) { return acc + "_" + string.first; });
-                boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image),
-                                       boost::gil::jpeg_tag());
+                boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image), boost::gil::jpeg_tag());
 
                 mutex.lock();
                 ++progress_display;
