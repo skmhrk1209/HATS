@@ -55,7 +55,7 @@ def main(unused_argv):
                 ],
                 data_format=args.data_format
             ),
-            num_classes=63,
+            num_classes=96,
             data_format=args.data_format,
             accuracy_type=Model.AccuracyType.FULL_SEQUENCE,
             hyper_params=AttrDict(
