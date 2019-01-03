@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import sys
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
@@ -22,8 +21,6 @@ parser.add_argument("--gpu", type=str, default="0,1,2", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
-
-sys.setrecursionlimit(10000)
 
 
 def main(unused_argv):
