@@ -4,7 +4,7 @@ import scipy.io
 import glob
 import sys
 import os
-import algorithms
+from .. import algorithms
 
 
 def convert_dataset(input_directory, output_filename, sequence_lengths):
