@@ -13,7 +13,7 @@ parser.add_argument("--model_dir", type=str, default="total_text_acnn_model", he
 parser.add_argument('--filenames', type=str, nargs="+", default=["total_text_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10000, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=10000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=1500, help="buffer size to shuffle dataset")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
