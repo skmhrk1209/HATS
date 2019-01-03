@@ -16,7 +16,7 @@ def main(input_directory, output_filename, sequence_lengths):
 
         for input_filename, input_dataset in zip(input_filenames, input_datasets):
 
-            label = np.concatenate(input_dataset["rectgt"][:, -2]).tolist()
+            label = list(map("".join, list(zip(*sorted(zip(*input_dataset["rectgt"][:, [1, 0, 6]].T))))[-1]))
             label = map_innermost_element(list, label)
             label = map_innermost_element(lambda c: ord(c) - 32, label)
 
