@@ -4,10 +4,10 @@ import scipy.io
 import glob
 import sys
 import os
-from . import algorithms
+from algorithms import *
 
 
-def convert_dataset(input_directory, output_filename, sequence_lengths):
+def main(input_directory, output_filename, sequence_lengths):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
@@ -56,4 +56,4 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
 
 if __name__ == "__main__":
 
-    convert_dataset(*sys.argv[1:3], list(map(int, sys.argv[3:])))
+    main(*sys.argv[1:3], list(map(int, sys.argv[3:])))
