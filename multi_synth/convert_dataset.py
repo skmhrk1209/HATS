@@ -16,7 +16,9 @@ def convert_dataset(input_directory, output_filename, sequence_lengths):
         class_ids.update({chr(j): i for i, j in enumerate(range(ord("a"), ord("z") + 1), class_ids["Z"] + 1)}),
         class_ids.update({"": max(class_ids.values()) + 1})
 
-        for input_filename in glob.glob(os.path.join(input_directory, "*")):
+        input_filenames = glob.glob(os.path.join(input_directory, "*"))
+
+        for input_filename in input_filenames:
 
             label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
             label = map_innermost_element(list, label)

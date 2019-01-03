@@ -2,10 +2,6 @@ import tensorflow as tf
 import numpy as np
 import sys
 import argparse
-import itertools
-import math
-import cv2
-import image as img
 from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
@@ -13,11 +9,11 @@ from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="synth_acnn_model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["synth_train.tfrecord"], help="tfrecord filenames")
-parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
+parser.add_argument("--model_dir", type=str, default="total_text_acnn_model", help="model directory")
+parser.add_argument('--filenames', type=str, nargs="+", default=["total_text_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--num_epochs", type=int, default=10000, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=7000000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=10000, help="buffer size to shuffle dataset")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
@@ -54,18 +50,19 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
+                    AttrDict(sequence_length=4, num_units=256),
                     AttrDict(sequence_length=10, num_units=256)
                 ],
                 data_format=args.data_format
             ),
             num_classes=63,
             data_format=args.data_format,
-            accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
+            accuracy_type=Model.AccuracyType.FULL_SEQUENCE,
             hyper_params=AttrDict(
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999,
-                attention_map_decay=0.0001
+                attention_map_decay=0.001
             )
         ),
         model_dir=args.model_dir,
@@ -87,7 +84,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[10],
+                sequence_lengths=[4, 10],
                 image_size=[256, 256],
                 data_format=args.data_format
             ).get_next()
@@ -101,7 +98,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[10],
+                sequence_lengths=[4, 10],
                 image_size=[256, 256],
                 data_format=args.data_format
             ).get_next()

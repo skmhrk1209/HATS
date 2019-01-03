@@ -2,10 +2,6 @@ import tensorflow as tf
 import numpy as np
 import sys
 import argparse
-import itertools
-import math
-import cv2
-import image as img
 from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
