@@ -59,7 +59,7 @@ def main(unused_argv):
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999,
-                attention_map_decay=0.001
+                attention_map_decay=0.0001
             )
         ),
         model_dir=args.model_dir,
