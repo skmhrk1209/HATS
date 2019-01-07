@@ -20,7 +20,7 @@ def main(input_directory, output_filename, sequence_length):
                 filename, label = regex.findall(line.strip())[0]
                 label = label.strip().strip('"')
                 label = [ord(c) - 32 for c in label]
-                for any([i > 95 for i in label]):
+                if any([i > 95 for i in label]):
                     continue
                 label = np.pad(
                     array=label,
