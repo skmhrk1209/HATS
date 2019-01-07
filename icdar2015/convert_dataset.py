@@ -10,7 +10,7 @@ def main(input_directory, output_filename, sequence_length):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
-        with open(os.path.join(input_directory, "gt.txt")) as f:
+        with open(os.path.join(input_directory, "gt.txt"), encoding="utf-8-sig") as f:
 
             regex = re.compile(r'(.+), "(.+)"')
 
@@ -19,7 +19,7 @@ def main(input_directory, output_filename, sequence_length):
                 filename, label = regex.findall(line.strip())[0]
                 if cv2.imread(os.path.join(input_directory, filename)) is None: 
                     print(filename)
-                    print(ord(filename[0]))
+                    
                 label = label.strip().strip('"')
                 label = [ord(c) - 32 for c in label]
                 if any([i > 95 for i in label]):
