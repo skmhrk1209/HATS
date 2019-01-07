@@ -18,7 +18,7 @@ def main(input_filename, output_filename, sequence_length):
                 label = label.strip().strip('"')
                 label = [ord(c) - 33 for c in label]
                 label = map(
-                    function=lambda sequence: np.pad(
+                    lambda sequence: np.pad(
                         array=sequence,
                         pad_width=[[0, sequence_length - len(sequence)]],
                         mode="constant",
