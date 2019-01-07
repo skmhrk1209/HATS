@@ -18,7 +18,7 @@ def main(input_filename, output_filename, sequence_length):
             for line in input_file:
 
                 print(regex.findall(line.strip()))
-                filename, label = regex.findall(line.strip())
+                filename, label = regex.findall(line.strip())[0]
                 label = label.strip().strip('"')
                 label = [ord(c) - 33 for c in label]
                 label = np.pad(
