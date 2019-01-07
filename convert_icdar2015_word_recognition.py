@@ -14,10 +14,8 @@ def main(input_filename, output_filename, sequence_length):
 
             for line in input_file:
 
-                print(line.split())
-                filename, label = line.split()
-                filename = filename.strip(",")
-                label = label.strip('"')
+                filename, label = line.split(",")
+                label = label.strip().strip('"')
                 label = [ord(c) - 33 for c in label]
                 label = map(
                     function=lambda sequence: np.pad(
