@@ -13,7 +13,7 @@ def main(input_filename, output_filename, sequence_length):
 
         with open(input_filename) as input_file:
 
-            regex = re.compile(r'(.+), "()"')
+            regex = re.compile(r'(.+), "(.+)"')
 
             for line in input_file:
 
