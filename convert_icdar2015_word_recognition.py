@@ -19,12 +19,14 @@ def main(input_directory, output_filename, sequence_length):
 
                 filename, label = regex.findall(line.strip())[0]
                 label = label.strip().strip('"')
-                label = [ord(c) - 33 for c in label]
+                label = [ord(c) - 32 for c in label]
+                for any([i > 95 for i in label]):
+                    continue
                 label = np.pad(
                     array=label,
                     pad_width=[[0, sequence_length - len(label)]],
                     mode="constant",
-                    constant_values=90
+                    constant_values=95
                 )
 
                 writer.write(
