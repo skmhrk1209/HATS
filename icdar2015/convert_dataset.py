@@ -4,7 +4,7 @@ import glob
 import sys
 import os
 import re
-
+import cv2
 
 def main(input_directory, output_filename, sequence_length):
 
@@ -17,8 +17,8 @@ def main(input_directory, output_filename, sequence_length):
             for line in f:
 
                 filename, label = regex.findall(line.strip())[0]
-                print(filename, label)
-                break
+                print(filename)
+                cv2.imread(os.path.join(input_directory, filename))
                 label = label.strip().strip('"')
                 label = [ord(c) - 32 for c in label]
                 if any([i > 95 for i in label]):
