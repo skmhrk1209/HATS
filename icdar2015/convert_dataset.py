@@ -18,8 +18,8 @@ def main(input_directory, output_filename, sequence_length):
 
                 filename, label = regex.findall(line.strip())[0]
                 if cv2.imread(os.path.join(input_directory, filename)) is None: 
-                    print(line.strip())
                     print(filename)
+                    print("a")
                 label = label.strip().strip('"')
                 label = [ord(c) - 32 for c in label]
                 if any([i > 95 for i in label]):
