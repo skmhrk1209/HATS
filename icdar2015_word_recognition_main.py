@@ -8,11 +8,11 @@ from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synth_acnn_model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth_train.tfrecord"], help="tfrecord filenames")
-parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
+parser.add_argument("--model_dir", type=str, default="icdar2015_word_recognition_acnn_model", help="model directory")
+parser.add_argument('--filenames', type=str, nargs="+", default=["icdar2015_word_recognition_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=4468, help="buffer size to shuffle dataset")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
@@ -47,8 +47,7 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=4, num_units=256),
-                    AttrDict(sequence_length=10, num_units=256)
+                    AttrDict(sequence_length=21, num_units=256),
                 ],
                 data_format=args.data_format
             ),
