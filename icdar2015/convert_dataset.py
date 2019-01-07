@@ -18,6 +18,7 @@ def main(input_directory, output_filename, sequence_length):
             for line in f:
 
                 filename, label = regex.findall(line.strip())[0]
+                print(filename, label)
                 label = label.strip().strip('"')
                 label = [ord(c) - 32 for c in label]
                 if any([i > 95 for i in label]):
