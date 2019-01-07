@@ -3,6 +3,7 @@ import numpy as np
 import glob
 import sys
 import os
+import re
 from algorithms import *
 
 
@@ -12,11 +13,11 @@ def main(input_filename, output_filename, sequence_length):
 
         with open(input_filename) as input_file:
 
+            regex = re.compile(r'(.+), "()"')
+
             for line in input_file:
 
-                print(line)
-                print(line.split(","))
-                filename, label = line.split(",")
+                filename, label = regex.findall(line.strip())
                 label = label.strip().strip('"')
                 label = [ord(c) - 33 for c in label]
                 label = np.pad(
