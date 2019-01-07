@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import cv2
 import argparse
 from attrdict import AttrDict
 from icdar2015.dataset import Dataset
@@ -86,21 +87,32 @@ def main(unused_argv):
             ).get_next()
         )
 
-    if args.eval:
+    if args.predict:
 
-        eval_results = classifier.evaluate(
-            input_fn=lambda: Dataset(
-                filenames=args.filenames,
-                num_epochs=args.num_epochs,
+        with tf.Session() as sesison:
+
+            filenames = session.run(tf.data.TFRecordDataset(filenames).map(lambda example: tf.parse_single_example(
+                serialized=example,
+                features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
+            )["path"]).make_one_shot_iterator().get_next())
+
+        images = [np.transpose(
+            cv2.resize(cv2.imread(filename), (256, 256)),
+            [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
+        ) for filename in filenames]
+
+        predict_results = classifier.predict(
+            input_fn=tf.estimator.inputs.numpy_input_fn(
+                x={"image": images},
                 batch_size=args.batch_size,
-                buffer_size=args.buffer_size,
-                sequence_lengths=[21],
-                image_size=[256, 256],
-                data_format=args.data_format
-            ).get_next()
+                num_epochs=1
+            )
         )
 
-        print(eval_results)
+        with open("result.txt", "w") as f:
+
+            for filename, predict_result in zip(filenames, predict_results):
+                f.write('{}, "{}"'.format(filename, "".join(map(lambda x: chr(x + 32), filter(lambda x: x < 95, predict_result["predictions"])))))
 
 
 if __name__ == "__main__":
