@@ -4,7 +4,6 @@ import glob
 import sys
 import os
 import re
-from algorithms import *
 
 
 def main(input_directory, output_filename, sequence_length):
