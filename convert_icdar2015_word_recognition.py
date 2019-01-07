@@ -17,14 +17,11 @@ def main(input_filename, output_filename, sequence_length):
                 filename, label = line.split(",")
                 label = label.strip().strip('"')
                 label = [ord(c) - 33 for c in label]
-                label = map(
-                    lambda sequence: np.pad(
-                        array=sequence,
-                        pad_width=[[0, sequence_length - len(sequence)]],
-                        mode="constant",
-                        constant_values=90
-                    ),
-                    sequence=label
+                label = np.pad(
+                    array=label,
+                    pad_width=[[0, sequence_length - len(label)]],
+                    mode="constant",
+                    constant_values=90
                 )
 
                 writer.write(
