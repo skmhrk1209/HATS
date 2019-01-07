@@ -2,14 +2,14 @@ import tensorflow as tf
 import numpy as np
 import argparse
 from attrdict import AttrDict
-from dataset import Dataset
+from multi_synthetic_word.dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synth_acnn_model", help="model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_acnn_model", help="model directory")
+parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
