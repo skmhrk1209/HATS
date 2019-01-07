@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import argparse
 from attrdict import AttrDict
-from icdar2015.dataset import Dataset
+from icdar2015_word_recognition.dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
@@ -96,10 +96,10 @@ def main(unused_argv):
                 features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
             )["path"]).make_one_shot_iterator().get_next())
 
-        images = [np.transpose(
+        images = map(lambda filename: np.transpose(
             cv2.resize(cv2.imread(filename), (256, 256)),
             [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
-        ) for filename in filenames]
+        ), filenames)
 
         predict_results = classifier.predict(
             input_fn=tf.estimator.inputs.numpy_input_fn(
