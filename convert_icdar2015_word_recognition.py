@@ -14,6 +14,7 @@ def main(input_filename, output_filename, sequence_length):
 
             for line in input_file:
 
+                print(line)
                 filename, label = line.split()
                 filename = filename.strip(",")
                 label = label.strip('"')
