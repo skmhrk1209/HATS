@@ -6,6 +6,7 @@ import os
 import re
 import cv2
 
+
 def main(input_directory, output_filename, sequence_length):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
@@ -17,10 +18,6 @@ def main(input_directory, output_filename, sequence_length):
             for line in f:
 
                 filename, label = regex.findall(line.strip())[0]
-                if cv2.imread(os.path.join(input_directory, filename)) is None: 
-                    print(filename)
-                    
-                label = label.strip().strip('"')
                 label = [ord(c) - 32 for c in label]
                 if any([i > 95 for i in label]):
                     continue
