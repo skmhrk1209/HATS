@@ -51,7 +51,7 @@ def main(unused_argv):
                 ],
                 data_format=args.data_format
             ),
-            num_classes=63,
+            num_classes=96,
             data_format=args.data_format,
             accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(
@@ -80,7 +80,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[4, 10],
+                sequence_lengths=[21],
                 image_size=[256, 256],
                 data_format=args.data_format
             ).get_next()
@@ -94,7 +94,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[4, 10],
+                sequence_lengths=[21],
                 image_size=[256, 256],
                 data_format=args.data_format
             ).get_next()
