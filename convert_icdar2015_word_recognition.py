@@ -7,15 +7,15 @@ import re
 from algorithms import *
 
 
-def main(input_filename, output_filename, sequence_length):
+def main(input_directory, output_filename, sequence_length):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
-        with open(input_filename) as input_file:
+        with open(os.path.join(input_directory, "gt.txt")) as f:
 
             regex = re.compile(r'(.+), "(.+)"')
 
-            for line in input_file:
+            for line in f:
 
                 filename, label = regex.findall(line.strip())[0]
                 label = label.strip().strip('"')
@@ -33,7 +33,7 @@ def main(input_filename, output_filename, sequence_length):
                             feature={
                                 "path": tf.train.Feature(
                                     bytes_list=tf.train.BytesList(
-                                        value=[filename.encode("utf-8")]
+                                        value=[os.path.join(input_directory, filename).encode("utf-8")]
                                     )
                                 ),
                                 "label": tf.train.Feature(
