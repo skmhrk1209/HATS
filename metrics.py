@@ -31,16 +31,10 @@ def edit_distance_accuracy(logits, labels, time_major):
         logits = tf.transpose(logits, [1, 0, 2])
         labels = tf.transpose(labels, [1, 0])
 
-    print(logits.shape)
-
     indices = tf.not_equal(labels, tf.shape(logits)[2] - 1)
-    print(indices.shape)
     indices = tf.where(tf.reduce_any(indices, axis=1))
-    print(indices.shape)
-    logits = tf.gather(logits, indices)
-    labels = tf.gather(labels, indices)
-
-    print(indices.shape)
+    logits = tf.gather_nd(logits, indices)
+    labels = tf.gather_nd(labels, indices)
 
     print(logits.shape)
 
