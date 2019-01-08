@@ -22,18 +22,21 @@ def full_sequence_accuracy(logits, labels, time_major):
         output_type=tf.int32
     )
 
-    return tf.metrics.mean(tf.reduce_all(
-        input_tensor=tf.equal(labels, predictions),
-        axis=1
-    ))
+    return tf.reduce_all(tf.equal(labels, predictions), axis=1)
 
 
 def edit_distance_accuracy(logits, labels, time_major):
 
     if time_major:
-        labels = tf.transpose(labels, [1, 0])
-    else:
         logits = tf.transpose(logits, [1, 0, 2])
+        labels = tf.transpose(labels, [1, 0])
+
+    indices = tf.not_equal(labels, tf.shape(logits)[2] - 1)
+    indices = tf.reduce_any(indices, axis=1)
+    logits = tf.gather(logits, indices)
+    labels = tf.gather(labels, indices)
+
+    logits = tf.transpose(logits, [1, 0, 2])
 
     predictions = tf.nn.ctc_greedy_decoder(
         inputs=logits,
@@ -49,8 +52,8 @@ def edit_distance_accuracy(logits, labels, time_major):
         null=tf.shape(logits)[2] - 1
     )
 
-    return tf.metrics.mean(1.0 - tf.edit_distance(
+    return 1.0 - tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
         truth=tf.cast(labels, tf.int32),
         normalize=False
-    ) / tf.cast(tf.shape(logits)[0], tf.float32))
+    ) / tf.cast(tf.shape(logits)[0], tf.float32)

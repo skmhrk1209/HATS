@@ -176,23 +176,17 @@ class Model(object):
                 metrics.edit_distance_accuracy if self.accuracy_type == Model.AccuracyType.EDIT_DISTANCE else \
                 None
 
-            accuracies = map_innermost_element(
+            accuracy = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
                 function=lambda logits_labels: accuracy_function(
                     logits=tf.stack(logits_labels[0], axis=1),
                     labels=tf.stack(logits_labels[1], axis=1),
                     time_major=False
                 ),
                 sequence=zip_innermost_list(logits, labels)
-            )
+            )), axis=0))
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops=dict(flatten_innermost_element(map_innermost_element(
-                    function=lambda indices_accuracy: (
-                        "accuracy_{}".format("_".join(map(str, indices_accuracy[0]))),
-                        indices_accuracy[1]
-                    ),
-                    sequence=enumerate_innermost_element(accuracies)
-                )))
+                eval_metric_ops=dict(accuracy=accuracy)
             )
