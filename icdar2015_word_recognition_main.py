@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import cv2
+import os
 import argparse
 from attrdict import AttrDict
 from icdar2015_word_recognition.dataset import Dataset
