@@ -36,8 +36,6 @@ def edit_distance_accuracy(logits, labels, time_major):
     logits = tf.gather_nd(logits, indices)
     labels = tf.gather_nd(labels, indices)
 
-    print(logits.shape)
-
     logits = tf.transpose(logits, [1, 0, 2])
 
     predictions = tf.nn.ctc_greedy_decoder(
