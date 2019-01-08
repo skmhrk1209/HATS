@@ -24,6 +24,8 @@ def main(input_directory, output_filename, sequence_lengths):
             label = map_innermost_element(list, label)
             label = map_innermost_element(lambda char: class_ids[char], label)
 
+            print(sequence_lengths)
+
             for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
                 label = map_innermost_list(
