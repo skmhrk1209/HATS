@@ -89,7 +89,7 @@ def main(unused_argv):
 
     if args.predict:
 
-        with tf.Session() as sesison:
+        with tf.Session() as session:
 
             filenames = session.run(tf.data.TFRecordDataset(filenames).map(lambda example: tf.parse_single_example(
                 serialized=example,
