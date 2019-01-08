@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
                                 if (!std::regex_match(string, match, std::regex(R"([0-9]+_([0-9A-Za-z]+))"))) {
                                     continue;
                                 }
-                                if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
+                                if (match.str(1).size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
                                     continue;
                                 }
 
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
                                             if (boost::algorithm::all_of(strings, [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
                                                 boost::gil::copy_pixels(boost::gil::view(image),
                                                                         boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
-                                                strings.emplace_back(match[1].str(), box);
+                                                strings.emplace_back(match.str(1), box);
                                                 return true;
                                             }
                                         }
