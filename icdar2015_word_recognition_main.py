@@ -93,12 +93,14 @@ def main(unused_argv):
 
         with tf.Session() as session:
 
+            next_filename = tf.data.TFRecordDataset(args.filenames).map(lambda example: tf.parse_single_example(
+                serialized=example,
+                features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
+            )["path"]).make_one_shot_iterator().get_next()
+
             while True:
                 try:
-                    filenames.append(session.run(tf.data.TFRecordDataset(args.filenames).map(lambda example: tf.parse_single_example(
-                        serialized=example,
-                        features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
-                    )["path"]).make_one_shot_iterator().get_next()))
+                    filenames.append(session.run(next_filename))
                     print(filenames[-1])
                 except:
                     break
