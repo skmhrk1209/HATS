@@ -121,7 +121,9 @@ def main(unused_argv):
         with open("result.txt", "w") as f:
 
             for filename, predict_result in zip(filenames, predict_results):
-                f.write('{}, "{}"\n'.format(filename, "".join(map(lambda x: chr(x + 32), filter(lambda x: x < 95, predict_result["predictions"])))))
+                f.write('{}, "{}"\n'.format(os.path.basename(filename), "".join(
+                    map(lambda x: chr(x + 32), filter(lambda x: x < 95, predict_result["predictions"]))
+                )))
 
 
 if __name__ == "__main__":
