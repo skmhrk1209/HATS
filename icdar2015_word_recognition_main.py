@@ -91,7 +91,7 @@ def main(unused_argv):
 
         with tf.Session() as session:
 
-            filenames = session.run(tf.data.TFRecordDataset(filenames).map(lambda example: tf.parse_single_example(
+            filenames = session.run(tf.data.TFRecordDataset(args.filenames).map(lambda example: tf.parse_single_example(
                 serialized=example,
                 features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
             )["path"]).make_one_shot_iterator().get_next())
