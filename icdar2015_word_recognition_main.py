@@ -105,7 +105,8 @@ def main(unused_argv):
             input_fn=tf.estimator.inputs.numpy_input_fn(
                 x={"image": images},
                 batch_size=args.batch_size,
-                num_epochs=1
+                num_epochs=1,
+                shuffle=False
             )
         )
 
