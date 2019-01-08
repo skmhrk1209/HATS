@@ -99,6 +99,7 @@ def main(unused_argv):
                         serialized=example,
                         features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
                     )["path"]).make_one_shot_iterator().get_next()))
+                    print(filenames[-1])
                 except:
                     break
 
