@@ -96,10 +96,11 @@ def main(unused_argv):
                 features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
             )["path"]).make_one_shot_iterator().get_next())
 
-        cv2.imread(filenames[0])
+
+       
 
         images = list(map(lambda filename: np.transpose(
-            cv2.resize(cv2.imread(filename), (256, 256)),
+            cv2.resize(cv2.imread(str(filename)), (256, 256)),
             [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
         ), filenames))
 
