@@ -96,7 +96,7 @@ def main(unused_argv):
                 features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
             )["path"]).make_one_shot_iterator().get_next())
 
-        print(filenames)
+        cv2.imread(filenames[0])
 
         images = list(map(lambda filename: np.transpose(
             cv2.resize(cv2.imread(filename), (256, 256)),
