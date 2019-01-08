@@ -96,6 +96,8 @@ def main(unused_argv):
                 features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
             )["path"]).make_one_shot_iterator().get_next())
 
+        print(filenames)
+
         for f in filenames:
             print(cv2.imread(str(f)))
 
