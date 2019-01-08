@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 
                                 auto string = filename.stem().string();
                                 std::smatch match;
-                                if (!std::regex_match(string, match, std::regex(R"(.*_([0-9A-Za-z]*)_.*)"))) {
+                                if (!std::regex_match(string, match, std::regex(R"(.+_([0-9A-Za-z]+))"))) {
                                     continue;
                                 }
                                 if (match[1].str().size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
