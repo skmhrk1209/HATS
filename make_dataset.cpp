@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
         "output_directory", boost::program_options::value<std::string>(), "directory of output data")(
         "image_width", boost::program_options::value<int>()->default_value(256), "width of image that will be generated")(
         "image_height", boost::program_options::value<int>()->default_value(256), "height of image that will be generated")(
-        "sequence_lengths", boost::program_options::value<std::vector<int>>()->multitoken()->default_value({4, 10}, "4, 10"), "sequence lengths of texts")(
-        "num_data", boost::program_options::value<int>()->default_value(1000000), "number of data that will be generated")(
+        "sequence_lengths", boost::program_options::value<std::vector<int>>()->multitoken()->default_value({5, 10}, "5, 10"), "sequence lengths of texts")(
+        "num_data", boost::program_options::value<int>()->default_value(900000), "number of data that will be generated")(
         "num_retries", boost::program_options::value<int>()->default_value(100), "number of retries for locating bounding box");
 
     boost::program_options::variables_map variables_map;
