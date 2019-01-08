@@ -101,12 +101,13 @@ def main(unused_argv):
             while True:
                 try:
                     filenames.append(session.run(next_filename))
-                    print(filenames[-1])
                 except:
                     break
 
+        print(filenames)
+
         images = list(map(lambda filename: np.transpose(
-            cv2.resize(cv2.imread(str(filename)), (256, 256)),
+            cv2.resize(cv2.imread(filename), (256, 256)),
             [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
         ), filenames))
 
