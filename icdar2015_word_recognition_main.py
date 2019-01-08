@@ -107,7 +107,7 @@ def main(unused_argv):
         images = np.array(list(map(lambda filename: np.transpose(
             cv2.resize(cv2.imread(filename.decode("utf-8")), (256, 256)),
             [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
-        ), filenames)))
+        ), filenames))) / 255.
 
         predict_results = classifier.predict(
             input_fn=tf.estimator.inputs.numpy_input_fn(
