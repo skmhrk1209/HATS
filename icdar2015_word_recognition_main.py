@@ -89,17 +89,18 @@ def main(unused_argv):
 
     if args.predict:
 
+        filenames = []
+
         with tf.Session() as session:
 
-            filenames = session.run(tf.data.TFRecordDataset(args.filenames).map(lambda example: tf.parse_single_example(
-                serialized=example,
-                features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
-            )["path"]).make_one_shot_iterator().get_next())
-
-        print(filenames)
-
-        for f in filenames:
-            print(cv2.imread(str(f)))
+            while True:
+                try:
+                    filenames.append(session.run(tf.data.TFRecordDataset(args.filenames).map(lambda example: tf.parse_single_example(
+                        serialized=example,
+                        features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
+                    )["path"]).make_one_shot_iterator().get_next()))
+                except:
+                    break
 
         images = list(map(lambda filename: np.transpose(
             cv2.resize(cv2.imread(str(filename)), (256, 256)),
