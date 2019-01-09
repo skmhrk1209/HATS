@@ -15,9 +15,6 @@ def spatial_flatten(inputs, data_format):
 
 class Model(object):
 
-    class AccuracyType:
-        FULL_SEQUENCE, EDIT_DISTANCE = range(2)
-
     def __init__(self, convolutional_network, attention_network,
                  num_classes, data_format, accuracy_type, hyper_params):
 
@@ -171,19 +168,16 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.EVAL:
 
-            accuracy_function = \
-                metrics.full_sequence_accuracy if self.accuracy_type == Model.AccuracyType.FULL_SEQUENCE else \
-                metrics.edit_distance_accuracy if self.accuracy_type == Model.AccuracyType.EDIT_DISTANCE else \
-                None
-
-            accuracy = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
-                function=lambda logits_labels: accuracy_function(
-                    logits=tf.stack(logits_labels[0], axis=1),
-                    labels=tf.stack(logits_labels[1], axis=1),
-                    time_major=False
+            accuracy = tf.metrics.mean((map_innermost_element(
+                function=lambda predictions_labels: tf.reduce_all(
+                    input_tensor=tf.equal(
+                        x=tf.stack(predictions_labels[0], axis=1),
+                        y=tf.stack(predictions_labels[1], axis=1)
+                    ),
+                    axis=1
                 ),
-                sequence=zip_innermost_list(logits, labels)
-            )), axis=0))
+                sequence=zip_innermost_list(predictions, labels)
+            ))
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
