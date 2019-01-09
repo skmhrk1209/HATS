@@ -16,13 +16,12 @@ def spatial_flatten(inputs, data_format):
 class Model(object):
 
     def __init__(self, convolutional_network, attention_network,
-                 num_classes, data_format, accuracy_type, hyper_params):
+                 num_classes, data_format, hyper_params):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
         self.num_classes = num_classes
         self.data_format = data_format
-        self.accuracy_type = accuracy_type
         self.hyper_params = hyper_params
 
     def __call__(self, features, labels, mode):
