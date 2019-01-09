@@ -55,5 +55,5 @@ def edit_distance_accuracy(logits, labels, time_major):
     return 1.0 - tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
         truth=tf.cast(labels, tf.int32),
-        normalize=False
-    ) / tf.cast(tf.shape(logits)[0], tf.float32)
+        normalize=True
+    )
