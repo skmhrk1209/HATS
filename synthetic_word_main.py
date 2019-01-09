@@ -53,7 +53,7 @@ def main(unused_argv):
             ),
             num_classes=63,
             data_format=args.data_format,
-            accuracy_type=Model.AccuracyType.FULL_SEQUENCE,
+            accuracy_type=Model.AccuracyType.EDIT_DISTANCE,
             hyper_params=AttrDict(
                 learning_rate=0.001,
                 beta1=0.9,
