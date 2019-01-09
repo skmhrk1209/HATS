@@ -177,7 +177,7 @@ class Model(object):
                     axis=1
                 ),
                 sequence=zip_innermost_list(predictions, labels)
-            ))
+            )))
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
