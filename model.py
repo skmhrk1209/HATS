@@ -61,7 +61,8 @@ class Model(object):
         predictions = map_innermost_element(
             function=lambda logits: tf.argmax(
                 input=logits,
-                axis=-1
+                axis=-1,
+                output_type=tf.int32
             ),
             sequence=logits
         )
