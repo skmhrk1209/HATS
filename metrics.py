@@ -10,7 +10,7 @@ def dense_to_sparse(tensor, null):
     return tf.SparseTensor(indices, values, shape)
 
 
-def edit_distance_accuracy(logits, labels):
+def edit_distance_accuracy(labels, logits):
 
     time_step, num_classes = tf.shape(logits)[1:]
     indices = tf.not_equal(labels, num_classes - 1)

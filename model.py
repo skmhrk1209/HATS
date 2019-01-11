@@ -109,11 +109,8 @@ class Model(object):
             )
 
         loss = tf.reduce_mean(map_innermost_element(
-            function=lambda logits_labels: tf.losses.sparse_softmax_cross_entropy(
-                logits=logits_labels[0],
-                labels=logits_labels[1]
-            ),
-            sequence=zip_innermost_element(logits, labels)
+            function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(*labels_logits),
+            sequence=zip_innermost_element(labels, logits)
         ))
 
         loss += tf.reduce_mean(map_innermost_element(
@@ -169,8 +166,8 @@ class Model(object):
         if mode == tf.estimator.ModeKeys.EVAL:
 
             accuracy = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
-                function=lambda logits_labels: metrics.edit_distance_accuracy(*logits_labels),
-                sequence=zip_innermost_list(logits, labels)
+                function=lambda labels_logits: metrics.edit_distance_accuracy(*labels_logits),
+                sequence=zip_innermost_list(labels, logits)
             )), axis=0))
 
             return tf.estimator.EstimatorSpec(
