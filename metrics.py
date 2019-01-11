@@ -12,7 +12,7 @@ def dense_to_sparse(tensor, null):
 
 def edit_distance_accuracy(labels, logits):
 
-    time_step, num_classes = tf.shape(logits)[1:]
+    time_step, num_classes = tf.unstack(tf.shape(logits)[1:])
     indices = tf.not_equal(labels, num_classes - 1)
     indices = tf.where(tf.reduce_any(indices, axis=1))
     logits = tf.gather_nd(logits, indices)
