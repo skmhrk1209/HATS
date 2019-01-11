@@ -12,7 +12,7 @@ parser.add_argument("--model_dir", type=str, default="synthetic_word_acnn_model"
 parser.add_argument('--filenames', type=str, nargs="+", default=["synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=7000000, help="buffer size to shuffle dataset")
+parser.add_argument("--buffer_size", type=int, default=6667760, help="buffer size to shuffle dataset")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
@@ -82,8 +82,7 @@ def main(unused_argv):
                 sequence_lengths=[10],
                 image_size=[256, 256],
                 data_format=args.data_format
-            ).get_next(),
-            max_steps=70313
+            ).get_next()
         )
 
     if args.eval:

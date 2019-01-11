@@ -23,6 +23,17 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
+def get_learning_rate_fn_with_decay(base_learning_rate, batch_size, batch_denom,
+                                    num_data, boundary_epochs, decay_rates):
+
+    initial_learning_rate = base_learning_rate * batch_size / batch_denom
+    batches_per_epoch = num_data / batch_size
+    boundaries = [int(batches_per_epoch * boundary_epoch) for boundary_epoch in boundary_epochs]
+    values = [initial_learning_rate * decay_rate for decay_rate in decay_rates]
+
+    return lambda global_step: tf.train.piecewise_constant(global_step, boundaries, values)
+
+
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
@@ -48,17 +59,25 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=5, num_units=256),
-                    AttrDict(sequence_length=10, num_units=256)
+                    AttrDict(sequence_length=10, num_units=256),
                 ],
                 data_format=args.data_format
             ),
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                learning_rate=0.001,
-                beta1=0.9,
-                beta2=0.999,
-                attention_map_decay=0.001
+                attention_map_decay=1e-3,
+                weight_decay=1e-4
+                loss_filter_fn=lambda name: "batch_normalization" not in name,
+                learning_rate_fn=get_learning_rate_fn_with_decay(
+                    base_learning_rate=0.128,
+                    batch_size=args.batch_size,
+                    batch_denom=256,
+                    num_data=args.buffer_size,
+                    boundary_epochs=[2, 4, 6, 8],
+                    decay_rates=[1e-0, 1e-1, 1e-2, 1e-3, 1e-4]
+                ),
+                momentum=0.9
             )
         ),
         model_dir=args.model_dir,

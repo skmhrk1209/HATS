@@ -118,6 +118,11 @@ class Model(object):
             sequence=attention_maps
         )) * self.hyper_params.attention_map_decay
 
+        loss += tf.add_n([
+            tf.nn.l2_loss(variable) for variable in tf.trainable_variables()
+            if self.hyper_params.loss_filter_fn(variable.name)
+        ]) * self.hyper_params.weight_decay
+
         # ==========================================================================================
         if self.data_format == "channels_first":
 
@@ -146,15 +151,24 @@ class Model(object):
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
+                '''
                 optimizer = tf.train.AdamOptimizer(
                     learning_rate=self.hyper_params.learning_rate,
                     beta1=self.hyper_params.beta1,
                     beta2=self.hyper_params.beta2
                 )
+                '''
+
+                global_step = tf.train.get_or_create_global_step()
+
+                optimizer = tf.train.MomentumOptimizer(
+                    learning_rate=self.hyper_params.learning_rate_fn(global_step),
+                    momentum=self.hyper_params.momentum
+                )
 
                 train_op = optimizer.minimize(
                     loss=loss,
-                    global_step=tf.train.get_global_step()
+                    global_step=global_step
                 )
 
             return tf.estimator.EstimatorSpec(
