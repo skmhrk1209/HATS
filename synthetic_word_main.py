@@ -82,7 +82,8 @@ def main(unused_argv):
                 sequence_lengths=[10],
                 image_size=[256, 256],
                 data_format=args.data_format
-            ).get_next()
+            ).get_next(),
+            max_steps=70313
         )
 
     if args.eval:
