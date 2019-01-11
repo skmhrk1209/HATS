@@ -171,7 +171,7 @@ class Model(object):
             accuracy = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
                 function=lambda logits_labels: metrics.edit_distance_accuracy(*logits_labels),
                 sequence=zip_innermost_list(logits, labels)
-            ))), axis=0)
+            )), axis=0))
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
