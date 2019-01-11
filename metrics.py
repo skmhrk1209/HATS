@@ -12,26 +12,19 @@ def dense_to_sparse(tensor, null):
 
 def edit_distance_accuracy(logits, labels):
 
-    indices = tf.not_equal(labels, tf.shape(logits)[2] - 1)
+    time_step, num_classes = tf.shape(logits)[1:]
+    indices = tf.not_equal(labels, num_classes - 1)
     indices = tf.where(tf.reduce_any(indices, axis=1))
     logits = tf.gather_nd(logits, indices)
     labels = tf.gather_nd(labels, indices)
 
-    logits = tf.transpose(logits, [1, 0, 2])
-
+    batch_size = tf.shape(logits)[0]
     predictions = tf.nn.ctc_greedy_decoder(
-        inputs=logits,
-        sequence_length=tf.tile(
-            input=[tf.shape(logits)[0]],
-            multiples=[tf.shape(logits)[1]]
-        ),
+        inputs=tf.transpose(logits, [1, 0, 2]),
+        sequence_length=tf.tile([time_step], [batch_size]),
         merge_repeated=False
     )[0][0]
-
-    labels = dense_to_sparse(
-        tensor=labels,
-        null=tf.shape(logits)[2] - 1
-    )
+    labels = dense_to_sparse(labels, num_classes - 1)
 
     return 1.0 - tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
