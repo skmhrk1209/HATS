@@ -168,16 +168,10 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.EVAL:
 
-            accuracy = tf.metrics.mean((map_innermost_element(
-                function=lambda predictions_labels: tf.reduce_all(
-                    input_tensor=tf.equal(
-                        x=tf.stack(predictions_labels[0], axis=1),
-                        y=tf.stack(predictions_labels[1], axis=1)
-                    ),
-                    axis=1
-                ),
-                sequence=zip_innermost_list(predictions, labels)
-            )))
+            accuracy = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
+                function=lambda logits_labels: metrics.edit_distance_accuracy(*logits_labels),
+                sequence=zip_innermost_list(logits, labels)
+            ))), axis=0)
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
