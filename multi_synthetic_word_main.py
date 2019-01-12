@@ -124,8 +124,8 @@ def main(unused_argv):
             image = predict_result["images"]
             attention_map = predict_result["attention_maps"]
 
-            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0]), attention_map))
-            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0]), attention_map))
+            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0])), attention_map)
+            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0])), attention_map)
             attention_map = map_innermost_element(lambda attention_map: (attention_map - attention_map.min()) /
                                                   (attention_map.max() - attention_map.min()), attention_map)
             attention_map = map_innermost_list(sum, attention_map)
