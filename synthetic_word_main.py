@@ -138,12 +138,13 @@ def main(unused_argv):
             attention_maps = map_innermost_element(lambda attention_map: np.split(attention_map, attention_map.shape[0]), attention_maps)
             attention_maps = map_innermost_element(lambda attention_map: (attention_map - attention_map.min()) /
                                                    (attention_map.max() - attention_map.min()), attention_maps)
+            map_innermost_element(lambda attention_map: print(attention_map.min(), attention_map.max()))
             attention_maps = map_innermost_list(sum, attention_maps)
             attention_maps = map_innermost_list(sum, attention_maps)
             attention_maps = np.squeeze(attention_maps)
 
             if args.data_format == "channels_first":
-                image = image.transpose([1, 2, 0])
+                image = np.transpose(image, [1, 2, 0])
 
             attention_maps = cv2.resize(attention_maps, image.shape[:2])
             image[:, :, -1] += attention_maps
