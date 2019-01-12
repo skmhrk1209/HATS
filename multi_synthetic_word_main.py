@@ -119,7 +119,7 @@ def main(unused_argv):
         import cv2
         import itertools
 
-        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
+        for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 
             image = predict_result["images"]
             if args.data_format == "channels_first":
