@@ -70,9 +70,9 @@ def main(unused_argv):
                 weight_decay=1e-4,
                 loss_filter_fn=lambda name: "batch_normalization" not in name,
                 learning_rate_fn=get_learning_rate_fn_with_decay(
-                    base_learning_rate=0.128,
+                    base_learning_rate=0.1,
                     batch_size=args.batch_size,
-                    batch_denom=256,
+                    batch_denom=args.batch_size,
                     num_data=args.buffer_size,
                     boundary_epochs=[2, 4, 6, 8],
                     decay_rates=[1e-0, 1e-1, 1e-2, 1e-3, 1e-4]
