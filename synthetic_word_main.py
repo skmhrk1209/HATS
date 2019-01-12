@@ -23,17 +23,6 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def get_learning_rate_fn_with_decay(base_learning_rate, batch_size, batch_denom,
-                                    num_data, boundary_epochs, decay_rates):
-
-    initial_learning_rate = base_learning_rate * batch_size / batch_denom
-    batches_per_epoch = num_data / batch_size
-    boundaries = [int(batches_per_epoch * boundary_epoch) for boundary_epoch in boundary_epochs]
-    values = [initial_learning_rate * decay_rate for decay_rate in decay_rates]
-
-    return lambda global_step: tf.train.piecewise_constant(global_step, boundaries, values)
-
-
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
