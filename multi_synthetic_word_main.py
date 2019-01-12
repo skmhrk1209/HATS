@@ -134,6 +134,7 @@ def main(unused_argv):
 
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
+                attention_maps = np.transpose(attention_maps, [1, 2, 0])
 
             print(image.shape)
             print(attention_maps.shape)
