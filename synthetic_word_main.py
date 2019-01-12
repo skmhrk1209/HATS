@@ -142,6 +142,7 @@ def main(unused_argv):
             attention_maps = map_innermost_list(sum, attention_maps)
             attention_maps = map_innermost_list(sum, attention_maps)
 
+            print(type(attention_maps))
             map_innermost_list(lambda l: print(sum(l)), attention_maps)
 
             if args.data_format == "channels_first":
