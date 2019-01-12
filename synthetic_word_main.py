@@ -130,7 +130,7 @@ def main(unused_argv):
 
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
-            attention_maps = attention_maps.sum(axis=[0, 1])
+            attention_maps = attention_maps.sum(axis=(0, 1))
 
             if args.data_format == "channels_first":
                 image = image.transpose([1, 2, 0])
