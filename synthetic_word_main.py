@@ -6,6 +6,7 @@ from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
+from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synthetic_word_acnn_model", help="model directory")
@@ -114,8 +115,6 @@ def main(unused_argv):
 
     if args.predict:
 
-        import cv2
-
         predict_results = classifier.predict(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
@@ -128,13 +127,18 @@ def main(unused_argv):
             ).get_next()
         )
 
+        import cv2
+
         for i, predict_result in enumerate(predict_results):
 
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
-            attention_maps = attention_maps.sum(axis=(0, 1))
 
-            print(attention_maps.shape)
+            attention_maps = map_innermost_element(lambda array: array.split(array.shape[0]), attention_maps)
+            attention_maps = map_innermost_element(lambda array: array.split(array.shape[0]), attention_maps)
+            attention_maps = map_innermost_element(lambda array: (array - array.min()) / (array.max() - array.min()), attention_maps)
+            attention_maps = map_innermost_list(sum, attention_maps)
+            attention_maps = map_innermost_list(sum, attention_maps)
 
             if args.data_format == "channels_first":
                 image = image.transpose([1, 2, 0])
