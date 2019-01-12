@@ -124,6 +124,8 @@ def main(unused_argv):
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
 
+            print(attention_maps.shape)
+
             attention_maps = map_innermost_element(lambda attention_map: np.split(attention_map, attention_map.shape[0]), attention_maps)
             attention_maps = map_innermost_element(lambda attention_map: np.split(attention_map, attention_map.shape[0]), attention_maps)
             attention_maps = map_innermost_element(lambda attention_map: (attention_map - attention_map.min()) /
@@ -135,12 +137,10 @@ def main(unused_argv):
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
                 attention_maps = np.transpose(attention_maps, [1, 2, 0])
-
-            print(image.shape)
-            print(attention_maps.shape)
+            
 
             attention_maps = cv2.resize(attention_maps, image.shape[:2])
-            image[:, :, -1:] += attention_maps
+            image[:, :, -1] += attention_maps
 
             cv2.imshow("image", image)
             if cv2.waitKey() == ord("q"):
