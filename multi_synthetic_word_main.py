@@ -139,7 +139,7 @@ def main(unused_argv):
                 attention_map = np.transpose(attention_map, [1, 2, 0])
 
             attention_map = cv2.resize(attention_map, image.shape[:2])
-            image[:, :, -1] += attention_maps
+            image[:, :, -1] += attention_map
 
             cv2.imshow("image", image)
             if cv2.waitKey() == ord("q"):
