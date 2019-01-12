@@ -124,9 +124,9 @@ def main(unused_argv):
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
 
-            for i in range(attention_map.shape[0]):
+            for i in range(attention_maps.shape[0]):
 
-                for j in range(attention_map.shape[1]):
+                for j in range(attention_maps.shape[1]):
 
                     attention_map = attention_maps[i, j]
                     attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
