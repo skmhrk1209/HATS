@@ -124,24 +124,21 @@ def main(unused_argv):
             image = predict_result["images"]
             attention_map = predict_result["attention_maps"]
 
-            attention_map = map_innermost_element(lambda attention_map: np.split(attention_map, attention_map.shape[0]), attention_map)
-            attention_map = map_innermost_element(lambda attention_map: np.split(attention_map, attention_map.shape[0]), attention_map)
+            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0]), attention_map))
+            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0]), attention_map))
             attention_map = map_innermost_element(lambda attention_map: (attention_map - attention_map.min()) /
                                                   (attention_map.max() - attention_map.min()), attention_map)
-            print(len(attention_map))
             attention_map = map_innermost_list(sum, attention_map)
-            print(len(attention_map))
             attention_map = map_innermost_list(sum, attention_map)
-            attention_map = np.squeeze(attention_map)
 
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
                 attention_map = np.transpose(attention_map, [1, 2, 0])
 
+            attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
             attention_map = cv2.resize(attention_map, image.shape[:2])
-            image[:, :, -1] += attention_map
 
-            cv2.imshow("image", image)
+            cv2.imshow("image", image + attention_map)
             if cv2.waitKey() == ord("q"):
                 break
 
