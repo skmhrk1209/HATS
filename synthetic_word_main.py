@@ -138,7 +138,7 @@ def main(unused_argv):
             attention_maps = map_innermost_element(lambda attention_map: np.split(attention_map, attention_map.shape[0]), attention_maps)
             attention_maps = map_innermost_element(lambda attention_map: (attention_map - attention_map.min()) /
                                                    (attention_map.max() - attention_map.min()), attention_maps)
-            map_innermost_element(lambda attention_map: print(attention_map.min(), attention_map.max()))
+            map_innermost_element(lambda attention_map: print(attention_map.min(), attention_map.max()), attention_maps)
             attention_maps = map_innermost_list(sum, attention_maps)
             attention_maps = map_innermost_list(sum, attention_maps)
             attention_maps = np.squeeze(attention_maps)
