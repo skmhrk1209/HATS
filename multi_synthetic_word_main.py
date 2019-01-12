@@ -122,20 +122,18 @@ def main(unused_argv):
         for i, predict_result in enumerate(predict_results):
 
             image = predict_result["images"]
-            attention_maps = predict_result["attention_maps"]
+            if args.data_format == "channels_first":
+                image = np.transpose(image, [1, 2, 0])
 
-            for attention_map_ in attention_maps:
+            for attention_maps in predict_result["attention_maps"]:
 
-                for attention_map in attention_map_:
+                for attention_map in attention_maps:
 
+                    attention_map = np.squeeze(attention_map)
                     attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
-
-                    if args.data_format == "channels_first":
-                        image = np.transpose(image, [1, 2, 0])
-                        attention_map = np.transpose(attention_map, [1, 2, 0])
-
-                    attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
                     attention_map = cv2.resize(attention_map, image.shape[:2])
+                    attention_map = np.expand_dims(attention_map, axis=-1)
+                    attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
 
                     cv2.imshow("image", image + attention_map)
                     if cv2.waitKey() == ord("q"):
