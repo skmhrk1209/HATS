@@ -118,11 +118,6 @@ class Model(object):
             sequence=attention_maps
         )) * self.hyper_params.attention_decay
 
-        loss += tf.add_n([
-            tf.nn.l2_loss(variable) for variable in tf.trainable_variables()
-            if self.hyper_params.loss_filter_fn(variable.name)
-        ]) * self.hyper_params.weight_decay
-
         # ==========================================================================================
         if self.data_format == "channels_first":
 
