@@ -121,7 +121,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[10],
+                sequence_lengths=[5, 10],
                 image_size=[256, 256],
                 data_format=args.data_format
             ).get_next()
