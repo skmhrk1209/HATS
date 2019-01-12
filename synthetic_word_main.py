@@ -112,6 +112,36 @@ def main(unused_argv):
 
         print(eval_results)
 
+    if args.predict:
+
+        predict_results = classifier.evaluate(
+            input_fn=lambda: Dataset(
+                filenames=args.filenames,
+                num_epochs=args.num_epochs,
+                batch_size=args.batch_size,
+                buffer_size=args.buffer_size,
+                sequence_lengths=[10],
+                image_size=[256, 256],
+                data_format=args.data_format
+            ).get_next()
+        )
+
+        for i, predict_result in enumerate(predict_results):
+
+            image = predict_result["images"]
+            attention_maps = predict_result["attention_maps"]
+            attention_maps = attention_maps.sum(axis=[0, 1])
+
+            if args.data_format == "channels_first":
+                image = image.transpose([1, 2, 0])
+                attention_maps = attention_maps.transpose([1, 2, 0])
+
+            attention_maps = cv2.resize(attention_maps, image.shape[:2])
+
+            cv2.imshow("image", image + attention_maps)
+            if cv2.waitKey() == ord("q"):
+                break
+
 
 if __name__ == "__main__":
     tf.app.run()
