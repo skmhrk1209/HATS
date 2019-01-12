@@ -67,7 +67,7 @@ def main(unused_argv):
             data_format=args.data_format,
             hyper_params=AttrDict(
                 attention_decay=1e-3,
-                weight_decay=1e-4,
+                weight_decay=1e-8,
                 loss_filter_fn=lambda name: "batch_normalization" not in name,
                 learning_rate_fn=lambda global_step: tf.train.exponential_decay(
                     learning_rate=0.1,
