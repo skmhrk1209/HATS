@@ -132,6 +132,8 @@ def main(unused_argv):
             attention_maps = predict_result["attention_maps"]
             attention_maps = attention_maps.sum(axis=(0, 1))
 
+            print(attention_maps.shape)
+
             if args.data_format == "channels_first":
                 image = image.transpose([1, 2, 0])
                 attention_maps = attention_maps.transpose([1, 2, 0])
