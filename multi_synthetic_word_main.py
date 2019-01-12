@@ -130,16 +130,14 @@ def main(unused_argv):
                                                   (attention_map.max() - attention_map.min()), attention_map)
             attention_map = map_innermost_list(sum, attention_map)
             attention_map = map_innermost_list(sum, attention_map)
-            print(attention_map.shape)
 
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
-                attention_map = np.transpose(attention_map, [1, 2, 0])
 
-            attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
             attention_map = cv2.resize(attention_map, image.shape[:2])
+            image[:, :, -1] += attention_map
 
-            cv2.imshow("image", image + attention_map)
+            cv2.imshow("image", image)
             if cv2.waitKey() == ord("q"):
                 break
 
