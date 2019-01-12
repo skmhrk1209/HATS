@@ -114,7 +114,7 @@ def main(unused_argv):
 
     if args.predict:
 
-        predict_results = classifier.evaluate(
+        predict_results = classifier.predict(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
