@@ -116,7 +116,7 @@ class Model(object):
         loss += tf.reduce_mean(map_innermost_element(
             function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
             sequence=attention_maps
-        )) * self.hyper_params.attention_map_decay
+        )) * self.hyper_params.attention_decay
 
         loss += tf.add_n([
             tf.nn.l2_loss(variable) for variable in tf.trainable_variables()
