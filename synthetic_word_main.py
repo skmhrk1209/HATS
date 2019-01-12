@@ -73,7 +73,7 @@ def main(unused_argv):
                     batch_size=args.batch_size,
                     batch_denom=256,
                     num_data=args.buffer_size,
-                    boundary_epochs=[2, 4, 6, 8],
+                    boundary_epochs=[0.2, 0.4, 0.6, 0.8],
                     decay_rates=[1e-0, 1e-1, 1e-2, 1e-3, 1e-4]
                 ),
                 momentum=0.9,
