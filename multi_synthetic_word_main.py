@@ -6,7 +6,6 @@ from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
-from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_acnn_model", help="model directory")
@@ -118,16 +117,17 @@ def main(unused_argv):
         )
 
         import cv2
+        import itertools
 
-        for i, predict_result in enumerate(predict_results):
+        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
             image = predict_result["images"]
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
 
-            for attention_maps in predict_result["attention_maps"]:
+            for j, attention_maps in enumerate(predict_result["attention_maps"]):
 
-                for attention_map in attention_maps:
+                for k, attention_map in enumerate(attention_maps):
 
                     attention_map = np.squeeze(attention_map)
                     attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
@@ -135,9 +135,7 @@ def main(unused_argv):
                     attention_map = np.expand_dims(attention_map, axis=-1)
                     attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
 
-                    cv2.imshow("image", image + attention_map)
-                    if cv2.waitKey() == ord("q"):
-                        break
+                    cv2.imwrite("attention_map_{}_{}_{}.jpg".format(i, j, k), image + attention_map)
 
 
 if __name__ == "__main__":
