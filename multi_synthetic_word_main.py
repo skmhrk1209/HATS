@@ -135,7 +135,7 @@ def main(unused_argv):
                     attention_map = np.expand_dims(attention_map, axis=-1)
                     attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
 
-                    cv2.imwrite("outputs/attention_map_{}_{}_{}.jpg".format(i, j, k), image + attention_map)
+                    cv2.imwrite("outputs/attention_map_{}_{}_{}.jpg".format(i, j, k), (image + attention_map) * 255.)
 
 
 if __name__ == "__main__":
