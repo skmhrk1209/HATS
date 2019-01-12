@@ -121,12 +121,14 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(predict_results):
 
+            image = predict_result["images"]
+            attention_maps = predict_result["attention_maps"]
+
             for i in range(attention_map.shape[0]):
 
                 for j in range(attention_map.shape[1]):
 
-                    image = predict_result["images"]
-                    attention_map = predict_result["attention_maps"][i, j]
+                    attention_map = attention_maps[i, j]
                     attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
 
                     if args.data_format == "channels_first":
