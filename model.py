@@ -170,7 +170,7 @@ class Model(object):
 
         if mode == tf.estimator.ModeKeys.EVAL:
 
-            accuracy = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
+            error_rate = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
                 function=lambda labels_logits: metrics.normalized_edit_distance(*labels_logits),
                 sequence=zip_innermost_list(labels, logits)
             )), axis=0))
@@ -178,5 +178,5 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops=dict(accuracy=accuracy)
+                eval_metric_ops=dict(error_rate=error_rate)
             )
