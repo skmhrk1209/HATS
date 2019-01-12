@@ -136,11 +136,11 @@ def main(unused_argv):
 
             if args.data_format == "channels_first":
                 image = image.transpose([1, 2, 0])
-                attention_maps = attention_maps.transpose([1, 2, 0])
 
             attention_maps = cv2.resize(attention_maps, image.shape[:2])
+            image[:, :, -1] += attention_maps
 
-            cv2.imshow("image", image + attention_maps)
+            cv2.imshow("image", image)
             if cv2.waitKey() == ord("q"):
                 break
 
