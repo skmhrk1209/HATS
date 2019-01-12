@@ -10,7 +10,7 @@ def dense_to_sparse(tensor, null):
     return tf.SparseTensor(indices, values, shape)
 
 
-def edit_distance_accuracy(labels, logits):
+def normalized_edit_distance(labels, logits):
 
     time_step, num_classes = tf.unstack(tf.shape(logits)[1:])
     indices = tf.not_equal(labels, num_classes - 1)
@@ -26,7 +26,7 @@ def edit_distance_accuracy(labels, logits):
     )[0][0]
     labels = dense_to_sparse(labels, num_classes - 1)
 
-    return 1.0 - tf.edit_distance(
+    return tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
         truth=tf.cast(labels, tf.int32),
         normalize=True

@@ -180,7 +180,7 @@ class Model(object):
         if mode == tf.estimator.ModeKeys.EVAL:
 
             accuracy = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
-                function=lambda labels_logits: metrics.edit_distance_accuracy(*labels_logits),
+                function=lambda labels_logits: metrics.normalized_edit_distance(*labels_logits),
                 sequence=zip_innermost_list(labels, logits)
             )), axis=0))
 
