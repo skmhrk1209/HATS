@@ -140,8 +140,8 @@ def main(unused_argv):
                                                    (attention_map.max() - attention_map.min()), attention_maps)
             attention_maps = map_innermost_list(sum, attention_maps)
             attention_maps = map_innermost_list(sum, attention_maps)
+            attention_maps = np.squeeze(attention_maps)
 
-            print(attention_maps.shape)
             if args.data_format == "channels_first":
                 image = image.transpose([1, 2, 0])
 
