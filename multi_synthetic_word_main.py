@@ -78,11 +78,9 @@ def main(unused_argv):
                     decay_rates=[1e-0, 1e-1, 1e-2, 1e-3, 1e-4]
                 ),
                 momentum=0.9,
-                '''
-                learning_rate=0.001,
-                beta1=0.9,
-                beta2=0.999,
-                '''
+                # learning_rate=0.001,
+                # beta1=0.9,
+                # beta2=0.999,
             )
         ),
         model_dir=args.model_dir,
