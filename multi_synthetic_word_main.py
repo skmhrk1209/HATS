@@ -121,30 +121,24 @@ def main(unused_argv):
 
         for i, predict_result in enumerate(predict_results):
 
-            image = predict_result["images"]
-            attention_map = predict_result["attention_maps"]
+            for i in range(attention_map.shape[0]):
 
-            '''
-            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0])), attention_map)
-            attention_map = map_innermost_element(lambda attention_map: np.squeeze(np.split(attention_map, attention_map.shape[0])), attention_map)
-            attention_map = map_innermost_element(lambda attention_map: (attention_map - attention_map.min()) /
-                                                  (attention_map.max() - attention_map.min()), attention_map)
-            attention_map = map_innermost_list(sum, attention_map)
-            attention_map = map_innermost_list(sum, attention_map)
-            '''
+                for j in range(attention_map.shape[1]):
 
-            attention_map = attention_map[0, 0, 0]
-            attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
+                    image = predict_result["images"]
+                    attention_map = predict_result["attention_maps"][i, j]
+                    attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
 
-            if args.data_format == "channels_first":
-                image = np.transpose(image, [1, 2, 0])
+                    if args.data_format == "channels_first":
+                        image = np.transpose(image, [1, 2, 0])
+                        attention_map = np.transpose(attention_map, [1, 2, 0])
 
-            attention_map = cv2.resize(attention_map, image.shape[:2])
-            image[:, :, -1] += attention_map
+                    attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
+                    attention_map = cv2.resize(attention_map, image.shape[:2])
 
-            cv2.imshow("image", image)
-            if cv2.waitKey() == ord("q"):
-                break
+                    cv2.imshow("image", image + attention_map)
+                    if cv2.waitKey() == ord("q"):
+                        break
 
 
 if __name__ == "__main__":
