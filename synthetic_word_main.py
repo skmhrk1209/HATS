@@ -114,6 +114,8 @@ def main(unused_argv):
 
     if args.predict:
 
+        import cv2
+
         predict_results = classifier.predict(
             input_fn=lambda: Dataset(
                 filenames=args.filenames,
