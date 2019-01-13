@@ -58,10 +58,10 @@ def main(unused_argv):
             num_classes=96,
             data_format=args.data_format,
             hyper_params=AttrDict(
+                attention_decay=0.0001,
                 learning_rate=0.001,
                 beta1=0.9,
-                beta2=0.999,
-                attention_map_decay=0.0001
+                beta2=0.999
             )
         ),
         model_dir=args.model_dir,
@@ -88,6 +88,22 @@ def main(unused_argv):
                 data_format=args.data_format
             ).get_next()
         )
+
+    if args.eval:
+
+        eval_results = classifier.evaluate(
+            input_fn=lambda: Dataset(
+                filenames=args.filenames,
+                num_epochs=args.num_epochs,
+                batch_size=args.batch_size,
+                buffer_size=args.buffer_size,
+                sequence_lengths=[21],
+                image_size=[256, 256],
+                data_format=args.data_format
+            ).get_next()
+        )
+
+        print(eval_results)
 
     if args.predict:
 
