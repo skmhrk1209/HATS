@@ -25,7 +25,7 @@ def main(input_directory, output_filename, sequence_lengths):
             # label = map_innermost_element(lambda char: class_ids[char], label)
             label = map_innermost_element(lambda char: char - ord(" "), label)
 
-            if any([char > ord("z") for char in flatten_innermost_element(label)):
+            if any([char > ord("z") for char in flatten_innermost_element(label)]):
                 continue
 
             for i, sequence_length in enumerate(sequence_lengths[::-1]):
