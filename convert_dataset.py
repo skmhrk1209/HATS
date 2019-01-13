@@ -45,7 +45,7 @@ def main(input_directory, output_filename, sequence_lengths):
                         array=sequence,
                         pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
                         mode="constant",
-                        constant_values=123
+                        constant_values=ord("z") - ord(" ") + 1
                     ),
                     sequence=label
                 )
