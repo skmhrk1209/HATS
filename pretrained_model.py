@@ -49,8 +49,8 @@ class Model(object):
         tf.train.init_from_checkpoint(
             ckpt_dir_or_file=self.pretrained_model_dir,
             assignment_map={
-                "attention_network": "attention_network",
-                "residual_network": "residual_network"
+                "attention_network/": "attention_network/",
+                "residual_network/": "residual_network/"
             }
         )
 
