@@ -4,7 +4,7 @@ import cv2
 import os
 import argparse
 from attrdict import AttrDict
-from word_recognition.dataset import Dataset
+from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
