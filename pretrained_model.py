@@ -46,12 +46,12 @@ class Model(object):
             sequence=attention_maps
         )
 
-        pretrained_variables = tf.trainable_variables()
-        scaffold = tf.train.Scaffold(
-            init_fn=lambda scaffold, session: tf.train.Saver(pretrained_variables).restore(
-                sess=session,
-                save_path=tf.train.get_checkpoint_state(self.pretrained_model_dir).model_checkpoint_path
-            )
+        tf.train.init_from_checkpoint(
+            ckpt_dir_or_file=pretrained_model_dir,
+            assignment_map={
+                "attention_network": "attention_network",
+                "residual_network": "residual_network"
+            }
         )
 
         logits = map_innermost_element(
