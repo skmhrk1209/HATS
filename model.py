@@ -7,13 +7,14 @@ from algorithms import *
 class Model(object):
 
     def __init__(self, convolutional_network, attention_network,
-                 num_classes, data_format, hyper_params):
+                 num_classes, data_format, hyper_params, pretrained_model_dir=None):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
+        self.pretrained_model_dir = pretrained_model_dir
 
     def __call__(self, images, labels, mode):
 
@@ -44,6 +45,13 @@ class Model(object):
             )),
             sequence=attention_maps
         )
+
+        if self.pretrained_model_dir:
+
+            tf.train.init_from_checkpoint(
+                ckpt_dir_or_file=self.pretrained_model_dir,
+                assignment_map={"/": "/"}
+            )
 
         logits = map_innermost_element(
             function=lambda feature_vectors: tf.layers.dense(

@@ -5,13 +5,13 @@ import os
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
-from pretrained_model import Model
+from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="word_recognition_acnn_model", help="model directory")
-parser.add_argument("--pretrained_model_dir", type=str, default="synthetic_word_acnn_model", help="pretrained model directory")
+parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["word_recognition_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1000, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -54,7 +54,6 @@ def main(unused_argv):
                 ],
                 data_format=args.data_format
             ),
-            pretrained_model_dir=args.pretrained_model_dir,
             num_classes=96,
             data_format=args.data_format,
             hyper_params=AttrDict(
@@ -62,7 +61,8 @@ def main(unused_argv):
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
-            )
+            ),
+            pretrained_model_dir=args.pretrained_model_dir
         )(features, labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(

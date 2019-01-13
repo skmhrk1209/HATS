@@ -9,6 +9,7 @@ from networks.attention_network import AttentionNetwork
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_acnn_model", help="model directory")
+parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -59,7 +60,8 @@ def main(unused_argv):
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
-            )
+            ),
+            pretrained_model_dir=args.pretrained_model_dir
         )(features, labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
