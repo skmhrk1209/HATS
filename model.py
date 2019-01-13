@@ -118,6 +118,19 @@ class Model(object):
             sequence=attention_maps
         )) * self.hyper_params.attention_decay
 
+        labels = tf.concat(flatten_innermost_element(map_innermost_list(
+            function=lambda labels: tf.stack(labels, axis=1),
+            sequence=labels
+        )), axis=0)
+
+        logits = tf.concat(flatten_innermost_element(map_innermost_list(
+            function=lambda logits: tf.stack(logits, axis=1),
+            sequence=logits
+        )), axis=0)
+
+        error_rate = metrics.normalized_edit_distance(labels, logits)
+        error_rate = tf.identity(error_rate, "error_rate")
+
         # ==========================================================================================
         if self.data_format == "channels_first":
 
@@ -164,11 +177,6 @@ class Model(object):
             )
 
         if mode == tf.estimator.ModeKeys.EVAL:
-
-            error_rate = tf.metrics.mean(tf.concat(flatten_innermost_element(map_innermost_element(
-                function=lambda labels_logits: metrics.normalized_edit_distance(*labels_logits),
-                sequence=zip_innermost_list(labels, logits)
-            )), axis=0))
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,

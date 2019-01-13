@@ -26,8 +26,8 @@ def normalized_edit_distance(labels, logits):
     )[0][0]
     labels = dense_to_sparse(labels, num_classes - 1)
 
-    return tf.edit_distance(
+    return tf.metrics.mean(tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
         truth=tf.cast(labels, tf.int32),
         normalize=True
-    )
+    ))
