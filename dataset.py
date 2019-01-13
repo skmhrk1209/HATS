@@ -9,7 +9,7 @@ from algorithms import *
 class Dataset(object):
 
     def __init__(self, filenames, num_epochs, batch_size, buffer_size,
-                 sequence_lengths, image_size, data_format, encoding):
+                 sequence_lengths, image_size, data_format):
 
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
@@ -22,8 +22,7 @@ class Dataset(object):
                 self.parse,
                 sequence_lengths=sequence_lengths,
                 image_size=image_size,
-                data_format=data_format,
-                encoding=encoding
+                data_format=data_format
             ),
             num_parallel_calls=os.cpu_count()
         )
@@ -31,7 +30,7 @@ class Dataset(object):
         self.dataset = self.dataset.prefetch(1)
         self.iterator = self.dataset.make_one_shot_iterator()
 
-    def parse(self, example, sequence_lengths, image_size, data_format, encoding):
+    def parse(self, example, sequence_lengths, image_size, data_format):
 
         features = tf.parse_single_example(
             serialized=example,
@@ -48,12 +47,7 @@ class Dataset(object):
         )
 
         image = tf.read_file(features["path"])
-
-        if encoding == "jpg":
-            image = tf.image.decode_jpeg(image, 3)
-        elif encoding == "png":
-            image = tf.image.decode_png(image, 3)
-
+        image = tf.image.decode_jpeg(image, 3)
         image = tf.image.convert_image_dtype(image, tf.float32)
 
         if image_size:
