@@ -11,6 +11,7 @@ class Model(object):
 
         self.convolutional_network = convolutional_network
         self.attention_network = attention_network
+        self.pretrained_model_dir = pretrained_model_dir
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -49,7 +50,7 @@ class Model(object):
         scaffold = tf.train.Scaffold(
             init_fn=lambda scaffold, session: tf.train.Saver(pretrained_variables).restore(
                 sess=session,
-                save_path=tf.train.get_checkpoint_state(pretrained_model).model_checkpoint_path
+                save_path=tf.train.get_checkpoint_state(self.pretrained_model_dir).model_checkpoint_path
             )
         )
 
