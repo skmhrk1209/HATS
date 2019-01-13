@@ -5,7 +5,7 @@ import os
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
-from model import Model
+from pretrained_model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
 
@@ -60,7 +60,8 @@ def main(unused_argv):
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
-            )
+            ),
+            pretrained_model="synthetic_word_acnn_model"
         )(features, labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
