@@ -129,21 +129,19 @@ class Model(object):
         )), axis=0)
 
         error_rate = metrics.normalized_edit_distance(labels, logits)
-        error_rate = tf.identity(error_rate, "error_rate")
+        error_rate = tf.identity(error_rate[0], "error_rate")
 
         # ==========================================================================================
         if self.data_format == "channels_first":
 
             images = tf.transpose(images, [0, 2, 3, 1])
 
-        tf.summary.image("images", images, max_outputs=2)
-
-        if self.data_format == "channels_first":
-
             attention_maps = map_innermost_element(
                 function=lambda attention_maps: tf.transpose(attention_maps, [0, 2, 3, 1]),
                 sequence=attention_maps
             )
+
+        tf.summary.image("images", images, max_outputs=2)
 
         map_innermost_element(
             function=lambda indices_attention_maps: tf.summary.image(
@@ -153,6 +151,8 @@ class Model(object):
             ),
             sequence=enumerate_innermost_element(attention_maps)
         )
+
+        tf.summary.scalar("error_rate", error_rate[1])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
