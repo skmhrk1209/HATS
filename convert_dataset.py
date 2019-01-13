@@ -29,13 +29,23 @@ def main(input_directory, output_filename, sequence_lengths):
                 continue
 
             for i, sequence_length in enumerate(sequence_lengths[::-1]):
-
+                '''
                 label = map_innermost_list(
                     function=lambda sequence: np.pad(
                         array=sequence,
                         pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
                         mode="constant",
                         constant_values=class_ids[""]
+                    ),
+                    sequence=label
+                )
+                '''
+                label = map_innermost_list(
+                    function=lambda sequence: np.pad(
+                        array=sequence,
+                        pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                        mode="constant",
+                        constant_values=123
                     ),
                     sequence=label
                 )
