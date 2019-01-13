@@ -129,7 +129,6 @@ class Model(object):
         )), axis=0)
 
         error_rate = metrics.normalized_edit_distance(labels, logits)
-        error_rate = tf.identity(error_rate[0], "error_rate")
 
         # ==========================================================================================
         if self.data_format == "channels_first":
@@ -152,6 +151,7 @@ class Model(object):
             sequence=enumerate_innermost_element(attention_maps)
         )
 
+        tf.identity(error_rate[0], "error_rate")
         tf.summary.scalar("error_rate", error_rate[1])
         # ==========================================================================================
 
