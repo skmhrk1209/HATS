@@ -4,15 +4,6 @@ import metrics
 from algorithms import *
 
 
-def spatial_flatten(inputs, data_format):
-
-    inputs_shape = inputs.get_shape().as_list()
-    outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
-                     [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
-
-    return tf.reshape(inputs, outputs_shape)
-
-
 class Model(object):
 
     def __init__(self, convolutional_network, attention_network,
@@ -35,6 +26,14 @@ class Model(object):
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
+
+        def spatial_flatten(inputs, data_format):
+
+            inputs_shape = inputs.get_shape().as_list()
+            outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
+                             [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
+
+            return tf.reshape(inputs, outputs_shape)
 
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
