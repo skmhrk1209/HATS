@@ -6,7 +6,7 @@ from algorithms import *
 
 class Model(object):
 
-    def __init__(self, convolutional_network, attention_network, pretrained_model_dir
+    def __init__(self, convolutional_network, attention_network, pretrained_model_dir,
                  num_classes, data_format, hyper_params):
 
         self.convolutional_network = convolutional_network
