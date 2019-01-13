@@ -26,7 +26,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
-        model_fn=lambda **kwargs: Model(
+        model_fn=lambda features, labels, mode: Model(
             convolutional_network=ResidualNetwork(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
@@ -60,7 +60,7 @@ def main(unused_argv):
                 beta1=0.9,
                 beta2=0.999
             )
-        )(*kwargs.values()),
+        )(features, labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
