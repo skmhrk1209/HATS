@@ -7,7 +7,7 @@ import re
 import cv2
 
 
-def main(input_directory, output_filename, sequence_length):
+def main(input_directory):
 
     with open(os.path.join(input_directory, "gt.txt"), encoding="utf-8-sig") as f:
 
@@ -22,4 +22,4 @@ def main(input_directory, output_filename, sequence_length):
 
 if __name__ == "__main__":
 
-    main(*sys.argv[1:3], int(sys.argv[3]))
+    main(sys.argv[0])
