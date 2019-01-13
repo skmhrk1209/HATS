@@ -82,7 +82,13 @@ def main(unused_argv):
                 sequence_lengths=[10],
                 image_size=[256, 256],
                 data_format=args.data_format
-            ).get_next()
+            ).get_next(),
+            hooks=[
+                logging_hook=tf.train.LoggingTensorHook(
+                    tensors={"error_rate": "error_rate"},
+                    every_n_iter=100
+                )
+            ]
         )
 
     if args.eval:

@@ -35,8 +35,6 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
-                    AttrDict(filters=512, strides=[1, 1], blocks=2),
                 ],
                 num_classes=None,
                 data_format=args.data_format
@@ -86,7 +84,13 @@ def main(unused_argv):
                 sequence_lengths=[21],
                 image_size=[256, 256],
                 data_format=args.data_format
-            ).get_next()
+            ).get_next(),
+            hooks=[
+                logging_hook=tf.train.LoggingTensorHook(
+                    tensors={"error_rate": "error_rate"},
+                    every_n_iter=100
+                )
+            ]
         )
 
     if args.eval:
