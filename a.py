@@ -11,11 +11,10 @@ def main(input_directory):
 
     with open(os.path.join(input_directory, "gt.txt"), encoding="utf-8-sig") as f:
 
-        regex = re.compile(r'(.+), "(.+)"')
-
         for line in f:
 
-            filename, label = regex.findall(line.strip())[0]
+            filename, label = line.strip().split(",")
+            label = label.strip('"')
             image = cv2.imread(os.path.join(input_directory, filename))
             cv2.imwrite(os.path.join(input_directory, "{}.jpg".format(label)), image)
 
