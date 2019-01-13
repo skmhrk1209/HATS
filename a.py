@@ -17,7 +17,7 @@ def main(input_directory):
 
             filename, label = regex.findall(line.strip())[0]
             image = cv2.imread(os.path.join(input_directory, filename))
-            cv2.imwrite(os.path.join(input_directory, "{}.jpg".format(label)}), image)
+            cv2.imwrite(os.path.join(input_directory, "{}.jpg".format(label)), image)
 
 
 if __name__ == "__main__":
