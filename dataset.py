@@ -59,7 +59,7 @@ class Dataset(object):
         label = tf.cast(features["label"], tf.int32)
         label = tf.reshape(label, sequence_lengths)
 
-        return {"image": image}, label
+        return image, label
 
     def get_next(self):
 

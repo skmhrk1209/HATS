@@ -24,9 +24,7 @@ class Model(object):
         self.data_format = data_format
         self.hyper_params = hyper_params
 
-    def __call__(self, features, labels, mode):
-
-        images = features["image"]
+    def __call__(self, images, labels, mode):
 
         feature_maps = self.convolutional_network(
             inputs=images,
