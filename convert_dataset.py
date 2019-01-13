@@ -22,7 +22,11 @@ def main(input_directory, output_filename, sequence_lengths):
 
             label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
             label = map_innermost_element(list, label)
-            label = map_innermost_element(lambda char: class_ids[char], label)
+            # label = map_innermost_element(lambda char: class_ids[char], label)
+            label = map_innermost_element(lambda char: char - ord(" "), label)
+
+            if any([c > ord("z") flatten_innermost_element(label)):
+                continue
 
             for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
