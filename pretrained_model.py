@@ -179,8 +179,7 @@ class Model(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                train_op=train_op,
-                scaffold=scaffold
+                train_op=train_op
             )
 
         if mode == tf.estimator.ModeKeys.EVAL:
