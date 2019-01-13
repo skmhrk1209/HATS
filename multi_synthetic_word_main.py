@@ -85,7 +85,7 @@ def main(unused_argv):
                 data_format=args.data_format
             ).get_next(),
             hooks=[
-                logging_hook=tf.train.LoggingTensorHook(
+                tf.train.LoggingTensorHook(
                     tensors={"error_rate": "error_rate"},
                     every_n_iter=100
                 )
