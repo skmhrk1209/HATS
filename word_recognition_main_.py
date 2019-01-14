@@ -46,8 +46,8 @@ def main(unused_argv):
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
