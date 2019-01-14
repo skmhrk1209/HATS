@@ -115,7 +115,10 @@ def main(unused_argv):
 
         import glob
 
-        filenames = sorted(glob.glob("evaluation_dataset/*.png"))
+        filenames = sorted(
+            iterable=glob.glob("evaluation_dataset/*.png"),
+            key=lambda filename: int(os.path.splitext(filename))[0].split("_")[1]
+        )
 
         images = np.array([np.transpose(
             cv2.resize(cv2.imread(filename), (256, 256)),
