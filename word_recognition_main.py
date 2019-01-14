@@ -135,7 +135,7 @@ def main(unused_argv):
 
         predict_results = classifier.predict(
             input_fn=tf.estimator.inputs.numpy_input_fn(
-                x={"image": images},
+                x=images,
                 batch_size=args.batch_size,
                 num_epochs=1,
                 shuffle=False
