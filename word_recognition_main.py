@@ -138,7 +138,7 @@ def main(unused_argv):
 
             for filename, predict_result in zip(filenames, predict_results):
 
-                predict_result["predictions"][predict_result["predictions"] < 95] + 32
+                print(predict_result["predictions"][predict_result["predictions"] < 95] + 32)
 
                 f.write('{}, "{}"\n'.format(os.path.basename(filename), "".join([
                     map(chr, predict_result["predictions"][predict_result["predictions"] < 95] + 32)
