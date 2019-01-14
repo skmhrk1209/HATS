@@ -124,7 +124,7 @@ def main(unused_argv):
 
         predict_results = classifier.predict(
             input_fn=lambda: tf.data.Dataset.from_tensor_slices((images, np.zeros([images.shape[0]])).batch(args.batch_size).make_one_shot_iterator().get_next()
-        )
+        ))
 
         with open("result.txt", "w") as f:
 
