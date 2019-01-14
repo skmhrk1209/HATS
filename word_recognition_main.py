@@ -116,7 +116,7 @@ def main(unused_argv):
         import glob
 
         filenames = sorted(
-            iterable=glob.glob("evaluation_dataset/*.png"),
+            glob.glob("evaluation_dataset/*.png"),
             key=lambda filename: int(os.path.splitext(filename)[0].split("_")[1])
         )
 
