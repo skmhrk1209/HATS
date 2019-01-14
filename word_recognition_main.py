@@ -113,20 +113,9 @@ def main(unused_argv):
 
     if args.predict:
 
-        filenames = []
+        import glob
 
-        with tf.Session() as session:
-
-            next_filename = tf.data.TFRecordDataset(args.filenames).map(lambda example: tf.parse_single_example(
-                serialized=example,
-                features=dict(path=tf.FixedLenFeature(shape=[], dtype=tf.string))
-            )["path"]).make_one_shot_iterator().get_next()
-
-            while True:
-                try:
-                    filenames.append(session.run(next_filename).decode("utf-8"))
-                except:
-                    break
+        filenames = glob.glob("eval_set/*.png")
 
         images = np.array(list(map(lambda filename: np.transpose(
             cv2.resize(cv2.imread(filename), (256, 256)),
