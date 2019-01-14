@@ -115,34 +115,24 @@ def main(unused_argv):
         import glob
         import cv2
 
-        filenames = sorted(
-            glob.glob("evaluation_dataset/*.png"),
-            key=lambda filename: int(os.path.splitext(os.path.basename(filename))[0].split("_")[1])
-        )
+        filenames = glob.glob("evaluation_dataset/*.png")
 
         images = np.array([np.transpose(
-            cv2.resize(cv2.imread(filename), (256, 256)),
+            cv2.resize(cv2.imread(filename), (256, 256)) / 255.,
             [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
-        ) for filename in filenames], dtype=np.float32) / 255.
+        ) for filename in filenames], dtype=np.float32)
 
         predict_results = classifier.predict(
-            input_fn=tf.estimator.inputs.numpy_input_fn(
-                x={"image": images},
-                batch_size=args.batch_size,
-                num_epochs=1,
-                shuffle=False
-            )
+            input_fn=lambda: tf.data.Dataset.from_tensor_slices((images, None)).make_one_shot_iterator().get_next()
         )
 
         with open("result.txt", "w") as f:
 
             for filename, predict_result in zip(filenames, predict_results):
 
-                print(predict_result["predictions"][predict_result["predictions"] < 95] + 32)
-
-                f.write('{}, "{}"\n'.format(os.path.basename(filename), "".join([
+                f.write('{}, "{}"\n'.format(os.path.basename(filename), "".join(
                     map(chr, predict_result["predictions"][predict_result["predictions"] < 95] + 32)
-                ])))
+                )))
 
 
 if __name__ == "__main__":
