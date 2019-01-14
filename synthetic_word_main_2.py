@@ -10,11 +10,11 @@ from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network_ import AttentionNetwork
+from networks.attention_network_2 import AttentionNetwork
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="synthetic_word_acnn_model_", help="model directory")
+parser.add_argument("--model_dir", type=str, default="synthetic_word_acnn_model_2", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
