@@ -52,7 +52,7 @@ def main(unused_argv):
                 ],
                 data_format=args.data_format
             ),
-            num_classes=63,
+            num_classes=96,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 attention_decay=1e-4,
