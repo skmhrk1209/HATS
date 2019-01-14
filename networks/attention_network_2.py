@@ -184,7 +184,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
-                                inputs=tf.concat([inputs, shortcut], axis=1 if data_format == "channels_first" else 3),
+                                inputs=tf.concat([inputs, shortcut], axis=1 if self.data_format == "channels_first" else 3),
                                 filters=deconv_param.filters,
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
@@ -220,7 +220,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
-                                inputs=tf.concat([inputs, shortcut], axis=1 if data_format == "channels_first" else 3),
+                                inputs=tf.concat([inputs, shortcut], axis=1 if self.data_format == "channels_first" else 3),
                                 filters=deconv_param.filters,
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
