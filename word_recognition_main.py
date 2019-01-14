@@ -63,7 +63,7 @@ def main(unused_argv):
                 beta2=0.999
             ),
             pretrained_model_dir=args.pretrained_model_dir
-        )(features, labels, mode),
+        )(features["images"], labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
@@ -135,7 +135,7 @@ def main(unused_argv):
 
         predict_results = classifier.predict(
             input_fn=tf.estimator.inputs.numpy_input_fn(
-                x=images,
+                x={"image": images},
                 batch_size=args.batch_size,
                 num_epochs=1,
                 shuffle=False
