@@ -83,7 +83,7 @@ def main(unused_argv):
     if args.train:
 
         classifier.train(
-            input_fn=lambda: Dataset(
+            input_fn=Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -91,7 +91,7 @@ def main(unused_argv):
                 sequence_lengths=[5, 10],
                 image_size=[256, 256],
                 data_format=args.data_format
-            ).get_next(),
+            ),
             hooks=[
                 tf.train.LoggingTensorHook(
                     tensors={"error_rate": "error_rate"},
@@ -103,7 +103,7 @@ def main(unused_argv):
     if args.eval:
 
         eval_results = classifier.evaluate(
-            input_fn=lambda: Dataset(
+            input_fn=Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -111,7 +111,7 @@ def main(unused_argv):
                 sequence_lengths=[5, 10],
                 image_size=[256, 256],
                 data_format=args.data_format
-            ).get_next()
+            )
         )
 
         print(eval_results)
@@ -119,7 +119,7 @@ def main(unused_argv):
     if args.predict:
 
         predict_results = classifier.predict(
-            input_fn=lambda: Dataset(
+            input_fn=Dataset(
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
@@ -127,7 +127,7 @@ def main(unused_argv):
                 sequence_lengths=[5, 10],
                 image_size=[256, 256],
                 data_format=args.data_format
-            ).get_next()
+            )
         )
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 100)):

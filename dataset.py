@@ -28,7 +28,10 @@ class Dataset(object):
         )
         self.dataset = self.dataset.batch(batch_size)
         self.dataset = self.dataset.prefetch(1)
-        self.iterator = self.dataset.make_one_shot_iterator()
+
+    def __call__(self):
+
+        return self.dataset.make_one_shot_iterator().get_next()
 
     def parse(self, example, sequence_lengths, image_size, data_format):
 
@@ -60,7 +63,3 @@ class Dataset(object):
         label = tf.reshape(label, sequence_lengths)
 
         return image, label
-
-    def get_next(self):
-
-        return self.iterator.get_next()
