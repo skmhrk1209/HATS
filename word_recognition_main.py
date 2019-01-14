@@ -126,7 +126,7 @@ def main(unused_argv):
                 functools.partial(tf.image.convert_image_dtype, dtype=tf.float32),
                 functools.partial(tf.image.resize_images, size=[256, 256]),
                 functools.partial(tf.transpose, perm=[2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2])
-            )).batch(args.batch_size).make_one_shot_iterator().get_next()
+            )).batch(args.batch_size)
         )
 
         with open("result.txt", "w") as f:
