@@ -117,7 +117,7 @@ def main(unused_argv):
 
         filenames = sorted(
             glob.glob("evaluation_dataset/*.png"),
-            key=lambda filename: int(os.path.splitext(filename)[0].split("_")[1])
+            key=lambda filename: int(os.path.splitext(os.path.basename(filename))[0].split("_")[1])
         )
 
         images = np.array([np.transpose(
