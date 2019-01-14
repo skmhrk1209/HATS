@@ -115,12 +115,12 @@ def main(unused_argv):
 
         import glob
 
-        filenames = glob.glob("eval_set/*.png")
+        filenames = sorted(glob.glob("evaluation_dataset/*.png"))
 
-        images = np.array(list(map(lambda filename: np.transpose(
+        images = np.array([np.transpose(
             cv2.resize(cv2.imread(filename), (256, 256)),
             [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
-        ), filenames)), dtype=np.float32) / 255.
+        ) for filename in filenames], dtype=np.float32) / 255.
 
         predict_results = classifier.predict(
             input_fn=tf.estimator.inputs.numpy_input_fn(
