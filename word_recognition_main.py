@@ -63,7 +63,7 @@ def main(unused_argv):
                 beta2=0.999
             ),
             pretrained_model_dir=args.pretrained_model_dir
-        )(features["images"] if isinstance(features, dict) else features, labels, mode),
+        )(features["image"] if isinstance(features, dict) else features, labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig().replace(
             session_config=tf.ConfigProto(
