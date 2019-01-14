@@ -134,7 +134,7 @@ def main(unused_argv):
             for filename, predict_result in zip(filenames, predict_results):
 
                 prediction = "".join(map(chr, predict_result["predictions"][predict_result["predictions"] < 95] + 32))
-                f.write('{}, "{}"\n'.format(os.path.basename(filename), prediction)
+                f.write('{}, "{}"\n'.format(os.path.basename(filename), prediction))
 
 
 if __name__ == "__main__":
