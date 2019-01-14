@@ -1,11 +1,17 @@
 import tensorflow as tf
 import numpy as np
 import argparse
+import functools
+import itertools
+import glob
+import os
+import cv2
 from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
 from networks.attention_network import AttentionNetwork
+from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_acnn_model", help="model directory")
@@ -123,9 +129,6 @@ def main(unused_argv):
                 data_format=args.data_format
             ).get_next()
         )
-
-        import itertools
-        import cv2
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 
