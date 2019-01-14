@@ -124,8 +124,8 @@ def main(unused_argv):
             ).get_next()
         )
 
-        import cv2
         import itertools
+        import cv2
 
         for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 

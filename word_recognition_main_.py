@@ -1,5 +1,7 @@
 import tensorflow as tf
 import numpy as np
+import cv2
+import os
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
@@ -48,11 +50,11 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=21, num_units=256)
+                    AttrDict(sequence_length=21, num_units=256),
                 ],
                 data_format=args.data_format
             ),
-            num_classes=63,
+            num_classes=96,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 attention_decay=1e-4,
@@ -112,7 +114,6 @@ def main(unused_argv):
     if args.predict:
 
         import glob
-        import cv2
 
         filenames = sorted(
             glob.glob("evaluation_dataset/*.png"),
@@ -136,10 +137,9 @@ def main(unused_argv):
         with open("result.txt", "w") as f:
 
             for filename, predict_result in zip(filenames, predict_results):
-
-                f.write('{}, "{}"\n'.format(os.path.basename(filename), "".join([
-                    map(chr, predict_result["predictions"][predict_result["predictions"] < 95] + 32)
-                ])))
+                f.write('{}, "{}"\n'.format(os.path.basename(filename), "".join(
+                    map(lambda x: chr(x + 32), filter(lambda x: x < 95, predict_result["predictions"]))
+                )))
 
 
 if __name__ == "__main__":
