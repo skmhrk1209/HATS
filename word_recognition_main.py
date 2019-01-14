@@ -111,6 +111,7 @@ def main(unused_argv):
 
     if args.predict:
 
+        import os
         import glob
         import cv2
 
