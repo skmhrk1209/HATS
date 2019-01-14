@@ -114,16 +114,19 @@ def main(unused_argv):
         import os
         import glob
         import cv2
+        import functools
+        from algorithms import *
 
         filenames = glob.glob("evaluation_dataset/*.png")
 
-        images = np.array([np.transpose(
-            cv2.resize(cv2.imread(filename), (256, 256)) / 255.,
-            [2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2]
-        ) for filename in filenames], dtype=np.float32)
-
         predict_results = classifier.predict(
-            input_fn=lambda: tf.data.Dataset.from_tensor_slices((images, np.zeros([images.shape[0]]))).batch(args.batch_size).make_one_shot_iterator().get_next()
+            input_fn=lambda: tf.data.Dataset.from_tensor_slices(filenames).map(compose(
+                functools.partial(tf.read_file),
+                functools.partial(tf.image.decode_png, channels=3),
+                functools.partial(tf.image.convert_image_dtype, dtype=tf.float32),
+                functools.partial(tf.image.resize_images, size=[256, 256]),
+                functools.partial(tf.transpose, perm=[2, 0, 1] if args.data_format == "channels_first" else [0, 1, 2])
+            )).map(lambda image: image, None).batch(args.batch_size).make_one_shot_iterator().get_next()
         )
 
         with open("result.txt", "w") as f:
