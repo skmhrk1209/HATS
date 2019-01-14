@@ -10,7 +10,7 @@ from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network import AttentionNetwork
+from networks.attention_network_ import AttentionNetwork
 from algorithms import *
 
 parser = argparse.ArgumentParser()
