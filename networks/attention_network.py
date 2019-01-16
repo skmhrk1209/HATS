@@ -67,7 +67,7 @@ class AttentionNetwork(object):
                     conv2d_lstm_cell = tf.contrib.rnn.Conv2DLSTMCell(
                         input_shape=references.get_shape().as_list()[1:],
                         output_channels=rnn_param.filters,
-                        kernel_shape=rnn_param.kernel_size,
+                        kernel_shape=tuple(rnn_param.kernel_size),
                         use_bias=True,
                     )
 
