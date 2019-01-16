@@ -3,7 +3,7 @@ import numpy as np
 from . import ops
 
 
-class ResidualNetwork(object):
+class ResNet(object):
 
     def __init__(self, conv_param, pool_param, residual_params, num_classes, data_format):
 
@@ -13,7 +13,7 @@ class ResidualNetwork(object):
         self.num_classes = num_classes
         self.data_format = data_format
 
-    def __call__(self, inputs, training, name="residual_network", reuse=None):
+    def __call__(self, inputs, training, name="resnet", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
 

@@ -8,13 +8,13 @@ import os
 import cv2
 from attrdict import AttrDict
 from dataset import Dataset
-from model import Model
-from networks.residual_network import ResidualNetwork
-from networks.attention_network import AttentionNetwork
+from models.hats import HATS
+from networks.resnet import ResNet
+from networks.han import HAN
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="word_recognition_acnn_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="word_recognition_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["word_recognition_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1000, help="number of training epochs")
@@ -33,8 +33,8 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
-        model_fn=lambda features, labels, mode: Model(
-            convolutional_network=ResidualNetwork(
+        model_fn=lambda features, labels, mode: HATS(
+            backbone_network=ResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
@@ -44,10 +44,10 @@ def main(unused_argv):
                 num_classes=None,
                 data_format=args.data_format
             ),
-            attention_network=AttentionNetwork(
+            hierarchical_attention_network=HAN(
                 conv_params=[
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),

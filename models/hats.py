@@ -4,13 +4,13 @@ import metrics
 from algorithms import *
 
 
-class Model(object):
+class HATS(object):
 
-    def __init__(self, convolutional_network, attention_network,
+    def __init__(self, backbone_network, hierarchical_attention_network,
                  num_classes, data_format, hyper_params, pretrained_model_dir=None):
 
-        self.convolutional_network = convolutional_network
-        self.attention_network = attention_network
+        self.backbone_network = backbone_network
+        self.hierarchical_attention_network = hierarchical_attention_network
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -18,12 +18,12 @@ class Model(object):
 
     def __call__(self, images, labels, mode):
 
-        feature_maps = self.convolutional_network(
+        feature_maps = self.backbone_network(
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        attention_maps = self.attention_network(
+        attention_maps = self.hierarchical_attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
