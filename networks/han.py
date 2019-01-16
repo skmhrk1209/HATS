@@ -18,8 +18,6 @@ class HAN(object):
 
         with tf.variable_scope(name, reuse=reuse):
 
-            shortcuts = []
-
             for i, conv_param in enumerate(self.conv_params):
 
                 with tf.variable_scope("conv_block_{}".format(i)):
@@ -50,8 +48,6 @@ class HAN(object):
                         ),
                         lambda inputs: tf.nn.relu(inputs)
                     )(inputs)
-
-                    shortcuts.append(inputs)
 
             shape = inputs.get_shape().as_list()
 
@@ -177,15 +173,10 @@ class HAN(object):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
-                    shortcut = shortcuts.pop()
-
                     inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
-                                inputs=tf.concat(
-                                    values=[inputs, shortcut],
-                                    axis=1 if self.data_format == "channels_first" else 3
-                                ),
+                                inputs=inputs,
                                 filters=deconv_param.filters,
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
@@ -216,15 +207,10 @@ class HAN(object):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
-                    shortcut = shortcuts.pop()
-
                     inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
-                                inputs=tf.concat(
-                                    values=[inputs, shortcut],
-                                    axis=1 if self.data_format == "channels_first" else 3
-                                ),
+                                inputs=inputs,
                                 filters=deconv_param.filters,
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
