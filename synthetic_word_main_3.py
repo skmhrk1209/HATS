@@ -10,7 +10,7 @@ from attrdict import AttrDict
 from dataset import Dataset
 from model import Model
 from networks.residual_network import ResidualNetwork
-from networks.attention_network_3 import AttentionNetwork
+from networks.attention_network import AttentionNetwork
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -54,7 +54,7 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=10, filters=16)
+                    AttrDict(sequence_length=10, filters=16, kernel_size=[8, 8])
                 ],
                 data_format=args.data_format
             ),

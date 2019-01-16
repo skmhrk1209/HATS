@@ -18,47 +18,41 @@ class AttentionNetwork(object):
 
         with tf.variable_scope(name, reuse=reuse):
 
+            # ==========================================================================================
+            shortcuts = []
+
             for i, conv_param in enumerate(self.conv_params):
 
                 with tf.variable_scope("conv_block_{}".format(i)):
 
-                    inputs = map_innermost_element(
-                        function=compose(
-                            lambda inputs: tf.layers.conv2d(
-                                inputs=inputs,
-                                filters=conv_param.filters,
-                                kernel_size=conv_param.kernel_size,
-                                strides=conv_param.strides,
-                                padding="same",
-                                data_format=self.data_format,
-                                use_bias=False,
-                                kernel_initializer=tf.variance_scaling_initializer(
+                    inputs = compose(
+                        lambda inputs: tf.layers.conv2d(
+                            inputs=inputs,
+                            filters=conv_param.filters,
+                            kernel_size=conv_param.kernel_size,
+                            strides=conv_param.strides,
+                            padding="same",
+                            data_format=self.data_format,
+                            use_bias=False,
+                            kernel_initializer=tf.variance_scaling_initializer(
                                     scale=2.0,
                                     mode="fan_in",
                                     distribution="normal"
-                                ),
-                                name="conv2d",
-                                reuse=None
                             ),
-                            lambda inputs: ops.batch_normalization(
-                                inputs=inputs,
-                                data_format=self.data_format,
-                                training=training,
-                                name="batch_normalization",
-                                reuse=None
-                            ),
-                            lambda inputs: tf.nn.relu(inputs)
+                            name="conv2d",
+                            reuse=None
                         ),
-                        sequence=inputs
-                    )
+                        lambda inputs: ops.batch_normalization(
+                            inputs=inputs,
+                            data_format=self.data_format,
+                            training=training,
+                            name="batch_normalization",
+                            reuse=None
+                        ),
+                        lambda inputs: tf.nn.relu(inputs)
+                    )(inputs)
 
-            shape = inputs.get_shape().as_list()
-
-            inputs = map_innermost_element(
-                function=lambda inputs: tf.layers.flatten(inputs),
-                sequence=inputs
-            )
-
+                    shortcuts.append(inputs)
             # ==========================================================================================
             references = inputs
 
@@ -70,23 +64,19 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    lstm_cell = tf.nn.rnn_cell.LSTMCell(
-                        num_units=rnn_param.num_units,
-                        use_peepholes=True,
-                        activation=tf.nn.tanh,
-                        initializer=tf.variance_scaling_initializer(
-                            scale=1.0,
-                            mode="fan_avg",
-                            distribution="normal"
-                        )
+                    conv2d_lstm_cell = tf.contrib.rnn.Conv2DLSTMCell(
+                        input_shape=tf.shape(references)[1:],
+                        output_channels=rnn_param.filters,
+                        kernel_shape=rnn_param.kernel_size,
+                        use_bias=True,
                     )
 
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
-                            cell=lstm_cell,
+                            cell=conv2d_lstm_cell,
                             inputs=[references] * rnn_param.sequence_length,
-                            initial_state=lstm_cell.zero_state(
-                                batch_size=tf.shape(inputs)[0],
+                            initial_state=conv2d_lstm_cell.zero_state(
+                                batch_size=tf.shape(references)[0],
                                 dtype=tf.float32
                             )
                         ),
@@ -97,45 +87,39 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    lstm_cell = tf.nn.rnn_cell.LSTMCell(
-                        num_units=rnn_param.num_units,
-                        use_peepholes=True,
-                        activation=tf.nn.tanh,
-                        initializer=tf.variance_scaling_initializer(
-                            scale=1.0,
-                            mode="fan_avg",
-                            distribution="normal"
-                        )
+                    conv2d_lstm_cell = tf.contrib.rnn.Conv2DLSTMCell(
+                        input_shape=tf.shape(references)[1:],
+                        output_channels=rnn_param.filters,
+                        kernel_shape=rnn_param.kernel_size,
+                        use_bias=True,
                     )
 
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
-                            cell=lstm_cell,
+                            cell=conv2d_lstm_cell,
                             inputs=[references] * rnn_param.sequence_length,
                             initial_state=tf.nn.rnn_cell.LSTMStateTuple(
-                                c=tf.layers.dense(
+                                c=tf.layers.conv2d(
                                     inputs=inputs.c,
-                                    units=rnn_param.num_units,
+                                    filters=rnn_param.filters,
+                                    kernel_size=[1, 1],
+                                    strides=[1, 1],
+                                    padding="same",
+                                    data_format=self.data_format,
                                     activation=None,
-                                    kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
-                                    ),
-                                    bias_initializer=tf.zeros_initializer(),
+                                    use_bias=True,
                                     name="c_projection",
                                     reuse=tf.AUTO_REUSE
                                 ),
-                                h=tf.layers.dense(
+                                h=tf.layers.conv2d(
                                     inputs=inputs.h,
-                                    units=rnn_param.num_units,
+                                    filters=rnn_param.filters,
+                                    kernel_size=[1, 1],
+                                    strides=[1, 1],
+                                    padding="same",
+                                    data_format=self.data_format,
                                     activation=tf.nn.tanh,
-                                    kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
-                                    ),
-                                    bias_initializer=tf.zeros_initializer(),
+                                    use_bias=True,
                                     name="h_projection",
                                     reuse=tf.AUTO_REUSE
                                 )
@@ -148,40 +132,20 @@ class AttentionNetwork(object):
                 function=lambda inputs: inputs.h,
                 sequence=inputs
             )
-
-            with tf.variable_scope("projection_block"):
-
-                inputs = map_innermost_element(
-                    function=lambda inputs: tf.layers.dense(
-                        inputs=inputs,
-                        units=np.prod(shape[1:]),
-                        activation=tf.nn.tanh,
-                        kernel_initializer=tf.variance_scaling_initializer(
-                            scale=1.0,
-                            mode="fan_avg",
-                            distribution="normal"
-                        ),
-                        bias_initializer=tf.zeros_initializer(),
-                        name="dense",
-                        reuse=tf.AUTO_REUSE
-                    ),
-                    sequence=inputs
-                )
             # ==========================================================================================
-
-            inputs = map_innermost_element(
-                function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
-                sequence=inputs
-            )
-
             for i, deconv_param in enumerate(self.deconv_params[:-1]):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
+                    shortcut = shortcuts.pop()
+
                     inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
-                                inputs=inputs,
+                                inputs=tf.concat(
+                                    values=[inputs, shortcut],
+                                    axis=1 if self.data_format == "channels_first" else 3
+                                ),
                                 filters=deconv_param.filters,
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
@@ -212,10 +176,15 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
+                    shortcut = shortcuts.pop()
+
                     inputs = map_innermost_element(
                         function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
-                                inputs=inputs,
+                                inputs=tf.concat(
+                                    values=[inputs, shortcut],
+                                    axis=1 if self.data_format == "channels_first" else 3
+                                ),
                                 filters=deconv_param.filters,
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
@@ -241,5 +210,6 @@ class AttentionNetwork(object):
                         ),
                         sequence=inputs
                     )
+            # ==========================================================================================
 
             return inputs
