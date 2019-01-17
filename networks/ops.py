@@ -22,8 +22,8 @@ def global_average_pooling2d(inputs, data_format):
 
 def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
     """Spatial Transformer Layer
-    Implements a spatial transformer layer as described in [1]_.
-    Based on [2]_ and edited by David Dao for Tensorflow.
+    Implements a spatial transformer layer as described in [1].
+    Based on [2] and edited by David Dao for Tensorflow.
     Parameters
     ----------
     inputs : float
