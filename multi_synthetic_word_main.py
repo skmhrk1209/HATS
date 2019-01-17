@@ -8,7 +8,7 @@ import os
 import cv2
 from attrdict import AttrDict
 from dataset import Dataset
-from models.hats import HATS
+from model import HATS
 from networks.han import HAN
 from networks.resnet import ResNet
 from algorithms import *
@@ -45,7 +45,7 @@ def main(unused_argv):
                 num_classes=None,
                 data_format=args.data_format
             ),
-            hierarchical_attention_network=HAN(
+            attention_network=HAN(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),

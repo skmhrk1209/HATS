@@ -7,11 +7,11 @@ from itertools import *
 
 class HAN(object):
 
-    def __init__(self, conv_params, deconv_params, rnn_params, data_format):
+    def __init__(self, conv_params, rnn_params, deconv_params, data_format):
 
         self.conv_params = conv_params
-        self.deconv_params = deconv_params
         self.rnn_params = rnn_params
+        self.deconv_params = deconv_params
         self.data_format = data_format
 
     def __call__(self, inputs, training, name="han", reuse=None):
