@@ -1,28 +1,10 @@
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-
-from six.moves import xrange
 import tensorflow as tf
 
 
-def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
+def spatial_transformer(U, theta, out_size, name="spatial_transformer"):
     """Spatial Transformer Layer
-
     Implements a spatial transformer layer as described in [1]_.
     Based on [2]_ and edited by David Dao for Tensorflow.
-
     Parameters
     ----------
     U : float
@@ -33,14 +15,12 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
         localisation network should be [num_batch, 6].
     out_size: tuple of two ints
         The size of the output of the network (height, width)
-
     References
     ----------
     .. [1]  Spatial Transformer Networks
             Max Jaderberg, Karen Simonyan, Andrew Zisserman, Koray Kavukcuoglu
             Submitted on 5 Jun 2015
     .. [2]  https://github.com/skaae/transformer_network/blob/master/transformerlayer.py
-
     Notes
     -----
     To initialize the network to the identity transform init
@@ -49,19 +29,18 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
                              [0., 1., 0.]])
         identity = identity.flatten()
         theta = tf.Variable(initial_value=identity)
-
     """
 
-    def _repeat(x, n_repeats):
-        with tf.variable_scope('_repeat'):
+    def repeat(x, n_repeats):
+        with tf.variable_scope("repeat"):
             rep = tf.transpose(
                 tf.expand_dims(tf.ones(shape=tf.stack([n_repeats, ])), 1), [1, 0])
             rep = tf.cast(rep, 'int32')
             x = tf.matmul(tf.reshape(x, (-1, 1)), rep)
             return tf.reshape(x, [-1])
 
-    def _interpolate(im, x, y, out_size):
-        with tf.variable_scope('_interpolate'):
+    def interpolate(im, x, y, out_size):
+        with tf.variable_scope("interpolate"):
             # constants
             num_batch = tf.shape(im)[0]
             height = tf.shape(im)[1]
@@ -94,7 +73,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             y1 = tf.clip_by_value(y1, zero, max_y)
             dim2 = width
             dim1 = width*height
-            base = _repeat(tf.range(num_batch)*dim1, out_height*out_width)
+            base = repeat(tf.range(num_batch)*dim1, out_height*out_width)
             base_y0 = base + y0*dim2
             base_y1 = base + y1*dim2
             idx_a = base_y0 + x0
@@ -123,8 +102,8 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             output = tf.add_n([wa*Ia, wb*Ib, wc*Ic, wd*Id])
             return output
 
-    def _meshgrid(height, width):
-        with tf.variable_scope('_meshgrid'):
+    def meshgrid(height, width):
+        with tf.variable_scope("meshgrid"):
             # This should be equivalent to:
             #  x_t, y_t = np.meshgrid(np.linspace(-1, 1, width),
             #                         np.linspace(-1, 1, height))
@@ -156,7 +135,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             width_f = tf.cast(width, 'float32')
             out_height = out_size[0]
             out_width = out_size[1]
-            grid = _meshgrid(out_height, out_width)
+            grid = meshgrid(out_height, out_width)
             grid = tf.expand_dims(grid, 0)
             grid = tf.reshape(grid, [-1])
             grid = tf.tile(grid, tf.stack([num_batch]))
@@ -169,7 +148,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             x_s_flat = tf.reshape(x_s, [-1])
             y_s_flat = tf.reshape(y_s, [-1])
 
-            input_transformed = _interpolate(
+            input_transformed = interpolate(
                 input_dim, x_s_flat, y_s_flat,
                 out_size)
 
@@ -182,19 +161,16 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
         return output
 
 
-def batch_transformer(U, thetas, out_size, name='BatchSpatialTransformer'):
+def batch_spatial_transformer(U, thetas, out_size, name="batch_spatial_transformer"):
     """Batch Spatial Transformer Layer
-
     Parameters
     ----------
-
     U : float
         tensor of inputs [num_batch,height,width,num_channels]
     thetas : float
         a set of transformations for each input [num_batch,num_transforms,6]
     out_size : int
         the size of the output [out_height,out_width]
-
     Returns: float
         Tensor of size [num_batch*num_transforms,out_height,out_width,num_channels]
     """
@@ -202,4 +178,4 @@ def batch_transformer(U, thetas, out_size, name='BatchSpatialTransformer'):
         num_batch, num_transforms = map(int, thetas.get_shape().as_list()[:2])
         indices = [[i]*num_transforms for i in xrange(num_batch)]
         input_repeated = tf.gather(U, tf.reshape(indices, [-1]))
-        return transformer(input_repeated, thetas, out_size)
+        return spatial_transformer(input_repeated, thetas, out_size)

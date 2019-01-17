@@ -8,19 +8,19 @@ import os
 import cv2
 from attrdict import AttrDict
 from dataset import Dataset
-from models.hats import HATS
+from models.stts import STTS
 from networks.resnet import ResNet
-from networks.han import HAN
+from networks.stn import STN
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_stts_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
-parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
+parser.add_argument("--data_format", type=str, default="channels_last", help="data format")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
@@ -33,7 +33,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
-        model_fn=lambda features, labels, mode: HATS(
+        model_fn=lambda features, labels, mode: STTS(
             backbone_network=ResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
@@ -44,18 +44,10 @@ def main(unused_argv):
                 num_classes=None,
                 data_format=args.data_format
             ),
-            hierarchical_attention_network=HAN(
-                conv_params=[
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[9, 9], strides=[2, 2]),
-                ],
-                deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                ],
+            hierarchical_attention_network=STN(
                 rnn_params=[
-                    AttrDict(sequence_length=5, num_units=256),
-                    AttrDict(sequence_length=10, num_units=256),
+                    AttrDict(sequence_length=5, num_units=[256, 6]),
+                    AttrDict(sequence_length=10, num_units=[256, 6]),
                 ],
                 data_format=args.data_format
             ),

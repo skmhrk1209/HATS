@@ -3,7 +3,7 @@ import numpy as np
 from . import ops
 from algorithms import *
 from itertools import *
-from spatial_transformer import transformer
+from spatial_transformer import spatial_transformer
 
 
 class STN(object):
@@ -51,7 +51,7 @@ class STN(object):
                 )
 
                 inputs = map_innermost_element(
-                    function=lambda inputs_theta: transformer(
+                    function=lambda inputs_theta: spatial_transformer(
                         U=inputs_theta[0],
                         theta=inputs_theta[1],
                         out_size=self.out_size
