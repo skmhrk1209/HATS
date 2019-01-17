@@ -210,7 +210,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
         with tf.variable_scope('_interpolate'):
             # constants
             num_batch = tf.shape(im)[0]
-            height, width, channels = inputs.shape[1:]
+            height, width, channels = im.shape[1:]
 
             x = tf.cast(x, 'float32')
             y = tf.cast(y, 'float32')
@@ -289,7 +289,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
     def _transform(theta, input_dim, out_size):
         with tf.variable_scope('_transform'):
             num_batch = tf.shape(input_dim)[0]
-            height, width, num_channels = inputs.shape[1:]
+            height, width, num_channels = input_dim.shape[1:]
 
             theta = tf.reshape(theta, (-1, 2, 3))
             theta = tf.cast(theta, 'float32')
