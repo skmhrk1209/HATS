@@ -148,7 +148,7 @@ def spatial_transformer(inputs, theta, out_size, name="spatial_transformer"):
             num_batch = tf.shape(inputs)[0]
             height = tf.shape(inputs)[1]
             width = tf.shape(inputs)[2]
-            num_channels = tf.shape(inputs)[3]
+            num_channels = inputs.shape[3]
 
             theta = tf.reshape(theta, (-1, 2, 3))
             theta = tf.cast(theta, tf.float32)
