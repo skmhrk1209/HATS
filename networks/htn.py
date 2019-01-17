@@ -7,9 +7,9 @@ from itertools import *
 
 class HTN(object):
 
-    def __init__(self, conv_param, rnn_params, data_format):
+    def __init__(self, conv_params, rnn_params, data_format):
 
-        self.conv_param = conv_param
+        self.conv_params = conv_params
         self.rnn_params = rnn_params
         self.data_format = data_format
 
