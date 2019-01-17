@@ -44,7 +44,7 @@ def main(unused_argv):
                 num_classes=None,
                 data_format=args.data_format
             ),
-            hierarchical_attention_network=HTN(
+            hierarchical_transformer_network=HTN(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[1, 1]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[1, 1]),
