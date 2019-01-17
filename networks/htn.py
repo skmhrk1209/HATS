@@ -55,4 +55,6 @@ class HTN(object):
                     sequence=inputs
                 )
 
+                print(inputs)
+
         return inputs
