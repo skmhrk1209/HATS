@@ -48,7 +48,7 @@ def main(unused_argv):
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[1, 1]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[1, 1]),
-                ]
+                ],
                 rnn_params=[
                     AttrDict(sequence_length=5, num_units=[256, 6], out_size=[16, 16]),
                     AttrDict(sequence_length=10, num_units=[256, 6], out_size=[8, 8]),
