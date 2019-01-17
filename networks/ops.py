@@ -140,10 +140,10 @@ def spatial_transformer(inputs, theta, out_size, name="spatial_transformer"):
     def transform(inputs, theta, out_size):
         with tf.variable_scope("transform"):
             # constants
-            num_batch, height, width = tf.unstack(tf.shape(inputs)[:-1])
-            num_channels = inputs.shape[-1]
+            num_batch = tf.shape(inputs)[0]
+            height, width, num_channels = inputs.shape[1]
 
-            theta = tf.reshape(theta, (-1, 2, 3))
+            theta = tf.reshape(theta, [-1, 2, 3])
             theta = tf.cast(theta, tf.float32)
 
             # grid of (x_t, y_t, 1), eq (1) in ref [1]
