@@ -145,7 +145,7 @@ def spatial_transformer(inputs, theta, out_size, name="spatial_transformer"):
             num_batch = tf.shape(inputs)[0]
             height = tf.shape(inputs)[1]
             width = tf.shape(inputs)[2]
-            num_channels = tf.shape(inputs)[3]
+            channels = tf.shape(inputs)[3]
 
             theta = tf.reshape(theta, [-1, 2, 3])
             theta = tf.cast(theta, tf.float32)
@@ -165,7 +165,7 @@ def spatial_transformer(inputs, theta, out_size, name="spatial_transformer"):
             y_s_flat = tf.reshape(y_s, [-1])
 
             outputs = interpolate(inputs, x_s_flat, y_s_flat, out_size)
-            outputs = tf.reshape(outputs, tf.stack([num_batch, out_size[0], out_size[1], num_channels]))
+            outputs = tf.reshape(outputs, tf.stack([num_batch, out_size[0], out_size[1], channels]))
             return outputs
 
     with tf.variable_scope(name):
@@ -296,9 +296,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
     def _transform(theta, input_dim, out_size):
         with tf.variable_scope('_transform'):
             num_batch = tf.shape(input_dim)[0]
-            height = tf.shape(input_dim)[1]
-            width = tf.shape(input_dim)[2]
-            num_channels = input_dim.shape[3]
+            height, width, num_channels = input_dim.shape[1:]
             theta = tf.reshape(theta, (-1, 2, 3))
             theta = tf.cast(theta, 'float32')
 
