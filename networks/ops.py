@@ -296,8 +296,8 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
     def _transform(theta, input_dim, out_size):
         with tf.variable_scope('_transform'):
             num_batch = tf.shape(input_dim)[0]
-            height = input_dim.shape[1]
-            width = input_dim.shape[2]
+            height = tf.shape(input_dim)[1]
+            width = tf.shape(input_dim)[2]
             num_channels = input_dim.shape[3]
             theta = tf.reshape(theta, (-1, 2, 3))
             theta = tf.cast(theta, 'float32')
@@ -325,8 +325,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
                 out_size)
 
             output = tf.reshape(
-                input_transformed, ([-1, out_height, out_width, num_channels]))
-            print(output.shape)
+                input_transformed, tf.stack([num_batch, out_height, out_width, num_channels]))
             return output
 
     with tf.variable_scope(name):
