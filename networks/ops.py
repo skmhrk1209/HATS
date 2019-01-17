@@ -325,7 +325,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
                 out_size)
 
             output = tf.reshape(
-                input_transformed, ([num_batch, out_height, out_width, num_channels]))
+                input_transformed, ([-1, out_height, out_width, num_channels]))
             print(output.shape)
             return output
 
