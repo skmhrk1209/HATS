@@ -46,8 +46,8 @@ def main(unused_argv):
             ),
             hierarchical_attention_network=HTN(
                 rnn_params=[
-                    AttrDict(sequence_length=5, num_units=[256, 6], out_size=[32, 32]),
-                    AttrDict(sequence_length=10, num_units=[256, 6], out_size=[32, 32]),
+                    AttrDict(sequence_length=5, num_units=[256, 6], out_size=[16, 16]),
+                    AttrDict(sequence_length=10, num_units=[256, 6], out_size=[8, 8]),
                 ],
                 data_format=args.data_format
             ),
