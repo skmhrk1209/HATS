@@ -14,7 +14,7 @@ class HTN(object):
 
     def __call__(self, inputs, training, name="htn", reuse=None):
 
-        for i, rnn_param in enumerate(self.rnn_params[:-1]):
+        for i, rnn_param in enumerate(self.rnn_params):
 
             with tf.variable_scope("rnn_block_{}".format(i)):
 
