@@ -55,4 +55,4 @@ class HTN(object):
                     sequence=inputs
                 )
 
-            return inputs
+        return inputs
