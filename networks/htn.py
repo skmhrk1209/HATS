@@ -81,8 +81,8 @@ class HTN(object):
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda inputs_theta: ops.spatial_transformer(
-                            inputs=inputs_theta[0],
+                        function=lambda inputs_theta: ops.transformer(
+                            U=inputs_theta[0],
                             params=inputs_theta[1],
                             out_size=rnn_param.out_size
                         ),
