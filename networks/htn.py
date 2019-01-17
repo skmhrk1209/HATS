@@ -46,6 +46,8 @@ class HTN(object):
                     sequence=inputs
                 )
 
+                print(inputs)
+
                 inputs = map_innermost_element(
                     function=lambda inputs_theta: ops.transformer(
                         U=inputs_theta[0],
