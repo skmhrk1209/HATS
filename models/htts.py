@@ -1,16 +1,17 @@
 import tensorflow as tf
 import numpy as np
 import metrics
+from networks import ops
 from algorithms import *
 
 
 class HTTS(object):
 
-    def __init__(self, backbone_network, hierarchical_attention_network,
-                 num_classes, data_format, hyper_params, pretrained_model_dir=None):
+    def __init__(self, backbone_network, hierarchical_transformer_network,
+                 out_size, num_classes, data_format, hyper_params, pretrained_model_dir=None):
 
         self.backbone_network = backbone_network
-        self.hierarchical_attention_network = hierarchical_attention_network
+        self.hierarchical_transformer_network = hierarchical_transformer_network
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -23,14 +24,18 @@ class HTTS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        feature_maps = self.hierarchical_attention_network(
+        params = self.hierarchical_transformer_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
         feature_vectors = map_innermost_element(
-            function=lambda feature_maps: tf.layers.flatten(feature_maps),
-            sequence=feature_maps
+            function=lambda params: tf.flatten(ops.spatial_transformer(
+                inputs=feature_maps,
+                params=params,
+                out_size=out_size
+            )),
+            sequence=params
         )
 
         if self.pretrained_model_dir:
