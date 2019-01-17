@@ -33,6 +33,8 @@ class HTTS(object):
             sequence=feature_maps
         )
 
+        print(feature_vectors)
+
         if self.pretrained_model_dir:
 
             tf.train.init_from_checkpoint(
