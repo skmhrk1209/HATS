@@ -61,8 +61,8 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
     def interpolate(inputs, x, y, out_size):
         with tf.variable_scope("interpolate"):
             # constants
-            num_batch = tf.shape(inputs)[0]
-            height, width, num_channels = inputs.shape[1:]
+            num_batch, height, width = tf.unstack(tf.shape(inputs)[:-1])
+            num_channels = inputs.shape[-1]
 
             x = tf.cast(x, tf.float32)
             y = tf.cast(y, tf.float32)
@@ -135,8 +135,8 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
     def transform(inputs, params, out_size):
         with tf.variable_scope("transform"):
             # constants
-            num_batch = tf.shape(inputs)[0]
-            height, width, num_channels = inputs.shape[1:]
+            num_batch, height, width = tf.unstack(tf.shape(inputs)[:-1])
+            num_channels = inputs.shape[-1]
 
             params = tf.reshape(params, [-1, 2, 3])
             params = tf.cast(params, tf.float32)
