@@ -89,7 +89,7 @@ class HTN(object):
                         sequence=inputs
                     )
 
-            for i, rnn_param in enumerate(self.rnn_params[-1:]):
+            for i, rnn_param in enumerate(self.rnn_params[-1:], i + 1):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
