@@ -25,6 +25,7 @@ parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
 parser.add_argument("--gpu", type=str, default="0,1,2", help="gpu id")
+parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
@@ -69,7 +70,8 @@ def main(unused_argv):
             pretrained_model_dir=args.pretrained_model_dir
         )(features, labels, mode),
         model_dir=args.model_dir,
-        config=tf.estimator.RunConfig().replace(
+        config=tf.estimator.RunConfig(
+            tf_random_seed=args.random_seed,
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
                     visible_device_list=args.gpu,
