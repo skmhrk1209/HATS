@@ -12,6 +12,7 @@ class HTTS(object):
 
         self.backbone_network = backbone_network
         self.hierarchical_transformer_network = hierarchical_transformer_network
+        self.out_size = out_size
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -33,7 +34,7 @@ class HTTS(object):
             function=lambda params: tf.layers.flatten(ops.spatial_transformer(
                 inputs=feature_maps,
                 params=params,
-                out_size=out_size
+                out_size=self.out_size
             )),
             sequence=params
         )
