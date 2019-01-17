@@ -4,13 +4,13 @@ import metrics
 from algorithms import *
 
 
-class STTS(object):
+class HTTS(object):
 
-    def __init__(self, backbone_network, spatial_transformer_network,
+    def __init__(self, backbone_network, hierarchical_attention_network,
                  num_classes, data_format, hyper_params, pretrained_model_dir=None):
 
         self.backbone_network = backbone_network
-        self.spatial_transformer_network = spatial_transformer_network
+        self.hierarchical_attention_network = hierarchical_attention_network
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -23,7 +23,7 @@ class STTS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        feature_maps = self.spatial_transformer_network(
+        attention_maps = self.hierarchical_attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
@@ -32,6 +32,13 @@ class STTS(object):
             function=lambda feature_maps: tf.layers.flatten(feature_maps),
             sequence=feature_maps
         )
+
+        if self.pretrained_model_dir:
+
+            tf.train.init_from_checkpoint(
+                ckpt_dir_or_file=self.pretrained_model_dir,
+                assignment_map={"/": "/"}
+            )
 
         logits = map_innermost_element(
             function=lambda feature_vectors: tf.layers.dense(
@@ -65,7 +72,6 @@ class STTS(object):
                 mode=mode,
                 predictions=dict(
                     images=images,
-                    attention_maps=attention_maps,
                     predictions=predictions
                 )
             )
@@ -95,6 +101,12 @@ class STTS(object):
         error_rate = metrics.normalized_edit_distance(labels, logits)
 
         # ==========================================================================================
+        if self.data_format == "channels_first":
+
+            images = tf.transpose(images, [0, 2, 3, 1])
+
+        tf.summary.image("images", images, max_outputs=2)
+
         tf.identity(error_rate[0], "error_rate")
         tf.summary.scalar("error_rate", error_rate[1])
         # ==========================================================================================

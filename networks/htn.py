@@ -3,20 +3,16 @@ import numpy as np
 from . import ops
 from algorithms import *
 from itertools import *
-from spatial_transformer import spatial_transformer
 
 
-class STN(object):
+class HTN(object):
 
     def __init__(self, rnn_params, out_size, data_format):
 
         self.rnn_params = rnn_params
-        self.out_size = out_size
         self.data_format = data_format
 
-    def __call__(self, inputs, training, name="stn", reuse=None):
-
-        feature_maps = inputs
+    def __call__(self, inputs, training, name="htn", reuse=None):
 
         for i, rnn_param in enumerate(self.rnn_params[:-1]):
 
@@ -51,10 +47,10 @@ class STN(object):
                 )
 
                 inputs = map_innermost_element(
-                    function=lambda inputs_theta: spatial_transformer(
-                        U=inputs_theta[0],
+                    function=lambda inputs_theta: ops.spatial_transformer(
+                        inputs=inputs_theta[0],
                         theta=inputs_theta[1],
-                        out_size=self.out_size
+                        out_size=rnn_param.out_size
                     ),
                     sequence=inputs
                 )

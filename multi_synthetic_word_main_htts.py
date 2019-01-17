@@ -8,13 +8,13 @@ import os
 import cv2
 from attrdict import AttrDict
 from dataset import Dataset
-from models.stts import STTS
+from models.htts import HTTS
+from networks.htn import HTN
 from networks.resnet import ResNet
-from networks.stn import STN
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_stts_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_htts_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
@@ -33,7 +33,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
-        model_fn=lambda features, labels, mode: STTS(
+        model_fn=lambda features, labels, mode: HTTS(
             backbone_network=ResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
@@ -44,17 +44,16 @@ def main(unused_argv):
                 num_classes=None,
                 data_format=args.data_format
             ),
-            hierarchical_attention_network=STN(
+            hierarchical_attention_network=HTN(
                 rnn_params=[
-                    AttrDict(sequence_length=5, num_units=[256, 6]),
-                    AttrDict(sequence_length=10, num_units=[256, 6]),
+                    AttrDict(sequence_length=5, num_units=[256, 6], out_size=[32, 32]),
+                    AttrDict(sequence_length=10, num_units=[256, 6], out_size=[32, 32]),
                 ],
                 data_format=args.data_format
             ),
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=1e-3,
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
@@ -107,38 +106,6 @@ def main(unused_argv):
         )
 
         print(eval_results)
-
-    if args.predict:
-
-        predict_results = classifier.predict(
-            input_fn=Dataset(
-                filenames=args.filenames,
-                num_epochs=args.num_epochs,
-                batch_size=args.batch_size,
-                buffer_size=args.buffer_size,
-                sequence_lengths=[5, 10],
-                image_size=[256, 256],
-                data_format=args.data_format
-            )
-        )
-
-        for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
-
-            image = predict_result["images"]
-            if args.data_format == "channels_first":
-                image = np.transpose(image, [1, 2, 0])
-
-            for j, attention_maps in enumerate(predict_result["attention_maps"]):
-
-                for k, attention_map in enumerate(attention_maps):
-
-                    attention_map = np.squeeze(attention_map)
-                    attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
-                    attention_map = cv2.resize(attention_map, image.shape[:2])
-                    attention_map = np.expand_dims(attention_map, axis=-1)
-                    attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
-
-                    cv2.imwrite("outputs/attention_map_{}_{}_{}.jpg".format(i, j, k), (image + attention_map) * 255.)
 
 
 if __name__ == "__main__":

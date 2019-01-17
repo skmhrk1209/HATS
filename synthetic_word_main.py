@@ -9,8 +9,8 @@ import cv2
 from attrdict import AttrDict
 from dataset import Dataset
 from models.hats import HATS
-from networks.resnet import ResNet
 from networks.han import HAN
+from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()

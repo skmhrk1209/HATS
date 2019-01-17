@@ -6,11 +6,11 @@ from algorithms import *
 
 class HATS(object):
 
-    def __init__(self, backbone_network, hierarchical_attention_network,
+    def __init__(self, backbone_network, hierarchical_transformer_network,
                  num_classes, data_format, hyper_params, pretrained_model_dir=None):
 
         self.backbone_network = backbone_network
-        self.hierarchical_attention_network = hierarchical_attention_network
+        self.hierarchical_transformer_network = hierarchical_transformer_network
         self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -23,7 +23,7 @@ class HATS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        attention_maps = self.hierarchical_attention_network(
+        feature_maps = self.hierarchical_transformer_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
