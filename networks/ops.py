@@ -79,7 +79,7 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
             y0 = tf.cast(tf.floor(y), tf.int32)
             y1 = y0 + 1
 
-            zero = tf.zeros([], dtype=tf.int32)
+            zero = tf.zeros([], tf.int32)
             max_y = tf.cast(tf.shape(inputs)[1] - 1, tf.int32)
             max_x = tf.cast(tf.shape(inputs)[2] - 1, tf.int32)
 
@@ -99,7 +99,7 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
 
             # use indices to lookup pixels in the flat image and restore
             # channels dim
-            inputs_flat = tf.reshape(inputs, tf.stack([-1, num_channels]))
+            inputs_flat = tf.reshape(inputs, [-1, num_channels])
             inputs_flat = tf.cast(inputs_flat, tf.float32)
             Ia = tf.gather(inputs_flat, idx_a)
             Ib = tf.gather(inputs_flat, idx_b)
@@ -110,11 +110,11 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
             x0 = tf.cast(x0, tf.float32)
             x1 = tf.cast(x1, tf.float32)
             y0 = tf.cast(y0, tf.float32)
-            y1_f = tf.cast(y1, tf.float32)
-            wa = tf.expand_dims(((x1 - x) * (y1_f-y)), 1)
-            wb = tf.expand_dims(((x1 - x) * (y-y0)), 1)
-            wc = tf.expand_dims(((x - x0) * (y1_f-y)), 1)
-            wd = tf.expand_dims(((x - x0) * (y-y0)), 1)
+            y1 = tf.cast(y1, tf.float32)
+            wa = tf.expand_dims(((x1 - x) * (y1 - y)), 1)
+            wb = tf.expand_dims(((x1 - x) * (y - y0)), 1)
+            wc = tf.expand_dims(((x - x0) * (y1 - y)), 1)
+            wd = tf.expand_dims(((x - x0) * (y - y0)), 1)
 
             outputs = tf.add_n([wa * Ia, wb * Ib, wc * Ic, wd * Id])
             return outputs
@@ -131,16 +131,14 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
             x_t_flat = tf.reshape(x_t, [1, -1])
             y_t_flat = tf.reshape(y_t, [1, -1])
 
-            ones = tf.ones_like(x_t_flat)
-            grid = tf.concat([x_t_flat, y_t_flat, ones], 0)
+            grid = tf.concat([x_t_flat, y_t_flat, tf.ones_like(x_t_flat)], 0)
             return grid
 
     def transform(inputs, param, out_size):
         with tf.variable_scope("transform"):
+            # constants
             num_batch = tf.shape(inputs)[0]
-            height = tf.shape(inputs)[1]
-            width = tf.shape(inputs)[2]
-            num_channels = inputs.shape[3]
+            height, width, num_channels = inputs.shape[1:]
 
             param = tf.reshape(param, [-1, 2, 3])
             param = tf.cast(param, tf.float32)
