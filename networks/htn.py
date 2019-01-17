@@ -7,7 +7,7 @@ from itertools import *
 
 class HTN(object):
 
-    def __init__(self, rnn_params, out_size, data_format):
+    def __init__(self, rnn_params, data_format):
 
         self.rnn_params = rnn_params
         self.data_format = data_format
