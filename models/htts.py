@@ -23,7 +23,7 @@ class HTTS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        attention_maps = self.hierarchical_attention_network(
+        feature_maps = self.hierarchical_attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
