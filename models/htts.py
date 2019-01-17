@@ -33,7 +33,7 @@ class HTTS(object):
         feature_vectors = map_innermost_element(
             function=lambda params: tf.layers.flatten(ops.transformer(
                 U=feature_maps,
-                params=params,
+                theta=params,
                 out_size=self.out_size
             )),
             sequence=params
