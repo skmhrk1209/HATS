@@ -26,12 +26,11 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
     Based on [2]_ and edited by David Dao for Tensorflow.
     Parameters
     ----------
-    U : float
+    inputs : float
         The output of a convolutional net should have the
         shape [num_batch, height, width, num_channels].
-    theta: float
-        The output of the
-        localisation network should be [num_batch, 6].
+    params: float
+        The output of the localisation network should be [num_batch, 6].
     out_size: tuple of two ints
         The size of the output of the network (height, width)
     References
@@ -43,11 +42,10 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
     Notes
     -----
     To initialize the network to the identity transform init
-    ``theta`` to :
-        identity = np.array([[1., 0., 0.],
-                             [0., 1., 0.]])
+    ``params`` to :
+        identity = np.array([[1., 0., 0.], [0., 1., 0.]])
         identity = identity.flatten()
-        theta = tf.Variable(initial_value=identity)
+        params = tf.Variable(initial_value=identity)
     """
 
     def repeat(inputs, num_repeats):
@@ -134,16 +132,16 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
             grid = tf.concat([x_t_flat, y_t_flat, tf.ones_like(x_t_flat)], 0)
             return grid
 
-    def transform(inputs, param, out_size):
+    def transform(inputs, params, out_size):
         with tf.variable_scope("transform"):
             # constants
             num_batch = tf.shape(inputs)[0]
             height, width, num_channels = inputs.shape[1:]
 
-            param = tf.reshape(param, [-1, 2, 3])
-            param = tf.cast(param, tf.float32)
+            params = tf.reshape(params, [-1, 2, 3])
+            params = tf.cast(params, tf.float32)
 
-            # grid of (x_t, y_t, 1), eq (1) in ref [1]           
+            # grid of (x_t, y_t, 1), eq (1) in ref [1]
             grid = meshgrid(out_size[0], out_size[1])
             grid = tf.expand_dims(grid, 0)
             grid = tf.reshape(grid, [-1])
@@ -151,7 +149,7 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
             grid = tf.reshape(grid, [num_batch, 3, -1])
 
             # Transform A x (x_t, y_t, 1)^T -> (x_s, y_s)
-            T_g = tf.matmul(param, grid)
+            T_g = tf.matmul(params, grid)
             x_s = tf.slice(T_g, [0, 0, 0], [-1, 1, -1])
             y_s = tf.slice(T_g, [0, 1, 0], [-1, 1, -1])
             x_s_flat = tf.reshape(x_s, [-1])
