@@ -47,8 +47,8 @@ def main(unused_argv):
             ),
             hierarchical_transformer_network=HTN(
                 conv_params=[
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[1, 1]),
-                    AttrDict(filters=4, kernel_size=[9, 9], strides=[1, 1]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[1, 1]),
+                    AttrDict(filters=16, kernel_size=[9, 9], strides=[1, 1]),
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=5, num_units=[256, 6], out_size=[32, 32]),
