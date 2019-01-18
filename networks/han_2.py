@@ -108,33 +108,18 @@ class HAN(object):
                         function=lambda inputs: static_rnn(
                             cell=gru_cell,
                             inputs=[references] * rnn_param.sequence_length,
-                            initial_state=tf.nn.rnn_cell.LSTMStateTuple(
-                                c=tf.layers.dense(
-                                    inputs=inputs.c,
-                                    units=rnn_param.num_units,
-                                    activation=None,
-                                    kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
-                                    ),
-                                    bias_initializer=tf.zeros_initializer(),
-                                    name="c_projection",
-                                    reuse=tf.AUTO_REUSE
+                            initial_state=tf.layers.dense(
+                                inputs=inputs.h,
+                                units=rnn_param.num_units,
+                                activation=tf.nn.tanh,
+                                kernel_initializer=tf.variance_scaling_initializer(
+                                    scale=1.0,
+                                    mode="fan_avg",
+                                    distribution="normal"
                                 ),
-                                h=tf.layers.dense(
-                                    inputs=inputs.h,
-                                    units=rnn_param.num_units,
-                                    activation=tf.nn.tanh,
-                                    kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
-                                    ),
-                                    bias_initializer=tf.zeros_initializer(),
-                                    name="h_projection",
-                                    reuse=tf.AUTO_REUSE
-                                )
+                                bias_initializer=tf.zeros_initializer(),
+                                name="h_projection",
+                                reuse=tf.AUTO_REUSE
                             )
                         ),
                         sequence=inputs
