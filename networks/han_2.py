@@ -109,7 +109,7 @@ class HAN(object):
                             cell=gru_cell,
                             inputs=[references] * rnn_param.sequence_length,
                             initial_state=tf.layers.dense(
-                                inputs=inputs.h,
+                                inputs=inputs,
                                 units=rnn_param.num_units,
                                 activation=tf.nn.tanh,
                                 kernel_initializer=tf.variance_scaling_initializer(
