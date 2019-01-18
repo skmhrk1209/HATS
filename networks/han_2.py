@@ -125,11 +125,6 @@ class HAN(object):
                         sequence=inputs
                     )
 
-            inputs = map_innermost_element(
-                function=lambda inputs: inputs.h,
-                sequence=inputs
-            )
-
             with tf.variable_scope("projection_block"):
 
                 inputs = map_innermost_element(
