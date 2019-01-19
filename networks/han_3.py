@@ -112,40 +112,42 @@ class HAN(object):
                         function=lambda inputs: static_rnn(
                             cell=multi_lstm_cell,
                             inputs=[references] * rnn_param.sequence_length,
-                            initial_state=tf.nn.rnn_cell.LSTMStateTuple(
-                                c=tf.layers.dense(
-                                    inputs=inputs[-1].c,
-                                    units=rnn_param.num_units,
-                                    activation=None,
-                                    kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
+                            initial_state=map_innermost_element(
+                                lambda index_inputs: tf.nn.rnn_cell.LSTMStateTuple(
+                                    c=tf.layers.dense(
+                                        inputs=index_inputs[1].c,
+                                        units=rnn_param.num_units,
+                                        activation=None,
+                                        kernel_initializer=tf.variance_scaling_initializer(
+                                            scale=1.0,
+                                            mode="fan_avg",
+                                            distribution="normal"
+                                        ),
+                                        bias_initializer=tf.zeros_initializer(),
+                                        name="c_projection_{}".format(index_inputs[0]),
+                                        reuse=tf.AUTO_REUSE
                                     ),
-                                    bias_initializer=tf.zeros_initializer(),
-                                    name="c_projection",
-                                    reuse=tf.AUTO_REUSE
-                                ),
-                                h=tf.layers.dense(
-                                    inputs=inputs[-1].h,
-                                    units=rnn_param.num_units,
-                                    activation=tf.nn.tanh,
-                                    kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
-                                    ),
-                                    bias_initializer=tf.zeros_initializer(),
-                                    name="h_projection",
-                                    reuse=tf.AUTO_REUSE
-                                )
+                                    h=tf.layers.dense(
+                                        inputs=index_inputs[1].h,
+                                        units=rnn_param.num_units,
+                                        activation=tf.nn.tanh,
+                                        kernel_initializer=tf.variance_scaling_initializer(
+                                            scale=1.0,
+                                            mode="fan_avg",
+                                            distribution="normal"
+                                        ),
+                                        bias_initializer=tf.zeros_initializer(),
+                                        name="h_projection_{}".format(index_inputs[0]),
+                                        reuse=tf.AUTO_REUSE
+                                    )
+                                ), list(enumerate(inputs))
                             )
                         ),
                         sequence=inputs
                     )
 
             inputs = map_innermost_element(
-                function=lambda inputs: inputs[-1].h,
+                function=lambda inputs: inputs.h,
                 sequence=inputs
             )
 
