@@ -113,10 +113,10 @@ class HAN(object):
                             cell=multi_lstm_cell,
                             inputs=[references] * rnn_param.sequence_length,
                             initial_state=map_innermost_element(
-                                lambda index_inputs: tf.nn.rnn_cell.LSTMStateTuple(
+                                lambda index_inputs_num_units: tf.nn.rnn_cell.LSTMStateTuple(
                                     c=tf.layers.dense(
-                                        inputs=index_inputs[1].c,
-                                        units=rnn_param.num_units,
+                                        inputs=index_inputs_num_units[1][0].c,
+                                        units=index_inputs_num_units[1][1],
                                         activation=None,
                                         kernel_initializer=tf.variance_scaling_initializer(
                                             scale=1.0,
@@ -124,12 +124,12 @@ class HAN(object):
                                             distribution="normal"
                                         ),
                                         bias_initializer=tf.zeros_initializer(),
-                                        #name="c_projection_{}".format(index_inputs[0]),
+                                        name="c_projection_{}".format(index_inputs_num_units[0]),
                                         reuse=tf.AUTO_REUSE
                                     ),
                                     h=tf.layers.dense(
-                                        inputs=index_inputs[1].h,
-                                        units=rnn_param.num_units,
+                                        inputs=index_inputs_num_units[1][0].h,
+                                        units=index_inputs_num_units[1][1],
                                         activation=tf.nn.tanh,
                                         kernel_initializer=tf.variance_scaling_initializer(
                                             scale=1.0,
@@ -137,10 +137,10 @@ class HAN(object):
                                             distribution="normal"
                                         ),
                                         bias_initializer=tf.zeros_initializer(),
-                                        #name="h_projection_{}".format(index_inputs[0]),
+                                        name="h_projection_{}".format(index_inputs_num_units[0]),
                                         reuse=tf.AUTO_REUSE
                                     )
-                                ), list(enumerate(inputs))
+                                ), list(enumerate(zip(inputs, rnn_param.num_units)))
                             )
                         ),
                         sequence=inputs
