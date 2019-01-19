@@ -112,7 +112,7 @@ class HAN(object):
                         function=lambda inputs: static_rnn(
                             cell=multi_lstm_cell,
                             inputs=[references] * rnn_param.sequence_length,
-                            initial_state=map_innermost_element(
+                            initial_state=tuple(map(
                                 lambda index_inputs_num_units: tf.nn.rnn_cell.LSTMStateTuple(
                                     c=tf.layers.dense(
                                         inputs=index_inputs_num_units[1][0].c,
@@ -141,7 +141,7 @@ class HAN(object):
                                         reuse=tf.AUTO_REUSE
                                     )
                                 ), list(enumerate(zip(inputs, rnn_param.num_units)))
-                            )
+                            ))
                         ),
                         sequence=inputs
                     )
