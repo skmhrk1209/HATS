@@ -60,7 +60,7 @@ class HAN(object):
 
             def static_rnn(cell, inputs, initial_state):
 
-                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1][-1]))[1:]
+                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
 
             for i, rnn_param in enumerate(self.rnn_params[:1]):
 
@@ -114,7 +114,7 @@ class HAN(object):
                             inputs=[references] * rnn_param.sequence_length,
                             initial_state=tf.nn.rnn_cell.LSTMStateTuple(
                                 c=tf.layers.dense(
-                                    inputs=inputs.c,
+                                    inputs=inputs[-1].c,
                                     units=rnn_param.num_units,
                                     activation=None,
                                     kernel_initializer=tf.variance_scaling_initializer(
@@ -127,7 +127,7 @@ class HAN(object):
                                     reuse=tf.AUTO_REUSE
                                 ),
                                 h=tf.layers.dense(
-                                    inputs=inputs.h,
+                                    inputs=inputs[-1].h,
                                     units=rnn_param.num_units,
                                     activation=tf.nn.tanh,
                                     kernel_initializer=tf.variance_scaling_initializer(
