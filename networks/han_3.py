@@ -124,7 +124,7 @@ class HAN(object):
                                             distribution="normal"
                                         ),
                                         bias_initializer=tf.zeros_initializer(),
-                                        name="c_projection_{}".format(index_inputs[0]),
+                                        #name="c_projection_{}".format(index_inputs[0]),
                                         reuse=tf.AUTO_REUSE
                                     ),
                                     h=tf.layers.dense(
@@ -137,7 +137,7 @@ class HAN(object):
                                             distribution="normal"
                                         ),
                                         bias_initializer=tf.zeros_initializer(),
-                                        name="h_projection_{}".format(index_inputs[0]),
+                                        #name="h_projection_{}".format(index_inputs[0]),
                                         reuse=tf.AUTO_REUSE
                                     )
                                 ), list(enumerate(inputs))
