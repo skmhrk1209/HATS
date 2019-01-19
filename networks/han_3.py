@@ -147,7 +147,7 @@ class HAN(object):
                     )
 
             inputs = map_innermost_element(
-                function=lambda inputs: inputs.h,
+                function=lambda inputs: inputs[-1].h,
                 sequence=inputs
             )
 
