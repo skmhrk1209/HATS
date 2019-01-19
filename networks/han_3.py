@@ -108,8 +108,6 @@ class HAN(object):
                         ) for num_units in rnn_param.num_units
                     ])
 
-                    print(inputs)
-
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=multi_lstm_cell,
@@ -147,6 +145,8 @@ class HAN(object):
                         )),
                         sequence=inputs
                     )
+
+                    print(inputs)
 
             inputs = map_innermost_element(
                 function=lambda inputs: inputs[-1].h,
