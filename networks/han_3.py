@@ -60,7 +60,7 @@ class HAN(object):
 
             def static_rnn(cell, inputs, initial_state):
 
-                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
+                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1][-1]))[1:]
 
             for i, rnn_param in enumerate(self.rnn_params[:1]):
 
