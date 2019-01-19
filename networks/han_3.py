@@ -113,7 +113,7 @@ class HAN(object):
                             cell=multi_lstm_cell,
                             inputs=[references] * rnn_param.sequence_length,
                             initial_state=tuple(map(
-                                lambda index_inputs: tf.nn.rnn_cell.LSTMStateTuple(
+                                lambda index_inputs: print(index_inputs) or tf.nn.rnn_cell.LSTMStateTuple(
                                     c=tf.layers.dense(
                                         inputs=index_inputs[1].c,
                                         units=rnn_param.num_units,
