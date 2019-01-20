@@ -133,7 +133,7 @@ class HATS(object):
             sequence=logits
         )), axis=0)
 
-        error_rate = metrics.edit_distance(labels, logits, normaliza=True)
+        error_rate = metrics.edit_distance(labels, logits, normalize=True)
 
         # ==========================================================================================
         if self.data_format == "channels_first":
