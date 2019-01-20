@@ -83,18 +83,18 @@ class HATS(object):
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
-            while isinstance(predictions, list):
-
-                predictions = map_innermost_list(
-                    function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions
-                )
-
             while isinstance(attention_maps, list):
 
                 attention_maps = map_innermost_list(
                     function=lambda attention_maps: tf.stack(attention_maps, axis=1),
                     sequence=attention_maps
+                )
+
+            while isinstance(predictions, list):
+
+                predictions = map_innermost_list(
+                    function=lambda predictions: tf.stack(predictions, axis=1),
+                    sequence=predictions
                 )
 
             return tf.estimator.EstimatorSpec(
@@ -133,7 +133,7 @@ class HATS(object):
             sequence=logits
         )), axis=0)
 
-        error_rate = metrics.normalized_edit_distance(labels, logits)
+        error_rate = metrics.edit_distance(labels, logits, normaliza=True)
 
         # ==========================================================================================
         if self.data_format == "channels_first":
