@@ -12,11 +12,13 @@ def batch_normalization(inputs, data_format, training, name=None, reuse=None):
     )
 
 
-def global_average_pooling2d(inputs, data_format):
+def global_average_pooling2d(inputs, data_format, keep_dims=False, name="global_average_pooling2d"):
 
     return tf.reduce_mean(
         input_tensor=inputs,
-        axis=[2, 3] if data_format == "channels_first" else [1, 2]
+        axis=[2, 3] if data_format == "channels_first" else [1, 2],
+        keep_dims=keep_dims,
+        name=name
     )
 
 
