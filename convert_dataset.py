@@ -21,6 +21,7 @@ def main(input_directory, output_filename, sequence_lengths):
         class_ids = {}
         class_ids.update({chr(j): i for i, j in enumerate(range(32, 127), 0)})
         class_ids.update({"": max(class_ids.values()) + 1})
+        class_ids["É"] = class_ids["E"]
 
         input_filenames = glob.glob(os.path.join(input_directory, "*"))
 
