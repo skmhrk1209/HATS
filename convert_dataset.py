@@ -26,28 +26,26 @@ def main(input_directory, output_filename, sequence_lengths):
 
         for input_filename in input_filenames:
 
-            label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
-            label = map_innermost_element(list, label)
-            label = map_innermost_element(lambda char: class_ids[char], label)
-
             try:
-
-                for i, sequence_length in enumerate(sequence_lengths[::-1]):
-
-                    label = map_innermost_list(
-                        function=lambda sequence: np.pad(
-                            array=sequence,
-                            pad_width=[[0, max(0, sequence_length - len(sequence))]] + [[0, 0]] * i,
-                            mode="constant",
-                            constant_values=class_ids[""]
-                        ),
-                        sequence=label
-                    )
+                label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
+                label = map_innermost_element(list, label)
+                label = map_innermost_element(lambda char: class_ids[char], label)
 
             except KeyError as error:
-
                 print(error, input_filename)
                 continue
+
+            for i, sequence_length in enumerate(sequence_lengths[::-1]):
+
+                label = map_innermost_list(
+                    function=lambda sequence: np.pad(
+                        array=sequence,
+                        pad_width=[[0, max(0, sequence_length - len(sequence))]] + [[0, 0]] * i,
+                        mode="constant",
+                        constant_values=class_ids[""]
+                    ),
+                    sequence=label
+                )
 
             writer.write(
                 record=tf.train.Example(
