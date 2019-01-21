@@ -29,7 +29,7 @@ def main(input_directory, output_filename, sequence_lengths):
                 label = map_innermost_list(
                     function=lambda sequence: np.pad(
                         array=sequence,
-                        pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                        pad_width=[[0, max(0, sequence_length - len(sequence))]] + [[0, 0]] * i,
                         mode="constant",
                         constant_values=class_ids[""]
                     ),
