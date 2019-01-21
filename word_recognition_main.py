@@ -55,7 +55,7 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=21, num_units=256)
+                    AttrDict(sequence_length=20, num_units=256)
                 ],
                 data_format=args.data_format
             ),
@@ -89,7 +89,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[21],
+                sequence_lengths=[20],
                 image_size=[256, 256],
                 data_format=args.data_format
             ),
@@ -109,7 +109,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 buffer_size=args.buffer_size,
-                sequence_lengths=[21],
+                sequence_lengths=[20],
                 image_size=[256, 256],
                 data_format=args.data_format
             )
