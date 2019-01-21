@@ -32,7 +32,7 @@ def main(input_directory, output_filename, sequence_lengths):
                 label = map_innermost_element(lambda char: class_ids[char], label)
 
             except KeyError as error:
-                print(error.message, input_filename)
+                print(error, input_filename)
                 continue
 
             for i, sequence_length in enumerate(sequence_lengths[::-1]):
