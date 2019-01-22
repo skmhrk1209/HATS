@@ -11,9 +11,7 @@ def main(input_directory, output_filename, sequence_lengths):
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
         class_ids = {}
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("a"), ord("z") + 1), class_ids["Z"] + 1)})
+        class_ids.update({chr(j): i for i, j in enumerate(range(32, 127))})
         class_ids.update({"": max(class_ids.values()) + 1})
 
         input_filenames = glob.glob(os.path.join(input_directory, "*"))
