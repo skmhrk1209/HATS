@@ -87,8 +87,7 @@ def main(unused_argv):
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
-            ),
-            pretrained_model_dir=args.pretrained_model_dir
+            )
         )(features, labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig(
