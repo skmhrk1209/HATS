@@ -14,7 +14,7 @@ class HAN(object):
         self.deconv_params = deconv_params
         self.data_format = data_format
 
-    def __call__(self, inputs, training, name="han", reuse=None):
+    def __call__(self, inputs, training, name="han", reuse=None, pretrained_network=None):
 
         with tf.variable_scope(name, reuse=reuse):
 
@@ -236,5 +236,12 @@ class HAN(object):
                         ),
                         sequence=inputs
                     )
+
+            if pretrained_network:
+
+                tf.train.init_from_checkpoint(
+                    ckpt_dir_or_file=pretrained_network.dir,
+                    assignment_map={pretrained_network.name: name}
+                )
 
             return inputs

@@ -13,24 +13,26 @@ class ResNet(object):
         self.num_classes = num_classes
         self.data_format = data_format
 
-    def __call__(self, inputs, training, name="resnet", reuse=None):
+    def __call__(self, inputs, training, name="resnet", reuse=None, pretrained_network=None):
 
         with tf.variable_scope(name, reuse=reuse):
 
-            inputs = tf.layers.conv2d(
-                inputs=inputs,
-                filters=self.conv_param.filters,
-                kernel_size=self.conv_param.kernel_size,
-                strides=self.conv_param.strides,
-                padding="same",
-                data_format=self.data_format,
-                use_bias=False,
-                kernel_initializer=tf.variance_scaling_initializer(
-                    scale=2.0,
-                    mode="fan_in",
-                    distribution="normal"
+            if self.conv_param:
+
+                inputs = tf.layers.conv2d(
+                    inputs=inputs,
+                    filters=self.conv_param.filters,
+                    kernel_size=self.conv_param.kernel_size,
+                    strides=self.conv_param.strides,
+                    padding="same",
+                    data_format=self.data_format,
+                    use_bias=False,
+                    kernel_initializer=tf.variance_scaling_initializer(
+                        scale=2.0,
+                        mode="fan_in",
+                        distribution="normal"
+                    )
                 )
-            )
 
             if self.pool_param:
 
@@ -75,6 +77,13 @@ class ResNet(object):
             )
 
             inputs = tf.nn.relu(inputs)
+
+            if pretrained_network:
+
+                tf.train.init_from_checkpoint(
+                    ckpt_dir_or_file=pretrained_network.dir,
+                    assignment_map={pretrained_network.name: name}
+                )
 
             if not self.num_classes:
                 return inputs
