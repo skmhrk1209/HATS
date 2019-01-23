@@ -49,7 +49,7 @@ def main(unused_argv):
                     inputs=inputs,
                     training=training,
                     name="resnet_1",
-                    #pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
+                    pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
                 ),
                 lambda inputs: ResNet(
                     conv_param=None,
