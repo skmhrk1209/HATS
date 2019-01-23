@@ -35,27 +35,17 @@ def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=lambda inputs, training: compose(
-                lambda inputs: ResNet(
-                    conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
-                    pool_param=None,
-                    residual_params=[
-                        AttrDict(filters=64, strides=[2, 2], blocks=2),
-                        AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    ],
-                    data_format=args.data_format,
-                    #pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
-                )(inputs, training, "resnet_1"),
-                lambda inputs: ResNet(
-                    conv_param=None,
-                    pool_param=None,
-                    residual_params=[
-                        AttrDict(filters=256, strides=[1, 1], blocks=2)
-                    ],
-                    data_format=args.data_format
-                )(inputs, training, "resnet_2")
-            )(inputs),
-            attention_network=lambda inputs, training: HAN(
+            backbone_network=ResNet(
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                pool_param=None,
+                residual_params=[
+                    AttrDict(filters=64, strides=[2, 2], blocks=2),
+                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                ],
+                data_format=args.data_format,
+                pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
+            ),
+            attention_network=HAN(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
@@ -67,8 +57,9 @@ def main(unused_argv):
                 rnn_params=[
                     AttrDict(sequence_length=20, num_units=256)
                 ],
-                data_format=args.data_format
-            )(inputs, training),
+                data_format=args.data_format,
+                pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="han")
+            ),
             num_classes=96,
             data_format=args.data_format,
             hyper_params=AttrDict(
