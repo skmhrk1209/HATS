@@ -35,7 +35,7 @@ def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=lambda inputs, training, data_format: compose(
+            backbone_network=lambda inputs, training: compose(
                 lambda inputs: ResNet(
                     conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                     pool_param=None,
@@ -43,11 +43,11 @@ def main(unused_argv):
                         AttrDict(filters=64, strides=[2, 2], blocks=2),
                         AttrDict(filters=128, strides=[2, 2], blocks=2),
                     ],
-                    num_classes=None
+                    num_classes=None,
+                    data_format=args.data_format
                 )(
                     inputs=inputs,
                     training=training,
-                    data_format=data_format,
                     name="resnet_1",
                     pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
                 ),
@@ -57,11 +57,11 @@ def main(unused_argv):
                     residual_params=[
                         AttrDict(filters=256, strides=[1, 1], blocks=2)
                     ],
-                    num_classes=None
+                    num_classes=None,
+                    data_format=args.data_format
                 )(
                     inputs=inputs,
                     training=training,
-                    data_format=data_format,
                     name="resnet_2"
                 )
             )(inputs),
@@ -76,7 +76,8 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=20, num_units=256)
-                ]
+                ],
+                data_format=args.data_format
             ),
             num_classes=96,
             data_format=args.data_format,

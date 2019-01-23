@@ -42,7 +42,8 @@ def main(unused_argv):
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
-                num_classes=None
+                num_classes=None,
+                data_format=args.data_format
             ),
             attention_network=HAN(
                 conv_params=[
@@ -55,7 +56,8 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=10, num_units=256)
-                ]
+                ],
+                data_format=args.data_format
             ),
             num_classes=63,
             data_format=args.data_format,
