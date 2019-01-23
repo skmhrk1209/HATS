@@ -42,7 +42,6 @@ def main(unused_argv):
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
-                num_classes=None,
                 data_format=args.data_format
             ),
             attention_network=HAN(

@@ -43,27 +43,17 @@ def main(unused_argv):
                         AttrDict(filters=64, strides=[2, 2], blocks=2),
                         AttrDict(filters=128, strides=[2, 2], blocks=2),
                     ],
-                    num_classes=None,
-                    data_format=args.data_format
-                )(
-                    inputs=inputs,
-                    training=training,
-                    name="resnet_1",
+                    data_format=args.data_format,
                     pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
-                ),
+                )(inputs, training, "resnet_1"),
                 lambda inputs: ResNet(
                     conv_param=None,
                     pool_param=None,
                     residual_params=[
                         AttrDict(filters=256, strides=[1, 1], blocks=2)
                     ],
-                    num_classes=None,
                     data_format=args.data_format
-                )(
-                    inputs=inputs,
-                    training=training,
-                    name="resnet_2"
-                )
+                )(inputs, training, "resnet_2")
             )(inputs),
             attention_network=lambda inputs, training: HAN(
                 conv_params=[
@@ -78,10 +68,7 @@ def main(unused_argv):
                     AttrDict(sequence_length=20, num_units=256)
                 ],
                 data_format=args.data_format
-            )(
-                inputs=inputs,
-                training=training
-            ),
+            )(inputs, training),
             num_classes=96,
             data_format=args.data_format,
             hyper_params=AttrDict(
