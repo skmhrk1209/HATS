@@ -44,7 +44,7 @@ def main(unused_argv):
                         AttrDict(filters=128, strides=[2, 2], blocks=2),
                     ],
                     data_format=args.data_format,
-                    pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
+                    #pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
                 )(inputs, training, "resnet_1"),
                 lambda inputs: ResNet(
                     conv_param=None,
