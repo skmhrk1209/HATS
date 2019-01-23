@@ -76,8 +76,7 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=20, num_units=256)
-                ],
-                data_format=args.data_format
+                ]
             ),
             num_classes=96,
             data_format=args.data_format,
