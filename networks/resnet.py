@@ -5,13 +5,15 @@ from . import ops
 
 class ResNet(object):
 
-    def __init__(self, conv_param, pool_param, residual_params, data_format, pretrained_network=None):
+    def __init__(self, conv_param, pool_param, residual_params, data_format,
+                 pretrained_model_dir=None, pretrained_model_scope=None):
 
         self.conv_param = conv_param
         self.pool_param = pool_param
         self.residual_params = residual_params
         self.data_format = data_format
-        self.pretrained_network = pretrained_network
+        self.pretrained_model_dir = pretrained_model_dir
+        self.pretrained_model_scope = pretrained_model_scope
 
     def __call__(self, inputs, training, name="resnet", reuse=None):
 
@@ -78,11 +80,11 @@ class ResNet(object):
 
             inputs = tf.nn.relu(inputs)
 
-        if self.pretrained_network:
+        if self.pretrained_model_dir:
 
             tf.train.init_from_checkpoint(
-                ckpt_dir_or_file=self.pretrained_network.dir,
-                assignment_map={"{}/".format(self.pretrained_network.name): "{}/".format(name)}
+                ckpt_dir_or_file=self.pretrained_model_dir,
+                assignment_map={"{}/".format(self.pretrained_model_scope): "{}/".format(name)}
             )
 
         return inputs

@@ -7,13 +7,15 @@ from itertools import *
 
 class HAN(object):
 
-    def __init__(self, conv_params, rnn_params, deconv_params, data_format, pretrained_network=None):
+    def __init__(self, conv_params, rnn_params, deconv_params, data_format,
+                 pretrained_model_dir=None, pretrained_model_scope=None):
 
         self.conv_params = conv_params
         self.rnn_params = rnn_params
         self.deconv_params = deconv_params
         self.data_format = data_format
-        self.pretrained_network = pretrained_network
+        self.pretrained_model_dir = pretrained_model_dir
+        self.pretrained_model_scope = pretrained_model_scope
 
     def __call__(self, inputs, training, name="han", reuse=None):
 
@@ -238,11 +240,11 @@ class HAN(object):
                         sequence=inputs
                     )
 
-            if self.pretrained_network:
+            if self.pretrained_model_dir:
 
                 tf.train.init_from_checkpoint(
-                    ckpt_dir_or_file=self.pretrained_network.dir,
-                    assignment_map={"{}/".format(self.pretrained_network.name): "{}/".format(name)}
+                    ckpt_dir_or_file=self.pretrained_model_dir,
+                    assignment_map={"{}/".format(self.pretrained_model_scope): "{}/".format(name)}
                 )
 
             return inputs

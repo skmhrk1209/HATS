@@ -15,7 +15,7 @@ from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="word_recognition_hats_model", help="model directory")
-parser.add_argument("--pretrained_model_dir", type=str, default="synthetic_word_hats_model", help="pretrained model directory")
+parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["word_recognition_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1000, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -44,7 +44,8 @@ def main(unused_argv):
                         AttrDict(filters=128, strides=[2, 2], blocks=2),
                     ],
                     data_format=args.data_format,
-                    pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
+                    pretrained_model_dir=args.pretrained_model_dir,
+                    pretrained_model_scope="resnet"
                 )(inputs, training, "resnet_1"),
                 lambda inputs: ResNet(
                     conv_param=None,

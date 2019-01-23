@@ -15,7 +15,7 @@ from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_hats_model_2", help="model directory")
-parser.add_argument("--pretrained_model_dir", type=str, default="synthetic_word_hats_model", help="pretrained model directory")
+parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
