@@ -45,17 +45,15 @@ def main(unused_argv):
                     ],
                     data_format=args.data_format,
                     pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
-                )(inputs, training),
+                )(inputs, training, "resnet_1"),
                 lambda inputs: ResNet(
-                    conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                    conv_param=None,
                     pool_param=None,
                     residual_params=[
-                        AttrDict(filters=64, strides=[2, 2], blocks=2),
-                        AttrDict(filters=128, strides=[2, 2], blocks=2),
+                        AttrDict(filters=256, strides=[1, 1], blocks=2),
                     ],
-                    data_format=args.data_format,
-                    pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="resnet")
-                )(inputs, training)
+                    data_format=args.data_format
+                )(inputs, training, "resnet_2")
             )(inputs),
             attention_network=HAN(
                 conv_params=[
