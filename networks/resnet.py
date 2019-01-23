@@ -5,15 +5,14 @@ from . import ops
 
 class ResNet(object):
 
-    def __init__(self, conv_param, pool_param, residual_params, num_classes, data_format):
+    def __init__(self, conv_param, pool_param, residual_params, num_classes):
 
         self.conv_param = conv_param
         self.pool_param = pool_param
         self.residual_params = residual_params
         self.num_classes = num_classes
-        self.data_format = data_format
 
-    def __call__(self, inputs, training, name="resnet", reuse=None, pretrained_network=None):
+    def __call__(self, inputs, training, data_format, name="resnet", reuse=None, pretrained_network=None):
 
         with tf.variable_scope(name, reuse=reuse):
 
@@ -25,7 +24,7 @@ class ResNet(object):
                     kernel_size=self.conv_param.kernel_size,
                     strides=self.conv_param.strides,
                     padding="same",
-                    data_format=self.data_format,
+                    data_format=data_format,
                     use_bias=False,
                     kernel_initializer=tf.variance_scaling_initializer(
                         scale=2.0,
@@ -41,7 +40,7 @@ class ResNet(object):
                     pool_size=self.pool_param.pool_size,
                     strides=self.pool_param.strides,
                     padding="same",
-                    data_format=self.data_format
+                    data_format=data_format
                 )
 
             for i, residual_param in enumerate(self.residual_params):
@@ -53,7 +52,7 @@ class ResNet(object):
                         filters=residual_param.filters,
                         strides=residual_param.strides,
                         projection_shortcut=True,
-                        data_format=self.data_format,
+                        data_format=data_format,
                         training=training,
                         name="residual_block_{}_{}".format(i, j)
                     )
@@ -65,14 +64,14 @@ class ResNet(object):
                         filters=residual_param.filters,
                         strides=[1, 1],
                         projection_shortcut=False,
-                        data_format=self.data_format,
+                        data_format=data_format,
                         training=training,
                         name="residual_block_{}_{}".format(i, j)
                     )
 
             inputs = ops.batch_normalization(
                 inputs=inputs,
-                data_format=self.data_format,
+                data_format=data_format,
                 training=training
             )
 
@@ -90,7 +89,7 @@ class ResNet(object):
 
             inputs = ops.global_average_pooling2d(
                 inputs=inputs,
-                data_format=self.data_format
+                data_format=data_format
             )
 
             inputs = tf.layers.dense(

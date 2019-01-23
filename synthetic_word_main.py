@@ -15,7 +15,7 @@ from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synthetic_word_hats_model", help="model directory")
-parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
+parser.add_argument("--pretrained_model_dir", type=str, default="synthetic_word_hats_model", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["synthetic_word_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -42,8 +42,7 @@ def main(unused_argv):
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                 ],
-                num_classes=None,
-                data_format=args.data_format
+                num_classes=None
             ),
             attention_network=HAN(
                 conv_params=[
@@ -56,8 +55,7 @@ def main(unused_argv):
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=10, num_units=256)
-                ],
-                data_format=args.data_format
+                ]
             ),
             num_classes=63,
             data_format=args.data_format,
@@ -66,8 +64,7 @@ def main(unused_argv):
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
-            ),
-            pretrained_model_dir=args.pretrained_model_dir
+            )
         )(features, labels, mode),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig(

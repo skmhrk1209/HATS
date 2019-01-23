@@ -18,12 +18,14 @@ class HATS(object):
 
         feature_maps = self.backbone_network(
             inputs=images,
-            training=mode == tf.estimator.ModeKeys.TRAIN
+            training=mode == tf.estimator.ModeKeys.TRAIN,
+            data_format=self.data_format
         )
 
         attention_maps = self.attention_network(
             inputs=feature_maps,
-            training=mode == tf.estimator.ModeKeys.TRAIN
+            training=mode == tf.estimator.ModeKeys.TRAIN,
+            data_format=self.data_format
         )
 
         def spatial_flatten(inputs, data_format):

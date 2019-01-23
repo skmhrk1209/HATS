@@ -7,14 +7,13 @@ from itertools import *
 
 class HAN(object):
 
-    def __init__(self, conv_params, rnn_params, deconv_params, data_format):
+    def __init__(self, conv_params, rnn_params, deconv_params):
 
         self.conv_params = conv_params
         self.rnn_params = rnn_params
         self.deconv_params = deconv_params
-        self.data_format = data_format
 
-    def __call__(self, inputs, training, name="han", reuse=None, pretrained_network=None):
+    def __call__(self, inputs, training, data_format, name="han", reuse=None, pretrained_network=None):
 
         with tf.variable_scope(name, reuse=reuse):
 
@@ -29,7 +28,7 @@ class HAN(object):
                             kernel_size=conv_param.kernel_size,
                             strides=conv_param.strides,
                             padding="same",
-                            data_format=self.data_format,
+                            data_format=data_format,
                             use_bias=False,
                             kernel_initializer=tf.variance_scaling_initializer(
                                     scale=2.0,
@@ -41,7 +40,7 @@ class HAN(object):
                         ),
                         lambda inputs: ops.batch_normalization(
                             inputs=inputs,
-                            data_format=self.data_format,
+                            data_format=data_format,
                             training=training,
                             name="batch_normalization",
                             reuse=None
@@ -181,7 +180,7 @@ class HAN(object):
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
                                 padding="same",
-                                data_format=self.data_format,
+                                data_format=data_format,
                                 use_bias=False,
                                 kernel_initializer=tf.variance_scaling_initializer(
                                     scale=2.0,
@@ -193,7 +192,7 @@ class HAN(object):
                             ),
                             lambda inputs: ops.batch_normalization(
                                 inputs=inputs,
-                                data_format=self.data_format,
+                                data_format=data_format,
                                 training=training,
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
@@ -215,7 +214,7 @@ class HAN(object):
                                 kernel_size=deconv_param.kernel_size,
                                 strides=deconv_param.strides,
                                 padding="same",
-                                data_format=self.data_format,
+                                data_format=data_format,
                                 use_bias=False,
                                 kernel_initializer=tf.variance_scaling_initializer(
                                     scale=1.0,
@@ -227,7 +226,7 @@ class HAN(object):
                             ),
                             lambda inputs: ops.batch_normalization(
                                 inputs=inputs,
-                                data_format=self.data_format,
+                                data_format=data_format,
                                 training=training,
                                 name="batch_normalization",
                                 reuse=tf.AUTO_REUSE
