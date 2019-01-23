@@ -80,8 +80,7 @@ def main(unused_argv):
                 data_format=args.data_format
             )(
                 inputs=inputs,
-                training=training,
-                pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="han")
+                training=training
             ),
             num_classes=96,
             data_format=args.data_format,
