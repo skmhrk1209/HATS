@@ -82,7 +82,7 @@ class ResNet(object):
 
                 tf.train.init_from_checkpoint(
                     ckpt_dir_or_file=pretrained_network.dir,
-                    assignment_map={pretrained_network.name: name}
+                    assignment_map={"{}/".format(pretrained_network.name): "{}/".format(name)}
                 )
 
             if not self.num_classes:
