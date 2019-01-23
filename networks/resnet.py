@@ -78,7 +78,7 @@ class ResNet(object):
 
             inputs = tf.nn.relu(inputs)
 
-        if pretrained_network:
+        if self.pretrained_network:
 
             tf.train.init_from_checkpoint(
                 ckpt_dir_or_file=self.pretrained_network.dir,
