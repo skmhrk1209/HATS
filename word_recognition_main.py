@@ -65,7 +65,7 @@ def main(unused_argv):
                     name="resnet_2"
                 )
             )(inputs),
-            attention_network=HAN(
+            attention_network=lambda inputs, training: HAN(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
@@ -78,6 +78,10 @@ def main(unused_argv):
                     AttrDict(sequence_length=20, num_units=256)
                 ],
                 data_format=args.data_format
+            )(
+                inputs=inputs,
+                training=training,
+                pretrained_network=AttrDict(dir=args.pretrained_model_dir, name="han")
             ),
             num_classes=96,
             data_format=args.data_format,
