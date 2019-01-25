@@ -144,10 +144,10 @@ def main(unused_argv):
                     attention_map = np.squeeze(attention_map)
                     attention_map = img.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
                     attention_map = cv2.resize(attention_map, image.shape[:-1])
-                    bounding_box = img.search_bounding_box(attention_map, 0.5)
+                    bounding_box = img.search_bounding_box(attention_map, 0.5, 1.0)
                     print(bounding_box)
                     print(image.shape)
-                    cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (0, 0, 1), 2)
+                    cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (0, 0, 255), 2)
 
             image = img.scale(image, 0.0, 1.0, 0.0, 255.0)
             cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image)
