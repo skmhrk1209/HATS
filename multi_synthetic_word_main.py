@@ -134,9 +134,10 @@ def main(unused_argv):
         for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 
             image = predict_result["images"]
+            image = img.scale(image, 0.0, 1.0, 0.0, 255.0)
+            image = image.astype(np.uint8)
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
-            image = img.scale(image, 0.0, 1.0, 0.0, 255.0).astype(np.uint8)
 
             for attention_maps in predict_result["attention_maps"]:
 
