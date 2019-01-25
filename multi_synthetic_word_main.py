@@ -139,8 +139,6 @@ def main(unused_argv):
                 image = np.transpose(image, [1, 2, 0])
                 attention_maps = np.transpose(attention_maps, [0, 1, 3, 4, 2])
 
-            print(attention_maps.shape)
-
             for attention_maps_ in attention_maps:
 
                 for attention_map in attention_maps_:
