@@ -133,8 +133,6 @@ def main(unused_argv):
         for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 
             image = predict_result["images"]
-            attention_maps = predict_result["attention_maps"]
-
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
 
@@ -144,7 +142,8 @@ def main(unused_argv):
 
                     attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
                     attention_map[attention_map < 0.5] = 0.0
-                    attention_map = cv2.resize(attention_map, image.shape[:2])
+                    attention_map = cv2.resize(attention_map, image.shape[:-1])
+                    print(attention_map.shape)
                     image[:, :, -1] += attention_map
 
             cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image * 255.)
