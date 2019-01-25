@@ -147,7 +147,7 @@ def main(unused_argv):
                     bounding_box = img.search_bounding_box(attention_map, 0.5, 1.0)
                     print(bounding_box)
                     print(image.shape)
-                    cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (0, 0, 255), 2)
+                    image = cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (0, 0, 255), 2)
 
             image = img.scale(image, 0.0, 1.0, 0.0, 255.0)
             cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image)
