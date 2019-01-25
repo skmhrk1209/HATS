@@ -12,7 +12,6 @@ from model import HATS
 from networks.han import HAN
 from networks.resnet import ResNet
 from algorithms import *
-import image as img
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_hats_model", help="model directory")
@@ -134,23 +133,22 @@ def main(unused_argv):
         for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 
             image = predict_result["images"]
-            image = img.scale(image, 0.0, 1.0, 0.0, 255.0)
-            image = image.astype(np.uint8)
+            attention_maps = predict_result["attention_maps"]
+
             if args.data_format == "channels_first":
-                image = image.transpose([1, 2, 0])
+                image = np.transpose(image, [1, 2, 0])
+                attention_maps = np.transpose(attention_maps, [0, 1, 3, 4, 2])
 
-            for attention_maps in predict_result["attention_maps"]:
+            for attention_maps_ in attention_maps:
 
-                for attention_map in attention_maps:
+                for attention_map in attention_maps_:
 
-                    attention_map = attention_map.squeeze()
-                    attention_map = img.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 255.0)
-                    attention_map = attention_map.astype(np.uint8)
+                    attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
+                    attention_map[attention_map < 0.5] = 0.0
                     attention_map = cv2.resize(attention_map, image.shape[:-1])
-                    bounding_box = img.search_bounding_box(attention_map, 255, 5, 2)
-                    image = cv2.rectangle(image.copy(), bounding_box[0][::-1], bounding_box[1][::-1], (0, 0, 255), 2)
+                    image[:, :, -1] += attention_map
 
-            cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image)
+            cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image * 255.)
 
 
 if __name__ == "__main__":
