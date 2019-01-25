@@ -140,6 +140,7 @@ def main(unused_argv):
 
                 for attention_map in attention_maps:
 
+                    print(attention_map.shape)
                     attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
                     attention_map[attention_map < 0.5] = 0.0
                     attention_map = cv2.resize(attention_map, image.shape[:-1])
