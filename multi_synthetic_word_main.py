@@ -12,6 +12,7 @@ from model import HATS
 from networks.han import HAN
 from networks.resnet import ResNet
 from algorithms import *
+import image as img
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_hats_model", help="model directory")
@@ -143,10 +144,10 @@ def main(unused_argv):
 
                 for attention_map in attention_maps_:
 
-                    attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
-                    attention_map[attention_map < 0.5] = 0.0
+                    attention_map = img.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
                     attention_map = cv2.resize(attention_map, image.shape[:-1])
-                    image[:, :, -1] += attention_map
+                    bounding_box = img.search_bounding_box(attention_map, 0.5)
+                    cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
 
             cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image * 255.)
 
