@@ -145,9 +145,7 @@ def main(unused_argv):
                     attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
                     attention_map[attention_map < 0.5] = 0.0
                     attention_map = cv2.resize(attention_map, image.shape[:2])
-                    attention_map = np.expand_dims(attention_map, axis=-1)
-                    attention_map = np.pad(attention_map, [[0, 0], [0, 0], [2, 0]], "constant")
-                    image += attention_map
+                    image[:, :, -1] += attention_map
 
             cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image * 255.)
 
