@@ -134,11 +134,12 @@ def main(unused_argv):
 
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
-            print(attention_maps.shape)
 
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
                 attention_maps = np.transpose(attention_maps, [3, 4, 2])
+
+            print(attention_maps.shape)
 
             for attention_maps_ in attention_maps:
 
