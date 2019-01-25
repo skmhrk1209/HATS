@@ -6,12 +6,12 @@ def scale(input, input_min, input_max, output_min, output_max):
     return output_min + (input - input_min) / (input_max - input_min) * (output_max - output_min)
 
 
-def search_bounding_box(image, threshold, max_value):
+def search_bounding_box(image, max_value):
 
     if len(image.shape) == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    binary = cv2.threshold(image, threshold, max_value, cv2.THRESH_BINARY)[1]
+    binary = cv2.adaptiveThreshold(image, max_value, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 3, 0)
     flags = np.ones_like(binary, dtype=np.bool)
     h, w = binary.shape[:2]
     segments = []
