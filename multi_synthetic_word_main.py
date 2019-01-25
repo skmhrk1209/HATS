@@ -130,7 +130,7 @@ def main(unused_argv):
             )
         )
 
-        for i, predict_result in enumerate(itertools.islice(predict_results, 1000)):
+        for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
