@@ -134,22 +134,21 @@ def main(unused_argv):
         for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
 
             image = predict_result["images"]
-            attention_maps = predict_result["attention_maps"]
-
             if args.data_format == "channels_first":
                 image = np.transpose(image, [1, 2, 0])
-                attention_maps = np.transpose(attention_maps, [0, 1, 3, 4, 2])
 
-            for attention_maps_ in attention_maps:
+            for attention_maps in predict_result["attention_maps"]:
 
-                for attention_map in attention_maps_:
+                for attention_map in attention_maps:
 
+                    attention_map = np.squeeze(attention_map)
                     attention_map = img.scale(attention_map, attention_map.min(), attention_map.max(), 0.0, 1.0)
                     attention_map = cv2.resize(attention_map, image.shape[:-1])
                     bounding_box = img.search_bounding_box(attention_map, 0.5)
-                    cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (255, 0, 0), 2)
+                    cv2.rectangle(image, bounding_box[0][::-1], bounding_box[1][::-1], (0, 0, 255), 2)
 
-            cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image * 255.)
+            image = img.scale(image, 0.0, 1.0, 0.0, 255.0)
+            cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image)
 
 
 if __name__ == "__main__":
