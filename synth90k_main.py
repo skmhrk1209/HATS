@@ -1,10 +1,12 @@
-''' main for synth90k 
+''' synth90k dataset details
+    url: http://www.robots.ox.ac.uk/~vgg/data/text/
     train: 7224612
     val: 802734
     test: 891927
     max num chars: 23
-    num classes: 37 (case insesitive)
+    num classes: 37 (case-insensitive)
 '''
+
 import tensorflow as tf
 import numpy as np
 import argparse
