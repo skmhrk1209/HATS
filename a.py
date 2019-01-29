@@ -10,7 +10,7 @@ with tf.python_io.TFRecordWriter("synth90k_train.tfrecord") as writer:
     class_ids.update({"": max(class_ids.values()) + 1})
     with open(os.path.join(dir, "annotation_train.txt")) as f:
         for line in f:
-            path = line.split()[0]
+            path = os.path.join(dir, line.split()[0])
             label = os.path.splitext(os.path.basename(path))[0].split("_")[1]
             label = label.upper()
             label = list(label)
