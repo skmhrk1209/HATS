@@ -54,4 +54,4 @@ def main(input_filename, output_filename, sequence_length=23):
 
 if __name__ == "__main__":
 
-    main(*sys.argv[1:3], list(map(int, sys.argv[3:])))
+    main(*sys.argv[1:3], *list(map(int, sys.argv[3:])))
