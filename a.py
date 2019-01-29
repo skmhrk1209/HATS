@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 
-dir = "~/data/synth90k/"
+dir = "../data/synth90k/"
 
 with tf.python_io.TFRecordWriter("synth90k_train.tfrecord") as writer:
     class_ids = {}
