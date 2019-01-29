@@ -21,9 +21,9 @@ from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="synthetic_word_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["synthetic_word_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=7224612, help="buffer size to shuffle dataset")
