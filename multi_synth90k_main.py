@@ -1,11 +1,16 @@
+# =============================================================
+# dataset details
+# dataset: multi synth90k
+# download: made by utils/make_multi_synth90k.cpp
+# train: 900000
+# val: 50000
+# test: 50000
+# max num chars: 10
+# num classes: 37 (case-insensitive)
+# =============================================================
+
 import tensorflow as tf
-import numpy as np
 import argparse
-import functools
-import itertools
-import glob
-import os
-import cv2
 from attrdict import AttrDict
 from dataset import Dataset
 from model import HATS
@@ -14,9 +19,9 @@ from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synthetic_word_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_synth90k_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synthetic_word_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--buffer_size", type=int, default=900000, help="buffer size to shuffle dataset")
@@ -117,6 +122,9 @@ def main(unused_argv):
         print(eval_results)
 
     if args.predict:
+
+        import cv2
+        import itertools
 
         predict_results = classifier.predict(
             input_fn=Dataset(

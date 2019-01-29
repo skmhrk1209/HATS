@@ -6,40 +6,38 @@ import os
 from algorithms import *
 
 
-def main(input_directory, output_filename, sequence_lengths):
+def main(input_directory, output_filename, *sequence_lengths):
+
+    class_ids = {}
+    class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
+    class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
+    class_ids.update({"": max(class_ids.values()) + 1})
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
-        class_ids = {}
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
-        class_ids.update({chr(j): i for i, j in enumerate(range(ord("a"), ord("z") + 1), class_ids["Z"] + 1)})
-        class_ids.update({"": max(class_ids.values()) + 1})
-
-        input_filenames = glob.glob(os.path.join(input_directory, "*"))
-
-        for input_filename in input_filenames:
+        for path in glob.glob(os.path.join(input_directory, "*")):
 
             try:
-                label = os.path.splitext(os.path.basename(input_filename))[0].split("_")[1:]
-                label = map_innermost_element(list, label)
+                label = os.path.splitext(os.path.basename(path))[0].split("_")[1:]
+                label = map_innermost_element(lambda string: string.upper(), label)
+                label = map_innermost_element(lambda string: list(string), label)
                 label = map_innermost_element(lambda char: class_ids[char], label)
 
-            except KeyError as error:
-                print("KeyError: {} at {}".format(error, input_filename))
-                continue
+                for i, sequence_length in enumerate(sequence_lengths[::-1]):
 
-            for i, sequence_length in enumerate(sequence_lengths[::-1]):
+                    label = map_innermost_list(
+                        function=lambda sequence: np.pad(
+                            array=sequence,
+                            pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                            mode="constant",
+                            constant_values=class_ids[""]
+                        ),
+                        sequence=label
+                    )
 
-                label = map_innermost_list(
-                    function=lambda sequence: np.pad(
-                        array=sequence,
-                        pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
-                        mode="constant",
-                        constant_values=class_ids[""]
-                    ),
-                    sequence=label
-                )
+                except KeyError as error:
+                    print("{} at {}".format(error, path))
+                    continue
 
             writer.write(
                 record=tf.train.Example(
@@ -47,12 +45,12 @@ def main(input_directory, output_filename, sequence_lengths):
                         feature={
                             "path": tf.train.Feature(
                                 bytes_list=tf.train.BytesList(
-                                    value=[input_filename.encode("utf-8")]
+                                    value=[path.encode("utf-8")]
                                 )
                             ),
                             "label": tf.train.Feature(
                                 int64_list=tf.train.Int64List(
-                                    value=label.astype(np.int32).reshape([-1]).tolist()
+                                    value=label.reshape([-1]).tolist()
                                 )
                             )
                         }
@@ -63,4 +61,4 @@ def main(input_directory, output_filename, sequence_lengths):
 
 if __name__ == "__main__":
 
-    main(*sys.argv[1:3], list(map(int, sys.argv[3:])))
+    main(*sys.argv[1:3], *list(map(int, sys.argv[3:])))

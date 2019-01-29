@@ -1,37 +1,16 @@
-''' synth90k dataset details
-    url: http://www.robots.ox.ac.uk/~vgg/data/text/
-    train: 7224612
-    val: 802734
-    test: 891927
-    max num chars: 23
-    num classes: 37 (case-insensitive)
-
-    broken files included:
-    synth90k/2911/6/77_heretical_35885.jpg
-    synth90k/2852/6/60_TOILSOME_79481.jpg
-    synth90k/2749/6/101_Chided_13155.jpg
-    synth90k/2069/4/192_whittier_86389.jpg
-    synth90k/2025/2/364_SNORTERS_72304.jpg
-    synth90k/2013/2/370_refract_63890.jpg
-    synth90k/1881/4/225_Marbling_46673.jpg
-    synth90k/1863/4/223_Diligently_21672.jpg
-    synth90k/1817/2/363_actuating_904.jpg
-    synth90k/913/4/231_randoms_62372.jpg
-    synth90k/869/4/234_TRIASSIC_80582.jpg
-    synth90k/495/6/81_MIDYEAR_48332.jpg
-    synth90k/368/4/232_friar_30876.jpg
-    synth90k/275/6/96_hackle_34465.jpg
-    synth90k/173/2/358_BURROWING_10395.jpg
-'''
+# =============================================================
+# dataset details
+# dataset: synth90k
+# download: http://www.robots.ox.ac.uk/~vgg/data/text/
+# train: 7224612
+# val: 802734
+# test: 891927
+# max num chars: 23
+# num classes: 37 (case-insensitive)
+# =============================================================
 
 import tensorflow as tf
-import numpy as np
 import argparse
-import functools
-import itertools
-import glob
-import os
-import cv2
 from attrdict import AttrDict
 from dataset import Dataset
 from model import HATS
