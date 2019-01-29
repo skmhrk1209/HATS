@@ -3,6 +3,7 @@ import sys
 import tensorflow as tf
 import numpy as np
 import skimage
+from tqdm import *
 
 class_ids = {}
 class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
@@ -13,7 +14,7 @@ with tf.python_io.TFRecordWriter(sys.argv[2]) as writer:
 
     with open(sys.argv[1]) as f:
 
-        for line in f:
+        for line in tqdm(f):
 
             path = os.path.join(os.path.dirname(sys.argv[1]), line.split()[0])
             try:
