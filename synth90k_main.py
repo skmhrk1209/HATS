@@ -1,14 +1,3 @@
-# =============================================================
-# dataset details
-# dataset: synth90k
-# download: http://www.robots.ox.ac.uk/~vgg/data/text/
-# train: 7224612
-# val: 802734
-# test: 891927
-# max num chars: 23
-# num classes: 37 (case-insensitive)
-# =============================================================
-
 import tensorflow as tf
 import argparse
 from attrdict import AttrDict
