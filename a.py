@@ -17,7 +17,7 @@ with tf.python_io.TFRecordWriter("synth90k_train.tfrecord") as writer:
             label = map(lambda char: class_ids[char], label)
             label = np.pad(
                 array=list(label),
-                pad_width=[[0, 23 - len(label)]]
+                pad_width=[[0, 23 - len(label)]],
                 mode="constant",
                 constant_values=class_ids[""]
             )
