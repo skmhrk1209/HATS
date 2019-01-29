@@ -30,7 +30,7 @@ def main(input_filename, output_filename, sequence_length=23):
 
                 label = os.path.splitext(os.path.basename(path))[0].split("_")[1]
                 label = list(map(lambda char: class_ids[char], label.upper()))
-                label = np.pad(label, [[0, 23 - len(label)]], "constant", constant_values=class_ids[""])
+                label = np.pad(label, [[0, sequence_length - len(label)]], "constant", constant_values=class_ids[""])
 
                 writer.write(
                     record=tf.train.Example(
