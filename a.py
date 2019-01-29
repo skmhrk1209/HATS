@@ -22,21 +22,21 @@ with tf.python_io.TFRecordWriter("synth90k_train.tfrecord") as writer:
                 constant_values=class_ids[""]
             )
 
-        writer.write(
-            record=tf.train.Example(
-                features=tf.train.Features(
-                    feature={
-                        "path": tf.train.Feature(
-                            bytes_list=tf.train.BytesList(
-                                value=[path.encode("utf-8")]
+            writer.write(
+                record=tf.train.Example(
+                    features=tf.train.Features(
+                        feature={
+                            "path": tf.train.Feature(
+                                bytes_list=tf.train.BytesList(
+                                    value=[path.encode("utf-8")]
+                                )
+                            ),
+                            "label": tf.train.Feature(
+                                int64_list=tf.train.Int64List(
+                                    value=label.tolist()
+                                )
                             )
-                        ),
-                        "label": tf.train.Feature(
-                            int64_list=tf.train.Int64List(
-                                value=label.tolist()
-                            )
-                        )
-                    }
-                )
-            ).SerializeToString()
-        )
+                        }
+                    )
+                ).SerializeToString()
+            )
