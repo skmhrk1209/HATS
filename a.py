@@ -14,8 +14,7 @@ with tf.python_io.TFRecordWriter("synth90k_train.tfrecord") as writer:
             path = os.path.join(dir, line.split()[0])
             label = os.path.splitext(os.path.basename(path))[0].split("_")[1]
             label = label.upper()
-            label = list(label)
-            label = map(lambda char: class_ids[char], label)
+            label = list(map(lambda char: class_ids[char], label))
             label = np.pad(
                 array=list(label),
                 pad_width=[[0, 23 - len(label)]],
