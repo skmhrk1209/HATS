@@ -24,8 +24,9 @@ parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretra
 parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--buffer_size", type=int, default=7224612, help="buffer size to shuffle dataset")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
+parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
+parser.add_argument("--max_steps", type=int, default=None, help="maximum number of training epochs")
 parser.add_argument("--train", action="store_true", help="with training")
 parser.add_argument("--eval", action="store_true", help="with evaluation")
 parser.add_argument("--predict", action="store_true", help="with prediction")
@@ -84,6 +85,11 @@ def main(unused_argv):
         )
     )
 
+    num_data = sum([
+        len(list(tf.io.tf_record_iterator(filename)))
+        for filename in args.filenames
+    ])
+
     if args.train:
 
         classifier.train(
@@ -91,11 +97,13 @@ def main(unused_argv):
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
-                buffer_size=args.buffer_size,
+                buffer_size=num_data,
                 sequence_lengths=[23],
                 image_size=[256, 256],
                 data_format=args.data_format
             ),
+            steps=args.steps,
+            max_steps=args.max_steps,
             hooks=[
                 tf.train.LoggingTensorHook(
                     tensors={"error_rate": "error_rate"},
@@ -109,9 +117,9 @@ def main(unused_argv):
         eval_results = classifier.evaluate(
             input_fn=Dataset(
                 filenames=args.filenames,
-                num_epochs=args.num_epochs,
+                num_epochs=1,
                 batch_size=args.batch_size,
-                buffer_size=args.buffer_size,
+                buffer_size=num_data,
                 sequence_lengths=[23],
                 image_size=[256, 256],
                 data_format=args.data_format
