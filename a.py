@@ -1,5 +1,6 @@
 import os
 import tensorflow as tf
+import numpy as np
 
 dir = "../data/synth90k/"
 
