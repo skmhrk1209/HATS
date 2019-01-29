@@ -1,3 +1,10 @@
+''' main for synth90k 
+    train: 7224612
+    val: 802734
+    test: 891927
+    max num chars: 23
+    num classes: 37 (case insesitive)
+'''
 import tensorflow as tf
 import numpy as np
 import argparse
