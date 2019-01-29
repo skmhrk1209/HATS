@@ -24,7 +24,7 @@ with tf.python_io.TFRecordWriter(sys.argv[2]) as writer:
                 continue
             label = os.path.splitext(os.path.basename(path))[0].split("_")[1]
             label = list(map(lambda char: class_ids[char], label.upper()))
-            label = np.pad(label, [[0, 23 - len(label)]], "constant", class_ids[""])
+            label = np.pad(label, [[0, 23 - len(label)]], "constant", constant_values=class_ids[""])
 
             writer.write(
                 record=tf.train.Example(
