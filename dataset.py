@@ -8,12 +8,15 @@ from algorithms import *
 
 class Dataset(object):
 
-    def __init__(self, filenames, num_epochs, batch_size, buffer_size,
+    def __init__(self, filenames, num_epochs, batch_size,
                  sequence_lengths, image_size, data_format):
 
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
-            buffer_size=buffer_size,
+            buffer_size=sum([
+                len(list(tf.io.tf_record_iterator(filename)))
+                for filename in filenames
+            ]),
             reshuffle_each_iteration=True
         )
         self.dataset = self.dataset.repeat(num_epochs)
