@@ -110,6 +110,8 @@ class HATS(object):
         edit_distance = metrics.edit_distance(labels, logits, normalize=True)
         sequence_accuracy = metrics.sequence_accuracy(labels, logits)
 
+        print(edit_distance[0].shape)
+
         print("num params: {}".format(sum([
             np.prod(variable.get_shape().as_list())
             for variable in tf.trainable_variables()
@@ -171,6 +173,6 @@ class HATS(object):
                 loss=loss,
                 eval_metric_ops=dict(
                     edit_distance=edit_distance,
-                    sequence_accuracy=accuracy
+                    sequence_accuracy=sequence_accuracy
                 )
             )
