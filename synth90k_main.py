@@ -102,8 +102,8 @@ def main(unused_argv):
             hooks=[
                 tf.train.LoggingTensorHook(
                     tensors={
-                        "error_rate": "error_rate",
-                        "accuracy": "accuracy"
+                        "edit_distance": "edit_distance",
+                        "sequence_accuracy": "sequence_accuracy"
                     },
                     every_n_iter=100
                 )
