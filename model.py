@@ -107,10 +107,8 @@ class HATS(object):
             sequence=logits
         )), axis=0)
 
-        edit_distance = metrics.edit_distance(labels, logits, normalize=True)
+        # edit_distance = metrics.edit_distance(labels, logits, normalize=True)
         sequence_accuracy = metrics.sequence_accuracy(labels, logits)
-
-        print(edit_distance[0].shape)
 
         print("num params: {}".format(sum([
             np.prod(variable.get_shape().as_list())
@@ -172,7 +170,7 @@ class HATS(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    edit_distance=edit_distance,
+                    # edit_distance=edit_distance,
                     sequence_accuracy=sequence_accuracy
                 )
             )
