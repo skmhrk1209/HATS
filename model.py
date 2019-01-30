@@ -26,9 +26,6 @@ class HATS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        print(feature_maps.shape)
-        print(attention_maps[0].shape)
-
         def spatial_flatten(inputs, data_format):
 
             inputs_shape = inputs.get_shape().as_list()
