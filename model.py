@@ -21,8 +21,6 @@ class HATS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        print(feature_maps.shape)
-
         attention_maps = self.attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
@@ -35,6 +33,9 @@ class HATS(object):
                              [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
 
             return tf.reshape(inputs, outputs_shape)
+
+        print(spatial_flatten(feature_maps, self.data_format).shape)
+        print(spatial_flatten(attention_maps, self.data_format).shape)
 
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
