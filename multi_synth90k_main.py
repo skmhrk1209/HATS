@@ -101,7 +101,10 @@ def main(unused_argv):
             max_steps=args.max_steps,
             hooks=[
                 tf.train.LoggingTensorHook(
-                    tensors={"error_rate": "error_rate"},
+                    tensors={
+                        "error_rate": "error_rate",
+                        "accuracy": "accuracy"
+                    },
                     every_n_iter=100
                 )
             ]
