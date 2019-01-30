@@ -50,7 +50,7 @@ def main(unused_argv):
                 inputs=dict(images=inputs),
                 signature="image_feature_vector",
                 as_dict=True
-            )["resnet_v2_50/block2"],
+            )["resnet_v2_50/block4"],
             attention_network=HAN(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),

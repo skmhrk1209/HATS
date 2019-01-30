@@ -21,6 +21,8 @@ class HATS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
+        print(feature_maps.shape)
+
         attention_maps = self.attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
