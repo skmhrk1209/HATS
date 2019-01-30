@@ -57,7 +57,7 @@ class HATS(object):
         predictions = map_innermost_element(
             function=lambda logits: tf.argmax(
                 input=logits,
-                axis=-1,
+                axis=1,
                 output_type=tf.int32
             ),
             sequence=logits
@@ -124,7 +124,13 @@ class HATS(object):
             sequence=logits
         )), axis=0)
 
+        predictions = tf.concat(flatten_innermost_element(map_innermost_list(
+            function=lambda predictions: tf.stack(predictions, axis=1),
+            sequence=predictions
+        )), axis=0)
+
         error_rate = metrics.edit_distance(labels, logits, normalize=True)
+        accuracy = tf.metrics.mean(tf.reduce_all(tf.equal(labels, predictions), axis=1))
 
         # ==========================================================================================
         if self.data_format == "channels_first":
@@ -149,6 +155,9 @@ class HATS(object):
 
         tf.identity(error_rate[0], "error_rate")
         tf.summary.scalar("error_rate", error_rate[1])
+
+        tf.identity(accuracy[0], "accuracy")
+        tf.summary.scalar("accuracy", accuracy[1])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:
@@ -177,5 +186,8 @@ class HATS(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops=dict(error_rate=error_rate)
+                eval_metric_ops=dict(
+                    error_rate=error_rate,
+                    accuracy=accuracy
+                )
             )
