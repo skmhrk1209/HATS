@@ -44,7 +44,7 @@ def main(unused_argv):
             backbone_network=lambda inputs, training: hub.Module(
                 spec="https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1",
                 trainable=True,
-                name="resnet"
+                name="resnet",
                 tags={"train"} if training else None
             )(
                 inputs=dict(images=inputs),
