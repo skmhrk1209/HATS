@@ -49,9 +49,7 @@ def main(unused_argv):
                     AttrDict(filters=256, strides=[1, 1], blocks=2),
                     AttrDict(filters=512, strides=[1, 1], blocks=2),
                 ],
-                data_format=args.data_format,
-                pretrained_model_dir=args.pretrained_model_dir,
-                pretrained_model_scope="resnet"
+                data_format=args.data_format
             ),
             attention_network=HAN(
                 conv_params=[
@@ -65,9 +63,7 @@ def main(unused_argv):
                 rnn_params=[
                     AttrDict(sequence_length=22, num_units=256)
                 ],
-                data_format=args.data_format,
-                pretrained_model_dir=args.pretrained_model_dir,
-                pretrained_model_scope="han"
+                data_format=args.data_format
             ),
             num_classes=37,
             data_format=args.data_format,
