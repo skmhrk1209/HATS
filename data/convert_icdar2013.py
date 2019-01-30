@@ -3,6 +3,7 @@ import numpy as np
 import glob
 import sys
 import os
+from tqdm import *
 from algorithms import *
 
 
