@@ -1,7 +1,7 @@
 # =============================================================
 # dataset details
 # dataset: multi synth90k
-# download: made by utils/make_multi_synth90k.cpp
+# download: made by make_multi_synth90k.cpp
 # train: 900000
 # val: 50000
 # test: 50000
