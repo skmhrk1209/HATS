@@ -54,15 +54,6 @@ class HATS(object):
             sequence=feature_vectors
         )
 
-        predictions = map_innermost_element(
-            function=lambda logits: tf.argmax(
-                input=logits,
-                axis=1,
-                output_type=tf.int32
-            ),
-            sequence=logits
-        )
-
         attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
                 input_tensor=attention_maps,
@@ -81,19 +72,11 @@ class HATS(object):
                     sequence=attention_maps
                 )
 
-            while isinstance(predictions, list):
-
-                predictions = map_innermost_list(
-                    function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions
-                )
-
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=dict(
                     images=images,
-                    attention_maps=attention_maps,
-                    predictions=predictions
+                    attention_maps=attention_maps
                 )
             )
 
@@ -124,13 +107,8 @@ class HATS(object):
             sequence=logits
         )), axis=0)
 
-        predictions = tf.concat(flatten_innermost_element(map_innermost_list(
-            function=lambda predictions: tf.stack(predictions, axis=1),
-            sequence=predictions
-        )), axis=0)
-
         error_rate = metrics.edit_distance(labels, logits, normalize=True)
-        accuracy = metrics.sequence_accuracy(labels, predictions)
+        accuracy = metrics.sequence_accuracy(labels, logits)
 
         print("num params: {}".format(sum([
             np.prod(variable.get_shape().as_list())
