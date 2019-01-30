@@ -46,6 +46,8 @@ def main(unused_argv):
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=256, strides=[1, 1], blocks=2),
+                    AttrDict(filters=512, strides=[1, 1], blocks=2),
                 ],
                 data_format=args.data_format,
                 pretrained_model_dir=args.pretrained_model_dir,
