@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import sys
 import os
-from ..algorithms import *
+from algorithms import *
 
 
 def main(input_filename, output_filename, sequence_lengths):
