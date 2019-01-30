@@ -41,7 +41,7 @@ def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=lambda inputs, training: hub.Module(
+            backbone_network=lambda inputs, training: tf.image.resize_image_with_crop_or_pad(hub.Module(
                 spec="https://tfhub.dev/google/imagenet/resnet_v1_50/feature_vector/1",
                 trainable=True,
                 name="resnet",
@@ -50,7 +50,7 @@ def main(unused_argv):
                 inputs=dict(images=inputs),
                 signature="image_feature_vector",
                 as_dict=True
-            )["resnet_v1_50/block1"],
+            )["resnet_v1_50/block4"], *[8, 8]),
             attention_network=HAN(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
