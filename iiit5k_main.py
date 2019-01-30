@@ -1,9 +1,9 @@
 # =============================================================
 # dataset details
-# dataset: icdar2013 focused scene test task2.3: word recognition
-# download: http://rrc.cvc.uab.es/?ch=2&com=tasks
-# train: 848
-# test: 1095
+# dataset: iiit5k dataset
+# download: http://cvit.iiit.ac.in/projects/SceneTextUnderstanding/IIIT5K.html
+# train: 2000
+# test: 3000
 # max num chars: 22
 # num classes: 37 (only alphanumeric characters, case-insensitive)
 # =============================================================
@@ -18,10 +18,10 @@ from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="icdar2013_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="iiit5k_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["icdar2013_train.tfrecord"], help="tfrecord filenames")
-parser.add_argument("--num_epochs", type=int, default=10000, help="number of training epochs")
+parser.add_argument('--filenames', type=str, nargs="+", default=["iiit5k_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--num_epochs", type=int, default=1000, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--steps", type=int, default=None, help="number of training epochs")

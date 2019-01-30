@@ -20,10 +20,10 @@ def main(input_filename, output_filename, sequence_lengths):
 
             for line in tqdm(f):
 
-                path = os.path.join(os.path.dirname(sys.argv[1]), line.split()[0].strip(","))
+                path = os.path.join(os.path.dirname(sys.argv[1]), line.split()[0])
 
                 try:
-                    label = line.split()[1].strip('"')
+                    label = line.split()[1]
                     label = map_innermost_element(lambda string: string.upper(), label)
                     label = map_innermost_element(lambda string: list(string), label)
                     label = map_innermost_element(lambda char: class_ids[char], label)
