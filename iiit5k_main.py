@@ -9,6 +9,7 @@
 # =============================================================
 
 import tensorflow as tf
+import tensorflow_hub as hub
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
@@ -40,16 +41,16 @@ def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=ResNet(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
-                pool_param=None,
-                residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
-                ],
-                data_format=args.data_format
-            ),
+            backbone_network=lambda inputs, training: hub.Module(
+                spec="https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1",
+                trainable=True,
+                name="resnet"
+                tags={"train"} if training else None
+            )(
+                inputs=dict(images=inputs),
+                signature="image_feature_vector",
+                as_dict=True
+            )["resnet_v2_50/block4"],
             attention_network=HAN(
                 conv_params=[
                     AttrDict(filters=4, kernel_size=[9, 9], strides=[2, 2]),
@@ -93,7 +94,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 sequence_lengths=[22],
-                image_size=[256, 256],
+                image_size=[224, 224],
                 data_format=args.data_format
             ),
             steps=args.steps,
@@ -117,7 +118,7 @@ def main(unused_argv):
                 num_epochs=1,
                 batch_size=args.batch_size,
                 sequence_lengths=[22],
-                image_size=[256, 256],
+                image_size=[224, 224],
                 data_format=args.data_format
             )
         )
