@@ -132,6 +132,11 @@ class HATS(object):
         error_rate = metrics.edit_distance(labels, logits, normalize=True)
         accuracy = tf.metrics.mean(tf.reduce_all(tf.equal(labels, predictions), axis=1))
 
+        print("num params: {}".format(sum([
+            np.prod(variable.get_shape().as_list())
+            for variable in tf.trainable_variables()
+        ])))
+
         # ==========================================================================================
         if self.data_format == "channels_first":
 
