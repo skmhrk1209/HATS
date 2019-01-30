@@ -130,7 +130,7 @@ class HATS(object):
         )), axis=0)
 
         error_rate = metrics.edit_distance(labels, logits, normalize=True)
-        accuracy = tf.metrics.mean(tf.reduce_all(tf.equal(labels, predictions), axis=1))
+        accuracy = metrics.sequence_accuracy(labels, predictions)
 
         print("num params: {}".format(sum([
             np.prod(variable.get_shape().as_list())
