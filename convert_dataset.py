@@ -20,29 +20,29 @@ def main(input_filename, output_filename, sequence_lengths):
 
             for line in tqdm(f):
 
-                path = os.path.join(os.path.dirname(sys.argv[1]), line.split()[0])
+                path, label = line.split()
+                path = os.path.join(os.path.dirname(sys.argv[1]), path)
+                label = label.split("_")
+                label = map_innermost_element(lambda string: string.upper(), label)
+                label = map_innermost_element(lambda string: list(string), label)
 
                 try:
-                    label = line.split()[1]
-                    label = map_innermost_element(lambda string: string.upper(), label)
-                    label = map_innermost_element(lambda string: list(string), label)
                     label = map_innermost_element(lambda char: class_ids[char], label)
-
-                    for i, sequence_length in enumerate(sequence_lengths[::-1]):
-
-                        label = map_innermost_list(
-                            function=lambda sequence: np.pad(
-                                array=sequence,
-                                pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
-                                mode="constant",
-                                constant_values=class_ids[""]
-                            ),
-                            sequence=label
-                        )
-
                 except KeyError as error:
                     print("{} at {}".format(error, path))
                     continue
+
+                for i, sequence_length in enumerate(sequence_lengths[::-1]):
+
+                    label = map_innermost_list(
+                        function=lambda sequence: np.pad(
+                            array=sequence,
+                            pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                            mode="constant",
+                            constant_values=class_ids[""]
+                        ),
+                        sequence=label
+                    )
 
                 writer.write(
                     record=tf.train.Example(
