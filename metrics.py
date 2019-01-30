@@ -39,8 +39,8 @@ def sequence_accuracy(labels, logits):
     num_classes = tf.shape(logits)[2]
     indices = tf.not_equal(labels, num_classes - 1)
     indices = tf.where(tf.reduce_any(indices, axis=1))
+    labels = tf.gather_nd(labels, indices)
     logits = tf.gather_nd(logits, indices)
-    labels = tf.gather_nd(predictions, indices)
 
     predictions = tf.argmax(logits, axis=2, output_type=tf.int32)
 
