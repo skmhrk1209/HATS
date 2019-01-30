@@ -5,9 +5,8 @@
 # train: 848
 # test: 1095
 # max num chars: 22
-# num classes: 37 (case-insensitive)
+# num classes: 37 (only alphanumeric characters, case-insensitive)
 # =============================================================
-
 
 import tensorflow as tf
 import argparse
