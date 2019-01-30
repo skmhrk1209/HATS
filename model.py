@@ -107,7 +107,7 @@ class HATS(object):
             sequence=logits
         )), axis=0)
 
-        edit_distance = metrics.edit_distance(labels, logits, normalize=True)
+        # edit_distance = metrics.edit_distance(labels, logits, normalize=True)
         sequence_accuracy = metrics.sequence_accuracy(labels, logits)
 
         print("num params: {}".format(sum([
@@ -136,8 +136,8 @@ class HATS(object):
             sequence=enumerate_innermost_element(attention_maps)
         )
 
-        tf.identity(edit_distance[0], "edit_distance")
-        tf.summary.scalar("edit_distance", edit_distance[1])
+        # tf.identity(edit_distance[0], "edit_distance")
+        # tf.summary.scalar("edit_distance", edit_distance[1])
 
         tf.identity(sequence_accuracy[0], "sequence_accuracy")
         tf.summary.scalar("sequence_accuracy", sequence_accuracy[1])
