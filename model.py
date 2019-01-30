@@ -34,8 +34,8 @@ class HATS(object):
 
             return tf.reshape(inputs, outputs_shape)
 
-        print(spatial_flatten(feature_maps, self.data_format).shape)
-        print(spatial_flatten(attention_maps, self.data_format).shape)
+        print(spatial_flatten(feature_maps[0], self.data_format).shape)
+        print(spatial_flatten(attention_maps[0], self.data_format).shape)
 
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
