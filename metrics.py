@@ -20,7 +20,7 @@ def edit_distance(labels, logits, normalize=False):
 
     labels = dense_to_sparse(labels, num_classes - 1)
 
-    batch_size, time_step = tf.shape(logits)[:2]
+    batch_size, time_step = tf.unstack(tf.shape(logits)[:2])
     predictions = tf.nn.ctc_greedy_decoder(
         inputs=tf.transpose(logits, [1, 0, 2]),
         sequence_length=tf.tile([time_step], [batch_size]),
