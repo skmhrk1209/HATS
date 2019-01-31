@@ -54,6 +54,11 @@ class HATS(object):
             sequence=feature_vectors
         )
 
+        predictions = map_innermost_element(
+            function=lambda logits: tf.argmax(logits, axis=-1),
+            sequence=logits
+        )
+
         attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
                 input_tensor=attention_maps,
@@ -76,7 +81,8 @@ class HATS(object):
                 mode=mode,
                 predictions=dict(
                     images=images,
-                    attention_maps=attention_maps
+                    attention_maps=attention_maps,
+                    predictions=predictions
                 )
             )
 

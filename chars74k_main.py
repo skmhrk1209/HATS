@@ -103,6 +103,38 @@ def main(unused_argv):
 
         print(eval_results)
 
+    if args.predict:
+
+        import cv2
+
+        predict_results = classifier.predict(
+            input_fn=Dataset(
+                filenames=args.filenames,
+                num_epochs=1,
+                batch_size=args.batch_size,
+                sequence_lengths=[],
+                image_size=[128, 128],
+                data_format=args.data_format,
+                encoding="png"
+            )
+        )
+
+        class_ids = {}
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
+        class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
+        class_ids.update({"": max(class_ids.values()) + 1})
+        class_names = {class_id, class_names for class_name, class_id in class_ids}
+
+        for predict_result in predict_results:
+
+            image = predict_result["images"]
+            prediction = predict_result["prediction"]
+
+            print(class_names[prediction])
+            cv2.imshow("", image)
+            if cv2.waitKey() == ord("q"):
+                break
+
 
 if __name__ == "__main__":
     tf.app.run()

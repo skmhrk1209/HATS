@@ -39,6 +39,16 @@ class Classifier(object):
             for variable in tf.trainable_variables()
         ])))
 
+        if mode == tf.estimator.ModeKeys.PREDICT:
+
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                predictions=dict(
+                    images=images,
+                    predictions=predictions
+                )
+            )
+
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
