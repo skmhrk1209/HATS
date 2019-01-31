@@ -1,11 +1,9 @@
 # =============================================================
 # dataset details
-# dataset: synth90k
-# download: http://www.robots.ox.ac.uk/~vgg/data/text/
-# train: 7224612
-# val: 802734
-# test: 891927
-# max num chars: 23
+# dataset: chars74k
+# download: http://www.ee.surrey.ac.uk/CVSSP/demos/chars74k/
+# train: 11252
+# test: 1251
 # num classes: 37 (only alphanumeric characters, case-insensitive)
 # =============================================================
 
@@ -15,16 +13,15 @@ import tensorflow_hub as hub
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
-from models.hats import HATS
-from networks.han import HAN
-from networks.pyramid_resnet import PyramidResNet
+from models.classifier import Classifier
+from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="synth90k_hats_model_2", help="model directory")
+parser.add_argument("--model_dir", type=str, default="chars74k_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
-parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
+parser.add_argument('--filenames', type=str, nargs="+", default=["chars74k_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
@@ -42,7 +39,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
-        model_fn=lambda features, labels, mode: HATS(
+        model_fn=lambda features, labels, mode: Classifier(
             backbone_network=PyramidResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=AttrDict(pool_size=[3, 3], strides=[2, 2]),
@@ -54,24 +51,9 @@ def main(unused_argv):
                 ],
                 data_format=args.data_format
             ),
-            attention_network=HAN(
-                conv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                ],
-                deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                ],
-                rnn_params=[
-                    AttrDict(sequence_length=23, num_units=256)
-                ],
-                data_format=args.data_format
-            ),
             num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=1e-4,
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
@@ -96,8 +78,8 @@ def main(unused_argv):
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
-                sequence_lengths=[23],
-                image_size=[256, 256],
+                sequence_lengths=[],
+                image_size=[128, 128],
                 data_format=args.data_format
             ),
             steps=args.steps,
@@ -117,8 +99,8 @@ def main(unused_argv):
                 filenames=args.filenames,
                 num_epochs=1,
                 batch_size=args.batch_size,
-                sequence_lengths=[23],
-                image_size=[256, 256],
+                sequence_lengths=[],
+                image_size=[128, 128],
                 data_format=args.data_format
             )
         )

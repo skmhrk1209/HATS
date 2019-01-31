@@ -14,7 +14,7 @@ import tensorflow_hub as hub
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
-from model import HATS
+from models.hats import HATS
 from networks.han import HAN
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
