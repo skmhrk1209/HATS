@@ -97,6 +97,8 @@ class PyramidResNet(object):
                     size=shape[2:] if self.data_format == "channels_first" else shape[1:-1]
                 )
 
+                print(shape)
+
                 inputs = tf.layers.conv2d(
                     inputs=inputs,
                     filters=shape[1] if self.data_format == "channels_first" else shape[-1],
