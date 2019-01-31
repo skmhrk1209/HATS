@@ -130,9 +130,7 @@ def main(unused_argv):
             image = predict_result["images"]
             prediction = predict_result["predictions"]
 
-            print(type(prediction))
-
-            print(class_names[prediction])
+            print(class_names[int(prediction)])
             cv2.imshow("", image)
             if cv2.waitKey() == ord("q"):
                 break
