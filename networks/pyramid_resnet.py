@@ -92,12 +92,12 @@ class PyramidResNet(object):
 
                 inputs = tf.image.resize_bilinear(
                     images=inputs,
-                    size=shape[2:] if data_format == "channels_first" else shape[1:-1]
+                    size=shape[2:] if self.data_format == "channels_first" else shape[1:-1]
                 )
 
                 inputs = tf.layers.conv2d(
                     inputs=inputs,
-                    filters=shape[1] if data_format == "channels_first" else shape[-1],
+                    filters=shape[1] if self.data_format == "channels_first" else shape[-1],
                     kernel_size=[1, 1],
                     strides=[1, 1],
                     padding="same",
