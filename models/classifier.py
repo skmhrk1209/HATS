@@ -26,18 +26,17 @@ class Classifier(object):
             data_format=self.data_format
         )
 
-        logits = tf.layers.dense(feature_vectors, units=self.num_classes)
+        logits = tf.layers.dense(
+            inputs=feature_vectors,
+            units=self.num_classes
+        )
 
         predictions = tf.argmax(logits, axis=-1)
 
-        loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)
-
-        accuracy = tf.metrics.accuracy(labels, predictions)
-
-        print("num params: {}".format(sum([
-            np.prod(variable.get_shape().as_list())
-            for variable in tf.trainable_variables()
-        ])))
+        loss = tf.losses.sparse_softmax_cross_entropy(
+            labels=labels,
+            logits=logits
+        )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -71,6 +70,11 @@ class Classifier(object):
             )
 
         if mode == tf.estimator.ModeKeys.EVAL:
+
+            accuracy = tf.metrics.accuracy(
+                labels=labels,
+                predictions=predictions
+            )
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,

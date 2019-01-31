@@ -77,6 +77,13 @@ class HATS(object):
                     sequence=attention_maps
                 )
 
+            while isinstance(predictions, list):
+
+                predictions = map_innermost_list(
+                    function=lambda predictions: tf.stack(predictions, axis=1),
+                    sequence=predictions
+                )
+
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=dict(
@@ -112,13 +119,6 @@ class HATS(object):
             function=lambda logits: tf.stack(logits, axis=1),
             sequence=logits
         )), axis=0)
-
-        accuracy = metrics.sequence_accuracy(labels, logits)
-
-        print("num params: {}".format(sum([
-            np.prod(variable.get_shape().as_list())
-            for variable in tf.trainable_variables()
-        ])))
 
         # ==========================================================================================
         if self.data_format == "channels_first":
@@ -164,6 +164,11 @@ class HATS(object):
             )
 
         if mode == tf.estimator.ModeKeys.EVAL:
+
+            accuracy = metrics.sequence_accuracy(
+                labels=labels,
+                logits=logits
+            )
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
