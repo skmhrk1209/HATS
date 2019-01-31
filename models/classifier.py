@@ -33,11 +33,6 @@ class Classifier(object):
 
         predictions = tf.argmax(logits, axis=-1)
 
-        loss = tf.losses.sparse_softmax_cross_entropy(
-            labels=labels,
-            logits=logits
-        )
-
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             return tf.estimator.EstimatorSpec(
@@ -47,6 +42,11 @@ class Classifier(object):
                     predictions=predictions
                 )
             )
+
+        loss = tf.losses.sparse_softmax_cross_entropy(
+            labels=labels,
+            logits=logits
+        )
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
