@@ -128,7 +128,7 @@ def main(unused_argv):
         for predict_result in predict_results:
 
             image = predict_result["images"]
-            prediction = predict_result["prediction"]
+            prediction = predict_result["predictions"]
 
             print(class_names[prediction])
             cv2.imshow("", image)
