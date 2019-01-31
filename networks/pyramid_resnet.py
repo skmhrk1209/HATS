@@ -90,18 +90,11 @@ class PyramidResNet(object):
 
                 shape = feature_maps[-1].get_shape().as_list()
 
-                if self.data_format == "channels_first":
-
-                    inputs = tf.transpose(inputs, [0, 2, 3, 1])
-
-                inputs = tf.image.resize_bilinear(
+                inputs = ops.bilinear_upsampling(
                     images=inputs,
-                    size=shape[2:] if self.data_format == "channels_first" else shape[1:-1]
+                    size=shape[2:] if self.data_format == "channels_first" else shape[1:-1],
+                    data_format=self.data_format
                 )
-
-                if self.data_format == "channels_first":
-
-                    inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
                 inputs = tf.layers.conv2d(
                     inputs=inputs,

@@ -1,6 +1,26 @@
 import tensorflow as tf
 
 
+def bilinear_upsampling(inputs, size, data_format):
+
+    if data_format == "channels_first":
+
+        inputs = tf.transpose(inputs, [0, 2, 3, 1])
+
+    shape = inputs.get_shape().as_list()
+
+    inputs = tf.image.resize_bilinear(
+        images=inputs,
+        size=shape[2:] if data_format == "channels_first" else shape[1:-1]
+    )
+
+    if data_format == "channels_first":
+
+        inputs = tf.transpose(inputs, [0, 3, 1, 2])
+
+    return inputs
+
+
 def batch_normalization(inputs, data_format, training, name=None, reuse=None):
 
     return tf.layers.batch_normalization(
