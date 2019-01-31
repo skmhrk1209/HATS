@@ -53,7 +53,7 @@ class Dataset(object):
         )
 
         image = tf.read_file(features["path"])
-        image = tf.image.decode_jpeg(image, 3)
+        image = tf.image.decode_image(image, 3)
         image = tf.image.convert_image_dtype(image, tf.float32)
         if image_size:
             image = tf.image.resize_images(image, image_size)
