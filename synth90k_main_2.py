@@ -62,7 +62,7 @@ def pyramid_resnet(inputs, training):
 
         inputs = tf.layers.conv2d(
             inputs=inputs,
-            filters=feature_maps[-1].get_shape().as_list()[1],
+            filters=feature_maps[-1].get_shape().as_list()[-1],
             kernel_size=[1, 1],
             strides=[1, 1],
             padding="same",
