@@ -39,6 +39,9 @@ class Classifier(object):
             for variable in tf.trainable_variables()
         ])))
 
+        tf.identity(accuracy[0], "accuracy")
+        tf.summary.scalar("accuracy", accuracy[1])
+
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
