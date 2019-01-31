@@ -90,6 +90,8 @@ class PyramidResNet(object):
 
                 shape = feature_maps[-1].get_shape().as_list()
 
+                print(shape)
+
                 inputs = tf.image.resize_bilinear(
                     images=inputs,
                     size=shape[2:] if self.data_format == "channels_first" else shape[1:-1]
