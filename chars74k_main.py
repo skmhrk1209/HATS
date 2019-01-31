@@ -128,7 +128,7 @@ def main(unused_argv):
 
         for predict_result in predict_results:
 
-            image = predict_result["images"]
+            image = predict_result["images"].transpose([2, 0, 1])
             prediction = predict_result["predictions"]
 
             print(class_names[int(prediction)])
