@@ -17,7 +17,7 @@ from attrdict import AttrDict
 from dataset import Dataset
 from model import HATS
 from networks.han import HAN
-from networks.resnet import ResNet
+from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -26,7 +26,7 @@ parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretra
 parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--data_format", type=str, default="channels_last", help="data format")
+parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
 parser.add_argument("--max_steps", type=int, default=None, help="maximum number of training epochs")
 parser.add_argument("--train", action="store_true", help="with training")
@@ -39,52 +39,21 @@ args = parser.parse_args()
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def pyramid_resnet(inputs, training):
-
-    resnet = hub.Module(
-        spec="https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/1",
-        trainable=True,
-        name="resnet",
-        tags={"train"} if training else None
-    )
-
-    feature_maps = [resnet(
-        inputs=dict(images=inputs),
-        signature="image_feature_vector",
-        as_dict=True
-    )[name] for name in [f"resnet_v2_50/block{i}" for i in range(1, 4)]]
-
-    inputs = feature_maps.pop()
-
-    while feature_maps:
-
-        inputs = tf.image.resize_bilinear(inputs, tf.shape(inputs)[1:-1] * 2)
-
-        inputs = tf.layers.conv2d(
-            inputs=inputs,
-            filters=feature_maps[-1].get_shape().as_list()[-1],
-            kernel_size=[1, 1],
-            strides=[1, 1],
-            padding="same",
-            kernel_initializer=tf.variance_scaling_initializer(
-                scale=2.0,
-                mode="fan_in",
-                distribution="normal"
-            )
-        )
-
-        inputs += feature_maps.pop()
-
-    print(inputs.shape)
-
-    return inputs
-
-
 def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=pyramid_resnet,
+            backbone_network=PyramidResNet(
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                pool_param=AttrDict(pool_size=[3, 3], strides=[2, 2]),
+                residual_params=[
+                    AttrDict(filters=64, strides=[1, 1], blocks=2),
+                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=256, strides=[2, 2], blocks=2),
+                    AttrDict(filters=512, strides=[2, 2], blocks=2),
+                ],
+                data_format=args.data_format
+            ),
             attention_network=HAN(
                 conv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
@@ -128,7 +97,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 sequence_lengths=[23],
-                image_size=[224, 224],
+                image_size=[256, 256],
                 data_format=args.data_format
             ),
             steps=args.steps,
@@ -149,7 +118,7 @@ def main(unused_argv):
                 num_epochs=1,
                 batch_size=args.batch_size,
                 sequence_lengths=[23],
-                image_size=[224, 224],
+                image_size=[256, 256],
                 data_format=args.data_format
             )
         )
