@@ -21,7 +21,7 @@ from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="multi_synth90k_hats_model_2", help="model directory")
-parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
+parser.add_argument("--pretrained_model_dir", type=str, default="chars74k_resnet_model", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
@@ -51,7 +51,9 @@ def main(unused_argv):
                     AttrDict(filters=256, strides=[2, 2], blocks=2),
                     AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
-                data_format=args.data_format
+                data_format=args.data_format,
+                pretrained_model_dir=args.pretrained_model_dir,
+                pretrained_model_scope="pyramid_resnet"
             ),
             attention_network=HAN(
                 conv_params=[
