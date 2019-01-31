@@ -134,9 +134,6 @@ class HATS(object):
             ),
             sequence=enumerate_innermost_element(attention_maps)
         )
-
-        tf.identity(accuracy[0], "accuracy")
-        tf.summary.scalar("accuracy", accuracy[1])
         # ==========================================================================================
 
         if mode == tf.estimator.ModeKeys.TRAIN:

@@ -84,13 +84,7 @@ def main(unused_argv):
                 encoding="png"
             ),
             steps=args.steps,
-            max_steps=args.max_steps,
-            hooks=[
-                tf.train.LoggingTensorHook(
-                    tensors={"accuracy": "accuracy"},
-                    every_n_iter=100
-                )
-            ]
+            max_steps=args.max_steps
         )
 
     if args.eval:
