@@ -75,6 +75,8 @@ def pyramid_resnet(inputs, training):
 
         inputs += feature_maps.pop()
 
+    print(inputs.shape)
+
     return inputs
 
 
