@@ -128,7 +128,7 @@ def main(unused_argv):
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
                 sequence_lengths=[23],
-                image_size=[256, 256],
+                image_size=[224, 224],
                 data_format=args.data_format
             ),
             steps=args.steps,
@@ -149,7 +149,7 @@ def main(unused_argv):
                 num_epochs=1,
                 batch_size=args.batch_size,
                 sequence_lengths=[23],
-                image_size=[256, 256],
+                image_size=[224, 224],
                 data_format=args.data_format
             )
         )
