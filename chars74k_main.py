@@ -123,7 +123,7 @@ def main(unused_argv):
         class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
         class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
         class_ids.update({"": max(class_ids.values()) + 1})
-        class_names = {class_id, class_names for class_name, class_id in class_ids}
+        class_names = {(class_id, class_names) for class_name, class_id in class_ids}
 
         for predict_result in predict_results:
 
