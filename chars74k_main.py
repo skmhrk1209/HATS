@@ -4,7 +4,7 @@
 # download: http://www.ee.surrey.ac.uk/CVSSP/demos/chars74k/
 # train: 11252
 # test: 1251
-# num classes: 37 (only alphanumeric characters, case-insensitive)
+# classes: [0-9A-Z](case-insensitive)
 # =============================================================
 
 

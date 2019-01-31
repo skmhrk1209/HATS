@@ -6,7 +6,7 @@
 # val: 50000
 # test: 50000
 # max num chars: 10
-# num classes: 37 (case-insensitive)
+# classes: [0-9A-Z](case-insensitive)
 # =============================================================
 
 import tensorflow as tf
