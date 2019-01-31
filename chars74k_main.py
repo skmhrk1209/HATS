@@ -80,7 +80,8 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 sequence_lengths=[],
                 image_size=[128, 128],
-                data_format=args.data_format
+                data_format=args.data_format,
+                encoding="png"
             ),
             steps=args.steps,
             max_steps=args.max_steps,
@@ -101,7 +102,8 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 sequence_lengths=[],
                 image_size=[128, 128],
-                data_format=args.data_format
+                data_format=args.data_format,
+                encoding="png"
             )
         )
 

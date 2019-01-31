@@ -98,7 +98,8 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 sequence_lengths=[23],
                 image_size=[256, 256],
-                data_format=args.data_format
+                data_format=args.data_format,
+                encoding="jpeg"
             ),
             steps=args.steps,
             max_steps=args.max_steps,
@@ -119,7 +120,8 @@ def main(unused_argv):
                 batch_size=args.batch_size,
                 sequence_lengths=[23],
                 image_size=[256, 256],
-                data_format=args.data_format
+                data_format=args.data_format,
+                encoding="jpeg"
             )
         )
 
