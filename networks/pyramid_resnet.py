@@ -91,7 +91,7 @@ class PyramidResNet(object):
                 shape = feature_maps[-1].get_shape().as_list()
 
                 inputs = ops.bilinear_upsampling(
-                    images=inputs,
+                    inputs=inputs,
                     size=shape[2:] if self.data_format == "channels_first" else shape[1:-1],
                     data_format=self.data_format
                 )
