@@ -130,6 +130,8 @@ def main(unused_argv):
             image = predict_result["images"]
             prediction = predict_result["predictions"]
 
+            print(prediction)
+
             print(class_names[prediction])
             cv2.imshow("", image)
             if cv2.waitKey() == ord("q"):
