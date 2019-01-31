@@ -66,8 +66,6 @@ def pyramid_resnet(inputs, training):
             kernel_size=[1, 1],
             strides=[1, 1],
             padding="same",
-            data_format="channels_last",
-            use_bias=False,
             kernel_initializer=tf.variance_scaling_initializer(
                 scale=2.0,
                 mode="fan_in",
