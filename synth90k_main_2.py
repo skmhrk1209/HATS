@@ -26,7 +26,7 @@ parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretra
 parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
+parser.add_argument("--data_format", type=str, default="channels_last", help="data format")
 parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
 parser.add_argument("--max_steps", type=int, default=None, help="maximum number of training epochs")
 parser.add_argument("--train", action="store_true", help="with training")
