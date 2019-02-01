@@ -170,6 +170,12 @@ class HATS(object):
                 logits=logits
             )
 
+            edit_distance = metrics.edit_distance(
+                labels=labels,
+                logits=logits,
+                normalize=True
+            )
+
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
