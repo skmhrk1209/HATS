@@ -179,5 +179,8 @@ class HATS(object):
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
-                eval_metric_ops=dict(accuracy=accuracy)
+                eval_metric_ops=dict(
+                    accuracy=accuracy,
+                    edit_distance=edit_distance
+                )
             )
