@@ -14,7 +14,7 @@ class Dataset(object):
         self.dataset = tf.data.TFRecordDataset(filenames)
         self.dataset = self.dataset.shuffle(
             buffer_size=sum([
-                len(list(tf.io.tf_record_iterator(filename)))
+                len(list(tf.python_io.tf_record_iterator(filename)))
                 for filename in filenames
             ]),
             reshuffle_each_iteration=True
