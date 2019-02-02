@@ -7,6 +7,8 @@
 # test: 50000
 # max num chars: 10
 # classes: [0-9A-Z](case-insensitive)
+# word accuracy: 0.863 (100000 steps)
+# edit distance: 0.033 (100000 steps)
 # =============================================================
 
 import tensorflow as tf
@@ -14,12 +16,12 @@ import argparse
 from attrdict import AttrDict
 from dataset import Dataset
 from models.hats import HATS
-from networks.han import HAN
+from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_synth90k_hats_model_4", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_synth90k_hats", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["multi_synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
@@ -43,9 +45,9 @@ def main(unused_argv):
         model_fn=lambda features, labels, mode: HATS(
             backbone_network=PyramidResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
-                pool_param=None,
+                pool_param=AttrDict(pool_size=[3, 3], strides=[2, 2]),
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
+                    AttrDict(filters=64, strides=[1, 1], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
                     AttrDict(filters=256, strides=[2, 2], blocks=2),
                     AttrDict(filters=512, strides=[2, 2], blocks=2),
@@ -54,10 +56,10 @@ def main(unused_argv):
                 pretrained_model_dir=args.pretrained_model_dir,
                 pretrained_model_scope="pyramid_resnet"
             ),
-            attention_network=HAN(
+            attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=16, kernel_size=[7, 7], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[7, 7], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
@@ -69,10 +71,10 @@ def main(unused_argv):
                 ],
                 data_format=args.data_format
             ),
-            num_classes=63,
+            num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=1e-4,
+                attention_decay=1e-5,
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999

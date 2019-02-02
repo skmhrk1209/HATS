@@ -5,7 +5,7 @@ from algorithms import *
 from itertools import *
 
 
-class HAN(object):
+class AttentionNetwork(object):
 
     def __init__(self, conv_params, rnn_params, deconv_params, data_format,
                  pretrained_model_dir=None, pretrained_model_scope=None):
@@ -17,7 +17,7 @@ class HAN(object):
         self.pretrained_model_dir = pretrained_model_dir
         self.pretrained_model_scope = pretrained_model_scope
 
-    def __call__(self, inputs, training, name="han", reuse=None):
+    def __call__(self, inputs, training, name="attention_network", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
 

@@ -9,16 +9,15 @@
 
 
 import tensorflow as tf
-import tensorflow_hub as hub
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
 from models.classifier import Classifier
-from networks.resnet_2 import ResNet
+from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="chars74k_resnet_model_3", help="model directory")
+parser.add_argument("--model_dir", type=str, default="chars74k_classifier", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["chars74k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")
@@ -40,7 +39,7 @@ def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: Classifier(
-            backbone_network=ResNet(
+            backbone_network=PyramidResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=AttrDict(pool_size=[3, 3], strides=[2, 2]),
                 residual_params=[

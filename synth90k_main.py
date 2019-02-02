@@ -9,21 +9,20 @@
 # classes: [0-9A-Z](case-insensitive)
 # =============================================================
 
-
 import tensorflow as tf
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
 from models.hats import HATS
-from networks.han import HAN
-from networks.resnet import ResNet
+from networks.attention_network import AttentionNetwork
+from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="synth90k_hats", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
-parser.add_argument("--num_epochs", type=int, default=1, help="number of training epochs")
+parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
@@ -42,17 +41,20 @@ def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=ResNet(
+            backbone_network=PyramidResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
-                pool_param=None,
+                pool_param=AttrDict(pool_size=[3, 3], strides=[2, 2]),
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
+                    AttrDict(filters=64, strides=[1, 1], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[1, 1], blocks=2),
+                    AttrDict(filters=256, strides=[2, 2], blocks=2),
+                    AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
-                data_format=args.data_format
+                data_format=args.data_format,
+                pretrained_model_dir=args.pretrained_model_dir,
+                pretrained_model_scope="pyramid_resnet"
             ),
-            attention_network=HAN(
+            attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
@@ -62,7 +64,7 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=23, num_units=256)
+                    AttrDict(sequence_length=23, num_units=256),
                 ],
                 data_format=args.data_format
             ),
@@ -118,6 +120,41 @@ def main(unused_argv):
         )
 
         print(eval_results)
+
+    if args.predict:
+
+        import cv2
+        import itertools
+
+        predict_results = classifier.predict(
+            input_fn=Dataset(
+                filenames=args.filenames,
+                num_epochs=1,
+                batch_size=args.batch_size,
+                sequence_lengths=[23],
+                image_size=[256, 256],
+                data_format=args.data_format,
+                encoding="jpeg"
+            )
+        )
+
+        for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
+
+            image = predict_result["images"]
+            attention_maps = predict_result["attention_maps"]
+
+            if args.data_format == "channels_first":
+                image = np.transpose(image, [1, 2, 0])
+                attention_maps = np.transpose(attention_maps, [0, 2, 3, 1])
+
+            for attention_maps_ in attention_maps:
+
+                attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
+                attention_map[attention_map < 0.5] = 0.0
+                attention_map = cv2.resize(attention_map, image.shape[:-1])
+                image[:, :, -1] += attention_map
+
+            cv2.imwrite("outputs/synth90k/attention_map_{}.jpg".format(i), image * 255.)
 
 
 if __name__ == "__main__":
