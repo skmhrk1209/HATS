@@ -147,7 +147,7 @@ def main(unused_argv):
                 image = np.transpose(image, [1, 2, 0])
                 attention_maps = np.transpose(attention_maps, [0, 2, 3, 1])
 
-            for attention_maps_ in attention_maps:
+            for attention_maps in attention_maps:
 
                 attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
                 attention_map[attention_map < 0.5] = 0.0
