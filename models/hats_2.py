@@ -52,7 +52,7 @@ class HATS(object):
             inputs = ops.batch_normalization(
                 inputs=inputs,
                 data_format=self.data_format,
-                training=training
+                training=mode == tf.estimator.ModeKeys.TRAIN
             )
 
             inputs = tf.nn.relu(inputs)
