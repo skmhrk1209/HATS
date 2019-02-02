@@ -7,6 +7,8 @@
 # test: 50000
 # max num chars: 10
 # classes: [0-9A-Z](case-insensitive)
+# word accuracy: 0.712 (100000 steps)
+# edit distance: 0.135 (100000 steps)
 # =============================================================
 
 import tensorflow as tf

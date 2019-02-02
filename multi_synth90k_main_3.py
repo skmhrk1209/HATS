@@ -43,7 +43,7 @@ def main(unused_argv):
         model_fn=lambda features, labels, mode: HATS(
             backbone_network=PyramidResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
-                pool_param=None,
+                pool_param=AttrDict(pool_size=[3, 3], strides=[2, 2]),
                 residual_params=[
                     AttrDict(filters=64, strides=[2, 2], blocks=2),
                     AttrDict(filters=128, strides=[2, 2], blocks=2),
@@ -56,8 +56,8 @@ def main(unused_argv):
             ),
             attention_network=HAN(
                 conv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[7, 7], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[7, 7], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
@@ -72,7 +72,7 @@ def main(unused_argv):
             num_classes=63,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=1e-4,
+                attention_decay=1e-3,
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
