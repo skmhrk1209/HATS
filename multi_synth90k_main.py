@@ -2,9 +2,9 @@
 # dataset details
 # dataset: multi synth90k
 # download: made by make_multi_synth90k.cpp
-# train: 900000
-# val: 50000
-# test: 50000
+# train: 800000
+# val: 100000
+# test: 100000
 # max num chars: 10
 # classes: [0-9A-Z](case-insensitive)
 # word accuracy: 0.863 (100000 steps)
@@ -159,7 +159,7 @@ def main(unused_argv):
                     attention_map = cv2.resize(attention_map, image.shape[:-1])
                     image[:, :, -1] += attention_map
 
-            cv2.imwrite("outputs/attention_map_{}.jpg".format(i), image * 255.)
+            cv2.imwrite("outputs/multi_synth90k/attention_map_{}.jpg".format(i), image * 255.)
 
 
 if __name__ == "__main__":
