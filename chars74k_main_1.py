@@ -18,7 +18,7 @@ from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="chars74k_resnet_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="chars74k_resnet_model_1", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["chars74k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=100, help="number of training epochs")

@@ -16,7 +16,7 @@ import tensorflow_hub as hub
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
-from models.hats import HATS
+from models.hats_2 import HATS
 from networks.han import HAN
 from networks.resnet_2 import ResNet
 from algorithms import *
