@@ -17,25 +17,25 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
-        feature_maps = self.backbone_network(
+        feature_maps_list = self.backbone_network(
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
-        inputs = feature_maps.pop()
+        feature_maps = feature_maps_list.pop()
 
-        while feature_maps:
+        while feature_maps_list:
 
-            shape = feature_maps[-1].get_shape().as_list()
+            shape = feature_maps_list[-1].get_shape().as_list()
 
-            inputs = ops.bilinear_upsampling(
-                inputs=inputs,
+            feature_maps = ops.bilinear_upsampling(
+                inputs=feature_maps,
                 size=shape[2:] if self.data_format == "channels_first" else shape[1:-1],
                 data_format=self.data_format
             )
 
-            inputs = tf.layers.conv2d(
-                inputs=inputs,
+            feature_maps = tf.layers.conv2d(
+                inputs=feature_maps,
                 filters=shape[1] if self.data_format == "channels_first" else shape[-1],
                 kernel_size=[1, 1],
                 strides=[1, 1],
@@ -49,15 +49,15 @@ class HATS(object):
                 )
             )
 
-            inputs = ops.batch_normalization(
-                inputs=inputs,
+            feature_maps = ops.batch_normalization(
+                inputs=feature_maps,
                 data_format=self.data_format,
                 training=mode == tf.estimator.ModeKeys.TRAIN
             )
 
-            inputs = tf.nn.relu(inputs)
+            feature_maps = tf.nn.relu(feature_maps)
 
-            inputs += feature_maps.pop()
+            feature_maps += feature_maps_list.pop()
 
         attention_maps = self.attention_network(
             inputs=feature_maps,

@@ -54,7 +54,7 @@ class ResNet(object):
                     data_format=self.data_format
                 )
 
-            feature_maps = []
+            feature_maps_list = []
 
             for i, residual_param in enumerate(self.residual_params):
 
@@ -82,7 +82,7 @@ class ResNet(object):
                         name="residual_block_{}_{}".format(i, j)
                     )
 
-                feature_maps.append(inputs)
+                feature_maps_list.append(inputs)
 
         if self.pretrained_model_dir:
 
@@ -91,7 +91,7 @@ class ResNet(object):
                 assignment_map={"{}/".format(self.pretrained_model_scope): "{}/".format(name)}
             )
 
-        return feature_maps
+        return feature_maps_list
 
     def residual_block(self, inputs, filters, strides, projection_shortcut, data_format, training, name="residual_block", reuse=None):
         """ A single block for ResNet v1, without a bottleneck.
