@@ -21,6 +21,8 @@ class Classifier(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
+        print(feature_maps)
+
         feature_vectors = ops.global_average_pooling2d(
             inputs=feature_maps[-1],
             data_format=self.data_format
