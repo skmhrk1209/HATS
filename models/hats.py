@@ -110,16 +110,6 @@ class HATS(object):
             sequence=attention_maps
         )) * self.hyper_params.attention_decay
 
-        labels = tf.concat(flatten_innermost_element(map_innermost_list(
-            function=lambda labels: tf.stack(labels, axis=1),
-            sequence=labels
-        )), axis=0)
-
-        logits = tf.concat(flatten_innermost_element(map_innermost_list(
-            function=lambda logits: tf.stack(logits, axis=1),
-            sequence=logits
-        )), axis=0)
-
         # ==========================================================================================
         if self.data_format == "channels_first":
 
@@ -164,6 +154,22 @@ class HATS(object):
             )
 
         if mode == tf.estimator.ModeKeys.EVAL:
+
+            labels = tf.concat(flatten_innermost_element(map_innermost_list(
+                function=lambda labels: tf.stack(labels, axis=1),
+                sequence=labels
+            )), axis=0)
+
+            logits = tf.concat(flatten_innermost_element(map_innermost_list(
+                function=lambda logits: tf.stack(logits, axis=1),
+                sequence=logits
+            )), axis=0)
+
+            indices = tf.not_equal(labels, self.num_classes - 1)
+            indices = tf.where(tf.reduce_any(indices, axis=1))
+
+            labels = tf.gather_nd(labels, indices)
+            logits = tf.gather_nd(logits, indices)
 
             accuracy = metrics.sequence_accuracy(
                 labels=labels,
