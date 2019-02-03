@@ -22,7 +22,7 @@ class Classifier(object):
         )
 
         feature_vectors = ops.global_average_pooling2d(
-            inputs=feature_maps[-1],
+            inputs=feature_maps,
             data_format=self.data_format
         )
 
