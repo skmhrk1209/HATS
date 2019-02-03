@@ -12,5 +12,6 @@ for record in tf.python_io.tf_record_iterator(sys.argv[1]):
 
     print(label)
     cv2.imshow("image", cv2.imread(path))
+
     if cv2.waitKey() == ord("q"):
         break
