@@ -14,7 +14,7 @@ for record in tf.python_io.tf_record_iterator(sys.argv[1]):
     example.ParseFromString(record)
 
     path = example.features.feature["path"].bytes_list.value[0].decode()
-    label = str(map(lambda class_id: class_names[class_id], example.features.feature["label"].bytes_list.value))
+    label = "".join(list(map(lambda class_id: class_names[class_id], example.features.feature["label"].bytes_list.value)))
 
     print(label)
     cv2.imshow("image", cv2.imread(path))
