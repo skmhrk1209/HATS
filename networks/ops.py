@@ -7,8 +7,6 @@ def bilinear_upsampling(inputs, size, data_format):
 
         inputs = tf.transpose(inputs, [0, 2, 3, 1])
 
-    shape = inputs.get_shape().as_list()
-
     inputs = tf.image.resize_bilinear(inputs, size)
 
     if data_format == "channels_first":
