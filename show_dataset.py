@@ -13,11 +13,11 @@ for record in tf.python_io.tf_record_iterator(sys.argv[1]):
     example = tf.train.Example()
     example.ParseFromString(record)
 
-    path = example.features.feature["path"].bytes_list.value[0].decode()
+    image = cv2.imread(example.features.feature["path"].bytes_list.value[0].decode())
     label = "".join(list(map(lambda class_id: class_names[class_id], example.features.feature["label"].int64_list.value)))
 
-    print(example.features.feature["label"].int64_list.value)
-    cv2.imshow("image", cv2.imread(path))
+    print(label)
+    cv2.imshow("image", image)
 
     if cv2.waitKey() == ord("q"):
         break
