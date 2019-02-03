@@ -54,21 +54,21 @@ class HATS(object):
             sequence=feature_vectors
         )
 
-        predictions = map_innermost_element(
-            function=lambda logits: tf.argmax(logits, axis=-1),
-            sequence=logits
-        )
-
-        attention_maps = map_innermost_element(
-            function=lambda attention_maps: tf.reduce_sum(
-                input_tensor=attention_maps,
-                axis=1 if self.data_format == "channels_first" else 3,
-                keep_dims=True
-            ),
-            sequence=attention_maps
-        )
-
         if mode == tf.estimator.ModeKeys.PREDICT:
+
+            attention_maps = map_innermost_element(
+                function=lambda attention_maps: tf.reduce_sum(
+                    input_tensor=attention_maps,
+                    axis=1 if self.data_format == "channels_first" else 3,
+                    keep_dims=True
+                ),
+                sequence=attention_maps
+            )
+
+            predictions = map_innermost_element(
+                function=lambda logits: tf.argmax(logits, axis=-1),
+                sequence=logits
+            )
 
             while isinstance(attention_maps, list):
 
@@ -110,7 +110,7 @@ class HATS(object):
             sequence=attention_maps
         )) * self.hyper_params.attention_decay
 
-        # ==========================================================================================
+        '''
         if self.data_format == "channels_first":
 
             images = tf.transpose(images, [0, 2, 3, 1])
@@ -130,7 +130,7 @@ class HATS(object):
             ),
             sequence=enumerate_innermost_element(attention_maps)
         )
-        # ==========================================================================================
+        '''
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
