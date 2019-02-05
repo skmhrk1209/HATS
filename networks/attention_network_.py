@@ -37,6 +37,7 @@ class AttentionNetwork(object):
                     trainable=True
                 )
                 dynamic_kernels = inputs @ kernel + bias
+                dynamic_kernels = tf.reshape(dynamic_kernels, [-1] + [self.num_units] * 2)
 
                 kernel = tf.get_variable(
                     name="kernel_1",
