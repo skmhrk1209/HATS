@@ -20,8 +20,10 @@ class AttentionNetwork(object):
 
             with tf.variable_scope(name, reuse=reuse):
 
+                inputs = tf.concat([inputs, state], axis=1)
+
                 kernels = tf.layers.dense(
-                    inputs=tf.concat([inputs, state], axis=1),
+                    inputs=inputs,
                     units=self.num_units ** 2,
                     kernel_initializer=self.kernel_initializer,
                     bias_initializer=self.bias_initializer
@@ -31,22 +33,19 @@ class AttentionNetwork(object):
                     shape=[-1, self.num_units, self.num_units]
                 )
                 biases = tf.layers.dense(
-                    inputs=tf.concat([inputs, state], axis=1),
+                    inputs=inputs,
                     units=self.num_units,
                     kernel_initializer=self.kernel_initializer,
                     bias_initializer=self.bias_initializer
                 )
 
-                inputs = tf.expand_dims(inputs, axis=-1)
+                state = tf.expand_dims(state, axis=-1)
+                state = tf.matmul(kernels, state)
+                state = tf.squeeze(state, axis=-1)
+                state = tf.add(state, biases)
+                state = self.activation(state)
 
-                print(kernels.shape)
-                print(inputs.shape)
-                inputs = tf.matmul(kernels, inputs)
-                inputs = tf.squeeze(inputs, axis=-1)
-                inputs = tf.add(inputs, biases)
-                inputs = self.activation(inputs)
-
-                return inputs
+                return state
 
         def zero_state(self, batch_size, dtype):
 
