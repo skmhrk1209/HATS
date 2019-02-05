@@ -26,8 +26,8 @@ class AttentionNetwork(object):
                     kernel_initializer=self.kernel_initializer,
                     bias_initializer=self.bias_initializer
                 )
-                kernels = tf.layers.reshape(
-                    inpits=kernels,
+                kernels = tf.reshape(
+                    tensor=kernels,
                     shape=[-1, self.num_units, self.num_units]
                 )
                 biases = tf.layers.dense(
