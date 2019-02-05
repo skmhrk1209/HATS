@@ -14,8 +14,8 @@ class AttentionNetwork(object):
 
             self.num_units = num_units
             self.activation = activation
-            self.kernel_initializer
-            self.bias_initializer
+            self.kernel_initializer = kernel_initializer
+            self.bias_initializer = bias_initializer
 
         def call(self, inputs, state):
 
