@@ -9,15 +9,14 @@ class AttentionNetwork(object):
 
     class DynamicRNNCell(object):
 
-        def __init__(self, num_units, activation, kernel_initializer,
-                     bias_initializer, name="dynamic_rnn_cell", reuse=None):
+        def __init__(self, num_units, activation, kernel_initializer, bias_initializer):
 
             self.num_units = num_units
             self.activation = activation
             self.kernel_initializer = kernel_initializer
             self.bias_initializer = bias_initializer
 
-        def __call__(self, inputs, state):
+        def __call__(self, inputs, state, name="dynamic_rnn_cell", reuse=None):
 
             with tf.variable_scope(name, reuse=reuse):
 
@@ -78,9 +77,9 @@ class AttentionNetwork(object):
                             data_format=self.data_format,
                             use_bias=False,
                             kernel_initializer=tf.variance_scaling_initializer(
-                                    scale=2.0,
-                                    mode="fan_in",
-                                    distribution="normal"
+                                scale=2.0,
+                                mode="fan_in",
+                                distribution="normal"
                             ),
                             name="conv2d",
                             reuse=None
@@ -120,14 +119,17 @@ class AttentionNetwork(object):
                             mode="fan_avg",
                             distribution="normal"
                         ),
-                        bias_initializer=tf.zeros_initializer(),
-                        name="dynamic_rnn_cell",
-                        reuse=tf.AUTO_REUSE
+                        bias_initializer=tf.zeros_initializer()
                     )
 
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
-                            cell=dynamic_rnn_cell,
+                            cell=lambda inputs, state: dynamic_rnn_cell(
+                                inputs=inputs,
+                                state=state,
+                                name="dynamic_rnn_cell",
+                                reuse=tf.AUTO_REUSE
+                            ),
                             inputs=[references] * rnn_param.sequence_length,
                             initial_state=dynamic_rnn_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
@@ -149,14 +151,17 @@ class AttentionNetwork(object):
                             mode="fan_avg",
                             distribution="normal"
                         ),
-                        bias_initializer=tf.zeros_initializer(),
-                        name="dynamic_rnn_cell",
-                        reuse=tf.AUTO_REUSE
+                        bias_initializer=tf.zeros_initializer()
                     )
 
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
-                            cell=dynamic_rnn_cell,
+                            cell=lambda inputs, state: dynamic_rnn_cell(
+                                inputs=inputs,
+                                state=state,
+                                name="dynamic_rnn_cell",
+                                reuse=tf.AUTO_REUSE
+                            ),
                             inputs=[references] * rnn_param.sequence_length,
                             initial_state=tf.layers.dense(
                                 inputs=inputs,
