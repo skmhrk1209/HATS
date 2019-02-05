@@ -17,7 +17,7 @@ class AttentionNetwork(object):
             self.kernel_initializer = kernel_initializer
             self.bias_initializer = bias_initializer
 
-        def call(self, inputs, state):
+        def __call__(self, inputs, state):
 
             with tf.variable_scope(name, reuse=reuse):
 
