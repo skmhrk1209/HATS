@@ -46,7 +46,7 @@ class AttentionNetwork(object):
 
                 return inputs
 
-        def zero_state(batch_size, dtype):
+        def zero_state(self, batch_size, dtype):
 
             return tf.zeros([batch_size, self.num_units], dtype)
 
