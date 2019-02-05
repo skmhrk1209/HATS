@@ -38,6 +38,9 @@ class AttentionNetwork(object):
                 )
 
                 inputs = tf.expand_dims(inputs, axis=-1)
+
+                print(kernels.shape)
+                print(inputs.shape)
                 inputs = tf.matmul(kernels, inputs)
                 inputs = tf.squeeze(inputs, axis=-1)
                 inputs = tf.add(inputs, biases)
