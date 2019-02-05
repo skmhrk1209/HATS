@@ -22,29 +22,42 @@ class AttentionNetwork(object):
 
                 inputs = tf.concat([inputs, state], axis=1)
 
-                kernels = tf.layers.dense(
-                    inputs=inputs,
-                    units=self.num_units ** 2,
-                    kernel_initializer=self.kernel_initializer,
-                    bias_initializer=self.bias_initializer,
-                    activation=tf.nn.tanh
+                kernel = tf.get_variable(
+                    name="kernel_0",
+                    shape=[inputs.shape[-1], self.num_units ** 2],
+                    dtype=tf.float32,
+                    initializer=self.kernel_initializer,
+                    trainable=True
                 )
-                kernels = tf.reshape(
-                    tensor=kernels,
-                    shape=[-1, self.num_units, self.num_units]
+                bias = tf.get_variable(
+                    name="bias_0",
+                    shape=[self.num_units ** 2],
+                    dtype=tf.float32,
+                    initializer=self.bias_initializer,
+                    trainable=True
                 )
-                biases = tf.layers.dense(
-                    inputs=inputs,
-                    units=self.num_units,
-                    kernel_initializer=self.kernel_initializer,
-                    bias_initializer=self.bias_initializer,
-                    activation=tf.nn.tanh
-                )
+                dynamic_kernels = inputs @ kernel + bias
 
-                state = tf.expand_dims(state, axis=-1)
-                state = tf.matmul(kernels, state)
-                state = tf.squeeze(state, axis=-1)
-                state = tf.add(state, biases)
+                kernel = tf.get_variable(
+                    name="kernel_1",
+                    shape=[inputs.shape[-1], self.num_units],
+                    dtype=tf.float32,
+                    initializer=self.kernel_initializer,
+                    trainable=True
+                )
+                bias = tf.get_variable(
+                    name="bias_1",
+                    shape=[self.num_units],
+                    dtype=tf.float32,
+                    initializer=self.bias_initializer,
+                    trainable=True
+                )
+                dynamic_biases = inputs @ kernel + bias
+
+                state = tf.expand_dims(state, axis=1)
+                state = state @ dynamic_kernels
+                state = tf.squeeze(state, axis=1)
+                state += dynamic_biases
                 state = self.activation(state)
 
                 return state
