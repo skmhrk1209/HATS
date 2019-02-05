@@ -38,6 +38,7 @@ class AttentionNetwork(object):
                 )
                 dynamic_kernels = inputs @ kernel + bias
                 dynamic_kernels = tf.reshape(dynamic_kernels, [-1] + [self.num_units] * 2)
+                dynamic_kernels = tf.nn.tanh(dynamic_kernels)
 
                 kernel = tf.get_variable(
                     name="kernel_1",
@@ -54,6 +55,7 @@ class AttentionNetwork(object):
                     trainable=True
                 )
                 dynamic_biases = inputs @ kernel + bias
+                dynamic_biases = tf.nn.tanh(dynamic_biases)
 
                 state = tf.expand_dims(state, axis=1)
                 state = state @ dynamic_kernels
