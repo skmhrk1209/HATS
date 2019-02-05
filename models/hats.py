@@ -171,21 +171,22 @@ class HATS(object):
             labels = tf.gather_nd(labels, indices)
             logits = tf.gather_nd(logits, indices)
 
-            accuracy = metrics.sequence_accuracy(
+            sequence_accuracy = metrics.sequence_accuracy(
                 labels=labels,
                 logits=logits
             )
-            '''
+
             edit_distance = metrics.edit_distance(
                 labels=labels,
                 logits=logits,
                 normalize=True
             )
-            '''
+
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    accuracy=accuracy
+                    sequence_accuracy=sequence_accuracy,
+                    edit_distance=edit_distance
                 )
             )

@@ -10,7 +10,7 @@
 # word accuracy:
 # edit distance:
 # pretrained model: chars74k classifier
-# max steps: 100000 batch size: 100
+# max steps: 100000 batch size: 64
 # =============================================================
 
 import tensorflow as tf
@@ -60,8 +60,8 @@ def main(unused_argv):
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=16, kernel_size=[5, 5], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[5, 5], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[7, 7], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[7, 7], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
