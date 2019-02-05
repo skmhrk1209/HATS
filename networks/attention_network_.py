@@ -26,7 +26,8 @@ class AttentionNetwork(object):
                     inputs=inputs,
                     units=self.num_units ** 2,
                     kernel_initializer=self.kernel_initializer,
-                    bias_initializer=self.bias_initializer
+                    bias_initializer=self.bias_initializer,
+                    activation=tf.nn.tanh
                 )
                 kernels = tf.reshape(
                     tensor=kernels,
@@ -36,7 +37,8 @@ class AttentionNetwork(object):
                     inputs=inputs,
                     units=self.num_units,
                     kernel_initializer=self.kernel_initializer,
-                    bias_initializer=self.bias_initializer
+                    bias_initializer=self.bias_initializer,
+                    activation=tf.nn.tanh
                 )
 
                 state = tf.expand_dims(state, axis=-1)
