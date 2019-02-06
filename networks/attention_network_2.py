@@ -7,12 +7,13 @@ from itertools import *
 
 class AttentionNetwork(object):
 
-    def __init__(self, conv_params, rnn_params, deconv_params, data_format,
+    def __init__(self, conv_params, rnn_params, deconv_params, num_groups, data_format,
                  pretrained_model_dir=None, pretrained_model_scope=None):
 
         self.conv_params = conv_params
         self.rnn_params = rnn_params
         self.deconv_params = deconv_params
+        self.num_groups = num_groups
         self.data_format = data_format
         self.pretrained_model_dir = pretrained_model_dir
         self.pretrained_model_scope = pretrained_model_scope
@@ -44,7 +45,7 @@ class AttentionNetwork(object):
                         ),
                         lambda inputs: ops.group_normalization(
                             inputs=inputs,
-                            groups=16,
+                            num_groups=self.num_groups,
                             data_format=self.data_format,
                             name="group_normalization",
                             reuse=None
@@ -196,7 +197,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: ops.group_normalization(
                                 inputs=inputs,
-                                groups=16,
+                                num_groups=self.num_groups,
                                 data_format=self.data_format,
                                 name="group_normalization",
                                 reuse=tf.AUTO_REUSE
@@ -230,7 +231,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: ops.group_normalization(
                                 inputs=inputs,
-                                groups=16,
+                                num_groups=self.num_groups,
                                 data_format=self.data_format,
                                 name="group_normalization",
                                 reuse=tf.AUTO_REUSE

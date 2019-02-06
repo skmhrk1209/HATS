@@ -63,14 +63,16 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=23, num_units=1024),
+                    AttrDict(sequence_length=23, num_units=256),
                 ],
                 data_format=args.data_format
             ),
