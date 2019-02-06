@@ -13,7 +13,7 @@ import argparse
 from attrdict import AttrDict
 from dataset import Dataset
 from models.classifier import Classifier
-from networks.pyramid_resnet import PyramidResNet
+from networks.pyramid_resnet_2 import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
