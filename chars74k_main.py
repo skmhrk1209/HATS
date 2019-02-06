@@ -13,7 +13,7 @@ import argparse
 from attrdict import AttrDict
 from dataset import Dataset
 from models.classifier import Classifier
-from networks.pyramid_resnet_2 import PyramidResNet
+from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -48,7 +48,6 @@ def main(unused_argv):
                     AttrDict(filters=256, strides=[2, 2], blocks=2),
                     AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
-                groups=32,
                 data_format=args.data_format
             ),
             num_classes=37,
