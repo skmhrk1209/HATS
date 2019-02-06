@@ -184,7 +184,7 @@ class PyramidResNet(object):
                 )
             )
 
-            inputs = ops.batch_normalization(
+            inputs = ops.group_normalization(
                 inputs=inputs,
                 groups=groups,
                 data_format=data_format
@@ -207,7 +207,7 @@ class PyramidResNet(object):
                 )
             )
 
-            inputs = ops.batch_normalization(
+            inputs = ops.group_normalization(
                 inputs=inputs,
                 groups=groups,
                 data_format=data_format
