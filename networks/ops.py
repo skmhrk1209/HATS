@@ -26,11 +26,11 @@ def batch_normalization(inputs, data_format, training, name=None, reuse=None):
     )
 
 
-def group_normalization(inputs, num_groups, data_format, name=None, reuse=None):
+def group_normalization(inputs, groups, data_format, name=None, reuse=None):
 
     return normalization.group_norm(
         inputs=inputs,
-        groups=num_groups,
+        groups=groups,
         channels_axis=1 if data_format == "channels_first" else 3,
         reduction_axes=[2, 3] if data_format == "channels_first" else [1, 2],
         scope=name,

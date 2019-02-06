@@ -7,13 +7,13 @@ from itertools import *
 
 class AttentionNetwork(object):
 
-    def __init__(self, conv_params, rnn_params, deconv_params, num_groups, data_format,
+    def __init__(self, conv_params, rnn_params, deconv_params, groups, data_format,
                  pretrained_model_dir=None, pretrained_model_scope=None):
 
         self.conv_params = conv_params
         self.rnn_params = rnn_params
         self.deconv_params = deconv_params
-        self.num_groups = num_groups
+        self.groups = groups
         self.data_format = data_format
         self.pretrained_model_dir = pretrained_model_dir
         self.pretrained_model_scope = pretrained_model_scope
@@ -45,7 +45,7 @@ class AttentionNetwork(object):
                         ),
                         lambda inputs: ops.group_normalization(
                             inputs=inputs,
-                            num_groups=self.num_groups,
+                            groups=self.groups,
                             data_format=self.data_format,
                             name="group_normalization",
                             reuse=None
@@ -71,7 +71,7 @@ class AttentionNetwork(object):
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
-                        num_units=rnn_param.num_units,
+                        num_units=rnn_param.units,
                         use_peepholes=True,
                         activation=tf.nn.tanh,
                         initializer=tf.variance_scaling_initializer(
@@ -98,7 +98,7 @@ class AttentionNetwork(object):
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
-                        num_units=rnn_param.num_units,
+                        num_units=rnn_param.units,
                         use_peepholes=True,
                         activation=tf.nn.tanh,
                         initializer=tf.variance_scaling_initializer(
@@ -115,7 +115,7 @@ class AttentionNetwork(object):
                             initial_state=tf.nn.rnn_cell.LSTMStateTuple(
                                 c=tf.layers.dense(
                                     inputs=inputs.c,
-                                    units=rnn_param.num_units,
+                                    units=rnn_param.units,
                                     activation=None,
                                     kernel_initializer=tf.variance_scaling_initializer(
                                         scale=1.0,
@@ -128,7 +128,7 @@ class AttentionNetwork(object):
                                 ),
                                 h=tf.layers.dense(
                                     inputs=inputs.h,
-                                    units=rnn_param.num_units,
+                                    units=rnn_param.units,
                                     activation=tf.nn.tanh,
                                     kernel_initializer=tf.variance_scaling_initializer(
                                         scale=1.0,
@@ -197,7 +197,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: ops.group_normalization(
                                 inputs=inputs,
-                                num_groups=self.num_groups,
+                                groups=self.groups,
                                 data_format=self.data_format,
                                 name="group_normalization",
                                 reuse=tf.AUTO_REUSE
@@ -231,7 +231,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: ops.group_normalization(
                                 inputs=inputs,
-                                num_groups=self.num_groups,
+                                groups=self.groups,
                                 data_format=self.data_format,
                                 name="group_normalization",
                                 reuse=tf.AUTO_REUSE

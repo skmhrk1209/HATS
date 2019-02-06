@@ -48,7 +48,7 @@ def main(unused_argv):
                     AttrDict(filters=256, strides=[2, 2], blocks=2),
                     AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
-                num_groups=32,
+                groups=32,
                 data_format=args.data_format
             ),
             num_classes=37,

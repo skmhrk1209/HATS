@@ -5,13 +5,13 @@ from . import ops
 
 class PyramidResNet(object):
 
-    def __init__(self, conv_param, pool_param, residual_params, num_groups,
+    def __init__(self, conv_param, pool_param, residual_params, groups,
                  data_format, pretrained_model_dir=None, pretrained_model_scope=None):
 
         self.conv_param = conv_param
         self.pool_param = pool_param
         self.residual_params = residual_params
-        self.num_groups = num_groups
+        self.groups = groups
         self.data_format = data_format
         self.pretrained_model_dir = pretrained_model_dir
         self.pretrained_model_scope = pretrained_model_scope
@@ -39,7 +39,7 @@ class PyramidResNet(object):
 
                 inputs = ops.group_normalization(
                     inputs=inputs,
-                    num_groups=self.num_groups,
+                    groups=self.groups,
                     data_format=self.data_format
                 )
 
@@ -66,7 +66,7 @@ class PyramidResNet(object):
                         filters=residual_param.filters,
                         strides=residual_param.strides,
                         projection_shortcut=True,
-                        num_groups=self.num_groups,
+                        groups=self.groups,
                         data_format=self.data_format,
                         training=training,
                         name="residual_block_{}_{}".format(i, j)
@@ -79,7 +79,7 @@ class PyramidResNet(object):
                         filters=residual_param.filters,
                         strides=[1, 1],
                         projection_shortcut=False,
-                        num_groups=self.num_groups,
+                        groups=self.groups,
                         data_format=self.data_format,
                         training=training,
                         name="residual_block_{}_{}".format(i, j)
@@ -121,7 +121,7 @@ class PyramidResNet(object):
 
                 feature_maps = ops.group_normalization(
                     inputs=feature_maps,
-                    num_groups=self.num_groups,
+                    groups=self.groups,
                     data_format=self.data_format
                 )
 
@@ -138,7 +138,7 @@ class PyramidResNet(object):
 
         return inputs
 
-    def residual_block(self, inputs, filters, strides, projection_shortcut, num_groups, data_format, training, name="residual_block", reuse=None):
+    def residual_block(self, inputs, filters, strides, projection_shortcut, groups, data_format, training, name="residual_block", reuse=None):
         """ A single block for ResNet v1, without a bottleneck.
         Convolution then batch normalization then ReLU as described by:
         Deep Residual Learning for Image Recognition
@@ -169,7 +169,7 @@ class PyramidResNet(object):
 
                 shortcut = ops.group_normalization(
                     inputs=shortcut,
-                    num_groups=num_groups,
+                    groups=groups,
                     data_format=self.data_format
                 )
 
@@ -190,7 +190,7 @@ class PyramidResNet(object):
 
             inputs = ops.group_normalization(
                 inputs=inputs,
-                num_groups=num_groups,
+                groups=groups,
                 data_format=self.data_format
             )
 
@@ -213,7 +213,7 @@ class PyramidResNet(object):
 
             inputs = ops.group_normalization(
                 inputs=inputs,
-                num_groups=num_groups,
+                groups=groups,
                 data_format=self.data_format
             )
 
