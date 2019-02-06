@@ -65,7 +65,7 @@ def main(unused_argv):
                     AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=23, num_units=[256, 256]),
+                    AttrDict(sequence_length=23, num_units=256),
                 ],
                 deconv_params=[
                     AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
