@@ -54,7 +54,7 @@ class PyramidResNet(object):
                     data_format=self.data_format
                 )
 
-            feature_maps = []
+            feature_maps_list = []
 
             for i, residual_param in enumerate(self.residual_params):
 
@@ -82,13 +82,15 @@ class PyramidResNet(object):
                         name="residual_block_{}_{}".format(i, j)
                     )
 
-                feature_maps.append(inputs)
+                feature_maps_list.append(inputs)
 
-            inputs = feature_maps.pop()
+            inputs = feature_maps_list.pop()
 
-            while feature_maps:
+            while feature_maps_list:
 
-                shape = feature_maps[-1].get_shape().as_list()
+                feature_maps = feature_maps_list.pop()
+
+                shape = feature_maps.get_shape().as_list()
 
                 inputs = ops.bilinear_upsampling(
                     inputs=inputs,
@@ -99,28 +101,30 @@ class PyramidResNet(object):
 
                 shape = inputs.get_shape().as_list()
 
-                inputs += compose(
-                    lambda inputs: tf.layers.conv2d(
-                        inputs=inputs,
-                        filters=shape[1] if self.data_format == "channels_first" else shape[-1],
-                        kernel_size=[1, 1],
-                        strides=[1, 1],
-                        padding="same",
-                        data_format=self.data_format,
-                        use_bias=False,
-                        kernel_initializer=tf.variance_scaling_initializer(
-                            scale=2.0,
-                            mode="fan_in",
-                            distribution="normal"
-                        )
-                    ),
-                    lambda inputs: ops.group_normalization(
-                        inputs=inputs,
-                        groups=32,
-                        data_format=self.data_format
-                    ),
-                    lambda inputs: tf.nn.relu(inputs)
-                )(feature_maps.pop())
+                feature_maps = tf.layers.conv2d(
+                    inputs=feature_maps,
+                    filters=shape[1] if self.data_format == "channels_first" else shape[-1],
+                    kernel_size=[1, 1],
+                    strides=[1, 1],
+                    padding="same",
+                    data_format=self.data_format,
+                    use_bias=False,
+                    kernel_initializer=tf.variance_scaling_initializer(
+                        scale=2.0,
+                        mode="fan_in",
+                        distribution="normal"
+                    )
+                )
+
+                feature_maps = ops.group_normalization(
+                    inputs=feature_maps,
+                    groups=32,
+                    data_format=self.data_format
+                )
+
+                feature_maps = tf.nn.relu(feature_maps)
+
+                inputs += feature_maps
 
         if self.pretrained_model_dir:
 
