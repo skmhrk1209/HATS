@@ -44,7 +44,7 @@ class AttentionNetwork(object):
                         ),
                         lambda inputs: ops.group_normalization(
                             inputs=inputs,
-                            groups=32,
+                            groups=16,
                             data_format=self.data_format,
                             name="group_normalization",
                             reuse=None
@@ -196,7 +196,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: ops.group_normalization(
                                 inputs=inputs,
-                                groups=32,
+                                groups=16,
                                 data_format=self.data_format,
                                 name="group_normalization",
                                 reuse=tf.AUTO_REUSE
@@ -230,7 +230,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: ops.group_normalization(
                                 inputs=inputs,
-                                groups=32,
+                                groups=16,
                                 data_format=self.data_format,
                                 name="group_normalization",
                                 reuse=tf.AUTO_REUSE
