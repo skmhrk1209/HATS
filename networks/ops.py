@@ -1,16 +1,15 @@
 import tensorflow as tf
+import normalization
 
 
 def bilinear_upsampling(inputs, size, align_corners, data_format):
 
     if data_format == "channels_first":
-
         inputs = tf.transpose(inputs, [0, 2, 3, 1])
 
     inputs = tf.image.resize_bilinear(inputs, size, align_corners)
 
     if data_format == "channels_first":
-
         inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
     return inputs
@@ -29,9 +28,7 @@ def batch_normalization(inputs, data_format, training, name=None, reuse=None):
 
 def group_normalization(inputs, groups, data_format, name=None, reuse=None):
 
-    print("aaaaaaaaaaaaaaaaaaaaa")
-
-    return tf.contrib.layers.group_norm(
+    return normalization.group_norm(
         inputs=inputs,
         groups=groups,
         channels_axis=1 if data_format == "channels_first" else 3,
