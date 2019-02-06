@@ -95,17 +95,8 @@ class PyramidResNet(object):
 
                 shape = feature_maps.get_shape().as_list()
 
-                inputs = ops.bilinear_upsampling(
+                inputs = tf.layers.conv2d(
                     inputs=inputs,
-                    size=shape[2:] if self.data_format == "channels_first" else shape[1:-1],
-                    align_corners=True,
-                    data_format=self.data_format
-                )
-
-                shape = inputs.get_shape().as_list()
-
-                feature_maps = tf.layers.conv2d(
-                    inputs=feature_maps,
                     filters=shape[1] if self.data_format == "channels_first" else shape[-1],
                     kernel_size=[1, 1],
                     strides=[1, 1],
@@ -119,13 +110,20 @@ class PyramidResNet(object):
                     )
                 )
 
-                feature_maps = ops.group_normalization(
-                    inputs=feature_maps,
+                inputs = ops.group_normalization(
+                    inputs=inputs,
                     groups=self.groups,
                     data_format=self.data_format
                 )
 
-                feature_maps = tf.nn.relu(feature_maps)
+                inputs = tf.nn.relu(inputs)
+
+                inputs = ops.bilinear_upsampling(
+                    inputs=inputs,
+                    size=shape[2:] if self.data_format == "channels_first" else shape[1:-1],
+                    align_corners=True,
+                    data_format=self.data_format
+                )
 
                 inputs += feature_maps
 
