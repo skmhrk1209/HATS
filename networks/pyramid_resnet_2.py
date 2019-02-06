@@ -5,8 +5,8 @@ from . import ops
 
 class PyramidResNet(object):
 
-    def __init__(self, conv_param, pool_param, residual_params, groups,
-                 data_format, pretrained_model_dir=None, pretrained_model_scope=None):
+    def __init__(self, conv_param, pool_param, residual_params, groups, data_format,
+                 pretrained_model_dir=None, pretrained_model_scope=None):
 
         self.conv_param = conv_param
         self.pool_param = pool_param
@@ -55,7 +55,7 @@ class PyramidResNet(object):
                     data_format=self.data_format
                 )
 
-            feature_maps_list = []
+            feature_maps = []
 
             for i, residual_param in enumerate(self.residual_params):
 
@@ -85,15 +85,13 @@ class PyramidResNet(object):
                         name="residual_block_{}_{}".format(i, j)
                     )
 
-                feature_maps_list.append(inputs)
+                feature_maps.append(inputs)
 
-            inputs = feature_maps_list.pop()
+            inputs = feature_maps.pop()
 
-            while feature_maps_list:
+            while feature_maps:
 
-                feature_maps = feature_maps_list.pop()
-
-                shape = feature_maps.get_shape().as_list()
+                shape = feature_maps[-1].get_shape().as_list()
 
                 inputs = tf.layers.conv2d(
                     inputs=inputs,
@@ -125,7 +123,7 @@ class PyramidResNet(object):
                     data_format=self.data_format
                 )
 
-                inputs += feature_maps
+                inputs += feature_maps.pop()
 
         if self.pretrained_model_dir:
 
@@ -168,7 +166,7 @@ class PyramidResNet(object):
                 shortcut = ops.group_normalization(
                     inputs=shortcut,
                     groups=groups,
-                    data_format=self.data_format
+                    data_format=data_format
                 )
 
             inputs = tf.layers.conv2d(
@@ -186,10 +184,10 @@ class PyramidResNet(object):
                 )
             )
 
-            inputs = ops.group_normalization(
+            inputs = ops.batch_normalization(
                 inputs=inputs,
                 groups=groups,
-                data_format=self.data_format
+                data_format=data_format
             )
 
             inputs = tf.nn.relu(inputs)
@@ -209,10 +207,10 @@ class PyramidResNet(object):
                 )
             )
 
-            inputs = ops.group_normalization(
+            inputs = ops.batch_normalization(
                 inputs=inputs,
                 groups=groups,
-                data_format=self.data_format
+                data_format=data_format
             )
 
             inputs += shortcut
