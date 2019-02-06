@@ -29,7 +29,7 @@ def batch_normalization(inputs, data_format, training, name=None, reuse=None):
 
 def group_normalization(inputs, groups, data_format, name=None, reuse=None):
 
-    print(tf.contrib.layers.group_norm(inputs).shape)
+    print("aaaaaaaaaaaaaaaaaaaaa")
 
     return tf.contrib.layers.group_norm(
         inputs=inputs,
