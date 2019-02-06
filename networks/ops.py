@@ -1,5 +1,4 @@
 import tensorflow as tf
-from . import normalization
 
 
 def bilinear_upsampling(inputs, size, align_corners, data_format):
