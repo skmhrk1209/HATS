@@ -60,13 +60,15 @@ def main(unused_argv):
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=8, kernel_size=[7, 7], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=23, units=256),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 data_format=args.data_format
             ),
