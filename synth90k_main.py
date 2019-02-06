@@ -27,7 +27,7 @@ parser.add_argument("--model_dir", type=str, default="synth90k_hats", help="mode
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
 parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
-parser.add_argument("--batch_size", type=int, default=128, help="batch size")
+parser.add_argument("--batch_size", type=int, default=32, help="batch size")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
 parser.add_argument("--max_steps", type=int, default=None, help="maximum number of training epochs")
@@ -61,15 +61,15 @@ def main(unused_argv):
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=23, num_units=256),
                 ],
                 deconv_params=[
-                    AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
-                num_groups=32,
+                num_groups=16,
                 data_format=args.data_format
             ),
             num_classes=37,
