@@ -18,8 +18,8 @@ import argparse
 from attrdict import AttrDict
 from dataset import Dataset
 from models.hats import HATS
-from networks.attention_network_2 import AttentionNetwork
-from networks.pyramid_resnet_2 import PyramidResNet
+from networks.attention_network import AttentionNetwork
+from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -54,7 +54,6 @@ def main(unused_argv):
                     AttrDict(filters=256, strides=[2, 2], blocks=2),
                     AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
-                groups=32,
                 data_format=args.data_format,
                 pretrained_model_dir=args.pretrained_model_dir,
                 pretrained_model_scope="pyramid_resnet"
@@ -69,7 +68,6 @@ def main(unused_argv):
                 deconv_params=[
                     AttrDict(filters=32, kernel_size=[3, 3], strides=[2, 2]),
                 ],
-                groups=32,
                 data_format=args.data_format
             ),
             num_classes=37,
