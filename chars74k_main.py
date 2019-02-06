@@ -5,6 +5,9 @@
 # train: 11252
 # test: 1251
 # classes: [0-9A-Z](case-insensitive)
+# accuracy: 0.894
+# pretrained model: chars74k classifier
+# max steps: 10000 batch size: 128
 # =============================================================
 
 
