@@ -11,7 +11,6 @@ class PyramidResNet(object):
         self.conv_param = conv_param
         self.pool_param = pool_param
         self.residual_params = residual_params
-        self.feature_map_index = feature_map_index
         self.data_format = data_format
         self.pretrained_model_dir = pretrained_model_dir
         self.pretrained_model_scope = pretrained_model_scope
