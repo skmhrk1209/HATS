@@ -54,6 +54,7 @@ def main(unused_argv):
                     AttrDict(filters=256, strides=[2, 2], blocks=2),
                     AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
+                num_groups=32,
                 data_format=args.data_format,
                 pretrained_model_dir=args.pretrained_model_dir,
                 pretrained_model_scope="pyramid_resnet"
@@ -65,15 +66,16 @@ def main(unused_argv):
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
+                rnn_params=[
+                    AttrDict(sequence_length=23, num_units=256),
+                ],
                 deconv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
-                rnn_params=[
-                    AttrDict(sequence_length=23, num_units=256),
-                ],
+                num_groups=16,
                 data_format=args.data_format
             ),
             num_classes=37,
