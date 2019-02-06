@@ -1,13 +1,13 @@
 import tensorflow as tf
 
 
-def bilinear_upsampling(inputs, size, data_format):
+def bilinear_upsampling(inputs, size, align_corners, data_format):
 
     if data_format == "channels_first":
 
         inputs = tf.transpose(inputs, [0, 2, 3, 1])
 
-    inputs = tf.image.resize_bilinear(inputs, size)
+    inputs = tf.image.resize_bilinear(inputs, size, align_corners)
 
     if data_format == "channels_first":
 

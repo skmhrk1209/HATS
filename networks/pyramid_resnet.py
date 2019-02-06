@@ -86,32 +86,13 @@ class PyramidResNet(object):
 
             inputs = feature_maps.pop()
 
-            inputs = tf.layers.conv2d(
-                inputs=inputs,
-                filters=256,
-                kernel_size=[1, 1],
-                strides=[1, 1],
-                padding="same",
-                data_format=self.data_format,
-                use_bias=False,
-                kernel_initializer=tf.variance_scaling_initializer(
-                    scale=2.0,
-                    mode="fan_in",
-                    distribution="normal"
-                )
-            )
-
             while feature_maps:
 
-                inputs = ops.bilinear_upsampling(
-                    inputs=inputs,
-                    size=feature_maps[-1].shape[2:] if self.data_format == "channels_first" else feature_maps[-1].shape[1:-1],
-                    data_format=self.data_format
-                )
+                shape = feature_maps[-1].get_shape().as_list()
 
-                inputs += tf.layers.conv2d(
-                    inputs=feature_maps.pop(),
-                    filters=256,
+                inputs = tf.layers.conv2d(
+                    inputs=inputs,
+                    filters=shape[1] if self.data_format == "channels_first" else shape[-1],
                     kernel_size=[1, 1],
                     strides=[1, 1],
                     padding="same",
@@ -123,6 +104,23 @@ class PyramidResNet(object):
                         distribution="normal"
                     )
                 )
+
+                inputs = ops.batch_normalization(
+                    inputs=inputs,
+                    data_format=self.data_format,
+                    training=training
+                )
+
+                inputs = tf.nn.relu(inputs)
+
+                inputs = ops.bilinear_upsampling(
+                    inputs=inputs,
+                    size=shape[2:] if self.data_format == "channels_first" else shape[1:-1],
+                    align_corners=True,
+                    data_format=self.data_format
+                )
+
+                inputs += feature_maps.pop()
 
         if self.pretrained_model_dir:
 

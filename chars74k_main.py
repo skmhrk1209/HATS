@@ -13,7 +13,7 @@ import argparse
 from attrdict import AttrDict
 from dataset import Dataset
 from models.classifier import Classifier
-from networks.pyramid_resnet import PyramidResNet
+from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -39,7 +39,7 @@ def main(unused_argv):
 
     classifier = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: Classifier(
-            backbone_network=PyramidResNet(
+            backbone_network=ResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
