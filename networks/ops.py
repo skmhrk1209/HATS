@@ -29,11 +29,13 @@ def batch_normalization(inputs, data_format, training, name=None, reuse=None):
 
 def group_normalization(inputs, groups, data_format, name=None, reuse=None):
 
+    return inputs
+
     return tf.contrib.layers.group_norm(
         inputs=inputs,
         groups=groups,
         channels_axis=1 if data_format == "channels_first" else 3,
-        reduction_axes=tuple([2, 3] if data_format == "channels_first" else [1, 2]),
+        reduction_axes=[2, 3] if data_format == "channels_first" else [1, 2],
         scope=name,
         reuse=reuse
     )
