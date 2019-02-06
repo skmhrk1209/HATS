@@ -104,7 +104,7 @@ class PyramidResNet(object):
                         distribution="normal"
                     )
                 )
-
+                '''
                 inputs = ops.batch_normalization(
                     inputs=inputs,
                     data_format=self.data_format,
@@ -112,7 +112,7 @@ class PyramidResNet(object):
                 )
 
                 inputs = tf.nn.relu(inputs)
-
+                '''
                 inputs = ops.bilinear_upsampling(
                     inputs=inputs,
                     size=shape[2:] if self.data_format == "channels_first" else shape[1:-1],
