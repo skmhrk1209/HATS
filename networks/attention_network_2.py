@@ -148,7 +148,7 @@ class AttentionNetwork(object):
                 function=lambda inputs: inputs.h,
                 sequence=inputs
             )
-            '''
+
             with tf.variable_scope("projection_block"):
 
                 inputs = map_innermost_element(
@@ -167,7 +167,7 @@ class AttentionNetwork(object):
                     ),
                     sequence=inputs
                 )
-            '''
+
             inputs = map_innermost_element(
                 function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
                 sequence=inputs

@@ -62,17 +62,11 @@ def main(unused_argv):
             attention_network=AttentionNetwork(
                 conv_params=[
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
                     AttrDict(sequence_length=23, num_units=256),
                 ],
                 deconv_params=[
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                     AttrDict(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 num_groups=16,
