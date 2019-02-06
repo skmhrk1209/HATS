@@ -59,7 +59,7 @@ class AttentionNetwork(object):
                 sequence=inputs
             )
 
-            references = inputs
+            feature_maps = inputs
 
             def static_rnn(cell, inputs, initial_state):
 
@@ -83,7 +83,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
-                            inputs=[references] * rnn_param.sequence_length,
+                            inputs=[feature_maps] * rnn_param.sequence_length,
                             initial_state=lstm_cell.zero_state(
                                 batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
@@ -110,7 +110,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
-                            inputs=[references] * rnn_param.sequence_length,
+                            inputs=[feature_maps] * rnn_param.sequence_length,
                             initial_state=tf.nn.rnn_cell.LSTMStateTuple(
                                 c=tf.layers.dense(
                                     inputs=inputs.c,
