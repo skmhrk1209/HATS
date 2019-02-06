@@ -1,5 +1,5 @@
 import tensorflow as tf
-from .normalization import *
+from . import normalization
 
 
 def bilinear_upsampling(inputs, size, align_corners, data_format):
@@ -28,7 +28,7 @@ def batch_normalization(inputs, data_format, training, name=None, reuse=None):
 
 def group_normalization(inputs, groups, data_format, name=None, reuse=None):
 
-    return group_norm(
+    return normalization.group_norm(
         inputs=inputs,
         groups=groups,
         channels_axis=1 if data_format == "channels_first" else 3,
