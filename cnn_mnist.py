@@ -139,7 +139,7 @@ def main(unused_argv):
         tensors=tensors_to_log, every_n_iter=50)
 
     # Train the model
-    train_input_fn = tf.compat.v1.estimator.inputs.numpy_input_fn(
+    train_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": train_data},
         y=train_labels,
         batch_size=100,
