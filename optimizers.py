@@ -56,7 +56,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         epsilon = tf.cast(self.epsilon, var.dtype.base_dtype)
 
         t = tf.train.get_global_step()
-        b = self.annealing_fn(t)
+        b = self.annealing_fn(tf.cast(t, var.dtype))
         z = tf.random_normal(var.shape)
 
         def _update(exploration):
