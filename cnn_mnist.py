@@ -151,7 +151,7 @@ def main(unused_argv):
         hooks=[logging_hook])
 
     # Evaluate the model and print results
-    eval_input_fn = tf.compat.v1.estimator.inputs.numpy_input_fn(
+    eval_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": eval_data}, y=eval_labels, num_epochs=1, shuffle=False)
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print(eval_results)
