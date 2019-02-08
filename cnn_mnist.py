@@ -102,7 +102,7 @@ def cnn_model_fn(features, labels, mode):
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = optimizers.SantaOptimizer(
+        optimizer = optimizers.SantaSSSOptimizer(
             eta=4e-6,
             annealing_fn=lambda t: tf.sqrt(t),
             burnin=10000
