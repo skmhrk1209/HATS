@@ -4,7 +4,7 @@ import numpy as np
 
 class SantaOptimizer(tf.train.Optimizer):
 
-    def __init__(self, eta=4e-6, gamma=0.5, sigma=0.95, const=1000, epsilon=1e-8,
+    def __init__(self, eta=4e-6, gamma=0.5, sigma=0.999, const=1000, epsilon=1e-8,
                  burnin=10000, use_locking=False, name="SantaOptimizer"):
 
         super().__init__(use_locking, name)
@@ -15,12 +15,6 @@ class SantaOptimizer(tf.train.Optimizer):
         self.const = const
         self.epsilon = epsilon
         self.burnin = burnin
-
-        self.eta_t = None
-        self.gamma_t = None
-        self.sigma_t = None
-        self.epsilon_t = None
-        self.burnin_t = None
 
     def _create_slots(self, var_list):
 
@@ -45,11 +39,11 @@ class SantaOptimizer(tf.train.Optimizer):
 
     def _prepare(self):
 
-        self.eta_t = tf.convert_to_tensor(self.eta, name="eta")
-        self.gamma_t = tf.convert_to_tensor(self.gamma, name="gamma")
-        self.sigma_t = tf.convert_to_tensor(self.sigma, name="sigma")
-        self.epsilon_t = tf.convert_to_tensor(self.epsilon, name="epsilon")
-        self.burnin_t = tf.convert_to_tensor(self.burnin, name="burnin")
+        self.eta = tf.convert_to_tensor(self.eta, name="eta")
+        self.gamma = tf.convert_to_tensor(self.gamma, name="gamma")
+        self.sigma = tf.convert_to_tensor(self.sigma, name="sigma")
+        self.epsilon = tf.convert_to_tensor(self.epsilon, name="epsilon")
+        self.burnin = tf.convert_to_tensor(self.burnin, name="burnin")
 
     def _apply_dense(self, grad, var):
 
@@ -60,11 +54,11 @@ class SantaOptimizer(tf.train.Optimizer):
         a = self.get_slot(var, "a")
         u = self.get_slot(var, "u")
 
-        eta = tf.cast(self.eta_t, var.dtype)
-        gamma = tf.cast(self.gamma_t, var.dtype)
-        sigma = tf.cast(self.sigma_t, var.dtype)
-        epsilon = tf.cast(self.epsilon_t, var.dtype)
-        burnin = tf.cast(self.burnin_t, t.dtype)
+        eta = tf.cast(self.eta, var.dtype)
+        gamma = tf.cast(self.gamma, var.dtype)
+        sigma = tf.cast(self.sigma, var.dtype)
+        epsilon = tf.cast(self.epsilon, var.dtype)
+        burnin = tf.cast(self.burnin, t.dtype)
 
         def _update(exploration):
 
