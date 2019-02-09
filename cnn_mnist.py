@@ -103,7 +103,11 @@ def cnn_model_fn(features, labels, mode):
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = optimizers.SantaOptimizer()
+        optimizer = optimizers.SantaOptimizer(
+            eta=4e-11,
+            gamma=0.8,
+            sigma=0.8,
+        )
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
