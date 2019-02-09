@@ -2,10 +2,10 @@ import tensorflow as tf
 import numpy as np
 
 
-class SantaSSSOptimizer(tf.train.Optimizer):
+class SantaOptimizer(tf.train.Optimizer):
 
     def __init__(self, eta=1e-6, gamma=0.5, sigma=0.95, const=1000, epsilon=1e-8,
-                 burnin=10000, use_locking=False, name="SantaSSSOptimizer"):
+                 burnin=10000, use_locking=False, name="SantaOptimizer"):
 
         super().__init__(use_locking, name)
 
@@ -25,6 +25,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
     def _create_slots(self, var_list):
 
         for var in var_list:
+            '''
             self._get_or_make_slot_with_initializer(
                 var, tf.zeros_initializer(),
                 var.shape, var.dtype, "v", self._name
@@ -40,6 +41,19 @@ class SantaSSSOptimizer(tf.train.Optimizer):
             self._get_or_make_slot_with_initializer(
                 var, tf.random_normal_initializer(stddev=np.sqrt(self.eta)),
                 var.shape, var.dtype, "u", self._name
+            )
+            '''
+            self._get_or_make_slot(
+                var, np.zeros(var.shape), "v", self._name
+            )
+            self._get_or_make_slot(
+                var, np.full(var.shape, 1 / np.sqrt(self.epsilon)), "g", self._name
+            )
+            self._get_or_make_slot(
+                var, np.full(var.shape, np.sqrt(self.eta) * self.const), "a", self._name
+            )
+            self._get_or_make_slot_with_initializer(
+                var, np.random.normal(scale=np.sqrt(self.eta), size=var.shape), "u", self._name
             )
 
     def _prepare(self):
