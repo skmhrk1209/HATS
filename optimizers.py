@@ -1,25 +1,26 @@
 import tensorflow as tf
 import numpy as np
 
+
 class SantaSSSOptimizer(tf.train.Optimizer):
 
-    def __init__(self, eta, burnin, annealing_fn,
-                 sigma=0.999, alpha=1000, epsilon=1e-4,
-                 use_locking=False, name="SantaSSSOptimizer"):
+    def __init__(self, eta=1e-6, gamma=0.5, sigma=0.95, alpha=0.5, epsilon=1e-8,
+                 burnin=10000, use_locking=False, name="SantaSSSOptimizer"):
 
         super().__init__(use_locking, name)
 
-        self.eta_ = eta
-        self.sigma_ = sigma
-        self.alpha_ = alpha
-        self.epsilon_ = epsilon
-        self.burnin_ = burnin
-        self.annealing_fn = annealing_fn
+        self.eta = eta
+        self.gamma = gamma
+        self.sigma = sigma
+        self.alpha = alpha
+        self.epsilon = epsilon
+        self.burnin = burnin
 
-        self.eta = None
-        self.sigma = None
-        self.epsilon = None
-        self.burnin = None
+        self.eta_t = None
+        self.gamma_t = None
+        self.sigma_t = None
+        self.epsilon_t = None
+        self.burnin_t = None
 
     def _create_slots(self, var_list):
 
@@ -33,20 +34,21 @@ class SantaSSSOptimizer(tf.train.Optimizer):
                 var.shape, var.dtype, "g", self._name
             )
             self._get_or_make_slot_with_initializer(
-                var, tf.constant_initializer(np.sqrt(self.eta_) * self.alpha_),
+                var, tf.constant_initializer(self.alpha),
                 var.shape, var.dtype, "a", self._name
             )
             self._get_or_make_slot_with_initializer(
-                var, tf.random_normal_initializer(stddev=np.sqrt(self.eta_)),
+                var, tf.random_normal_initializer(stddev=np.sqrt(self.eta)),
                 var.shape, var.dtype, "u", self._name
             )
 
     def _prepare(self):
 
-        self.eta = tf.convert_to_tensor(self.eta_, name="eta")
-        self.sigma = tf.convert_to_tensor(self.sigma_, name="sigma")
-        self.epsilon = tf.convert_to_tensor(self.epsilon_, name="epsilon")
-        self.burnin = tf.convert_to_tensor(self.burnin_, name="burnin")
+        self.eta_t = tf.convert_to_tensor(self.eta, name="eta")
+        self.gamma_t = tf.convert_to_tensor(self.gamma, name="gamma")
+        self.sigma_t = tf.convert_to_tensor(self.sigma, name="sigma")
+        self.epsilon_t = tf.convert_to_tensor(self.epsilon, name="epsilon")
+        self.burnin_t = tf.convert_to_tensor(self.burnin, name="burnin")
 
     def _apply_dense(self, grad, var):
 
@@ -57,12 +59,13 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         a = self.get_slot(var, "a")
         u = self.get_slot(var, "u")
 
-        eta = tf.cast(self.eta, var.dtype)
-        sigma = tf.cast(self.sigma, var.dtype)
-        epsilon = tf.cast(self.epsilon, var.dtype)
-        burnin = tf.cast(self.burnin, t.dtype)
+        eta = tf.cast(self.eta_t, var.dtype)
+        gamma = tf.cast(self.gamma_t, var.dtype)
+        sigma = tf.cast(self.sigma_t, var.dtype)
+        epsilon = tf.cast(self.epsilon_t, var.dtype)
+        burnin = tf.cast(self.burnin_t, t.dtype)
 
-        b = self.annealing_fn(tf.cast(t, var.dtype))
+        b = tf.cast(t, var.dtype) ** gamma
         z = tf.random_normal(var.shape)
 
         def _update(exploration):
@@ -76,9 +79,8 @@ class SantaSSSOptimizer(tf.train.Optimizer):
                 a_ = a + (u * u - eta / b) / 2
                 u_ = tf.exp(- a_ / 2) * u
                 u_ = u_ - eta * g_ * grad
-                # u_ = u_ + tf.sqrt(2 * eta / b * g) * z
-                # u_ = u_ + eta / b * (1 - g / g_) / u
-                u_ = u_ + tf.sqrt(2 * eta * tf.sqrt(eta) / b * g) * z
+                u_ = u_ + tf.sqrt(2 * eta / b * g) * z
+                u_ = u_ + eta / b * (1 - g / g_) / u
                 u_ = tf.exp(- a_ / 2) * u_
                 a_ = a_ + (u_ * u_ - eta / b) / 2
             else:
