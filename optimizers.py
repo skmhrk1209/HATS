@@ -43,18 +43,10 @@ class SantaOptimizer(tf.train.Optimizer):
                 var.shape, var.dtype, "u", self._name
             )
             '''
-            self._get_or_make_slot(
-                var, tf.convert_to_tensor(np.zeros(var.shape)), "v", self._name
-            )
-            self._get_or_make_slot(
-                var, tf.convert_to_tensor(np.full(var.shape, 1 / np.sqrt(self.epsilon))), "g", self._name
-            )
-            self._get_or_make_slot(
-                var, tf.convert_to_tensor(np.full(var.shape, np.sqrt(self.eta) * self.const)), "a", self._name
-            )
-            self._get_or_make_slot(
-                var, tf.convert_to_tensor(np.random.normal(scale=np.sqrt(self.eta), size=var.shape)), "u", self._name
-            )
+            self._zeros_slot(var, "v", self._name)
+            self._zeros_slot(var, "g", self._name)
+            self._zeros_slot(var, "a", self._name)
+            self._zeros_slot(var, "u", self._name)
 
     def _prepare(self):
 
