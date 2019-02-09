@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python import debug as tf_debug
 import optimizers
 
 tf.logging.set_verbosity(tf.logging.INFO)
@@ -144,7 +145,7 @@ def main(unused_argv):
     mnist_classifier.train(
         input_fn=train_input_fn,
         steps=20000,
-        hooks=[logging_hook])
+        hooks=[logging_hook, tf_debug.LocalCLIDebugHook()])
 
     # Evaluate the model and print results
     eval_input_fn = tf.estimator.inputs.numpy_input_fn(
