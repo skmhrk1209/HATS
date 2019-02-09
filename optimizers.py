@@ -53,10 +53,10 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         a = self.get_slot(var, "a")
         u = self.get_slot(var, "u")
 
-        eta = tf.cast(self.eta, var.dtype.base_dtype)
-        sigma = tf.cast(self.sigma, var.dtype.base_dtype)
-        epsilon = tf.cast(self.epsilon, var.dtype.base_dtype)
-        burnin = tf.cast(self.burnin, t.dtype.base_dtype)
+        eta = tf.cast(self.eta, var.dtype)
+        sigma = tf.cast(self.sigma, var.dtype)
+        epsilon = tf.cast(self.epsilon, var.dtype)
+        burnin = tf.cast(self.burnin, t.dtype)
 
         b = self.annealing_fn(tf.cast(t, var.dtype.base_dtype))
         z = tf.random_normal(shape=var.shape, dtype=var.dtype.base_dtype)
