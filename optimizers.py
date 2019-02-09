@@ -5,7 +5,7 @@ import numpy as np
 class SantaSSSOptimizer(tf.train.Optimizer):
 
     def __init__(self, eta, burnin, annealing_fn,
-                 sigma=0.999, alpha=1000, epsilon=1e-8,
+                 sigma=0.999, alpha=1000, epsilon=1e-4,
                  use_locking=False, name="SantaSSSOptimizer"):
 
         super().__init__(use_locking, name)
