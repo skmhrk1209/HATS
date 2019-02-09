@@ -58,8 +58,8 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         epsilon = tf.cast(self.epsilon, var.dtype)
         burnin = tf.cast(self.burnin, t.dtype)
 
-        b = self.annealing_fn(tf.cast(t, var.dtype.base_dtype))
-        z = tf.random_normal(shape=var.shape, dtype=var.dtype.base_dtype)
+        b = self.annealing_fn(tf.cast(t, var.dtype))
+        z = tf.random_normal(shape=var.shape, dtype=var.dtype)
 
         def _update(exploration):
 
