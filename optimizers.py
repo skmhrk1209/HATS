@@ -72,7 +72,7 @@ class SantaOptimizer(tf.train.Optimizer):
             zeta = tf.random_normal(var.shape)
 
             v_ = sigma * v + (1 - sigma) * grad * grad
-            g_ = 1 / (epsilon + v_ ** 0.5) ** 0.5
+            g_ = 1 / tf.sqrt(epsilon + tf.sqrt(v_))
 
             var_ = var + g_ * u / 2
 
@@ -80,9 +80,9 @@ class SantaOptimizer(tf.train.Optimizer):
                 a_ = a + (u * u - eta / beta) / 2
                 u_ = tf.exp(- a_ / 2) * u
                 u_ = u_ - eta * g_ * grad
-                # u_ = u_ + tf.sqrt(2 * eta / beta * g) * zeta
-                # u_ = u_ + eta / beta * (1 - g / g_) / u
-                u_ = u_ + (2 * eta ** 1.5 / beta * g) ** 0.5 * zeta
+                u_ = u_ + tf.sqrt(2 * eta / beta * g) * zeta
+                u_ = u_ + eta / beta * (1 - g / g_) / u
+                # u_ = u_ + (2 * eta ** 1.5 / beta * g) ** 0.5 * zeta
                 u_ = tf.exp(- a_ / 2) * u_
                 a_ = a_ + (u_ * u_ - eta / beta) / 2
             else:
