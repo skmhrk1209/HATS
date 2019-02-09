@@ -1,6 +1,12 @@
 import tensorflow as tf
 import numpy as np
 
+from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.ops import math_ops
+from tensorflow.python.ops import state_ops
+from tensorflow.python.framework import ops
+from tensorflow.python.training import optimizer
+
 class PowerSign(optimizer.Optimizer):
     """Implementation of PowerSign.
     See [Bello et. al., 2017](https://arxiv.org/abs/1709.07417)
