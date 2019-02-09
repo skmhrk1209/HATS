@@ -107,6 +107,7 @@ def cnn_model_fn(features, labels, mode):
             annealing_fn=lambda t: tf.sqrt(t),
             burnin=10000
         )
+        optimizer = tf.train.AdamOptimizer()
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
