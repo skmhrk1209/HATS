@@ -4,7 +4,7 @@ import numpy as np
 
 class SantaOptimizer(tf.train.Optimizer):
 
-    def __init__(self, eta=1e-8, gamma=0.5, sigma=0.95, const=1000, epsilon=1e-8,
+    def __init__(self, eta=4e-6, gamma=0.5, sigma=0.95, const=1000, epsilon=1e-8,
                  burnin=10000, use_locking=False, name="SantaOptimizer"):
 
         super().__init__(use_locking, name)
