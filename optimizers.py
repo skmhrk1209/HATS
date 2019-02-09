@@ -76,7 +76,7 @@ class SantaOptimizer(tf.train.Optimizer):
 
             var_ = var + g_ * u / 2
 
-            if True:
+            if False:
                 a_ = a + (u * u - eta / beta) / 2
                 u_ = tf.exp(- a_ / 2) * u
                 u_ = u_ - eta * g_ * grad
