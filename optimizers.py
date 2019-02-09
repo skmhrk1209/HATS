@@ -68,7 +68,7 @@ class SantaOptimizer(tf.train.Optimizer):
 
         def _update(exploration):
 
-            beta = tf.cast(t, var.dtype) ** gamma
+            beta = tf.cast(t + 1, var.dtype) ** gamma
             zeta = tf.random_normal(var.shape)
 
             v_ = sigma * v + (1 - sigma) * grad * grad
@@ -76,7 +76,7 @@ class SantaOptimizer(tf.train.Optimizer):
 
             var_ = var + g_ * u / 2
 
-            if False:
+            if exploration:
                 a_ = a + (u * u - eta / beta) / 2
                 u_ = tf.exp(- a_ / 2) * u
                 u_ = u_ - eta * g_ * grad
