@@ -59,7 +59,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         burnin = tf.cast(self.burnin, t.dtype)
 
         b = self.annealing_fn(tf.cast(t, var.dtype))
-        z = tf.random_normal(shape=var.shape, dtype=var.dtype)
+        z = tf.random_normal(var.shape)
 
         def _update(exploration):
 
