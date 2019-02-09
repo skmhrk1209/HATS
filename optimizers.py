@@ -16,6 +16,11 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         self.burnin_ = burnin
         self.annealing_fn = annealing_fn
 
+        self.eta = None
+        self.sigma = None
+        self.epsilon = None
+        self.burnin = None
+
     def _create_slots(self, var_list):
 
         for var in var_list:
