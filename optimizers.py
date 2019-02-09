@@ -25,7 +25,7 @@ class SantaOptimizer(tf.train.Optimizer):
     def _create_slots(self, var_list):
 
         for var in var_list:
-            '''
+
             self._get_or_make_slot_with_initializer(
                 var, tf.zeros_initializer(),
                 var.shape, var.dtype, "v", self._name
@@ -42,11 +42,6 @@ class SantaOptimizer(tf.train.Optimizer):
                 var, tf.random_normal_initializer(stddev=np.sqrt(self.eta)),
                 var.shape, var.dtype, "u", self._name
             )
-            '''
-            self._zeros_slot(var, "v", self._name)
-            self._zeros_slot(var, "g", self._name)
-            self._zeros_slot(var, "a", self._name)
-            self._zeros_slot(var, "u", self._name)
 
     def _prepare(self):
 
