@@ -52,7 +52,7 @@ class SantaOptimizer(tf.train.Optimizer):
             self._get_or_make_slot(
                 var, tf.convert_to_tensor(np.full(var.shape, np.sqrt(self.eta) * self.const)), "a", self._name
             )
-            self._get_or_make_slot_with_initializer(
+            self._get_or_make_slot(
                 var, tf.convert_to_tensor(np.random.normal(scale=np.sqrt(self.eta), size=var.shape)), "u", self._name
             )
 
