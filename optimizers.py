@@ -54,11 +54,11 @@ class SantaOptimizer(tf.train.Optimizer):
         a = self.get_slot(var, "a")
         u = self.get_slot(var, "u")
 
-        eta = tf.cast(self.eta, var.dtype)
-        gamma = tf.cast(self.gamma, var.dtype)
-        sigma = tf.cast(self.sigma, var.dtype)
-        epsilon = tf.cast(self.epsilon, var.dtype)
-        burnin = tf.cast(self.burnin, t.dtype)
+        eta = tf.cast(self.eta, var.dtype.base_dtype)
+        gamma = tf.cast(self.gamma, var.dtype.base_dtype)
+        sigma = tf.cast(self.sigma, var.dtype.base_dtype)
+        epsilon = tf.cast(self.epsilon, var.dtype.base_dtype)
+        burnin = tf.cast(self.burnin, t.dtype.base_dtype)
 
         def _update(exploration):
 
