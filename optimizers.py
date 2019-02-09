@@ -38,7 +38,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
                 var.shape, var.dtype, "a", self._name
             )
             self._get_or_make_slot_with_initializer(
-                var, tf.random_normal_initializer(stddev=np.sqrt(self.eta)),
+                var, tf.zeros_initializer(),#tf.random_normal_initializer(stddev=np.sqrt(self.eta)),
                 var.shape, var.dtype, "u", self._name
             )
 
