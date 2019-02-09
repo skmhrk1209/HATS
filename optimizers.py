@@ -93,7 +93,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
                 u_ = tf.exp(- a_ / 2) * u_
                 tf.Print(u_, [u_])
                 a_ = a_ + (u_ * u_ - eta / b) / 2
-                tf.Print(u_, [u_])
+                tf.Print(a_, [a_])
             else:
                 a_ = a
                 u_ = tf.exp(- a_ / 2) * u
@@ -101,7 +101,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
                 u_ = tf.exp(- a_ / 2) * u_
 
             var_ = var_ + g_ * u_ / 2
-            tf.print(var_)
+            tf.Print(var_, [var_])
 
             return var_, v_, g_, a_, u_
 
