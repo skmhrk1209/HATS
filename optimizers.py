@@ -68,6 +68,22 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         b = tf.cast(t, var.dtype) ** gamma
         z = tf.random_normal(var.shape)
 
+        v_ = sigma * v + (1 - sigma) * grad * grad
+        g_ = 1 / tf.sqrt(epsilon + tf.sqrt(v_))
+
+        var_ = var + g_ * u / 2
+
+        a_ = a + (u * u - eta / b) / 2
+        u_ = tf.exp(- a_ / 2) * u
+        u_ = u_ - eta * g_ * grad
+        u_ = u_ + tf.sqrt(2 * eta / b * g) * z
+        u_ = u_ + eta / b * (1 - g / g_) / u
+        u_ = tf.exp(- a_ / 2) * u_
+        a_ = a_ + (u_ * u_ - eta / b) / 2
+
+        var_ = var_ + g_ * u_ / 2
+
+        '''
         def _update(exploration):
 
             v_ = sigma * v + (1 - sigma) * grad * grad
@@ -98,7 +114,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
             true_fn=lambda: _update(True),
             false_fn=lambda: _update(False)
         )
-
+        '''
         return tf.group(*[
             var.assign(var_),
             v.assign(v_),
