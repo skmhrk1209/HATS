@@ -71,29 +71,29 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         def _update(exploration):
 
             v_ = sigma * v + (1 - sigma) * grad * grad
-            tf.print(v_)
+            tf.Print(v_, [_v])
             g_ = 1 / tf.sqrt(epsilon + tf.sqrt(v_))
-            tf.print(g_)
+            tf.Print(g_, [_g])
 
             var_ = var + g_ * u / 2
 
-            tf.print(var_)
+            tf.Print(var_, [_var])
 
             if exploration:
                 a_ = a + (u * u - eta / b) / 2
-                tf.print(a_)
+                tf.Print(a_, [a_])
                 u_ = tf.exp(- a_ / 2) * u
-                tf.print(u_)
+                tf.Print(u_, [u_])
                 u_ = u_ - eta * g_ * grad
-                tf.print(u_)
+                tf.Print(u_, [u_])
                 u_ = u_ + tf.sqrt(2 * eta / b * g) * z
-                tf.print(u_)
+                tf.Print(u_, [u_])
                 u_ = u_ + eta / b * (1 - g / g_) / u
-                tf.print(u_)
+                tf.Print(u_, [u_])
                 u_ = tf.exp(- a_ / 2) * u_
-                tf.print(u_)
+                tf.Print(u_, [u_])
                 a_ = a_ + (u_ * u_ - eta / b) / 2
-                tf.print(a_)
+                tf.Print(u_, [u_])
             else:
                 a_ = a
                 u_ = tf.exp(- a_ / 2) * u
