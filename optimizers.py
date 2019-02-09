@@ -4,7 +4,7 @@ import numpy as np
 
 class SantaOptimizer(tf.train.Optimizer):
 
-    def __init__(self, eta=4e-6, gamma=0.5, sigma=0.999, const=1000, epsilon=1e-8,
+    def __init__(self, eta=4e-11, gamma=0.8, sigma=0.8, const=1000, epsilon=1e-8,
                  burnin=10000, use_locking=False, name="SantaOptimizer"):
 
         super().__init__(use_locking, name)
@@ -54,11 +54,11 @@ class SantaOptimizer(tf.train.Optimizer):
         a = self.get_slot(var, "a")
         u = self.get_slot(var, "u")
 
-        eta = tf.cast(self.eta, var.dtype.base_dtype)
-        gamma = tf.cast(self.gamma, var.dtype.base_dtype)
-        sigma = tf.cast(self.sigma, var.dtype.base_dtype)
-        epsilon = tf.cast(self.epsilon, var.dtype.base_dtype)
-        burnin = tf.cast(self.burnin, t.dtype.base_dtype)
+        eta = tf.cast(self.eta, var.dtype)
+        gamma = tf.cast(self.gamma, var.dtype)
+        sigma = tf.cast(self.sigma, var.dtype)
+        epsilon = tf.cast(self.epsilon, var.dtype)
+        burnin = tf.cast(self.burnin, t.dtype)
 
         def _update(exploration):
 
