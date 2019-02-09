@@ -46,6 +46,8 @@ class SantaSSSOptimizer(tf.train.Optimizer):
 
     def _apply_dense(self, grad, var):
 
+        t = tf.train.get_global_step()
+
         v = self.get_slot(var, "v")
         g = self.get_slot(var, "g")
         a = self.get_slot(var, "a")
@@ -54,9 +56,9 @@ class SantaSSSOptimizer(tf.train.Optimizer):
         eta = tf.cast(self.eta, var.dtype.base_dtype)
         sigma = tf.cast(self.sigma, var.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, var.dtype.base_dtype)
+        burnin = tf.cast(self.burnin, t.dtype.base_dtype)
 
-        t = tf.cast(tf.train.get_global_step(), var.dtype.base_dtype)
-        b = self.annealing_fn(t)
+        b = self.annealing_fn(tf.cast(t, var.dtype.base_dtype))
         z = tf.random_normal(shape=var.shape, dtype=var.dtype.base_dtype)
 
         def _update(exploration):
@@ -85,7 +87,7 @@ class SantaSSSOptimizer(tf.train.Optimizer):
             return var_, v_, g_, a_, u_
 
         var_, v_, g_, a_, u_ = tf.cond(
-            pred=tf.less(t, self.burnin),
+            pred=tf.less(t, burnin),
             true_fn=lambda: _update(True),
             false_fn=lambda: _update(False)
         )
