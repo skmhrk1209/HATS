@@ -82,7 +82,7 @@ class SantaOptimizer(tf.train.Optimizer):
                 u_ = u_ - eta * g_ * grad
                 # u_ = u_ + tf.sqrt(2 * eta / beta * g) * zeta
                 # u_ = u_ + eta / beta * (1 - g / g_) / u
-                u_ = u_ + (2 * eta ** 1.5 / beta) ** 0.5 * zeta
+                u_ = u_ + (2 * eta ** 1.5 / beta * g) ** 0.5 * zeta
                 u_ = tf.exp(- a_ / 2) * u_
                 a_ = a_ + (u_ * u_ - eta / beta) / 2
             else:
