@@ -60,7 +60,7 @@ class HATS(object):
                 function=lambda attention_maps: tf.reduce_sum(
                     input_tensor=attention_maps,
                     axis=1 if self.data_format == "channels_first" else 3,
-                    keep_dims=True
+                    keepdims=True
                 ),
                 sequence=attention_maps
             )
