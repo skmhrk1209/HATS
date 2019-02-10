@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     study = optuna.create_study(
         pruner=optuna.pruners.MedianPruner(
-            n_startup_trials=10,
+            n_startup_trials=0,
             n_warmup_steps=args.max_steps // 10
         )
     )
