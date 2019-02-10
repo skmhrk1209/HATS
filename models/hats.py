@@ -100,23 +100,25 @@ class HATS(object):
                 sequence=labels
             )
 
-        global_step = tf.train.get_global_step()
-
         loss = tf.reduce_mean(map_innermost_element(
             function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(*labels_logits),
             sequence=zip_innermost_element(labels, logits)
         ))
 
-        loss += tf.add_n([
-            tf.nn.l2_loss(variable)
-            for variable in tf.trainable_variables()
-            if "batch_normalization" not in variable.name
-        ]) * self.hyper_params.weight_decay
+        if self.hyper_params.weight_decay:
 
-        loss += tf.reduce_mean(map_innermost_element(
-            function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
-            sequence=attention_maps
-        )) * self.hyper_params.attention_decay_fn(global_step)
+            loss += tf.add_n([
+                tf.nn.l2_loss(variable)
+                for variable in tf.trainable_variables()
+                if "batch_normalization" not in variable.name
+            ]) * self.hyper_params.weight_decay
+
+        if self.hyper_params.attention_decay:
+
+            loss += tf.reduce_mean(map_innermost_element(
+                function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
+                sequence=attention_maps
+            )) * self.hyper_params.attention_decay
 
         attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
@@ -151,15 +153,9 @@ class HATS(object):
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                optimizer = tf.train.MomentumOptimizer(
-                    learning_rate=self.hyper_params.learning_rate_fn(global_step),
-                    momentum=self.hyper_params.momentum,
-                    use_nesterov=True
-                )
-
-                train_op = optimizer.minimize(
+                train_op = self.hyper_params.optimizer.minimize(
                     loss=loss,
-                    global_step=global_step
+                    global_step=tf.train.get_global_step()
                 )
 
             return tf.estimator.EstimatorSpec(

@@ -41,8 +41,12 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def objective(trial):
 
-    learning_rate = trial.suggest_loguniform("learning_rate", 1e-3, 1e-1)
-    # decay_steps = trial.suggest_int("decay_steps", args.max_steps // 10, args.max_steps)
+    optimizer_type = trial.suggest_categorical("optimizer_type", ["adam", "adamax", "nadam"])
+    learning_rate = trial.suggest_loguniform("learning_rate", 1e-4, 1e-2)
+
+    Optimizer = (tf.train.AdamOptimizer if optimizer_type == "adam" else
+                 tf.contrib.opt.AdaMaxOptimizer if optimizer_type == "adamax" else
+                 tf.contrib.opt.NadamOptimizer if optimizer_type == "nadam" else None)
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
@@ -74,25 +78,20 @@ def objective(trial):
             num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                weight_decay=1e-4,
-                attention_decay_fn=lambda global_step: tf.train.cosine_decay(
-                    learning_rate=1e-6,
-                    global_step=global_step,
-                    decay_steps=args.max_steps
-                ),
-                learning_rate_fn=lambda global_step: tf.train.exponential_decay(
+                weight_decay=None,
+                attention_decay_fn=1e-9,
+                optimizer=Optimizer(
                     learning_rate=learning_rate,
-                    global_step=global_step,
-                    decay_steps=args.max_steps,
-                    decay_rate=0.1
-                ),
-                momentum=0.9
+                    beta1=0.9,
+                    beta2=0.999,
+                    epsilon=1e-08,
+                )
             )
         )(features, labels, mode),
-        model_dir="{}_(lr={}, ds={})".format(
+        model_dir="{}_(opt={}, lr={})".format(
             args.model_dir,
+            optimizer_type,
             learning_rate,
-            args.max_steps
         ),
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
