@@ -92,7 +92,7 @@ def main(unused_argv):
                 )
             )
         ),
-        warm_start_from=tf.WarmStartSettings(
+        warm_start_from=tf.estimator.WarmStartSettings(
             ckpt_to_initialize_from=args.pretrained_model_dir,
             vars_to_warm_start=".*pyramid_resnet.*"
         )
