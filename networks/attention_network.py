@@ -151,10 +151,10 @@ class AttentionNetwork(object):
                     function=lambda inputs: tf.layers.dense(
                         inputs=inputs,
                         units=np.prod(shape[1:]),
-                        activation=tf.nn.tanh,
+                        activation=tf.nn.relu,
                         kernel_initializer=tf.variance_scaling_initializer(
-                            scale=1.0,
-                            mode="fan_avg",
+                            scale=2.0,
+                            mode="fan_in",
                             distribution="untruncated_normal"
                         ),
                         bias_initializer=tf.zeros_initializer(),
