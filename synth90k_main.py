@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
-parser.add_argument("--num_epochs", type=int, default=10, help="number of training epochs")
+parser.add_argument("--num_epochs", type=int, default=None, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
@@ -75,10 +75,13 @@ def main(unused_argv):
             num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=1e-9,
-                learning_rate=0.001,
-                beta1=0.9,
-                beta2=0.999
+                attention_decay_fn=lambda global_step: tf.train.cosine_decay(
+                    learning_rate=1e-6,
+                    global_step=global_step,
+                    decay_steps=args.max_steps
+                ),
+                learning_rate=0.1,
+                decay_steps=args.max_steps
             )
         )(features, labels, mode),
         model_dir=args.model_dir,

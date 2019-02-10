@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import metrics
+import sign_decay
 from algorithms import *
 
 
@@ -100,6 +101,8 @@ class HATS(object):
                 sequence=labels
             )
 
+        global_step = tf.train.get_global_step()
+
         loss = tf.reduce_mean(map_innermost_element(
             function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(*labels_logits),
             sequence=zip_innermost_element(labels, logits)
@@ -108,7 +111,7 @@ class HATS(object):
         loss += tf.reduce_mean(map_innermost_element(
             function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
             sequence=attention_maps
-        )) * self.hyper_params.attention_decay
+        )) * self.hyper_params.attention_decay_fn(global_step)
 
         attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
@@ -143,15 +146,22 @@ class HATS(object):
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
+                '''
                 optimizer = tf.train.AdamOptimizer(
                     learning_rate=self.hyper_params.learning_rate,
                     beta1=self.hyper_params.beta1,
                     beta2=self.hyper_params.beta2
                 )
+                '''
+
+                optimizer = tf.contrib.opt.PowerSignOptimizer(
+                    learning_rate=self.hyper_params.learning_rate,
+                    sign_decay_fn=sign_decays.get_cosine_decay_fn(self.hyper_params.decay_steps)
+                )
 
                 train_op = optimizer.minimize(
                     loss=loss,
-                    global_step=tf.train.get_global_step()
+                    global_step=global_step
                 )
 
             return tf.estimator.EstimatorSpec(

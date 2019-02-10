@@ -76,7 +76,7 @@ def main(unused_argv):
             num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=1e-5,
+                attention_decay=1e-9,
                 learning_rate=0.001,
                 beta1=0.9,
                 beta2=0.999
