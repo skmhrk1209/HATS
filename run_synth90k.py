@@ -33,7 +33,7 @@ parser.add_argument("--num_epochs", type=int, default=None, help="number of trai
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
-parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
+parser.add_argument("--max_steps", type=int, default=100000, help="maximum number of training steps")
 parser.add_argument("--gpu", type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
@@ -95,35 +95,31 @@ if __name__ == "__main__":
         )
     )
 
-    train_input_fn = Dataset(
-        filenames=args.train_filenames,
-        num_epochs=args.num_epochs,
-        batch_size=args.batch_size,
-        random_seed=args.random_seed,
-        sequence_lengths=[23],
-        image_size=[256, 256],
-        data_format=args.data_format,
-        encoding="jpeg"
-    )
-
-    eval_input_fn = Dataset(
-        filenames=args.test_filenames,
-        num_epochs=1,
-        batch_size=args.batch_size,
-        random_seed=args.random_seed,
-        sequence_lengths=[23],
-        image_size=[256, 256],
-        data_format=args.data_format,
-        encoding="jpeg"
-    )
-
     estimator.train(
-        input_fn=train_input_fn,
+        input_fn=Dataset(
+            filenames=args.train_filenames,
+            num_epochs=args.num_epochs,
+            batch_size=args.batch_size,
+            random_seed=args.random_seed,
+            sequence_lengths=[23],
+            image_size=[256, 256],
+            data_format=args.data_format,
+            encoding="jpeg"
+        ),
         max_steps=args.max_steps
     )
 
     eval_result = estimator.evaluate(
-        input_fn=eval_input_fn
+        input_fn=Dataset(
+            filenames=args.test_filenames,
+            num_epochs=1,
+            batch_size=args.batch_size,
+            random_seed=args.random_seed,
+            sequence_lengths=[23],
+            image_size=[256, 256],
+            data_format=args.data_format,
+            encoding="jpeg"
+        )
     )
 
     print(eval_result)
