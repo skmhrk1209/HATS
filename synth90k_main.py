@@ -25,7 +25,7 @@ from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats", help="model directory")
-parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
+parser.add_argument("--pretrained_model_dir", type=str, default="chars74k_classifier", help="pretrained model directory")
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecords for training")
 parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_test.tfrecord"], help="tfrecords for test")
 parser.add_argument("--num_epochs", type=int, default=None, help="number of training epochs")
