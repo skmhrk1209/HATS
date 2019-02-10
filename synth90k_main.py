@@ -78,12 +78,7 @@ def main(unused_argv):
                     global_step=global_step,
                     decay_steps=args.max_steps
                 ),
-                learning_rate=0.1,
-                sign_decay_fn=lambda global_step: tf.train.cosine_decay(
-                    learning_rate=1.0,
-                    global_step=global_step,
-                    decay_steps=args.max_steps
-                )
+                learning_rate=0.001
             )
         )(features, labels, mode),
         model_dir=args.model_dir,
