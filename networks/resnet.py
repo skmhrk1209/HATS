@@ -29,7 +29,7 @@ class ResNet(object):
                     kernel_initializer=tf.variance_scaling_initializer(
                         scale=2.0,
                         mode="fan_in",
-                        distribution="normal"
+                        distribution="untruncated_normal"
                     )
                 )
 
@@ -112,7 +112,7 @@ class ResNet(object):
                     kernel_initializer=tf.variance_scaling_initializer(
                         scale=2.0,
                         mode="fan_in",
-                        distribution="normal"
+                        distribution="untruncated_normal"
                     )
                 )
 
@@ -127,7 +127,7 @@ class ResNet(object):
                 kernel_initializer=tf.variance_scaling_initializer(
                     scale=2.0,
                     mode="fan_in",
-                    distribution="normal"
+                    distribution="untruncated_normal"
                 )
             )
 
@@ -150,7 +150,7 @@ class ResNet(object):
                 kernel_initializer=tf.variance_scaling_initializer(
                     scale=2.0,
                     mode="fan_in",
-                    distribution="normal"
+                    distribution="untruncated_normal"
                 )
             )
 

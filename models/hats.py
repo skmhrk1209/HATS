@@ -158,6 +158,13 @@ class HATS(object):
                     sign_decay_fn=self.hyper_params.sign_decay_fn
                 )
 
+                '''
+                optimizer = tf.contrib.opt.AddSignOptimizer(
+                    learning_rate=self.hyper_params.learning_rate,
+                    sign_decay_fn=self.hyper_params.sign_decay_fn
+                )
+                '''
+
                 train_op = optimizer.minimize(
                     loss=loss,
                     global_step=global_step

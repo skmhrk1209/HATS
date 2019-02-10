@@ -34,7 +34,7 @@ class AttentionNetwork(object):
                             kernel_initializer=tf.variance_scaling_initializer(
                                 scale=2.0,
                                 mode="fan_in",
-                                distribution="normal"
+                                distribution="untruncated_normal"
                             ),
                             name="conv2d",
                             reuse=None
@@ -73,7 +73,7 @@ class AttentionNetwork(object):
                         initializer=tf.variance_scaling_initializer(
                             scale=1.0,
                             mode="fan_avg",
-                            distribution="normal"
+                            distribution="untruncated_normal"
                         )
                     )
 
@@ -100,7 +100,7 @@ class AttentionNetwork(object):
                         initializer=tf.variance_scaling_initializer(
                             scale=1.0,
                             mode="fan_avg",
-                            distribution="normal"
+                            distribution="untruncated_normal"
                         )
                     )
 
@@ -116,7 +116,7 @@ class AttentionNetwork(object):
                                     kernel_initializer=tf.variance_scaling_initializer(
                                         scale=1.0,
                                         mode="fan_avg",
-                                        distribution="normal"
+                                        distribution="untruncated_normal"
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
                                     name="c_projection",
@@ -129,7 +129,7 @@ class AttentionNetwork(object):
                                     kernel_initializer=tf.variance_scaling_initializer(
                                         scale=1.0,
                                         mode="fan_avg",
-                                        distribution="normal"
+                                        distribution="untruncated_normal"
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
                                     name="h_projection",
@@ -155,7 +155,7 @@ class AttentionNetwork(object):
                         kernel_initializer=tf.variance_scaling_initializer(
                             scale=1.0,
                             mode="fan_avg",
-                            distribution="normal"
+                            distribution="untruncated_normal"
                         ),
                         bias_initializer=tf.zeros_initializer(),
                         name="dense",
@@ -186,7 +186,7 @@ class AttentionNetwork(object):
                                 kernel_initializer=tf.variance_scaling_initializer(
                                     scale=2.0,
                                     mode="fan_in",
-                                    distribution="normal"
+                                    distribution="untruncated_normal"
                                 ),
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
@@ -220,7 +220,7 @@ class AttentionNetwork(object):
                                 kernel_initializer=tf.variance_scaling_initializer(
                                     scale=1.0,
                                     mode="fan_avg",
-                                    distribution="normal"
+                                    distribution="untruncated_normal"
                                 ),
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
