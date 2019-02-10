@@ -54,9 +54,7 @@ def main(unused_argv):
                     AttrDict(filters=256, strides=[2, 2], blocks=2),
                     AttrDict(filters=512, strides=[2, 2], blocks=2),
                 ],
-                data_format=args.data_format,
-                pretrained_model_dir=args.pretrained_model_dir,
-                pretrained_model_scope="pyramid_resnet"
+                data_format=args.data_format
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
@@ -93,6 +91,10 @@ def main(unused_argv):
                     allow_growth=True
                 )
             )
+        ),
+        warm_start_from=WarmStartSettings(
+            ckpt_to_initialize_from=args.pretrained_model_dir,
+            vars_to_warm_start=".*pyramid_resnet.*"
         )
     )
 
@@ -103,6 +105,7 @@ def main(unused_argv):
                 filenames=args.filenames,
                 num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
+                random_seed=args.random_seed,
                 sequence_lengths=[23],
                 image_size=[256, 256],
                 data_format=args.data_format,
@@ -119,6 +122,7 @@ def main(unused_argv):
                 filenames=args.filenames,
                 num_epochs=1,
                 batch_size=args.batch_size,
+                random_seed=args.random_seed,
                 sequence_lengths=[23],
                 image_size=[256, 256],
                 data_format=args.data_format,
@@ -138,6 +142,7 @@ def main(unused_argv):
                 filenames=args.filenames,
                 num_epochs=1,
                 batch_size=args.batch_size,
+                random_seed=args.random_seed,
                 sequence_lengths=[23],
                 image_size=[256, 256],
                 data_format=args.data_format,

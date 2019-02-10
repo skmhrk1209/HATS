@@ -8,18 +8,24 @@ from algorithms import *
 
 class Dataset(object):
 
-    def __init__(self, filenames, num_epochs, batch_size,
+    def __init__(self, filenames, num_epochs, batch_size, random_seed,
                  sequence_lengths, image_size, data_format, encoding):
 
-        self.dataset = tf.data.TFRecordDataset(filenames)
+        self.dataset = tf.data.TFRecordDataset(
+            filenames=filenames,
+            num_parallel_reads=os.cpu_count()
+        )
         self.dataset = self.dataset.shuffle(
             buffer_size=sum([
                 len(list(tf.python_io.tf_record_iterator(filename)))
                 for filename in filenames
             ]),
+            seed=random_seed,
             reshuffle_each_iteration=True
         )
-        self.dataset = self.dataset.repeat(num_epochs)
+        self.dataset = self.dataset.repeat(
+            count=num_epochs
+        )
         self.dataset = self.dataset.map(
             map_func=functools.partial(
                 self.parse,
@@ -30,8 +36,13 @@ class Dataset(object):
             ),
             num_parallel_calls=os.cpu_count()
         )
-        self.dataset = self.dataset.batch(batch_size)
-        self.dataset = self.dataset.prefetch(1)
+        self.dataset = self.dataset.batch(
+            batch_size=batch_size,
+            drop_remainder=True
+        )
+        self.dataset = self.dataset.prefetch(
+            buffer_size=1
+        )
 
     def __call__(self):
 

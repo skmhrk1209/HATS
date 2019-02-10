@@ -5,15 +5,12 @@ from . import ops
 
 class PyramidResNet(object):
 
-    def __init__(self, conv_param, pool_param, residual_params, data_format,
-                 pretrained_model_dir=None, pretrained_model_scope=None):
+    def __init__(self, conv_param, pool_param, residual_params, data_format):
 
         self.conv_param = conv_param
         self.pool_param = pool_param
         self.residual_params = residual_params
         self.data_format = data_format
-        self.pretrained_model_dir = pretrained_model_dir
-        self.pretrained_model_scope = pretrained_model_scope
 
     def __call__(self, inputs, training, name="pyramid_resnet", reuse=None):
 
@@ -121,13 +118,6 @@ class PyramidResNet(object):
                 )
 
                 inputs += feature_maps.pop()
-
-        if self.pretrained_model_dir:
-
-            tf.train.init_from_checkpoint(
-                ckpt_dir_or_file=self.pretrained_model_dir,
-                assignment_map={"{}/".format(self.pretrained_model_scope): "{}/".format(name)}
-            )
 
         return inputs
 
