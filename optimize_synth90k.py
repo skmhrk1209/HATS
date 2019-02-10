@@ -22,6 +22,7 @@ from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
+from tensor2tensor.utils.yellowfin import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats", help="model directory")
@@ -81,10 +82,7 @@ def objective(trial):
                 weight_decay=None,
                 attention_decay=1e-9,
                 optimizer=Optimizer(
-                    learning_rate=learning_rate,
-                    beta1=0.9,
-                    beta2=0.999,
-                    epsilon=1e-08,
+                    learning_rate=learning_rate
                 )
             )
         )(features, labels, mode),
@@ -110,44 +108,40 @@ def objective(trial):
         )
     )
 
-    train_input_fn = Dataset(
-        filenames=args.train_filenames,
-        num_epochs=args.num_epochs,
-        batch_size=args.batch_size,
-        random_seed=args.random_seed,
-        sequence_lengths=[23],
-        image_size=[256, 256],
-        data_format=args.data_format,
-        encoding="jpeg"
-    )
-
-    eval_input_fn = Dataset(
-        filenames=args.test_filenames,
-        num_epochs=1,
-        batch_size=args.batch_size,
-        random_seed=args.random_seed,
-        sequence_lengths=[23],
-        image_size=[256, 256],
-        data_format=args.data_format,
-        encoding="jpeg"
-    )
-
-    optuna_pruning_hook = optuna.integration.TensorFlowPruningHook(
-        trial=trial,
-        estimator=estimator,
-        metric="word_accuracy",
-        is_higher_better=True,
-        run_every_steps=args.max_steps // 100
-    )
-
     estimator.train(
-        input_fn=train_input_fn,
+        input_fn=Dataset(
+            filenames=args.train_filenames,
+            num_epochs=args.num_epochs,
+            batch_size=args.batch_size,
+            random_seed=args.random_seed,
+            sequence_lengths=[23],
+            image_size=[256, 256],
+            data_format=args.data_format,
+            encoding="jpeg"
+        ),
         max_steps=args.max_steps,
-        hooks=[optuna_pruning_hook]
+        hooks=[
+            optuna.integration.TensorFlowPruningHook(
+                trial=trial,
+                estimator=estimator,
+                metric="word_accuracy",
+                is_higher_better=True,
+                run_every_steps=args.max_steps // 100
+            )
+        ]
     )
 
     eval_result = AttrDict(estimator.evaluate(
-        input_fn=eval_input_fn,
+        input_fn=Dataset(
+            filenames=args.test_filenames,
+            num_epochs=1,
+            batch_size=args.batch_size,
+            random_seed=args.random_seed,
+            sequence_lengths=[23],
+            image_size=[256, 256],
+            data_format=args.data_format,
+            encoding="jpeg"
+        ),
         steps=sum([
             len(list(tf.io.tf_record_iterator(filename)))
             for filename in args.test_filenames
