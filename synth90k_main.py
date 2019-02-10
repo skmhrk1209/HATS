@@ -42,7 +42,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def objective(trial):
 
     learning_rate = trial.suggest_loguniform("learning_rate", 1e-3, 1e-0)
-    learning_rate = trial.suggest_int("decay_steps", args.max_steps // 10, args.max_steps)
+    decay_steps = trial.suggest_int("decay_steps", args.max_steps // 10, args.max_steps)
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
