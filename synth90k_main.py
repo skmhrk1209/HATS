@@ -95,8 +95,8 @@ def objective(trial):
         ),
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
-            save_summary_steps=args.max_steps // 1000,
-            save_checkpoints_steps=args.max_steps // 1000,
+            save_summary_steps=args.max_steps // 100,
+            save_checkpoints_steps=args.max_steps // 100,
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
                     visible_device_list=args.gpu,
