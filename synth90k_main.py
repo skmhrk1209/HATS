@@ -80,7 +80,7 @@ def objective(trial):
                     global_step=global_step,
                     decay_steps=args.max_steps
                 ),
-                learning_rate_fn=lambda global_steps: tf.train.exponential_decay(
+                learning_rate_fn=lambda global_step: tf.train.exponential_decay(
                     learning_rate=learning_rate,
                     global_step=global_step,
                     decay_steps=decay_steps,
