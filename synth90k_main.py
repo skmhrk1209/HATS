@@ -79,7 +79,7 @@ def objective(trial):
             data_format=args.data_format,
             hyper_params=AttrDict(
                 weight_decay=None,
-                attention_decay_fn=1e-9,
+                attention_decay=1e-9,
                 optimizer=Optimizer(
                     learning_rate=learning_rate,
                     beta1=0.9,
