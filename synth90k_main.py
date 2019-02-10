@@ -79,7 +79,7 @@ def main(unused_argv):
                     decay_steps=args.max_steps
                 ),
                 learning_rate=0.1,
-                sign_decay_fn=lambda global_step: tf.train.linear_cosine_decay(
+                sign_decay_fn=lambda global_step: tf.train.cosine_decay(
                     learning_rate=1.0,
                     global_step=global_step,
                     decay_steps=args.max_steps
