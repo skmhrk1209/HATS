@@ -145,7 +145,12 @@ class HATS(object):
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                optimizer = tf.train.AdamOptimizer(self.hyper_params.learning_rate)
+                optimizer = tf.train.AdamOptimizer(
+                    learning_rate=self.hyper_params.learning_rate,
+                    beta1=self.hyper_params.beta1,
+                    beta2=self.hyper_params.beta2,
+                    epsilon=self.hyper_params.epsilon
+                )
 
                 '''
                 optimizer = tf.contrib.opt.PowerSignOptimizer(

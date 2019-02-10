@@ -78,7 +78,10 @@ def main(unused_argv):
                     global_step=global_step,
                     decay_steps=args.max_steps
                 ),
-                learning_rate=0.001
+                learning_rate=0.001,
+                beta1=0.9,
+                beta2=0.999,
+                epsilon=0.1,
             )
         )(features, labels, mode),
         model_dir=args.model_dir,
