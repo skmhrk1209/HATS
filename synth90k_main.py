@@ -165,13 +165,13 @@ if __name__ == "__main__":
     study = optuna.create_study(
         pruner=optuna.pruners.MedianPruner(
             n_startup_trials=0,
-            n_warmup_steps=0
+            n_warmup_steps=args.max_steps // 10
         )
     )
 
-    study.optimize(objective, n_trials=10)
+    study.optimize(objective, n_trials=100)
 
     print("================================")
     print(study.best_trial)
-    print([t.state for t in study.trials])
+    print([trial.state for trial in study.trials])
     print("================================")
