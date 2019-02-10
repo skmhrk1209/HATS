@@ -74,7 +74,7 @@ def objective(trial):
             num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                weight_decay=1e-4
+                weight_decay=1e-4,
                 attention_decay_fn=lambda global_step: tf.train.cosine_decay(
                     learning_rate=1e-6,
                     global_step=global_step,
