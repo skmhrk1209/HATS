@@ -156,7 +156,7 @@ class HATS(object):
 
                 optimizer = tf.contrib.opt.PowerSignOptimizer(
                     learning_rate=self.hyper_params.learning_rate,
-                    sign_decay_fn=sign_decay.get_cosine_decay_fn(self.hyper_params.decay_steps)
+                    sign_decay_fn=self.hyper_params.sign_decay_fn
                 )
 
                 train_op = optimizer.minimize(
