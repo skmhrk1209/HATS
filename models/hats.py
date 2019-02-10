@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 import metrics
-import sign_decay
 from algorithms import *
 
 
