@@ -107,7 +107,7 @@ class HATS(object):
             sequence=zip_innermost_element(labels, logits)
         ))
 
-        loss += weight_decay * tf.add_n([
+        loss += tf.add_n([
             tf.nn.l2_loss(variable)
             for variable in tf.trainable_variables()
             if "batch_normalization" not in variable.name
