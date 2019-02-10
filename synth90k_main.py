@@ -92,7 +92,7 @@ def objective(trial):
         model_dir="{}_(lr={}, ds={})".format(
             args.model_dir,
             learning_rate,
-            decay_steps
+            args.max_steps
         ),
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
