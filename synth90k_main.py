@@ -169,7 +169,7 @@ if __name__ == "__main__":
         )
     )
 
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=10)
 
     print(study.best_trial)
     print([t.state for t in study.trials])
