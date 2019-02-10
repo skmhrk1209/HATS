@@ -16,13 +16,13 @@
 import tensorflow as tf
 import optuna
 import argparse
+import opt
 from attrdict import AttrDict
 from dataset import Dataset
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
-from tensor2tensor.utils.yellowfin import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats", help="model directory")
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             hyper_params=AttrDict(
                 weight_decay=None,
                 attention_decay=1e-9,
-                optimizer=YellowFinOptimizer()
+                optimizer=opt.YFOptimizer()
             )
         )(features, labels, mode),
         model_dir=args.model_dir,
