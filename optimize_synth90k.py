@@ -16,6 +16,7 @@
 import tensorflow as tf
 import optuna
 import argparse
+import opt
 from attrdict import AttrDict
 from dataset import Dataset
 from models.hats import HATS
@@ -42,12 +43,13 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def objective(trial):
 
-    optimizer_type = trial.suggest_categorical("optimizer_type", ["adam", "adamax", "nadam"])
+    optimizer_type = trial.suggest_categorical("optimizer_type", ["adam", "adamax", "nadam", "eve"])
     learning_rate = trial.suggest_loguniform("learning_rate", 1e-4, 1e-2)
 
     Optimizer = (tf.train.AdamOptimizer if optimizer_type == "adam" else
                  tf.contrib.opt.AdaMaxOptimizer if optimizer_type == "adamax" else
-                 tf.contrib.opt.NadamOptimizer if optimizer_type == "nadam" else None)
+                 tf.contrib.opt.NadamOptimizer if optimizer_type == "nadam" else
+                 opt.EveOptimizer if optimizer_type == "eve" else None)
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
