@@ -95,7 +95,7 @@ def objective(trial):
             args.model_dir,
             learning_rate,
             decay_steps
-        )
+        ),
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
             save_summary_steps=args.max_steps // 1000,
