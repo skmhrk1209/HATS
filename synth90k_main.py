@@ -32,7 +32,7 @@ parser.add_argument("--num_epochs", type=int, default=None, help="number of trai
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
-parser.add_argument("--max_steps", type=int, default=100000, help="maximum number of training steps")
+parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
 parser.add_argument("--gpu", type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
