@@ -29,7 +29,7 @@ def edit_distance(labels, logits, normalize):
     ))
 
 
-def sequence_accuracy(labels, logits):
+def word_accuracy(labels, logits):
 
     batch_size, time_step, num_classes = tf.unstack(tf.shape(logits))
 

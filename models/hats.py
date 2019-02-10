@@ -107,6 +107,12 @@ class HATS(object):
             sequence=zip_innermost_element(labels, logits)
         ))
 
+        loss += weight_decay * tf.add_n([
+            tf.nn.l2_loss(variable)
+            for variable in tf.trainable_variables()
+            if "batch_normalization" not in variable.name
+        ]) * self.hyper_params.weight_decay
+
         loss += tf.reduce_mean(map_innermost_element(
             function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
             sequence=attention_maps
@@ -145,26 +151,11 @@ class HATS(object):
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                optimizer = tf.train.AdamOptimizer(
-                    learning_rate=self.hyper_params.learning_rate,
-                    beta1=self.hyper_params.beta1,
-                    beta2=self.hyper_params.beta2,
-                    epsilon=self.hyper_params.epsilon
+                optimizer = tf.train.MomentumOptimizer(
+                    learning_rate=self.hyper_params.learning_rate_fn(global_step),
+                    momentum=self.hyper_params.momentum,
+                    use_nesterov=True
                 )
-
-                '''
-                optimizer = tf.contrib.opt.PowerSignOptimizer(
-                    learning_rate=self.hyper_params.learning_rate,
-                    sign_decay_fn=self.hyper_params.sign_decay_fn
-                )
-                '''
-
-                '''
-                optimizer = tf.contrib.opt.AddSignOptimizer(
-                    learning_rate=self.hyper_params.learning_rate,
-                    sign_decay_fn=self.hyper_params.sign_decay_fn
-                )
-                '''
 
                 train_op = optimizer.minimize(
                     loss=loss,
@@ -195,7 +186,7 @@ class HATS(object):
             labels = tf.gather_nd(labels, indices)
             logits = tf.gather_nd(logits, indices)
 
-            sequence_accuracy = metrics.sequence_accuracy(
+            word_accuracy = metrics.word_accuracy(
                 labels=labels,
                 logits=logits
             )
@@ -210,7 +201,7 @@ class HATS(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    sequence_accuracy=sequence_accuracy,
+                    word_accuracy=word_accuracy,
                     edit_distance=edit_distance
                 )
             )

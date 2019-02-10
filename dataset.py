@@ -17,7 +17,7 @@ class Dataset(object):
         )
         self.dataset = self.dataset.shuffle(
             buffer_size=sum([
-                len(list(tf.python_io.tf_record_iterator(filename)))
+                len(list(tf.io.tf_record_iterator(filename)))
                 for filename in filenames
             ]),
             seed=random_seed,

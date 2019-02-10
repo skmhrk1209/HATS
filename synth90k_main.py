@@ -14,6 +14,7 @@
 # =============================================================
 
 import tensorflow as tf
+import optuna
 import argparse
 from attrdict import AttrDict
 from dataset import Dataset
@@ -25,25 +26,25 @@ from algorithms import *
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
-parser.add_argument('--filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecord filenames")
+parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecords for training")
+parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_test.tfrecord"], help="tfrecords for test")
 parser.add_argument("--num_epochs", type=int, default=None, help="number of training epochs")
-parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
-parser.add_argument("--steps", type=int, default=None, help="number of training epochs")
-parser.add_argument("--max_steps", type=int, default=None, help="maximum number of training epochs")
-parser.add_argument("--train", action="store_true", help="with training")
-parser.add_argument("--eval", action="store_true", help="with evaluation")
-parser.add_argument("--predict", action="store_true", help="with prediction")
-parser.add_argument("--gpu", type=str, default="0,1,2", help="gpu id")
+parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
+parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
+parser.add_argument("--max_steps", type=int, default=100000, help="maximum number of training steps")
+parser.add_argument("--gpu", type=str, default="0,1,2", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def main(unused_argv):
+def objective(trial):
 
-    classifier = tf.estimator.Estimator(
+    learning_rate = trial.suggest_loguniform("learning_rate", 1e-3, 1e-0)
+    learning_rate = trial.suggest_int("decay_steps", args.max_steps // 10, args.max_steps)
+
+    estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
             backbone_network=PyramidResNet(
                 conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
@@ -73,20 +74,32 @@ def main(unused_argv):
             num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
+                weight_decay=1e-4
                 attention_decay_fn=lambda global_step: tf.train.cosine_decay(
                     learning_rate=1e-6,
                     global_step=global_step,
                     decay_steps=args.max_steps
                 ),
-                learning_rate=0.001,
-                beta1=0.9,
-                beta2=0.999,
-                epsilon=0.1,
+                learning_rate_fn=lambda global_steps: tf.train.exponential_decay(
+                    learning_rate=learning_rate,
+                    global_step=global_step,
+                    decay_steps=decay_steps,
+                    decay_rate=0.1,
+                    staircase=False,
+                    name=None
+                ),
+                momentum=0.9
             )
         )(features, labels, mode),
-        model_dir=args.model_dir,
+        model_dir="{}_(lr={}, ds={})".format(
+            args.model_dir,
+            learning_rate,
+            decay_steps
+        )
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
+            save_summary_steps=args.max_steps // 1000,
+            save_checkpoints_steps=args.max_steps // 1000,
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
                     visible_device_list=args.gpu,
@@ -100,76 +113,63 @@ def main(unused_argv):
         )
     )
 
-    if args.train:
+    train_input_fn = Dataset(
+        filenames=args.train_filenames,
+        num_epochs=args.num_epochs,
+        batch_size=args.batch_size,
+        random_seed=args.random_seed,
+        sequence_lengths=[23],
+        image_size=[256, 256],
+        data_format=args.data_format,
+        encoding="jpeg"
+    )
 
-        classifier.train(
-            input_fn=Dataset(
-                filenames=args.filenames,
-                num_epochs=args.num_epochs,
-                batch_size=args.batch_size,
-                random_seed=args.random_seed,
-                sequence_lengths=[23],
-                image_size=[256, 256],
-                data_format=args.data_format,
-                encoding="jpeg"
-            ),
-            steps=args.steps,
-            max_steps=args.max_steps
-        )
+    eval_input_fn = Dataset(
+        filenames=args.test_filenames,
+        num_epochs=1,
+        batch_size=args.batch_size,
+        random_seed=args.random_seed,
+        sequence_lengths=[23],
+        image_size=[256, 256],
+        data_format=args.data_format,
+        encoding="jpeg"
+    )
 
-    if args.eval:
+    optuna_pruning_hook = optuna.integration.TensorFlowPruningHook(
+        trial=trial,
+        estimator=estimator,
+        metric="word_accuracy",
+        is_higher_better=True,
+        run_every_steps=args.max_steps // 100
+    )
 
-        eval_results = classifier.evaluate(
-            input_fn=Dataset(
-                filenames=args.filenames,
-                num_epochs=1,
-                batch_size=args.batch_size,
-                random_seed=args.random_seed,
-                sequence_lengths=[23],
-                image_size=[256, 256],
-                data_format=args.data_format,
-                encoding="jpeg"
-            )
-        )
+    estimator.train(
+        input_fn=train_input_fn,
+        max_steps=args.max_steps,
+        hooks=[optuna_pruning_hook]
+    )
 
-        print(eval_results)
+    eval_result = AttrDict(estimator.evaluate(
+        input_fn=eval_input_fn,
+        steps=sum([
+            len(list(tf.io.tf_record_iterator(filename)))
+            for filename in args.test_filenames
+        ]) // args.batch_size // 10
+    ))
 
-    if args.predict:
-
-        import cv2
-        import itertools
-
-        predict_results = classifier.predict(
-            input_fn=Dataset(
-                filenames=args.filenames,
-                num_epochs=1,
-                batch_size=args.batch_size,
-                random_seed=args.random_seed,
-                sequence_lengths=[23],
-                image_size=[256, 256],
-                data_format=args.data_format,
-                encoding="jpeg"
-            )
-        )
-
-        for i, predict_result in enumerate(itertools.islice(predict_results, 100)):
-
-            image = predict_result["images"]
-            attention_maps = predict_result["attention_maps"]
-
-            if args.data_format == "channels_first":
-                image = np.transpose(image, [1, 2, 0])
-                attention_maps = np.transpose(attention_maps, [0, 2, 3, 1])
-
-            for attention_maps in attention_maps:
-
-                attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
-                attention_map[attention_map < 0.5] = 0.0
-                attention_map = cv2.resize(attention_map, image.shape[:-1])
-                image[:, :, -1] += attention_map
-
-            cv2.imwrite("outputs/synth90k/attention_map_{}.jpg".format(i), image * 255.)
+    return 1.0 - eval_result.word_accuracy
 
 
 if __name__ == "__main__":
-    tf.app.run()
+
+    study = optuna.create_study(
+        pruner=optuna.pruners.MedianPruner(
+            n_startup_trials=10,
+            n_warmup_steps=args.max_steps // 10
+        )
+    )
+
+    study.optimize(objective, n_trials=100)
+
+    print(study.best_trial)
+    print([t.state for t in study.trials])
