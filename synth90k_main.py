@@ -41,8 +41,8 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 def objective(trial):
 
-    learning_rate = trial.suggest_loguniform("learning_rate", 1e-3, 1e-0)
-    decay_steps = trial.suggest_int("decay_steps", args.max_steps // 10, args.max_steps)
+    learning_rate = trial.suggest_loguniform("learning_rate", 1e-3, 1e-1)
+    # decay_steps = trial.suggest_int("decay_steps", args.max_steps // 10, args.max_steps)
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
@@ -83,10 +83,8 @@ def objective(trial):
                 learning_rate_fn=lambda global_step: tf.train.exponential_decay(
                     learning_rate=learning_rate,
                     global_step=global_step,
-                    decay_steps=decay_steps,
-                    decay_rate=0.1,
-                    staircase=False,
-                    name=None
+                    decay_steps=args.max_steps,
+                    decay_rate=0.1
                 ),
                 momentum=0.9
             )
