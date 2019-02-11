@@ -33,6 +33,7 @@ parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
+parser.add_argument("--steps", type=int, default=None, help="number of evaluation steps")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument("--gpu", type=str, default="0", help="gpu id")
@@ -82,8 +83,8 @@ if __name__ == "__main__":
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
-            save_summary_steps=args.max_steps // 100,
-            save_checkpoints_steps=args.max_steps // 100,
+            save_summary_steps=100,
+            save_checkpoints_steps=100,
             session_config=tf.ConfigProto(
                 gpu_options=tf.GPUOptions(
                     visible_device_list=args.gpu,
@@ -126,5 +127,5 @@ if __name__ == "__main__":
                 data_format=args.data_format,
                 encoding="jpeg"
             ),
-            steps=None
+            steps=args.steps
         ))
