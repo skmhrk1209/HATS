@@ -16,7 +16,6 @@
 import tensorflow as tf
 import optuna
 import argparse
-import opt
 from attrdict import AttrDict
 from dataset import Dataset
 from models.hats import HATS
