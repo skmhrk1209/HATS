@@ -34,6 +34,8 @@ parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
+parser.add_argument('--train', action="store_true", help="with training")
+parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument("--gpu", type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
@@ -96,30 +98,34 @@ if __name__ == "__main__":
         )
     )
 
-    estimator.train(
-        input_fn=Dataset(
-            filenames=args.train_filenames,
-            num_epochs=args.num_epochs,
-            batch_size=args.batch_size,
-            random_seed=args.random_seed,
-            sequence_lengths=[23],
-            image_size=[256, 256],
-            data_format=args.data_format,
-            encoding="jpeg"
-        ),
-        max_steps=args.max_steps
-    )
+    if args.train:
 
-    print(estimator.evaluate(
-        input_fn=Dataset(
-            filenames=args.test_filenames,
-            num_epochs=1,
-            batch_size=args.batch_size,
-            random_seed=args.random_seed,
-            sequence_lengths=[23],
-            image_size=[256, 256],
-            data_format=args.data_format,
-            encoding="jpeg"
-        ),
-        steps=None
-    ))
+        estimator.train(
+            input_fn=Dataset(
+                filenames=args.train_filenames,
+                num_epochs=args.num_epochs,
+                batch_size=args.batch_size,
+                random_seed=args.random_seed,
+                sequence_lengths=[23],
+                image_size=[256, 256],
+                data_format=args.data_format,
+                encoding="jpeg"
+            ),
+            max_steps=args.max_steps
+        )
+
+    if args.eval:
+
+        print(estimator.evaluate(
+            input_fn=Dataset(
+                filenames=args.test_filenames,
+                num_epochs=1,
+                batch_size=args.batch_size,
+                random_seed=args.random_seed,
+                sequence_lengths=[23],
+                image_size=[256, 256],
+                data_format=args.data_format,
+                encoding="jpeg"
+            ),
+            steps=None
+        ))
