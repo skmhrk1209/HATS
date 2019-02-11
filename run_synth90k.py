@@ -74,7 +74,7 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=AttrDict(
                 weight_decay=None,
-                attention_decay=1e-5,
+                attention_decay=1e-6,
                 optimizer=tf.contrib.opt.NadamOptimizer()
             )
         )(features, labels, mode),
