@@ -75,11 +75,7 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=AttrDict(
                 weight_decay_fn=None,
-                attention_decay_fn=lambda global_step: tf.train.cosine_decay(
-                    learning_rate=1e-6,
-                    global_step=global_step,
-                    decay_steps=args.max_steps
-                ),
+                attention_decay_fn=None,
                 optimizer=tf.train.AdamOptimizer()
             )
         )(features, labels, mode),
