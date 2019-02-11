@@ -138,20 +138,22 @@ class HATS(object):
             sequence=zip_innermost_element(labels, logits)
         ))
 
-        if self.hyper_params.weight_decay:
+        global_step = tf.train.get_global_step()
+
+        if self.hyper_params.weight_decay_fn:
 
             loss += tf.add_n([
                 tf.nn.l2_loss(variable)
                 for variable in tf.trainable_variables()
                 if "batch_normalization" not in variable.name
-            ]) * self.hyper_params.weight_decay
+            ]) * self.hyper_params.weight_decay_fn(global_step)
 
-        if self.hyper_params.attention_decay:
+        if self.hyper_params.attention_decay_fn:
 
             loss += tf.reduce_mean(map_innermost_element(
                 function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
                 sequence=attention_maps
-            )) * self.hyper_params.attention_decay
+            )) * self.hyper_params.attention_decay_fn(global_step)
 
         attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
@@ -188,7 +190,7 @@ class HATS(object):
 
                 train_op = self.hyper_params.optimizer.minimize(
                     loss=loss,
-                    global_step=tf.train.get_global_step()
+                    global_step=global_step
                 )
 
             return tf.estimator.EstimatorSpec(
