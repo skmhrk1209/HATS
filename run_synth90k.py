@@ -42,84 +42,84 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 if __name__ == "__main__":
 
-    print(tf.estimator.train_and_evaluate(
-        estimator=tf.estimator.Estimator(
-            model_fn=lambda features, labels, mode: HATS(
-                backbone_network=PyramidResNet(
-                    conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
-                    pool_param=None,
-                    residual_params=[
-                        AttrDict(filters=64, strides=[2, 2], blocks=2),
-                        AttrDict(filters=128, strides=[2, 2], blocks=2),
-                        AttrDict(filters=256, strides=[2, 2], blocks=2),
-                        AttrDict(filters=512, strides=[2, 2], blocks=2),
-                    ],
-                    data_format=args.data_format
-                ),
-                attention_network=AttentionNetwork(
-                    conv_params=[
-                        AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                        AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                    ],
-                    rnn_params=[
-                        AttrDict(sequence_length=23, units=256),
-                    ],
-                    deconv_params=[
-                        AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                        AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                    ],
-                    data_format=args.data_format
-                ),
-                units=[1024],
-                classes=37,
-                data_format=args.data_format,
-                hyper_params=AttrDict(
-                    weight_decay=None,
-                    attention_decay=1e-5,
-                    optimizer=opt.EveOptimizer()
-                )
-            )(features, labels, mode),
-            model_dir=args.model_dir,
-            config=tf.estimator.RunConfig(
-                tf_random_seed=args.random_seed,
-                save_summary_steps=args.max_steps // 100,
-                save_checkpoints_steps=args.max_steps // 100,
-                session_config=tf.ConfigProto(
-                    gpu_options=tf.GPUOptions(
-                        visible_device_list=args.gpu,
-                        allow_growth=True
-                    )
-                )
+    estimator = tf.estimator.Estimator(
+        model_fn=lambda features, labels, mode: HATS(
+            backbone_network=PyramidResNet(
+                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                pool_param=None,
+                residual_params=[
+                    AttrDict(filters=64, strides=[2, 2], blocks=2),
+                    AttrDict(filters=128, strides=[2, 2], blocks=2),
+                    AttrDict(filters=256, strides=[2, 2], blocks=2),
+                    AttrDict(filters=512, strides=[2, 2], blocks=2),
+                ],
+                data_format=args.data_format
             ),
-            warm_start_from=tf.estimator.WarmStartSettings(
-                ckpt_to_initialize_from=args.pretrained_model_dir,
-                vars_to_warm_start=".*pyramid_resnet.*"
+            attention_network=AttentionNetwork(
+                conv_params=[
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                ],
+                rnn_params=[
+                    AttrDict(sequence_length=23, units=256),
+                ],
+                deconv_params=[
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                ],
+                data_format=args.data_format
+            ),
+            units=[1024],
+            classes=37,
+            data_format=args.data_format,
+            hyper_params=AttrDict(
+                weight_decay=None,
+                attention_decay=1e-5,
+                optimizer=opt.EveOptimizer()
+            )
+        )(features, labels, mode),
+        model_dir=args.model_dir,
+        config=tf.estimator.RunConfig(
+            tf_random_seed=args.random_seed,
+            save_summary_steps=args.max_steps // 100,
+            save_checkpoints_steps=args.max_steps // 100,
+            session_config=tf.ConfigProto(
+                gpu_options=tf.GPUOptions(
+                    visible_device_list=args.gpu,
+                    allow_growth=True
+                )
             )
         ),
-        train_spec=tf.estimator.TrainSpec(
-            input_fn=Dataset(
-                filenames=args.train_filenames,
-                num_epochs=args.num_epochs,
-                batch_size=args.batch_size,
-                random_seed=args.random_seed,
-                sequence_lengths=[23],
-                image_size=[256, 256],
-                data_format=args.data_format,
-                encoding="jpeg"
-            ),
-            max_steps=args.max_steps
-        ),
-        eval_spec=tf.estimator.EvalSpec(
-            input_fn=Dataset(
-                filenames=args.test_filenames,
-                num_epochs=1,
-                batch_size=args.batch_size,
-                random_seed=args.random_seed,
-                sequence_lengths=[23],
-                image_size=[256, 256],
-                data_format=args.data_format,
-                encoding="jpeg"
-            ),
-            steps=None
+        warm_start_from=tf.estimator.WarmStartSettings(
+            ckpt_to_initialize_from=args.pretrained_model_dir,
+            vars_to_warm_start=".*pyramid_resnet.*"
         )
+    )
+
+    estimator.train(
+        input_fn=Dataset(
+            filenames=args.train_filenames,
+            num_epochs=args.num_epochs,
+            batch_size=args.batch_size,
+            random_seed=args.random_seed,
+            sequence_lengths=[23],
+            image_size=[256, 256],
+            data_format=args.data_format,
+            encoding="jpeg"
+        ),
+        max_steps=args.max_steps
+    )
+
+    print(estimator.evaluate(
+        input_fn=Dataset(
+            filenames=args.test_filenames,
+            num_epochs=1,
+            batch_size=args.batch_size,
+            random_seed=args.random_seed,
+            sequence_lengths=[23],
+            image_size=[256, 256],
+            data_format=args.data_format,
+            encoding="jpeg"
+        ),
+        steps=None
     ))
