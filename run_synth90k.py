@@ -75,7 +75,7 @@ if __name__ == "__main__":
             hyper_params=AttrDict(
                 weight_decay=None,
                 attention_decay=1e-6,
-                optimizer=tf.contrib.opt.NadamOptimizer()
+                optimizer=tf.train.AdamOptimizer()
             )
         )(features, labels, mode),
         model_dir=args.model_dir,
