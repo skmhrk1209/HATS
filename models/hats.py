@@ -7,11 +7,13 @@ from algorithms import *
 
 class HATS(object):
 
-    def __init__(self, backbone_network, attention_network, num_classes, data_format, hyper_params):
+    def __init__(self, backbone_network, attention_network,
+                 units, classes, data_format, hyper_params):
 
         self.backbone_network = backbone_network
         self.attention_network = attention_network
-        self.num_classes = num_classes
+        self.units = units
+        self.classes = classes
         self.data_format = data_format
         self.hyper_params = hyper_params
 
@@ -45,36 +47,40 @@ class HATS(object):
             sequence=attention_maps
         )
 
-        feature_vectors = map_innermost_element(
-            function=compose(
-                lambda inputs: tf.layers.dense(
-                    inputs=inputs,
-                    units=1024,
-                    use_bias=False,
-                    kernel_initializer=tf.variance_scaling_initializer(
-                        scale=2.0,
-                        mode="fan_in",
-                        distribution="untruncated_normal"
+        for i, units in enumerate(self.units):
+
+            with tf.variable_scope("dense_block_{}".format(i)):
+
+                feature_vectors = map_innermost_element(
+                    function=compose(
+                        lambda inputs: tf.layers.dense(
+                            inputs=inputs,
+                            units=units,
+                            use_bias=False,
+                            kernel_initializer=tf.variance_scaling_initializer(
+                                scale=2.0,
+                                mode="fan_in",
+                                distribution="untruncated_normal"
+                            ),
+                            name="dense",
+                            reuse=tf.AUTO_REUSE
+                        ),
+                        lambda inputs: ops.batch_normalization(
+                            inputs=inputs,
+                            data_format=self.data_format,
+                            training=mode == tf.estimator.ModeKeys.TRAIN,
+                            name="batch_normalization",
+                            reuse=tf.AUTO_REUSE
+                        ),
+                        lambda inputs: tf.nn.relu(inputs)
                     ),
-                    name="dense",
-                    reuse=tf.AUTO_REUSE
-                ),
-                lambda inputs: ops.batch_normalization(
-                    inputs=inputs,
-                    data_format=self.data_format,
-                    training=mode == tf.estimator.ModeKeys.TRAIN,
-                    name="batch_normalization",
-                    reuse=tf.AUTO_REUSE
-                ),
-                lambda inputs: tf.nn.relu(inputs)
-            ),
-            sequence=feature_vectors
-        )
+                    sequence=feature_vectors
+                )
 
         logits = map_innermost_element(
             function=lambda feature_vectors: tf.layers.dense(
                 inputs=feature_vectors,
-                units=self.num_classes,
+                units=self.classes,
                 name="logits",
                 reuse=tf.AUTO_REUSE
             ),
@@ -203,7 +209,7 @@ class HATS(object):
                 sequence=logits
             )), axis=0)
 
-            indices = tf.not_equal(labels, self.num_classes - 1)
+            indices = tf.not_equal(labels, self.classes - 1)
             indices = tf.where(tf.reduce_any(indices, axis=1))
 
             labels = tf.gather_nd(labels, indices)

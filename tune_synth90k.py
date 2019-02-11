@@ -33,16 +33,24 @@ parser.add_argument("--num_epochs", type=int, default=None, help="number of trai
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
-parser.add_argument("--max_steps", type=int, default=100000, help="maximum number of training steps")
+parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
 parser.add_argument("--gpu", type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-if __name__ == "__main__":
+def objective_func(trial):
 
-    print(tf.estimator.train_and_evaluate(
+    optimizer_type = trial.suggest_categorical("optimizer_type", ["adam", "adamax", "nadam", "eve"])
+    learning_rate = trial.suggest_loguniform("learning_rate", 1e-4, 1e-2)
+
+    Optimizer = (tf.train.AdamOptimizer if optimizer_type == "adam" else
+                 tf.contrib.opt.AdaMaxOptimizer if optimizer_type == "adamax" else
+                 tf.contrib.opt.NadamOptimizer if optimizer_type == "nadam" else
+                 opt.EveOptimizer if optimizer_type == "eve" else None)
+
+    return tf.estimator.train_and_evaluate(
         estimator=tf.estimator.Estimator(
             model_fn=lambda features, labels, mode: HATS(
                 backbone_network=PyramidResNet(
@@ -75,11 +83,17 @@ if __name__ == "__main__":
                 data_format=args.data_format,
                 hyper_params=AttrDict(
                     weight_decay=None,
-                    attention_decay=1e-4,
-                    optimizer=opt.EveOptimizer()
+                    attention_decay=1e-6,
+                    optimizer=Optimizer(
+                        learning_rate=learning_rate
+                    )
                 )
             )(features, labels, mode),
-            model_dir=args.model_dir,
+            model_dir="{}_(opt={}, lr={})".format(
+                args.model_dir,
+                optimizer_type,
+                learning_rate,
+            ),
             config=tf.estimator.RunConfig(
                 tf_random_seed=args.random_seed,
                 save_summary_steps=args.max_steps // 100,
@@ -107,7 +121,14 @@ if __name__ == "__main__":
                 data_format=args.data_format,
                 encoding="jpeg"
             ),
-            max_steps=args.max_steps
+            max_steps=args.max_steps,
+            hooks=[optuna.integration.TensorFlowPruningHook(
+                trial=trial,
+                estimator=estimator,
+                metric="loss",
+                is_higher_better=False,
+                run_every_steps=args.max_steps // 100
+            )]
         ),
         eval_spec=tf.estimator.EvalSpec(
             input_fn=Dataset(
@@ -120,6 +141,26 @@ if __name__ == "__main__":
                 data_format=args.data_format,
                 encoding="jpeg"
             ),
-            steps=None
+            steps=sum([
+                len(list(tf.io.tf_record_iterator(filename)))
+                for filename in args.test_filenames
+            ]) // args.batch_size // 10
         )
-    ))
+    )["loss"]
+
+
+if __name__ == "__main__":
+
+    study = optuna.create_study(
+        pruner=optuna.pruners.MedianPruner(
+            n_startup_trials=0,
+            n_warmup_steps=args.max_steps // 10
+        )
+    )
+
+    study.optimize(objective_func, n_trials=100)
+
+    print("================================")
+    print(study.best_trial)
+    print([trial.state for trial in study.trials])
+    print("================================")
