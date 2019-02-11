@@ -75,7 +75,7 @@ if __name__ == "__main__":
                 data_format=args.data_format,
                 hyper_params=AttrDict(
                     weight_decay=None,
-                    attention_decay=1e-4,
+                    attention_decay=1e-5,
                     optimizer=opt.EveOptimizer()
                 )
             )(features, labels, mode),
