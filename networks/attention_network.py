@@ -5,6 +5,9 @@ from . import rnn_cell
 from algorithms import *
 from itertools import *
 
+from tensorflow.python.keras.utils import tf_utils
+from tensorflow.python.ops import init_ops
+
 
 class IRNNCell(tf.nn.rnn_cell.BasicRNNCell):
 
@@ -12,6 +15,7 @@ class IRNNCell(tf.nn.rnn_cell.BasicRNNCell):
 
         super(IRNNCell, self).__init__(*args, **kwargs)
 
+    @tf_utils.shape_type_conversion
     def build(self, inputs_shape):
 
         if inputs_shape[-1] is None:
@@ -21,12 +25,12 @@ class IRNNCell(tf.nn.rnn_cell.BasicRNNCell):
         self._kernel = self.add_variable(
             name="kernel",
             shape=[inputs_shape[-1] + self._num_units, self._num_units],
-            initializer=tf.initializers.identity(self.dtype)
+            initializer=init_ops.identity_initializer(self.dtype)
         )
         self._bias = self.add_variable(
             name="bias",
             shape=[self._num_units],
-            initializer=tf.initializers.zeros(self.dtype)
+            initializer=init_ops.zeros_initializer(dtype=self.dtype)
         )
 
         self.built = True
