@@ -59,4 +59,6 @@ def main(input_filename, output_filename, num_words, num_chars):
 
 if __name__ == "__main__":
 
+    print(sys.argv)
+
     main(*sys.argv[1:3], list(map(int, sys.argv[3:])))
