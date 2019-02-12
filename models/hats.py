@@ -93,28 +93,21 @@ class HATS(object):
             sequence=feature_vectors
         )
 
+        predictions = map_innermost_element(
+            function=lambda logits: tf.argmax(logits, axis=-1),
+            sequence=logits
+        )
+
+        attention_maps = map_innermost_element(
+            function=lambda attention_maps: tf.reduce_sum(
+                input_tensor=attention_maps,
+                axis=1 if self.data_format == "channels_first" else 3,
+                keepdims=True
+            ),
+            sequence=attention_maps
+        )
+
         if mode == tf.estimator.ModeKeys.PREDICT:
-
-            attention_maps = map_innermost_element(
-                function=lambda attention_maps: tf.reduce_sum(
-                    input_tensor=attention_maps,
-                    axis=1 if self.data_format == "channels_first" else 3,
-                    keepdims=True
-                ),
-                sequence=attention_maps
-            )
-
-            predictions = map_innermost_element(
-                function=lambda logits: tf.argmax(logits, axis=-1),
-                sequence=logits
-            )
-
-            while isinstance(attention_maps, list):
-
-                attention_maps = map_innermost_list(
-                    function=lambda attention_maps: tf.stack(attention_maps, axis=1),
-                    sequence=attention_maps
-                )
 
             while isinstance(predictions, list):
 
@@ -123,12 +116,19 @@ class HATS(object):
                     sequence=predictions
                 )
 
+            while isinstance(attention_maps, list):
+
+                attention_maps = map_innermost_list(
+                    function=lambda attention_maps: tf.stack(attention_maps, axis=1),
+                    sequence=attention_maps
+                )
+
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=dict(
                     images=images,
-                    attention_maps=attention_maps,
-                    predictions=predictions
+                    predictions=predictions,
+                    attention_maps=attention_maps
                 )
             )
 
@@ -139,36 +139,15 @@ class HATS(object):
                 sequence=labels
             )
 
-        loss = tf.reduce_mean(map_innermost_element(
-            function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(*labels_logits),
-            sequence=zip_innermost_element(labels, logits)
-        ))
-
-        global_step = tf.train.get_global_step()
-
-        if self.hyper_params.weight_decay_fn:
-
-            loss += tf.add_n([
-                tf.nn.l2_loss(variable)
-                for variable in tf.trainable_variables()
-                if "batch_normalization" not in variable.name
-            ]) * self.hyper_params.weight_decay_fn(global_step)
-
-        if self.hyper_params.attention_decay_fn:
-
-            loss += tf.reduce_mean(map_innermost_element(
-                function=lambda attention_maps: tf.reduce_mean(tf.reduce_sum(attention_maps, axis=[1, 2, 3])),
-                sequence=attention_maps
-            )) * self.hyper_params.attention_decay_fn(global_step)
-
-        attention_maps = map_innermost_element(
-            function=lambda attention_maps: tf.reduce_sum(
-                input_tensor=attention_maps,
-                axis=1 if self.data_format == "channels_first" else 3,
-                keepdims=True
+        losses = map_innermost_element(
+            function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
+                labels=labels_logits[0],
+                logits=labels_logits[1]
             ),
-            sequence=attention_maps
+            sequence=zip_innermost_element(labels, logits)
         )
+
+        loss = tf.reduce_mean(losses)
 
         if self.data_format == "channels_first":
 
@@ -190,13 +169,21 @@ class HATS(object):
             sequence=enumerate_innermost_element(attention_maps)
         )
 
+        map_innermost_element(
+            function=lambda indices_loss: tf.summary.scalar(
+                name="loss_{}".format("_".join(map(str, indices_loss[0]))),
+                tensor=indices_loss[1]
+            ),
+            sequence=enumerate_innermost_element(losses)
+        )
+
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
                 train_op = self.hyper_params.optimizer.minimize(
                     loss=loss,
-                    global_step=global_step
+                    global_step=tf.train.get_global_step()
                 )
 
             return tf.estimator.EstimatorSpec(
