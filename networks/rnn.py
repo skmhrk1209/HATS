@@ -19,8 +19,16 @@ from tensorflow.python.ops import variable_scope as vs
 from tensorflow.python.util import nest
 from tensorflow.python.util.tf_export import tf_export
 
-from tensorflow.python.ops.rnn import _should_cache
 from tensorflow.python.ops.rnn import _concat
+from tensorflow.python.ops.rnn import _transpose_batch_time
+from tensorflow.python.ops.rnn import _best_effort_input_batch_size
+from tensorflow.python.ops.rnn import _infer_state_dtype
+from tensorflow.python.ops.rnn import _maybe_tensor_shape_from_tensor
+from tensorflow.python.ops.rnn import _should_cache
+from tensorflow.python.ops.rnn import _is_keras_rnn_cell
+from tensorflow.python.ops.rnn import _rnn_step
+from tensorflow.python.ops.rnn import _reverse_seq
+from tensorflow.python.ops.rnn import _dynamic_rnn_loop
 
 
 def static_rnn(cell,
