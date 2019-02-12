@@ -8,7 +8,7 @@ from itertools import *
 
 def static_rnn(cell, inputs, initial_state):
 
-    return list(accumulate([initial_state] + inputs, lambda hiddens, inputs: cell(inputs, hiddens)[0]))[1:]
+    return list(accumulate([(None, initial_state)] + inputs, lambda outputs_hiddens, inputs: cell(inputs, outputs_hiddens[1])))[1:]
 
 
 class AttentionNetwork(object):
