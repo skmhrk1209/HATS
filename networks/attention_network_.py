@@ -52,10 +52,7 @@ class AttentionNetwork(object):
 
             image_shape = inputs.shape.as_list()
 
-            inputs = map_innermost_element(
-                func=lambda inputs: tf.layers.flatten(inputs),
-                seq=inputs
-            )
+            inputs = tf.layers.flatten(inputs)
 
             def get_seq_lens(labels, indices):
 
@@ -88,7 +85,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         func=lambda indices_inputs: tf.unstack(tf.nn.dynamic_rnn(
                             cell=lstm_cell,
-                            inputs=[indices_inputs[1]] * rnn_param.max_seq_len,
+                            inputs=tf.stack([indices_inputs[1]] * rnn_param.max_seq_len, axis=0),
                             sequence_length=get_seq_lens(
                                 labels=labels,
                                 indices=list(indices_inputs[0])
