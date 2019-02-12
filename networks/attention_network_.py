@@ -70,7 +70,7 @@ class AttentionNetwork(object):
                     )
 
                     print(seq_len_getter(
-                                    indices=list(indices_inputs[0])
+                                    indices=[])
                                 ))
 
                     inputs = map_innermost_element(
