@@ -38,7 +38,7 @@ def main(input_filename, output_filename, num_words, num_chars):
                 label = map_innermost_element(lambda char: class_ids[char], chars)
                 label = flatten_innermost_element(label)
 
-                if(len(label) != 24) print(label)
+                if(len(label) != 24): print(label)
 
                 writer.write(
                     record=tf.train.Example(
