@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import metrics
+import summary
 from networks import ops
 from algorithms import *
 
@@ -99,12 +100,13 @@ class HATS(object):
         )
 
         attention_maps = map_innermost_element(
-            func=lambda attention_maps: tf.reduce_sum(
-                input_tensor=attention_maps,
+            func=lambda indices_attention_maps: tf.reduce_sum(
+                input_tensor=indices_attention_maps[1],
                 axis=1 if self.data_format == "channels_first" else 3,
-                keepdims=True
+                keepdims=True,
+                name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0])))
             ),
-            seq=attention_maps
+            seq=enumerate_innermost_element(attention_maps)
         )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
@@ -140,42 +142,52 @@ class HATS(object):
             )
 
         losses = map_innermost_element(
-            func=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
-                labels=labels_logits[0],
-                logits=labels_logits[1]
+            func=lambda indices_labels_logits: tf.losses.sparse_softmax_cross_entropy(
+                labels=indices_labels_logits[1][0],
+                logits=indices_labels_logits[1][1],
+                name="loss_{}".format("_".join(map(str, indices_labels_logits[0])))
             ),
-            seq=zip_innermost_element(labels, logits)
+            seq=enumerate_innermost_element(zip_innermost_element(labels, logits))
         )
 
         loss = tf.reduce_mean(losses)
 
-        if self.data_format == "channels_first":
+        labels = tf.concat(flatten_innermost_element(map_innermost_list(
+            func=lambda labels: tf.stack(labels, axis=1),
+            seq=labels
+        )), axis=0)
 
-            images = tf.transpose(images, [0, 2, 3, 1])
+        logits = tf.concat(flatten_innermost_element(map_innermost_list(
+            func=lambda logits: tf.stack(logits, axis=1),
+            seq=logits
+        )), axis=0)
 
-            attention_maps = map_innermost_element(
-                func=lambda attention_maps: tf.transpose(attention_maps, [0, 2, 3, 1]),
-                seq=attention_maps
-            )
+        indices = tf.not_equal(labels, self.classes - 1)
+        indices = tf.where(tf.reduce_any(indices, axis=1))
 
-        tf.summary.image("images", images, max_outputs=2)
+        labels = tf.gather_nd(labels, indices)
+        logits = tf.gather_nd(logits, indices)
 
-        map_innermost_element(
-            func=lambda indices_attention_maps: tf.summary.image(
-                name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0]))),
-                tensor=indices_attention_maps[1],
-                max_outputs=2
-            ),
-            seq=enumerate_innermost_element(attention_maps)
+        word_accuracy = metrics.word_accuracy(
+            labels=labels,
+            logits=logits,
+            name="word_accuracy"
         )
 
-        map_innermost_element(
-            func=lambda indices_loss: tf.summary.scalar(
-                name="loss_{}".format("_".join(map(str, indices_loss[0]))),
-                tensor=indices_loss[1]
-            ),
-            seq=enumerate_innermost_element(losses)
+        edit_distance = metrics.edit_distance(
+            labels=labels,
+            logits=logits,
+            normalize=True,
+            name="edit_distance"
         )
+
+        summary.any(images, data_format=self.data_format, max_outputs=2)
+        for attention_maps in flatten_innermost_element(attention_maps):
+            summary.any(attention_maps, data_format=self.data_format, max_outputs=2)
+        for loss in flatten_innermost_element(losses):
+            summary.any(loss)
+        summary.any(word_accuracy)
+        summary.any(edit_distance)
 
         if mode == tf.estimator.ModeKeys.TRAIN:
 
@@ -193,33 +205,6 @@ class HATS(object):
             )
 
         if mode == tf.estimator.ModeKeys.EVAL:
-
-            labels = tf.concat(flatten_innermost_element(map_innermost_list(
-                func=lambda labels: tf.stack(labels, axis=1),
-                seq=labels
-            )), axis=0)
-
-            logits = tf.concat(flatten_innermost_element(map_innermost_list(
-                func=lambda logits: tf.stack(logits, axis=1),
-                seq=logits
-            )), axis=0)
-
-            indices = tf.not_equal(labels, self.classes - 1)
-            indices = tf.where(tf.reduce_any(indices, axis=1))
-
-            labels = tf.gather_nd(labels, indices)
-            logits = tf.gather_nd(logits, indices)
-
-            word_accuracy = metrics.word_accuracy(
-                labels=labels,
-                logits=logits
-            )
-
-            edit_distance = metrics.edit_distance(
-                labels=labels,
-                logits=logits,
-                normalize=True
-            )
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
