@@ -118,7 +118,7 @@ class HATS(object):
         )
 
         predictions = map_innermost_element(
-            func=lambda logits: tf.argmax(logits, axis=-1),
+            func=lambda logits: tf.argmax(logits, axis=-1, dtype=tf.int32),
             seq=logits
         )
 
