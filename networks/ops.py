@@ -16,7 +16,7 @@ def irnn(inputs_sequence, hiddens, hidden_units,
 
             inputs = tf.layers.dense(
                 inputs=inputs,
-                units=self.hidden_units,
+                units=hidden_units,
                 kernel_initializer=tf.initializers.variance_scaling(
                     scale=2.0,
                     mode="fan_in",
@@ -29,7 +29,7 @@ def irnn(inputs_sequence, hiddens, hidden_units,
 
             hiddens = tf.layers.dense(
                 inputs=hiddens,
-                units=self.hidden_units,
+                units=hidden_units,
                 kernel_initializer=tf.initializers.identity(),
                 bias_initializer=tf.initializers.zeros(),
                 name="hidden_dense",
@@ -40,7 +40,7 @@ def irnn(inputs_sequence, hiddens, hidden_units,
 
             outputs = tf.layers.dense(
                 inputs=hiddens,
-                units=self.output_units,
+                units=output_units,
                 kernel_initializer=tf.initializers.variance_scaling(
                     scale=2.0,
                     mode="fan_in",
