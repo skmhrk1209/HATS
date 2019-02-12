@@ -186,7 +186,7 @@ class HATS(object):
         logits = tf.gather_nd(logits, indices)
 
         sequence_lengths = tf.count_nonzero(tf.less(labels, self.classes), axis=1)
-        sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[1])
+        sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[1], dtype=tf.int32)
 
         loss = tf.contrib.seq2seq.sequence_loss(
             logits=logits,
