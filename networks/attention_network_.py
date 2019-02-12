@@ -110,7 +110,7 @@ class AttentionNetwork(object):
             with tf.variable_scope("projection_block"):
 
                 inputs = map_innermost_element(
-                    function=lambda inputs: tf.layers.dense(
+                    func=lambda inputs: tf.layers.dense(
                         inputs=inputs.h,
                         units=np.prod(image_shape[1:]),
                         activation=tf.nn.relu,
@@ -123,7 +123,7 @@ class AttentionNetwork(object):
                         name="dense",
                         reuse=tf.AUTO_REUSE
                     ),
-                    sequence=inputs
+                    seq=inputs
                 )
 
             inputs = map_innermost_element(
