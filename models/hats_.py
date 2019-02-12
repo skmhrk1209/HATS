@@ -7,6 +7,22 @@ from networks import ops
 from algorithms import *
 
 
+def seq_len_getter(labels, classes, indices):
+
+    begin = [0] + indices + [0] * (len(labels.shape[1:]) - len(indices))
+    size = [-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
+
+    labels = tf.slice(labels, begin, size)
+
+    return tf.count_nonzero(
+        input_tensor=tf.reduce_any(
+            input_tensor=tf.not_equal(labels, classes),
+            axis=list(range(2, len(labels.shape)))
+        ),
+        axis=1
+    )
+
+
 def spatial_flatten(inputs, data_format):
 
     inputs_shape = inputs.shape.as_list()
@@ -29,21 +45,6 @@ class HATS(object):
         self.hyper_params = hyper_params
 
     def __call__(self, images, labels, mode):
-
-        def seq_len_getter(labels, classes, indices):
-
-            begin = [0] + indices + [0] * (len(labels.shape[1:]) - len(indices))
-            size = [-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
-
-            labels = tf.slice(labels, begin, size)
-
-            return tf.count_nonzero(
-                input_tensor=tf.reduce_any(
-                    input_tensor=tf.not_equal(labels, classes),
-                    axis=list(range(2, len(labels.shape)))
-                ),
-                axis=1
-            )
 
         feature_maps = self.backbone_network(
             inputs=images,
@@ -170,7 +171,7 @@ class HATS(object):
                     labels=labels_logits[0],
                     logits=labels_logits[1]
                 ),
-                false_fn=lambda: tf.zeros([tf.shape(labels_logits[0])[0]])
+                false_fn=lambda: tf.zeros_like(labels_logits[0])
             ),
             seq=zip_innermost_element(labels, logits)
         ))
