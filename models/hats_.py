@@ -43,8 +43,8 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
-        eos = num_classes - 1
-        blank = num_classes
+        eos = self.num_classes - 1
+        blank = self.num_classes
 
         feature_maps = self.backbone_network(
             inputs=images,
