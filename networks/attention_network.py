@@ -69,14 +69,6 @@ class AttentionNetwork(object):
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         num_units=rnn_param.units,
                         use_peepholes=True,
-                        '''
-                        activation=tf.nn.tanh,
-                        initializer=tf.variance_scaling_initializer(
-                            scale=1.0,
-                            mode="fan_avg",
-                            distribution="untruncated_normal"
-                        )
-                        '''
                         activation=tf.nn.relu,
                         initializer=tf.initializers.identity()
                     )
@@ -100,14 +92,6 @@ class AttentionNetwork(object):
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         num_units=rnn_param.units,
                         use_peepholes=True,
-                        '''
-                        activation=tf.nn.tanh,
-                        initializer=tf.variance_scaling_initializer(
-                            scale=1.0,
-                            mode="fan_avg",
-                            distribution="untruncated_normal"
-                        )
-                        '''
                         activation=tf.nn.relu,
                         initializer=tf.initializers.identity()
                     )
