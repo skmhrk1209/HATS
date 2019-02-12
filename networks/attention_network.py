@@ -6,9 +6,12 @@ from algorithms import *
 from itertools import *
 
 
-def static_rnn(cell, inputs, initial_state):
+def static_rnn(cell, inputs, initial_hiddens):
 
-    return list(accumulate([(None, initial_state)] + inputs, lambda outputs_hiddens, inputs: cell(inputs, outputs_hiddens[1])))[1:]
+    return list(accumulate(
+        [(None, initial_hiddens)] + inputs,
+        lambda outputs_hiddens, inputs: cell(inputs, outputs_hiddens[1])
+    ))[1:]
 
 
 class AttentionNetwork(object):
@@ -84,7 +87,7 @@ class AttentionNetwork(object):
                         function=lambda inputs: static_rnn(
                             cell=irnn_cell,
                             inputs=[feature_maps] * rnn_param.sequence_length,
-                            initial_state=tf.zeros([
+                            initial_hiddens=tf.zeros([
                                 tf.shape(feature_maps)[0],
                                 rnn_param.hidden_units
                             ])
@@ -112,7 +115,7 @@ class AttentionNetwork(object):
                         function=lambda inputs: static_rnn(
                             cell=irnn_cell,
                             inputs=[feature_maps] * rnn_param.sequence_length,
-                            initial_state=inputs
+                            initial_hiddens=inputs
                         ),
                         sequence=inputs
                     )
