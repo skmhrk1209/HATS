@@ -69,6 +69,8 @@ class AttentionNetwork(object):
                     axis=range(2, len(labels.shape))
                 ), axis=1)
 
+            inputs = None
+
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
