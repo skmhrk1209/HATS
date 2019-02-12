@@ -34,7 +34,7 @@ def main(input_filename, output_filename, num_words, num_chars):
                 chars = map_innermost_list(lambda chars: np.pad(
                     chars, [[0, num_chars - len(chars)]],
                     "constant", constant_values=""
-                ).to_list(), chars)
+                ).tolist(), chars)
                 chars = map_innermost_element(lambda char: class_ids[char], chars)
 
                 writer.write(
