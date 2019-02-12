@@ -8,7 +8,7 @@ from algorithms import *
 
 def parse_example(example, sequence_lengths):
 
-    features = tf.parse_single_example(
+    return tf.parse_single_example(
         serialized=example,
         features={
             "path": tf.FixedLenFeature(
@@ -22,14 +22,10 @@ def parse_example(example, sequence_lengths):
         }
     )
 
+
+def preprocess(features, encoding, image_size, data_format, sequence_lengths):
+
     path = tf.cast(features["path"], tf.string)
-    label = tf.cast(features["label"], tf.int32)
-
-    return path, label
-
-
-def preprocess(path, label, encoding, image_size, data_format, sequence_lengths):
-
     image = tf.read_file(features["path"])
     if encoding == "jpeg":
         image = tf.image.decode_jpeg(image, 3)
@@ -41,6 +37,7 @@ def preprocess(path, label, encoding, image_size, data_format, sequence_lengths)
     if data_format == "channels_first":
         image = tf.transpose(image, [2, 0, 1])
 
+    label = tf.cast(features["label"], tf.int32)
     label = tf.reshape(label, sequence_lengths)
 
     return image, label
