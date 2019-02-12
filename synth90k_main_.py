@@ -25,7 +25,7 @@ from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="synth90k_hats_model_", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="chars74k_classifier", help="pretrained model directory")
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecords for training")
 parser.add_argument('--val_filenames', type=str, nargs="+", default=["synth90k_val.tfrecord"], help="tfrecords for validation")
