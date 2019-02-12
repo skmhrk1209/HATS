@@ -38,8 +38,6 @@ def main(input_filename, output_filename, num_words, num_chars):
                 chars = map_innermost_element(lambda char: class_ids[char], chars)
                 chars = flatten_innermost_element(chars)
 
-                print(max(chars))
-
                 writer.write(
                     record=tf.train.Example(
                         features=tf.train.Features(
