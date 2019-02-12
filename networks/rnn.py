@@ -192,7 +192,7 @@ def static_rnn(cell,
                     state_size=cell.state_size)
             else:
                 (output, state) = call_cell()
-            outputs.append((output, state))
+            outputs.append(state)
         # Keras RNN cells only return state as list, even if it's a single tensor.
         if is_keras_rnn_cell and len(state) == 1:
             state = state[0]
