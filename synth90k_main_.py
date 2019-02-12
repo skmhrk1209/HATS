@@ -73,7 +73,7 @@ if __name__ == "__main__":
                 data_format=args.data_format
             ),
             num_units=[1024],
-            classes=38,
+            num_classes=38,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 optimizer=tf.train.AdamOptimizer()
