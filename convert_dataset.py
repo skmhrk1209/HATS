@@ -36,6 +36,7 @@ def main(input_filename, output_filename, num_words, num_chars):
                     "constant", constant_values=""
                 ).tolist(), chars)
                 chars = map_innermost_element(lambda char: class_ids[char], chars)
+                chars = flatten_innermost_element(chars)
 
                 writer.write(
                     record=tf.train.Example(
@@ -48,7 +49,7 @@ def main(input_filename, output_filename, num_words, num_chars):
                                 ),
                                 "label": tf.train.Feature(
                                     int64_list=tf.train.Int64List(
-                                        value=label.reshape([-1]).tolist()
+                                        value=chars
                                     )
                                 )
                             }
