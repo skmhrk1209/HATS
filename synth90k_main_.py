@@ -25,11 +25,11 @@ from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="synth90k_hats_model_", help="model directory")
+parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="chars74k_classifier", help="pretrained model directory")
-parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train_2.tfrecord"], help="tfrecords for training")
-parser.add_argument('--val_filenames', type=str, nargs="+", default=["synth90k_val_2.tfrecord"], help="tfrecords for validation")
-parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_test_2.tfrecord"], help="tfrecords for test")
+parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecords for training")
+parser.add_argument('--val_filenames', type=str, nargs="+", default=["synth90k_val.tfrecord"], help="tfrecords for validation")
+parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_test.tfrecord"], help="tfrecords for test")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
