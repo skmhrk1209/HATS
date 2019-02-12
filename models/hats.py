@@ -40,13 +40,13 @@ class HATS(object):
             return tf.reshape(inputs, outputs_shape)
 
         feature_vectors = map_innermost_element(
-            func=lambda attention_maps: tf.layers.flatten(tf.matmul(
+            function=lambda attention_maps: tf.layers.flatten(tf.matmul(
                 a=spatial_flatten(feature_maps, self.data_format),
                 b=spatial_flatten(attention_maps, self.data_format),
                 transpose_a=False if self.data_format == "channels_first" else True,
                 transpose_b=True if self.data_format == "channels_first" else False
             )),
-            seq=attention_maps
+            sequence=attention_maps
         )
 
         for i, units in enumerate(self.units):
@@ -54,7 +54,7 @@ class HATS(object):
             with tf.variable_scope("dense_block_{}".format(i)):
 
                 feature_vectors = map_innermost_element(
-                    func=compose(
+                    function=compose(
                         lambda inputs: tf.layers.dense(
                             inputs=inputs,
                             units=units,
@@ -76,11 +76,11 @@ class HATS(object):
                         ),
                         lambda inputs: tf.nn.relu(inputs)
                     ),
-                    seq=feature_vectors
+                    sequence=feature_vectors
                 )
 
         logits = map_innermost_element(
-            func=lambda feature_vectors: tf.layers.dense(
+            function=lambda feature_vectors: tf.layers.dense(
                 inputs=feature_vectors,
                 units=self.classes,
                 kernel_initializer=tf.initializers.variance_scaling(
@@ -92,29 +92,29 @@ class HATS(object):
                 name="logits",
                 reuse=tf.AUTO_REUSE
             ),
-            seq=feature_vectors
+            sequence=feature_vectors
         )
 
         predictions = map_innermost_element(
-            func=lambda logits: tf.argmax(logits, axis=-1),
-            seq=logits
+            function=lambda logits: tf.argmax(logits, axis=-1),
+            sequence=logits
         )
 
         attention_maps = map_innermost_element(
-            func=lambda attention_maps: tf.reduce_sum(
+            function=lambda attention_maps: tf.reduce_sum(
                 input_tensor=attention_maps,
                 axis=1 if self.data_format == "channels_first" else 3,
                 keepdims=True
             ),
-            seq=attention_maps
+            sequence=attention_maps
         )
 
         attention_maps = map_innermost_element(
-            func=lambda indices_attention_maps: tf.identity(
+            function=lambda indices_attention_maps: tf.identity(
                 input=indices_attention_maps[1],
                 name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0])))
             ),
-            seq=enumerate_innermost_element(attention_maps)
+            sequence=enumerate_innermost_element(attention_maps)
         )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
@@ -122,15 +122,15 @@ class HATS(object):
             while isinstance(predictions, list):
 
                 predictions = map_innermost_list(
-                    func=lambda predictions: tf.stack(predictions, axis=1),
-                    seq=predictions
+                    function=lambda predictions: tf.stack(predictions, axis=1),
+                    sequence=predictions
                 )
 
             while isinstance(attention_maps, list):
 
                 attention_maps = map_innermost_list(
-                    func=lambda attention_maps: tf.stack(attention_maps, axis=1),
-                    seq=attention_maps
+                    function=lambda attention_maps: tf.stack(attention_maps, axis=1),
+                    sequence=attention_maps
                 )
 
             return tf.estimator.EstimatorSpec(
@@ -145,36 +145,36 @@ class HATS(object):
         while all(flatten_innermost_element(map_innermost_element(lambda labels: len(labels.shape) > 1, labels))):
 
             labels = map_innermost_element(
-                func=lambda labels: tf.unstack(labels, axis=1),
-                seq=labels
+                function=lambda labels: tf.unstack(labels, axis=1),
+                sequence=labels
             )
 
         losses = map_innermost_element(
-            func=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
+            function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
                 labels=labels_logits[0],
                 logits=labels_logits[1]
             ),
-            seq=zip_innermost_element(labels, logits)
+            sequence=zip_innermost_element(labels, logits)
         )
 
         losses = map_innermost_element(
-            func=lambda indices_loss: tf.identity(
+            function=lambda indices_loss: tf.identity(
                 input=indices_loss[1],
                 name="loss_{}".format("_".join(map(str, indices_loss[0])))
             ),
-            seq=enumerate_innermost_element(losses)
+            sequence=enumerate_innermost_element(losses)
         )
 
         loss = tf.reduce_mean(losses)
 
         labels = tf.concat(flatten_innermost_element(map_innermost_list(
-            func=lambda labels: tf.stack(labels, axis=1),
-            seq=labels
+            function=lambda labels: tf.stack(labels, axis=1),
+            sequence=labels
         )), axis=0)
 
         logits = tf.concat(flatten_innermost_element(map_innermost_list(
-            func=lambda logits: tf.stack(logits, axis=1),
-            seq=logits
+            function=lambda logits: tf.stack(logits, axis=1),
+            sequence=logits
         )), axis=0)
 
         indices = tf.not_equal(labels, self.classes - 1)

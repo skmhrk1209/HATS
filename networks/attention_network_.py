@@ -15,7 +15,7 @@ class AttentionNetwork(object):
         self.deconv_params = deconv_params
         self.data_format = data_format
 
-    def __call__(self, inputs, seq_len_getter, training, name="attention_network", reuse=None):
+    def __call__(self, inputs, sequence_lengths_fn, training, name="attention_network", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
 
@@ -70,14 +70,14 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        func=lambda indices_inputs: tf.unstack(
+                        function=lambda indices_inputs: tf.unstack(
                             value=tf.nn.dynamic_rnn(
                                 cell=lstm_cell,
                                 inputs=tf.stack(
                                     values=[indices_inputs[1]] * rnn_param.max_seq_len,
                                     axis=0
                                 ),
-                                sequence_length=seq_len_getter(
+                                sequence_length=sequence_lengths_fn(
                                     indices=list(indices_inputs[0])
                                 ),
                                 initial_state=lstm_cell.zero_state(
@@ -90,13 +90,13 @@ class AttentionNetwork(object):
                             )[0],
                             axis=0
                         ),
-                        seq=enumerate_innermost_element(inputs)
+                        sequence=enumerate_innermost_element(inputs)
                     )
 
             with tf.variable_scope("projection_block"):
 
                 inputs = map_innermost_element(
-                    func=lambda inputs: tf.layers.dense(
+                    function=lambda inputs: tf.layers.dense(
                         inputs=inputs,
                         units=np.prod(image_shape[1:]),
                         activation=tf.nn.relu,
@@ -109,12 +109,12 @@ class AttentionNetwork(object):
                         name="dense",
                         reuse=tf.AUTO_REUSE
                     ),
-                    seq=inputs
+                    sequence=inputs
                 )
 
             inputs = map_innermost_element(
-                func=lambda inputs: tf.reshape(inputs, [-1] + image_shape[1:]),
-                seq=inputs
+                function=lambda inputs: tf.reshape(inputs, [-1] + image_shape[1:]),
+                sequence=inputs
             )
 
             for i, deconv_param in enumerate(self.deconv_params[:-1]):
@@ -122,7 +122,7 @@ class AttentionNetwork(object):
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
                     inputs = map_innermost_element(
-                        func=compose(
+                        function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
                                 inputs=inputs,
                                 filters=deconv_param.filters,
@@ -148,7 +148,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
-                        seq=inputs
+                        sequence=inputs
                     )
 
             for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
@@ -156,7 +156,7 @@ class AttentionNetwork(object):
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
                     inputs = map_innermost_element(
-                        func=compose(
+                        function=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
                                 inputs=inputs,
                                 filters=deconv_param.filters,
@@ -182,7 +182,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.sigmoid(inputs)
                         ),
-                        seq=inputs
+                        sequence=inputs
                     )
 
             return inputs
