@@ -7,6 +7,15 @@ from networks import ops
 from algorithms import *
 
 
+def spatial_flatten(inputs, data_format):
+
+    inputs_shape = inputs.shape.as_list()
+    outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
+                     [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
+
+    return tf.reshape(inputs, outputs_shape)
+
+
 class HATS(object):
 
     def __init__(self, backbone_network, attention_network,
@@ -50,14 +59,6 @@ class HATS(object):
             ),
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
-
-        def spatial_flatten(inputs, data_format):
-
-            inputs_shape = inputs.shape.as_list()
-            outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
-                             [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
-
-            return tf.reshape(inputs, outputs_shape)
 
         feature_vectors = map_innermost_element(
             func=lambda attention_maps: tf.layers.flatten(tf.matmul(
@@ -169,7 +170,7 @@ class HATS(object):
                     labels=labels_logits[0],
                     logits=labels_logits[1]
                 ),
-                false_fn=lambda: tf.zeros([tf.shape(labels)[0]])
+                false_fn=lambda: tf.zeros([tf.shape(labels_logits[0])[0]])
             ),
             seq=zip_innermost_element(labels, logits)
         ))
