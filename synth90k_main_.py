@@ -73,7 +73,7 @@ if __name__ == "__main__":
                 data_format=args.data_format
             ),
             units=[1024],
-            classes=37,
+            classes=38,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 optimizer=tf.train.AdamOptimizer()
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format,
-                seq_lens=[23]
+                seq_lens=[24]
             ),
             max_steps=args.max_steps
         )
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format,
-                seq_lens=[23]
+                seq_lens=[24]
             ),
             steps=args.steps
         ))
