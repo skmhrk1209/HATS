@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 ],
                 data_format=args.data_format
             ),
-            units=[1024],
+            units=[512],
             classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
