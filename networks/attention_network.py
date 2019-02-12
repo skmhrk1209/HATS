@@ -84,10 +84,7 @@ class AttentionNetwork(object):
                         function=lambda inputs: static_rnn(
                             cell=irnn_cell,
                             inputs=[feature_maps] * rnn_param.sequence_length,
-                            initial_state=irnn_cell.zero_state(
-                                batch_size=tf.shape(inputs)[0],
-                                dtype=tf.float32
-                            )
+                            initial_state=tf.zeros([tf.shape(feature_maps)[0], rnn_param.hidden_units])
                         ),
                         sequence=inputs
                     )
