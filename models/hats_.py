@@ -164,18 +164,6 @@ class HATS(object):
                 seq=labels
             )
 
-        loss = tf.reduce_mean(map_innermost_element(
-            func=lambda labels_logits: tf.cond(
-                pred=tf.less(labels_logits[0], self.classes),
-                true_fn=lambda: tf.losses.sparse_softmax_cross_entropy(
-                    labels=labels_logits[0],
-                    logits=labels_logits[1]
-                ),
-                false_fn=lambda: tf.zeros([])
-            ),
-            seq=zip_innermost_element(labels, logits)
-        ))
-
         labels = tf.concat(flatten_innermost_element(map_innermost_list(
             func=lambda labels: tf.stack(labels, axis=1),
             seq=labels
@@ -197,11 +185,19 @@ class HATS(object):
         labels = tf.gather_nd(labels, indices)
         logits = tf.gather_nd(logits, indices)
 
-        seq_lens = tf.count_nonzero(tf.less(labels, self.classes), axis=1)
-        seq_mask = tf.sequence_mask(seq_lens, labels.shape[1])
+        sequence_lengths = tf.count_nonzero(tf.less(labels, self.classes), axis=1)
+        sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[1])
 
-        labels *= seq_mask
-        predictions *= seq_mask
+        loss = tf.contrib.seq2seq.sequence_loss(
+            logits=logits,
+            targets=labels,
+            weights=sequence_mask,
+            average_across_timesteps=True,
+            average_across_batch=True
+        )
+
+        labels *= sequence_mask
+        predictions *= sequence_mask
 
         word_accuracy = metrics.word_accuracy(
             labels=labels,
