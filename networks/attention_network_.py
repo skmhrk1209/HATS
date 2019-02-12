@@ -69,7 +69,7 @@ class AttentionNetwork(object):
                         )
                     )
 
-                    print(seq_len_getter(indices=[])))
+                    print(seq_len_getter(indices=[]))
 
                     inputs = map_innermost_element(
                         func=lambda indices_inputs: tf.unstack(
