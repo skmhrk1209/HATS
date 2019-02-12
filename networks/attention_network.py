@@ -84,7 +84,7 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda inputs: static_rnn(
+                        function=lambda inputs_hiddens: static_rnn(
                             cell=irnn_cell,
                             inputs=[feature_maps] * rnn_param.sequence_length,
                             initial_hiddens=tf.zeros([
@@ -112,16 +112,16 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda inputs: static_rnn(
+                        function=lambda inputs_hiddens: static_rnn(
                             cell=irnn_cell,
                             inputs=[feature_maps] * rnn_param.sequence_length,
-                            initial_hiddens=inputs
+                            initial_hiddens=inputs_hiddens[0]
                         ),
                         sequence=inputs
                     )
 
             inputs = map_innermost_element(
-                function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
+                function=lambda inputs_hiddens: tf.reshape(inputs_hiddens[0], [-1] + shape[1:]),
                 sequence=inputs
             )
 
