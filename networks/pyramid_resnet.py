@@ -26,7 +26,7 @@ class PyramidResNet(object):
                     padding="same",
                     data_format=self.data_format,
                     use_bias=False,
-                    kernel_initializer=tf.variance_scaling_initializer(
+                    kernel_initializer=tf.initializers.variance_scaling(
                         scale=2.0,
                         mode="fan_in",
                         distribution="untruncated_normal"
@@ -95,7 +95,7 @@ class PyramidResNet(object):
                     padding="same",
                     data_format=self.data_format,
                     use_bias=False,
-                    kernel_initializer=tf.variance_scaling_initializer(
+                    kernel_initializer=tf.initializers.variance_scaling(
                         scale=2.0,
                         mode="fan_in",
                         distribution="untruncated_normal"
@@ -143,7 +143,7 @@ class PyramidResNet(object):
                     padding="same",
                     data_format=data_format,
                     use_bias=False,
-                    kernel_initializer=tf.variance_scaling_initializer(
+                    kernel_initializer=tf.initializers.variance_scaling(
                         scale=2.0,
                         mode="fan_in",
                         distribution="untruncated_normal"
@@ -164,7 +164,7 @@ class PyramidResNet(object):
                 padding="same",
                 data_format=data_format,
                 use_bias=False,
-                kernel_initializer=tf.variance_scaling_initializer(
+                kernel_initializer=tf.initializers.variance_scaling(
                     scale=2.0,
                     mode="fan_in",
                     distribution="untruncated_normal"
@@ -187,7 +187,7 @@ class PyramidResNet(object):
                 padding="same",
                 data_format=data_format,
                 use_bias=False,
-                kernel_initializer=tf.variance_scaling_initializer(
+                kernel_initializer=tf.initializers.variance_scaling(
                     scale=2.0,
                     mode="fan_in",
                     distribution="untruncated_normal"

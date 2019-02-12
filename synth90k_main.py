@@ -28,7 +28,6 @@ parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help
 parser.add_argument("--pretrained_model_dir", type=str, default="chars74k_classifier", help="pretrained model directory")
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecords for training")
 parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_test.tfrecord"], help="tfrecords for test")
-parser.add_argument("--num_epochs", type=int, default=None, help="number of training epochs")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
@@ -71,7 +70,7 @@ if __name__ == "__main__":
                 ],
                 data_format=args.data_format
             ),
-            units=[512],
+            units=[],
             classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
@@ -103,9 +102,9 @@ if __name__ == "__main__":
         estimator.train(
             input_fn=Dataset(
                 filenames=args.train_filenames,
-                num_epochs=args.num_epochs,
                 batch_size=args.batch_size,
-                random_seed=args.random_seed,
+                num_epochs=None,
+                shuffle=True,
                 sequence_lengths=[23],
                 image_size=[256, 256],
                 data_format=args.data_format,
@@ -119,9 +118,9 @@ if __name__ == "__main__":
         print(estimator.evaluate(
             input_fn=Dataset(
                 filenames=args.test_filenames,
-                num_epochs=1,
                 batch_size=args.batch_size,
-                random_seed=args.random_seed,
+                num_epochs=1,
+                shuffle=False,
                 sequence_lengths=[23],
                 image_size=[256, 256],
                 data_format=args.data_format,

@@ -1,50 +1,61 @@
 import tensorflow as tf
 
 
-def bilinear_upsampling(inputs, size, align_corners, data_format):
+def irnn(inputs_sequence, hiddens, hidden_units,
+         output_units, name="irnn", reuse=None):
+    """ Identity Recurrent Neural Network 
+    composed of ReLUs and initialized with the identity matrix 
+    See [Le et al., 2015](https://arxiv.org/pdf/1504.00941.pdf)
+    """
 
-    if data_format == "channels_first":
-        inputs = tf.transpose(inputs, [0, 2, 3, 1])
+    with tf.variable_scope(name, reuse=reuse):
 
-    inputs = tf.image.resize_bilinear(inputs, size, align_corners)
+        outputs_sequence = []
 
-    if data_format == "channels_first":
-        inputs = tf.transpose(inputs, [0, 3, 1, 2])
+        for i, inputs in enumerate(inputs_sequence):
 
-    return inputs
+            inputs = tf.layers.dense(
+                inputs=inputs,
+                units=self.hidden_units,
+                kernel_initializer=tf.initializers.variance_scaling(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="untruncated_normal"
+                ),
+                bias_initializer=tf.initializers.zeros(),
+                name="input_dense",
+                reuse=tf.AUTO_REUSE
+            )
 
+            hiddens = tf.layers.dense(
+                inputs=hiddens,
+                units=self.hidden_units,
+                kernel_initializer=tf.initializers.identity(),
+                bias_initializer=tf.initializers.zeros(),
+                name="hidden_dense",
+                reuse=tf.AUTO_REUSE
+            )
 
-def batch_normalization(inputs, data_format, training, name=None, reuse=None):
+            hiddens = tf.nn.relu(inputs + hiddens)
 
-    return tf.layers.batch_normalization(
-        inputs=inputs,
-        axis=1 if data_format == "channels_first" else 3,
-        training=training,
-        name=name,
-        reuse=reuse
-    )
+            outputs = tf.layers.dense(
+                inputs=hiddens,
+                units=self.output_units,
+                kernel_initializer=tf.initializers.variance_scaling(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="untruncated_normal"
+                ),
+                bias_initializer=tf.initializers.zeros(),
+                name="output_dense",
+                reuse=tf.AUTO_REUSE
+            )
 
+            outputs = tf.nn.relu(outputs)
 
-def group_normalization(inputs, groups, data_format, name=None, reuse=None):
+            outputs_sequence.append(outputs)
 
-    return tf.contrib.layers.group_norm(
-        inputs=inputs,
-        groups=groups,
-        channels_axis=1 if data_format == "channels_first" else 3,
-        reduction_axes=[2, 3] if data_format == "channels_first" else [1, 2],
-        scope=name,
-        reuse=reuse
-    )
-
-
-def global_average_pooling2d(inputs, data_format, keep_dims=False, name="global_average_pooling2d"):
-
-    return tf.reduce_mean(
-        input_tensor=inputs,
-        axis=[2, 3] if data_format == "channels_first" else [1, 2],
-        keep_dims=keep_dims,
-        name=name
-    )
+        return outputs_sequence
 
 
 def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
@@ -189,3 +200,49 @@ def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
     with tf.variable_scope(name):
         output = transform(inputs, params, out_size)
         return output
+
+
+def bilinear_upsampling(inputs, size, align_corners, data_format):
+
+    if data_format == "channels_first":
+        inputs = tf.transpose(inputs, [0, 2, 3, 1])
+
+    inputs = tf.image.resize_bilinear(inputs, size, align_corners)
+
+    if data_format == "channels_first":
+        inputs = tf.transpose(inputs, [0, 3, 1, 2])
+
+    return inputs
+
+
+def batch_normalization(inputs, data_format, training, name=None, reuse=None):
+
+    return tf.layers.batch_normalization(
+        inputs=inputs,
+        axis=1 if data_format == "channels_first" else 3,
+        training=training,
+        name=name,
+        reuse=reuse
+    )
+
+
+def group_normalization(inputs, groups, data_format, name=None, reuse=None):
+
+    return tf.contrib.layers.group_norm(
+        inputs=inputs,
+        groups=groups,
+        channels_axis=1 if data_format == "channels_first" else 3,
+        reduction_axes=[2, 3] if data_format == "channels_first" else [1, 2],
+        scope=name,
+        reuse=reuse
+    )
+
+
+def global_average_pooling2d(inputs, data_format, keep_dims=False, name="global_average_pooling2d"):
+
+    return tf.reduce_mean(
+        input_tensor=inputs,
+        axis=[2, 3] if data_format == "channels_first" else [1, 2],
+        keep_dims=keep_dims,
+        name=name
+    )

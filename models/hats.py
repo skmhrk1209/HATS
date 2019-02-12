@@ -57,7 +57,7 @@ class HATS(object):
                             inputs=inputs,
                             units=units,
                             use_bias=False,
-                            kernel_initializer=tf.variance_scaling_initializer(
+                            kernel_initializer=tf.initializers.variance_scaling(
                                 scale=2.0,
                                 mode="fan_in",
                                 distribution="untruncated_normal"
@@ -81,6 +81,12 @@ class HATS(object):
             function=lambda feature_vectors: tf.layers.dense(
                 inputs=feature_vectors,
                 units=self.classes,
+                kernel_initializer=tf.initializers.variance_scaling(
+                    scale=1.0,
+                    mode="fan_avg",
+                    distribution="untruncated_normal"
+                ),
+                bias_initializer=tf.initializers.zeros(),
                 name="logits",
                 reuse=tf.AUTO_REUSE
             ),

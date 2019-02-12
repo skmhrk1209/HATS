@@ -8,24 +8,27 @@ from algorithms import *
 
 class Dataset(object):
 
-    def __init__(self, filenames, num_epochs, batch_size, random_seed,
+    def __init__(self, filenames, batch_size, num_epochs, shuffle,
                  sequence_lengths, image_size, data_format, encoding):
 
         self.dataset = tf.data.TFRecordDataset(
             filenames=filenames,
             num_parallel_reads=os.cpu_count()
         )
-        self.dataset = self.dataset.shuffle(
-            buffer_size=sum([
-                len(list(tf.io.tf_record_iterator(filename)))
-                for filename in filenames
-            ]),
-            seed=random_seed,
-            reshuffle_each_iteration=True
-        )
+
+        if shuffle:
+            self.dataset = self.dataset.shuffle(
+                buffer_size=sum([
+                    len(list(tf.io.tf_record_iterator(filename)))
+                    for filename in filenames
+                ]),
+                reshuffle_each_iteration=True
+            )
+
         self.dataset = self.dataset.repeat(
             count=num_epochs
         )
+
         self.dataset = self.dataset.map(
             map_func=functools.partial(
                 self.parse,
@@ -36,10 +39,12 @@ class Dataset(object):
             ),
             num_parallel_calls=os.cpu_count()
         )
+
         self.dataset = self.dataset.batch(
             batch_size=batch_size,
             drop_remainder=True
         )
+
         self.dataset = self.dataset.prefetch(
             buffer_size=1
         )

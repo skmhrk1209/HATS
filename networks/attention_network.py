@@ -6,18 +6,6 @@ from algorithms import *
 from itertools import *
 
 
-def static_rnn(cell, inputs_sequence, hiddens):
-
-    outputs_sequence = []
-
-    for inputs in inputs_sequence:
-
-        outputs, hiddens = cell(inputs, hiddens)
-        outputs_sequence.append(outputs)
-
-    return outputs_sequence
-
-
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, rnn_params, deconv_params, data_format):
@@ -44,7 +32,7 @@ class AttentionNetwork(object):
                             padding="same",
                             data_format=self.data_format,
                             use_bias=False,
-                            kernel_initializer=tf.variance_scaling_initializer(
+                            kernel_initializer=tf.initializers.variance_scaling(
                                 scale=2.0,
                                 mode="fan_in",
                                 distribution="untruncated_normal"
@@ -75,26 +63,15 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    irnn_cell = rnn_cell.IRNNCell(
-                        input_units=feature_maps.shape[-1],
-                        hidden_units=rnn_param.hidden_units,
-                        output_units=rnn_param.output_units,
-                        kernel_initializer=tf.variance_scaling_initializer(
-                            scale=2.0,
-                            mode="fan_in",
-                            distribution="untruncated_normal"
-                        ),
-                        bias_initializer=tf.zeros_initializer()
-                    )
-
                     inputs = map_innermost_element(
-                        function=lambda inputs: static_rnn(
-                            cell=irnn_cell,
+                        function=lambda inputs: ops.irnn(
                             inputs_sequence=[feature_maps] * rnn_param.sequence_length,
                             hiddens=tf.zeros([
                                 tf.shape(feature_maps)[0],
                                 rnn_param.hidden_units
-                            ])
+                            ]),
+                            hidden_units=rnn_param.hidden_units,
+                            output_units=rnn_param.output_units
                         ),
                         sequence=inputs
                     )
@@ -103,23 +80,12 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    irnn_cell = rnn_cell.IRNNCell(
-                        input_units=feature_maps.shape[-1],
-                        hidden_units=rnn_param.hidden_units,
-                        output_units=rnn_param.output_units,
-                        kernel_initializer=tf.variance_scaling_initializer(
-                            scale=2.0,
-                            mode="fan_in",
-                            distribution="untruncated_normal"
-                        ),
-                        bias_initializer=tf.zeros_initializer()
-                    )
-
                     inputs = map_innermost_element(
-                        function=lambda inputs: static_rnn(
-                            cell=irnn_cell,
+                        function=lambda inputs: ops.irnn(
                             inputs_sequence=[feature_maps] * rnn_param.sequence_length,
-                            hiddens=inputs
+                            hiddens=inputs,
+                            hidden_units=rnn_param.hidden_units,
+                            output_units=rnn_param.output_units
                         ),
                         sequence=inputs
                     )
@@ -143,7 +109,7 @@ class AttentionNetwork(object):
                                 padding="same",
                                 data_format=self.data_format,
                                 use_bias=False,
-                                kernel_initializer=tf.variance_scaling_initializer(
+                                kernel_initializer=tf.initializers.variance_scaling(
                                     scale=2.0,
                                     mode="fan_in",
                                     distribution="untruncated_normal"
@@ -177,7 +143,7 @@ class AttentionNetwork(object):
                                 padding="same",
                                 data_format=self.data_format,
                                 use_bias=False,
-                                kernel_initializer=tf.variance_scaling_initializer(
+                                kernel_initializer=tf.initializers.variance_scaling(
                                     scale=1.0,
                                     mode="fan_avg",
                                     distribution="untruncated_normal"
