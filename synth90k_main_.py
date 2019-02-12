@@ -6,7 +6,7 @@
 # val: 802734
 # test: 891927
 # max num chars: 23
-# classes: [0-9A-Z](case-insensitive)
+# classes: [0-9A-Z!(eos)](case-insensitive)
 # word accuracy:
 # edit distance:
 # pretrained model: chars74k classifier

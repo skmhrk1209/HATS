@@ -25,7 +25,7 @@ def main(input_filename, output_filename, num_words, num_chars):
 
         with open(input_filename) as f:
 
-            for line in f:
+            for line in tqdm(f):
 
                 path, words = line.split()
                 path = os.path.join(os.path.dirname(sys.argv[1]), path)
