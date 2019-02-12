@@ -19,7 +19,7 @@ import argparse
 import functools
 import dataset
 from attrdict import AttrDict
-from models.hats import HATS
+from models.hats_ import HATS
 from networks.attention_network_ import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
