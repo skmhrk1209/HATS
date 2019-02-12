@@ -57,12 +57,14 @@ class AttentionNetwork(object):
                 seq=inputs
             )
 
-            labels = tf.expand_dims(labels, axis=-1)
-
             def get_seq_lens(labels, indices):
 
                 classes = labels.shape[-1]
-                labels = tf.slice(labels, (0,) + indices, (-1,) + (1,) * len(indices))
+                labels = tf.slice(
+                    input_=labels,
+                    begin=(0,) + indices + (0,) * (len(labels.shape) - len(indices) - 1),
+                    size=(-1,) + (1,) * len(indices) + (-1,) * (len(labels.shape) - len(indices) - 1)
+                )
 
                 return tf.count_nonzero(tf.reduce_any(
                     input_tensor=tf.not_equal(labels, classes - 1),
