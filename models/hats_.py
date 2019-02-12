@@ -7,7 +7,7 @@ from networks import ops
 from algorithms import *
 
 
-def sequence_length_fn(labels, classes, indices):
+def sequence_lengths_fn(labels, classes, indices):
 
     begin = [0] + indices + [0] * (len(labels.shape[1:]) - len(indices))
     size = [-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
@@ -53,8 +53,8 @@ class HATS(object):
 
         attention_maps = self.attention_network(
             inputs=feature_maps,
-            sequence_length_fn=functools.partial(
-                sequence_length_fn,
+            sequence_lengths_fn=functools.partial(
+                sequence_lengths_fn,
                 labels=labels,
                 classes=self.classes
             ),
