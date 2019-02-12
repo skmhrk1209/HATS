@@ -7,10 +7,10 @@ from tqdm import *
 from algorithms import *
 
 
-def pad(seq, seq_len, value):
-    while len(seq) < seq_len:
-        seq.append(value)
-    return seq
+def pad(sequence, sequence_length, value):
+    while len(sequence) < sequence_length:
+        sequence.append(value)
+    return sequence
 
 
 def main(input_filename, output_filename, num_words, num_chars):
@@ -30,11 +30,11 @@ def main(input_filename, output_filename, num_words, num_chars):
                 path, words = line.split()
                 path = os.path.join(os.path.dirname(sys.argv[1]), path)
                 words = words.split("_")
-                words = map_innermost_list(lambda words: pad(words, num_words - len(words), ""), words)
+                words = map_innermost_list(lambda words: pad(words, num_words, ""), words)
                 words = map_innermost_element(lambda word: word + "!", words)
                 words = map_innermost_element(lambda word: word.upper(), words)
                 chars = map_innermost_element(lambda word: list(word), words)
-                chars = map_innermost_list(lambda chars: pad(chars, num_chars - len(chars), ""), chars)
+                chars = map_innermost_list(lambda chars: pad(chars, num_chars, ""), chars)
                 chars = map_innermost_element(lambda char: class_ids[char], chars)
                 chars = flatten_innermost_element(chars)
 
