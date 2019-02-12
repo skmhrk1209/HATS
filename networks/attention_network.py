@@ -5,35 +5,10 @@ from . import rnn_cell
 from algorithms import *
 from itertools import *
 
-from tensorflow.python.keras.utils import tf_utils
-from tensorflow.python.ops import init_ops
 
+def static_rnn(cell, inputs, initial_state):
 
-class IRNNCell(tf.nn.rnn_cell.BasicRNNCell):
-
-    def __init__(self, *args, **kwargs):
-
-        super(IRNNCell, self).__init__(*args, **kwargs)
-
-    @tf_utils.shape_type_conversion
-    def build(self, inputs_shape):
-
-        if inputs_shape[-1] is None:
-            raise ValueError("Expected inputs.shape[-1] to be known, "
-                             "saw shape: %s" % str(inputs_shape))
-
-        self._kernel = self.add_variable(
-            name="kernel",
-            shape=[inputs_shape[-1] + self._num_units, self._num_units],
-            initializer=init_ops.identity_initializer(self.dtype)
-        )
-        self._bias = self.add_variable(
-            name="bias",
-            shape=[self._num_units],
-            initializer=init_ops.zeros_initializer(dtype=self.dtype)
-        )
-
-        self.built = True
+    return list(accumulate([initial_state] + inputs, lambda hiddens, inputs: cell(inputs, hiddens)[0]))[1:]
 
 
 class AttentionNetwork(object):
@@ -89,17 +64,20 @@ class AttentionNetwork(object):
 
             feature_maps = inputs
 
-            def static_rnn(cell, inputs, initial_state):
-
-                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
-
             for i, rnn_param in enumerate(self.rnn_params[:1]):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    irnn_cell = IRNNCell(
-                        num_units=rnn_param.num_units,
-                        activation=tf.nn.relu
+                    irnn_cell = rnn_cell.IRNNCell(
+                        input_units=feature_maps.shape[-1],
+                        hidden_units=rnn_param.hidden_units,
+                        output_units=rnn_param.output_units,
+                        kernel_initializer=tf.variance_scaling_initializer(
+                            scale=2.0,
+                            mode="fan_in",
+                            distribution="untruncated_normal"
+                        ),
+                        bias_initializer=tf.zeros_initializer()
                     )
 
                     inputs = map_innermost_element(
@@ -118,50 +96,26 @@ class AttentionNetwork(object):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    irnn_cell = IRNNCell(
-                        num_units=rnn_param.num_units,
-                        activation=tf.nn.relu
+                    irnn_cell = rnn_cell.IRNNCell(
+                        input_units=feature_maps.shape[-1],
+                        hidden_units=rnn_param.hidden_units,
+                        output_units=rnn_param.output_units,
+                        kernel_initializer=tf.variance_scaling_initializer(
+                            scale=2.0,
+                            mode="fan_in",
+                            distribution="untruncated_normal"
+                        ),
+                        bias_initializer=tf.zeros_initializer()
                     )
 
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=irnn_cell,
                             inputs=[feature_maps] * rnn_param.sequence_length,
-                            initial_state=tf.layers.dense(
-                                inputs=inputs,
-                                units=rnn_param.units,
-                                activation=tf.nn.relu,
-                                kernel_initializer=tf.variance_scaling_initializer(
-                                    scale=2.0,
-                                    mode="fan_in",
-                                    distribution="untruncated_normal"
-                                ),
-                                bias_initializer=tf.zeros_initializer(),
-                                name="projection",
-                                reuse=tf.AUTO_REUSE
-                            )
+                            initial_state=inputs
                         ),
                         sequence=inputs
                     )
-
-            with tf.variable_scope("projection_block"):
-
-                inputs = map_innermost_element(
-                    function=lambda inputs: tf.layers.dense(
-                        inputs=inputs,
-                        units=np.prod(shape[1:]),
-                        activation=tf.nn.relu,
-                        kernel_initializer=tf.variance_scaling_initializer(
-                            scale=2.0,
-                            mode="fan_in",
-                            distribution="untruncated_normal"
-                        ),
-                        bias_initializer=tf.zeros_initializer(),
-                        name="dense",
-                        reuse=tf.AUTO_REUSE
-                    ),
-                    sequence=inputs
-                )
 
             inputs = map_innermost_element(
                 function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
