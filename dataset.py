@@ -6,9 +6,9 @@ import os
 from algorithms import *
 
 
-def parse_example(example, sequence_length):
+def parse_example(example, sequence_lengths, encoding, image_size, data_format):
 
-    return tf.parse_single_example(
+    features = tf.parse_single_example(
         serialized=example,
         features={
             "path": tf.FixedLenFeature(
@@ -16,17 +16,14 @@ def parse_example(example, sequence_length):
                 dtype=tf.string
             ),
             "label": tf.FixedLenFeature(
-                shape=[sequence_length],
+                shape=[np.prod(sequence_lengths)],
                 dtype=tf.int64
             )
         }
     )
 
-
-def preprocess(features, encoding, image_size, data_format, sequence_lengths):
-
-    path = tf.cast(features["path"], tf.string)
-    image = tf.read_file(features["path"])
+    image = tf.cast(features["path"], tf.string)
+    image = tf.read_file(image)
     if encoding == "jpeg":
         image = tf.image.decode_jpeg(image, 3)
     elif encoding == "png":
@@ -60,18 +57,12 @@ def input_fn(filenames, batch_size, num_epochs, shuffle,
         )
     dataset = dataset.repeat(count=num_epochs)
     dataset = dataset.map(
-        map_func=compose(
-            functools.partial(
-                parse_example,
-                sequence_length=np.prod(sequence_lengths)
-            ),
-            functools.partial(
-                preprocess,
-                encoding=encoding,
-                image_size=image_size,
-                data_format=data_format,
-                sequence_lengths=sequence_lengths
-            )
+        map_func=functools.partial(
+            parse_example,
+            sequence_lengths=sequence_lengths,
+            encoding=encoding,
+            image_size=image_size,
+            data_format=data_format
         ),
         num_parallel_calls=os.cpu_count()
     )
