@@ -74,7 +74,7 @@ class AttentionNetwork(object):
                             value=tf.nn.dynamic_rnn(
                                 cell=lstm_cell,
                                 inputs=tf.stack(
-                                    values=[indices_inputs[1]] * rnn_param.max_seq_len, 
+                                    values=[indices_inputs[1]] * rnn_param.max_seq_len,
                                     axis=0
                                 ),
                                 sequence_length=seq_len_getter(
@@ -87,7 +87,7 @@ class AttentionNetwork(object):
                                 parallel_iterations=os.cpu_count(),
                                 swap_memory=True,
                                 time_major=True
-                            )[0], 
+                            )[0],
                             axis=0
                         ),
                         seq=enumerate_innermost_element(inputs)
@@ -97,7 +97,7 @@ class AttentionNetwork(object):
 
                 inputs = map_innermost_element(
                     func=lambda inputs: tf.layers.dense(
-                        inputs=inputs.h,
+                        inputs=inputs,
                         units=np.prod(image_shape[1:]),
                         activation=tf.nn.relu,
                         kernel_initializer=tf.initializers.variance_scaling(
