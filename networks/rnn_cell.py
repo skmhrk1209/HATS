@@ -7,7 +7,7 @@ class IRNNCell(object):
                  kernel_initializer, bias_initializer,
                  name="irnn_cell", reuse=None):
 
-        with tf.variable_scope(name=name, reuse=reuse):
+        with tf.variable_scope(name, reuse=reuse):
 
             self.input_kernel = tf.get_variable(
                 name="input_kernel",
