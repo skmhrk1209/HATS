@@ -41,7 +41,7 @@ def parse_example(example, sequence_lengths, encoding, image_size, data_format):
 
 
 def input_fn(filenames, batch_size, num_epochs, shuffle,
-             encoding, image_size, data_format, sequence_lengths):
+             sequence_lengths, encoding, image_size, data_format):
 
     dataset = tf.data.TFRecordDataset(
         filenames=filenames,

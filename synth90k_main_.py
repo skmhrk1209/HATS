@@ -106,10 +106,10 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=None,
                 shuffle=True,
+                sequence_lengths=[24],
                 encoding="jpeg",
                 image_size=[256, 256],
-                data_format=args.data_format,
-                sequence_lengths=[24]
+                data_format=args.data_format
             ),
             max_steps=args.max_steps
         )
@@ -123,10 +123,10 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=1,
                 shuffle=False,
+                sequence_lengths=[24],
                 encoding="jpeg",
                 image_size=[256, 256],
-                data_format=args.data_format,
-                sequence_lengths=[24]
+                data_format=args.data_format
             ),
             steps=args.steps
         ))
