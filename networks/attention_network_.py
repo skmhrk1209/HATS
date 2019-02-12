@@ -15,7 +15,7 @@ class AttentionNetwork(object):
         self.deconv_params = deconv_params
         self.data_format = data_format
 
-    def __call__(self, inputs, labels, training, name="attention_network", reuse=None):
+    def __call__(self, inputs, labels, classes, training, name="attention_network", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
 
@@ -59,15 +59,14 @@ class AttentionNetwork(object):
 
             def get_seq_lens(labels, indices):
 
-                classes = labels.shape[-1]
                 labels = tf.slice(
                     input_=labels,
-                    begin=(0,) + indices + (0,) * (len(labels.shape) - len(indices) - 1),
-                    size=(-1,) + (1,) * len(indices) + (-1,) * (len(labels.shape) - len(indices) - 1)
+                    begin=[0] + indices + [0] * (len(labels.shape[1:]) - len(indices)),
+                    size=[-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
                 )
 
                 return tf.count_nonzero(tf.reduce_any(
-                    input_tensor=tf.not_equal(labels, classes - 1),
+                    input_tensor=tf.not_equal(labels, classes),
                     axis=list(range(2, len(labels.shape)))
                 ), axis=1)
 
@@ -92,8 +91,8 @@ class AttentionNetwork(object):
                             inputs=[indices_inputs[1]] * rnn_param.max_seq_len,
                             sequence_length=get_seq_lens(
                                 labels=labels,
-                                indices=indices_inputs[0]
-                            ) + 1,
+                                indices=list(indices_inputs[0])
+                            ),
                             initial_state=lstm_cell.zero_state(
                                 batch_size=tf.shape(indices_inputs[1])[0],
                                 dtype=tf.float32
