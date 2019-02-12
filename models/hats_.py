@@ -35,11 +35,11 @@ def spatial_flatten(inputs, data_format):
 class HATS(object):
 
     def __init__(self, backbone_network, attention_network,
-                 units, classes, data_format, hyper_params):
+                 num_units, classes, data_format, hyper_params):
 
         self.backbone_network = backbone_network
         self.attention_network = attention_network
-        self.units = units
+        self.num_units = num_units
         self.classes = classes
         self.data_format = data_format
         self.hyper_params = hyper_params
@@ -71,7 +71,7 @@ class HATS(object):
             sequence=attention_maps
         )
 
-        for i, units in enumerate(self.units):
+        for i, num_units in enumerate(self.num_units):
 
             with tf.variable_scope("dense_block_{}".format(i)):
 
@@ -79,7 +79,7 @@ class HATS(object):
                     function=compose(
                         lambda inputs: tf.layers.dense(
                             inputs=inputs,
-                            units=units,
+                            units=num_units,
                             use_bias=False,
                             kernel_initializer=tf.initializers.variance_scaling(
                                 scale=2.0,

@@ -74,7 +74,7 @@ class AttentionNetwork(object):
                             value=tf.nn.dynamic_rnn(
                                 cell=lstm_cell,
                                 inputs=tf.stack(
-                                    values=[indices_inputs[1]] * rnn_param.max_seq_len,
+                                    values=[indices_inputs[1]] * rnn_param.max_sequence_length,
                                     axis=0
                                 ),
                                 sequence_length=sequence_lengths_fn(
