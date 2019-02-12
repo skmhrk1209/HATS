@@ -47,7 +47,7 @@ def preprocess(path, label, encoding, image_size, data_format, sequence_lengths)
     return image, label
 
 
-def input_fn(self, filenames, batch_size, num_epochs, shuffle,
+def input_fn(filenames, batch_size, num_epochs, shuffle,
              encoding, image_size, data_format, sequence_lengths):
 
     dataset = tf.data.TFRecordDataset(
