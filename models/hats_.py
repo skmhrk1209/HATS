@@ -171,7 +171,7 @@ class HATS(object):
                     labels=labels_logits[0],
                     logits=labels_logits[1]
                 ),
-                false_fn=lambda: tf.zeros_like(labels_logits[0])
+                false_fn=lambda: tf.zeros([])
             ),
             seq=zip_innermost_element(labels, logits)
         ))
