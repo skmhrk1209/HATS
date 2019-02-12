@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import skimage
 import glob
 import sys
 import os
@@ -11,6 +12,14 @@ def pad(sequence, sequence_length, value):
     while len(sequence) < sequence_length:
         sequence.append(value)
     return sequence
+
+
+def invalid(path):
+    try:
+        skimage.io.imread(path)
+    except:
+        return True
+    return False
 
 
 def main(input_filename, output_filename, num_words, num_chars):
@@ -29,6 +38,10 @@ def main(input_filename, output_filename, num_words, num_chars):
 
                 path, words = line.split()
                 path = os.path.join(os.path.dirname(sys.argv[1]), path)
+                if invalid(path):
+                    print("invalid file: {}".format(path))
+                    continue
+
                 words = words.split("_")
                 words = map_innermost_list(lambda words: pad(words, num_words, ""), words)
                 words = map_innermost_element(lambda word: word + "!", words)
