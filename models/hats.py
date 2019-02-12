@@ -33,7 +33,7 @@ class HATS(object):
 
         def spatial_flatten(inputs, data_format):
 
-            inputs_shape = inputs.get_shape().as_list()
+            inputs_shape = inputs.shape.as_list()
             outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
                              [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
 
@@ -101,10 +101,17 @@ class HATS(object):
         )
 
         attention_maps = map_innermost_element(
-            func=lambda indices_attention_maps: tf.reduce_sum(
-                input_tensor=indices_attention_maps[1],
+            func=lambda attention_maps: tf.reduce_sum(
+                input_tensor=attention_maps,
                 axis=1 if self.data_format == "channels_first" else 3,
-                keepdims=True,
+                keepdims=True
+            ),
+            seq=attention_maps
+        )
+
+        attention_maps = map_innermost_element(
+            func=lambda indices_attention_maps: tf.identity(
+                input=indices_attention_maps[1],
                 name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0])))
             ),
             seq=enumerate_innermost_element(attention_maps)
@@ -143,12 +150,19 @@ class HATS(object):
             )
 
         losses = map_innermost_element(
-            func=lambda indices_labels_logits: tf.losses.sparse_softmax_cross_entropy(
-                labels=indices_labels_logits[1][0],
-                logits=indices_labels_logits[1][1],
-                name="loss_{}".format("_".join(map(str, indices_labels_logits[0])))
+            func=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
+                labels=labels_logits[0],
+                logits=labels_logits[1]
             ),
-            seq=enumerate_innermost_element(zip_innermost_element(labels, logits))
+            seq=zip_innermost_element(labels, logits)
+        )
+
+        losses = map_innermost_element(
+            func=lambda indices_loss: tf.identity(
+                input=indices_loss[1],
+                name="loss_{}".format("_".join(map(str, indices_loss[0])))
+            ),
+            seq=enumerate_innermost_element(losses)
         )
 
         loss = tf.reduce_mean(losses)
@@ -171,14 +185,20 @@ class HATS(object):
 
         word_accuracy = metrics.word_accuracy(
             labels=labels,
-            logits=logits,
+            logits=logits
+        )
+        word_accuracy = tf.identity(
+            input=word_accuracy,
             name="word_accuracy"
         )
 
         edit_distance = metrics.edit_distance(
             labels=labels,
             logits=logits,
-            normalize=True,
+            normalize=True
+        )
+        edit_distance = tf.identity(
+            input=edit_distance,
             name="edit_distance"
         )
 

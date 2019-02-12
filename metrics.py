@@ -10,7 +10,7 @@ def dense_to_sparse(tensor, null):
     return tf.SparseTensor(indices, values, shape)
 
 
-def edit_distance(labels, logits, normalize, name="edit_distance"):
+def edit_distance(labels, logits, normalize):
 
     batch_size, time_step, num_classes = tf.unstack(tf.shape(logits))
 
@@ -25,15 +25,14 @@ def edit_distance(labels, logits, normalize, name="edit_distance"):
     return tf.metrics.mean(tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
         truth=tf.cast(labels, tf.int32),
-        normalize=normalize,
-        name=name
+        normalize=normalize
     ))
 
 
-def word_accuracy(labels, logits, name="word_accuracy"):
+def word_accuracy(labels, logits):
 
     batch_size, time_step, num_classes = tf.unstack(tf.shape(logits))
 
     predictions = tf.argmax(logits, axis=2, output_type=tf.int32)
 
-    return tf.metrics.mean(tf.reduce_all(tf.equal(predictions, labels), axis=1), name=name)
+    return tf.metrics.mean(tf.reduce_all(tf.equal(predictions, labels), axis=1))
