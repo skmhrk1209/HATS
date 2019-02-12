@@ -15,7 +15,7 @@ def sequence_lengths_fn(labels, blank, indices):
     labels = tf.slice(labels, begin, size)
 
     return tf.count_nonzero(tf.reduce_any(
-        input_tensor=tf.not_equal(labels, classes),
+        input_tensor=tf.not_equal(labels, blank),
         axis=list(range(2, len(labels.shape)))
     ), axis=1)
 
