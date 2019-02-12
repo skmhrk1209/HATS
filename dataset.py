@@ -30,8 +30,8 @@ def parse_example(example):
 
 def preprocess(path, label, encoding, image_size, data_format, sequence_lengths):
 
-  image = tf.read_file(features["path"])
-   if encoding == "jpeg":
+    image = tf.read_file(features["path"])
+    if encoding == "jpeg":
         image = tf.image.decode_jpeg(image, 3)
     elif encoding == "png":
         image = tf.image.decode_png(image, 3)
@@ -41,7 +41,6 @@ def preprocess(path, label, encoding, image_size, data_format, sequence_lengths)
     if data_format == "channels_first":
         image = tf.transpose(image, [2, 0, 1])
 
-    label = tf.cast(features["label"], tf.int32)
     label = tf.reshape(label, sequence_lengths)
 
     return image, label
