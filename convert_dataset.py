@@ -27,14 +27,14 @@ def main(input_filename, output_filename, num_words, num_chars):
                 words = map_innermost_list(lambda words: np.pad(
                     words, [[0, num_words - len(words)]],
                     "constant", constant_values=""
-                ), words)
+                ).tolist(), words)
                 words = map_innermost_element(lambda word: word + "!", words)
                 words = map_innermost_element(lambda word: word.upper(), words)
                 chars = map_innermost_element(lambda word: list(word), words)
                 chars = map_innermost_list(lambda chars: np.pad(
                     chars, [[0, num_chars - len(chars)]],
                     "constant", constant_values=""
-                ), chars)
+                ).to_list(), chars)
                 chars = map_innermost_element(lambda char: class_ids[char], chars)
 
                 writer.write(
