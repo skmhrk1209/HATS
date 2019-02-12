@@ -54,12 +54,14 @@ class AttentionNetwork(object):
                         lambda inputs: tf.nn.relu(inputs)
                     )(inputs)
 
-            shape = inputs.get_shape().as_list()
+            image_shape = inputs.shape
 
             feature_maps = map_innermost_element(
                 func=lambda inputs: tf.layers.flatten(inputs),
                 seq=inputs
             )
+
+            labels = tf.expand_dims(labels, axis=-1)
 
             def get_seq_lens(labels, indices):
 
@@ -70,8 +72,6 @@ class AttentionNetwork(object):
                     input_tensor=tf.not_equal(labels, classes - 1),
                     axis=range(2, len(labels.shape))
                 ), axis=1)
-
-            labels = tf.expand_dims(labels, axis=-1)
 
             for i, rnn_param in enumerate(self.rnn_params):
 
@@ -107,8 +107,27 @@ class AttentionNetwork(object):
                         seq=enumerate_innermost_element(inputs)
                     )
 
+            with tf.variable_scope("projection_block"):
+
+                inputs = map_innermost_element(
+                    function=lambda inputs: tf.layers.dense(
+                        inputs=inputs.h,
+                        units=np.prod(image_shape[1:]),
+                        activation=tf.nn.relu,
+                        kernel_initializer=tf.initializers.variance_scaling(
+                            scale=2.0,
+                            mode="fan_in",
+                            distribution="untruncated_normal"
+                        ),
+                        bias_initializer=tf.zeros_initializer(),
+                        name="dense",
+                        reuse=tf.AUTO_REUSE
+                    ),
+                    sequence=inputs
+                )
+
             inputs = map_innermost_element(
-                func=lambda inputs: tf.reshape(inputs.h, [-1] + shape[1:]),
+                func=lambda inputs: tf.reshape(inputs, [-1] + image_shape[1:]),
                 seq=inputs
             )
 
