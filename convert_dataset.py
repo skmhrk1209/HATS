@@ -25,7 +25,7 @@ def main(input_filename, output_filename, num_words, num_chars):
 
         with open(input_filename) as f:
 
-            for line in tqdm(f):
+            for line in f:
 
                 path, words = line.split()
                 path = os.path.join(os.path.dirname(sys.argv[1]), path)
@@ -35,8 +35,10 @@ def main(input_filename, output_filename, num_words, num_chars):
                 words = map_innermost_element(lambda word: word.upper(), words)
                 chars = map_innermost_element(lambda word: list(word), words)
                 chars = map_innermost_list(lambda chars: pad(chars, num_chars, ""), chars)
-                chars = map_innermost_element(lambda char: class_ids[char], chars)
-                chars = flatten_innermost_element(chars)
+                label = map_innermost_element(lambda char: class_ids[char], chars)
+                label = flatten_innermost_element(label)
+
+                if(len(label) != 24) print(label)
 
                 writer.write(
                     record=tf.train.Example(
@@ -49,7 +51,7 @@ def main(input_filename, output_filename, num_words, num_chars):
                                 ),
                                 "label": tf.train.Feature(
                                     int64_list=tf.train.Int64List(
-                                        value=chars
+                                        value=label
                                     )
                                 )
                             }
