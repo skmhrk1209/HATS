@@ -1,13 +1,9 @@
 import tensorflow as tf
 import numpy as np
 from . import ops
+from . import rnn
 from algorithms import *
 from itertools import *
-
-
-def static_rnn(cell, inputs, initial_state):
-
-    return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
 
 
 class AttentionNetwork(object):
@@ -89,7 +85,7 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        func=lambda indices_inputs: tf.nn.static_rnn(
+                        func=lambda indices_inputs: rnn.static_rnn(
                             cell=lstm_cell,
                             inputs=[feature_maps] * rnn_param.max_seq_len,
                             initial_state=(
