@@ -20,6 +20,7 @@ from tensorflow.python.util import nest
 from tensorflow.python.util.tf_export import tf_export
 
 from tensorflow.python.ops.rnn import _should_cache
+from tensorflow.python.ops.rnn import _concat
 
 
 def static_rnn(cell,
