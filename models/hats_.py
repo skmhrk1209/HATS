@@ -20,6 +20,21 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
+        def seq_len_getter(indices):
+
+            begin = [0] + indices + [0] * (len(labels.shape[1:]) - len(indices))
+            size = [-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
+
+            labels = tf.slice(labels, begin, size)
+
+            return tf.count_nonzero(
+                input_tensor=tf.reduce_any(
+                    input_tensor=tf.not_equal(labels, self.classes),
+                    axis=list(range(2, len(labels.shape)))
+                ),
+                axis=1
+            )
+
         feature_maps = self.backbone_network(
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
@@ -27,8 +42,7 @@ class HATS(object):
 
         attention_maps = self.attention_network(
             inputs=feature_maps,
-            labels=labels,
-            classes=self.classes,
+            seq_len_getter=seq_len_getter,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 

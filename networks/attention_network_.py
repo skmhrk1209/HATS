@@ -83,21 +83,27 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        func=lambda indices_inputs: tf.unstack(tf.nn.dynamic_rnn(
-                            cell=lstm_cell,
-                            inputs=tf.stack([indices_inputs[1]] * rnn_param.max_seq_len, axis=0),
-                            sequence_length=get_seq_lens(
-                                labels=labels,
-                                indices=list(indices_inputs[0])
-                            ),
-                            initial_state=lstm_cell.zero_state(
-                                batch_size=tf.shape(indices_inputs[1])[0],
-                                dtype=tf.float32
-                            ),
-                            parallel_iterations=os.cpu_count(),
-                            swap_memory=True,
-                            time_major=True
-                        ), axis=0),
+                        func=lambda indices_inputs: tf.unstack(
+                            value=tf.nn.dynamic_rnn(
+                                cell=lstm_cell,
+                                inputs=tf.stack(
+                                    values=[indices_inputs[1]] * rnn_param.max_seq_len, 
+                                    axis=0
+                                ),
+                                sequence_length=get_seq_lens(
+                                    labels=labels,
+                                    indices=list(indices_inputs[0])
+                                ),
+                                initial_state=lstm_cell.zero_state(
+                                    batch_size=tf.shape(indices_inputs[1])[0],
+                                    dtype=tf.float32
+                                ),
+                                parallel_iterations=os.cpu_count(),
+                                swap_memory=True,
+                                time_major=True
+                            ), 
+                            axis=0
+                        ),
                         seq=enumerate_innermost_element(inputs)
                     )
 
