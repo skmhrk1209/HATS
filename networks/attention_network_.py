@@ -68,7 +68,7 @@ class AttentionNetwork(object):
 
                 return tf.count_nonzero(tf.reduce_any(
                     input_tensor=tf.not_equal(labels, classes - 1),
-                    axis=range(2, len(labels.shape))
+                    axis=list(range(2, len(labels.shape)))
                 ), axis=1)
 
             inputs = None
