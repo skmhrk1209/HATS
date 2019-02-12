@@ -209,7 +209,7 @@ class HATS(object):
             name="word_accuracy"
         )
 
-        summary.any(word_accuracy)
+        summary.any(word_accuracy[1])
         summary.any(images, data_format=self.data_format, max_outputs=2)
         for attention_maps in flatten_innermost_element(attention_maps):
             summary.any(attention_maps, data_format=self.data_format, max_outputs=2)
