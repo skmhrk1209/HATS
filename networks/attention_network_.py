@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
+import os
 from . import ops
-from . import rnn
 from algorithms import *
 from itertools import *
 
@@ -52,7 +52,7 @@ class AttentionNetwork(object):
 
             image_shape = inputs.shape.as_list()
 
-            feature_maps = map_innermost_element(
+            inputs = map_innermost_element(
                 func=lambda inputs: tf.layers.flatten(inputs),
                 seq=inputs
             )
@@ -71,8 +71,6 @@ class AttentionNetwork(object):
                     axis=list(range(2, len(labels.shape)))
                 ), axis=1)
 
-            inputs = None
-
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
@@ -89,21 +87,21 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        func=lambda indices_inputs: rnn.static_rnn(
+                        func=lambda indices_inputs: tf.unstack(tf.nn.dynamic_rnn(
                             cell=lstm_cell,
-                            inputs=[feature_maps] * rnn_param.max_seq_len,
-                            initial_state=(
-                                indices_inputs[1] if indices_inputs[1] else
-                                lstm_cell.zero_state(
-                                    batch_size=tf.shape(feature_maps)[0],
-                                    dtype=tf.float32
-                                )
-                            ),
+                            inputs=[indices_inputs[1]] * rnn_param.max_seq_len,
                             sequence_length=get_seq_lens(
                                 labels=labels,
                                 indices=indices_inputs[0]
-                            )
-                        ),
+                            ) + 1,
+                            initial_state=lstm_cell.zero_state(
+                                batch_size=tf.shape(indices_inputs[1])[0],
+                                dtype=tf.float32
+                            ),
+                            parallel_iterations=os.cpu_count(),
+                            swap_memory=True,
+                            time_major=True
+                        ), axis=0),
                         seq=enumerate_innermost_element(inputs)
                     )
 

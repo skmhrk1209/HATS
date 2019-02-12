@@ -7,11 +7,12 @@ from tqdm import *
 from algorithms import *
 
 
-def main(input_filename, output_filename, seq_lens):
+def main(input_filename, output_filename, num_words, num_chars):
 
     class_ids = {}
     class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
     class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
+    class_ids.update({"!": max(class_ids.values()) + 1})
     class_ids.update({"": max(class_ids.values()) + 1})
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
@@ -20,29 +21,21 @@ def main(input_filename, output_filename, seq_lens):
 
             for line in tqdm(f):
 
-                path, label = line.split()
+                path, words = line.split()
                 path = os.path.join(os.path.dirname(sys.argv[1]), path)
-                label = label.split("_")
-                label = map_innermost_element(lambda string: string.upper(), label)
-                label = map_innermost_element(lambda string: list(string), label)
-
-                try:
-                    label = map_innermost_element(lambda char: class_ids[char], label)
-                except KeyError as error:
-                    print("{} at {}".format(error, path))
-                    continue
-
-                for i, seq_len in enumerate(seq_lens[::-1]):
-
-                    label = map_innermost_list(
-                        func=lambda seq: np.pad(
-                            array=seq,
-                            pad_width=[[0, seq_len - len(seq)]] + [[0, 0]] * i,
-                            mode="constant",
-                            constant_values=class_ids[""]
-                        ),
-                        seq=label
-                    )
+                words = words.split("_")
+                words = map_innermost_list(lambda words: np.pad(
+                    words, [[0, num_words - len(words)]],
+                    "constant", constant_values=""
+                ), words)
+                words = map_innermost_element(lambda word: word + "!", words)
+                words = map_innermost_element(lambda word: word.upper(), words)
+                chars = map_innermost_element(lambda word: list(word), words)
+                chars = map_innermost_list(lambda chars: np.pad(
+                    chars, [[0, num_chars - len(chars)]],
+                    "constant", constant_values=""
+                ), chars)
+                chars = map_innermost_element(lambda char: class_ids[char], chars)
 
                 writer.write(
                     record=tf.train.Example(
