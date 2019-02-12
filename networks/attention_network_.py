@@ -50,7 +50,7 @@ class AttentionNetwork(object):
                         lambda inputs: tf.nn.relu(inputs)
                     )(inputs)
 
-            image_shape = inputs.shape
+            image_shape = inputs.shape.as_list()
 
             feature_maps = map_innermost_element(
                 func=lambda inputs: tf.layers.flatten(inputs),
