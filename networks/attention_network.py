@@ -69,12 +69,16 @@ class AttentionNetwork(object):
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         num_units=rnn_param.units,
                         use_peepholes=True,
+                        '''
                         activation=tf.nn.tanh,
                         initializer=tf.variance_scaling_initializer(
                             scale=1.0,
                             mode="fan_avg",
                             distribution="untruncated_normal"
                         )
+                        '''
+                        activation=tf.nn.relu,
+                        initializer=tf.initializers.identity()
                     )
 
                     inputs = map_innermost_element(
@@ -96,12 +100,16 @@ class AttentionNetwork(object):
                     lstm_cell = tf.nn.rnn_cell.LSTMCell(
                         num_units=rnn_param.units,
                         use_peepholes=True,
+                        '''
                         activation=tf.nn.tanh,
                         initializer=tf.variance_scaling_initializer(
                             scale=1.0,
                             mode="fan_avg",
                             distribution="untruncated_normal"
                         )
+                        '''
+                        activation=tf.nn.relu,
+                        initializer=tf.initializers.identity()
                     )
 
                     inputs = map_innermost_element(
@@ -112,10 +120,10 @@ class AttentionNetwork(object):
                                 c=tf.layers.dense(
                                     inputs=inputs.c,
                                     units=rnn_param.units,
-                                    activation=None,
+                                    activation=tf.nn.relu,
                                     kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
+                                        scale=2.0,
+                                        mode="fan_in",
                                         distribution="untruncated_normal"
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
@@ -125,10 +133,10 @@ class AttentionNetwork(object):
                                 h=tf.layers.dense(
                                     inputs=inputs.h,
                                     units=rnn_param.units,
-                                    activation=tf.nn.tanh,
+                                    activation=tf.nn.relu,
                                     kernel_initializer=tf.variance_scaling_initializer(
-                                        scale=1.0,
-                                        mode="fan_avg",
+                                        scale=2.0,
+                                        mode="fan_in",
                                         distribution="untruncated_normal"
                                     ),
                                     bias_initializer=tf.zeros_initializer(),
