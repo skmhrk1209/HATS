@@ -21,7 +21,7 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
-        def seq_len_getter(labels, indices):
+        def seq_len_getter(labels, classes, indices):
 
             begin = [0] + indices + [0] * (len(labels.shape[1:]) - len(indices))
             size = [-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
@@ -30,7 +30,7 @@ class HATS(object):
 
             return tf.count_nonzero(
                 input_tensor=tf.reduce_any(
-                    input_tensor=tf.not_equal(labels, self.classes),
+                    input_tensor=tf.not_equal(labels, classes),
                     axis=list(range(2, len(labels.shape)))
                 ),
                 axis=1
@@ -45,7 +45,8 @@ class HATS(object):
             inputs=feature_maps,
             seq_len_getter=functools.partial(
                 seq_len_getter,
-                labels=labels
+                labels=labels,
+                classes=self.classes
             ),
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
