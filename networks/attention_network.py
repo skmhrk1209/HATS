@@ -6,12 +6,16 @@ from algorithms import *
 from itertools import *
 
 
-def static_rnn(cell, inputs, initial_hiddens):
+def static_rnn(cell, inputs_sequence, hiddens):
 
-    return list(accumulate(
-        [(None, initial_hiddens)] + inputs,
-        lambda outputs_hiddens, inputs: cell(inputs, outputs_hiddens[1])
-    ))[1:]
+    outputs_sequence = []
+
+    for inputs in inputs_sequence:
+
+        outputs, hiddens = cell(inputs, hiddens)
+        outputs_sequence.append(outputs)
+
+    return outputs_sequence
 
 
 class AttentionNetwork(object):
@@ -84,10 +88,10 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda inputs_hiddens: static_rnn(
+                        function=lambda inputs: static_rnn(
                             cell=irnn_cell,
-                            inputs=[feature_maps] * rnn_param.sequence_length,
-                            initial_hiddens=tf.zeros([
+                            inputs_sequence=[feature_maps] * rnn_param.sequence_length,
+                            hiddens=tf.zeros([
                                 tf.shape(feature_maps)[0],
                                 rnn_param.hidden_units
                             ])
@@ -112,16 +116,16 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda inputs_hiddens: static_rnn(
+                        function=lambda inputs: static_rnn(
                             cell=irnn_cell,
-                            inputs=[feature_maps] * rnn_param.sequence_length,
-                            initial_hiddens=inputs_hiddens[0]
+                            inputs_sequence=[feature_maps] * rnn_param.sequence_length,
+                            hiddens=inputs
                         ),
                         sequence=inputs
                     )
 
             inputs = map_innermost_element(
-                function=lambda inputs_hiddens: tf.reshape(inputs_hiddens[0], [-1] + shape[1:]),
+                function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
                 sequence=inputs
             )
 
