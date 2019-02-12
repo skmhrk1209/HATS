@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import functools
 import metrics
 import summary
 from networks import ops
@@ -20,7 +21,7 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
-        def seq_len_getter(indices):
+        def seq_len_getter(labels, indices):
 
             begin = [0] + indices + [0] * (len(labels.shape[1:]) - len(indices))
             size = [-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
@@ -42,7 +43,10 @@ class HATS(object):
 
         attention_maps = self.attention_network(
             inputs=feature_maps,
-            seq_len_getter=seq_len_getter,
+            seq_len_getter=functools.partial(
+                seq_len_getter,
+                labels=labels
+            ),
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
