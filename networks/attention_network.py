@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 from . import ops
-from . import rnn_cell
 from algorithms import *
 from itertools import *
 
