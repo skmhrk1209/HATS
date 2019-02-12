@@ -16,8 +16,9 @@
 import tensorflow as tf
 import optuna
 import argparse
+import functools
+import dataset
 from attrdict import AttrDict
-from dataset import Dataset
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
@@ -27,6 +28,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="chars74k_classifier", help="pretrained model directory")
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecords for training")
+parser.add_argument('--val_filenames', type=str, nargs="+", default=["synth90k_val.tfrecord"], help="tfrecords for validation")
 parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_test.tfrecord"], help="tfrecords for test")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
@@ -70,7 +72,7 @@ if __name__ == "__main__":
                 ],
                 data_format=args.data_format
             ),
-            units=[],
+            units=[1024],
             classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
@@ -100,15 +102,16 @@ if __name__ == "__main__":
     if args.train:
 
         estimator.train(
-            input_fn=Dataset(
+            input_fn=functools.partial(
+                dataset.input_fn,
                 filenames=args.train_filenames,
                 batch_size=args.batch_size,
                 num_epochs=None,
                 shuffle=True,
-                sequence_lengths=[23],
+                encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format,
-                encoding="jpeg"
+                sequence_lengths=[23]
             ),
             max_steps=args.max_steps
         )
@@ -116,15 +119,16 @@ if __name__ == "__main__":
     if args.eval:
 
         print(estimator.evaluate(
-            input_fn=Dataset(
+            input_fn=functools.partial(
+                dataset.input_fn,
                 filenames=args.test_filenames,
                 batch_size=args.batch_size,
                 num_epochs=1,
                 shuffle=False,
-                sequence_lengths=[23],
+                encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format,
-                encoding="jpeg"
+                sequence_lengths=[23]
             ),
             steps=args.steps
         ))
