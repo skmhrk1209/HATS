@@ -6,7 +6,7 @@ import os
 from algorithms import *
 
 
-def parse_example(example):
+def parse_example(example, sequence_lengths):
 
     features = tf.parse_single_example(
         serialized=example,
@@ -64,7 +64,10 @@ def input_fn(filenames, batch_size, num_epochs, shuffle,
     dataset = dataset.repeat(count=num_epochs)
     dataset = dataset.map(
         map_func=compose(
-            parse_example,
+            functools.partial(
+                parse_example,
+                sequence_lengths=sequence_lengths
+            ),
             functools.partial(
                 preprocess,
                 encoding=encoding,
