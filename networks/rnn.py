@@ -19,7 +19,7 @@ from tensorflow.python.ops import variable_scope as vs
 from tensorflow.python.util import nest
 from tensorflow.python.util.tf_export import tf_export
 
-from tensorflow.python.ops import rnn
+from tensorflow.python.ops.rnn import _should_cache
 
 
 def static_rnn(cell,
