@@ -6,7 +6,7 @@ import os
 from algorithms import *
 
 
-def parse_example(example, sequence_lengths):
+def parse_example(example, seq_len):
 
     return tf.parse_single_example(
         serialized=example,
@@ -16,14 +16,14 @@ def parse_example(example, sequence_lengths):
                 dtype=tf.string
             ),
             "label": tf.FixedLenFeature(
-                shape=[np.prod(sequence_lengths)],
+                shape=[seq_len],
                 dtype=tf.int64
             )
         }
     )
 
 
-def preprocess(features, encoding, image_size, data_format, sequence_lengths):
+def preprocess(features, encoding, image_size, data_format, seq_lens):
 
     path = tf.cast(features["path"], tf.string)
     image = tf.read_file(features["path"])
@@ -38,13 +38,13 @@ def preprocess(features, encoding, image_size, data_format, sequence_lengths):
         image = tf.transpose(image, [2, 0, 1])
 
     label = tf.cast(features["label"], tf.int32)
-    label = tf.reshape(label, sequence_lengths)
+    label = tf.reshape(label, seq_lens)
 
     return image, label
 
 
 def input_fn(filenames, batch_size, num_epochs, shuffle,
-             encoding, image_size, data_format, sequence_lengths):
+             encoding, image_size, data_format, seq_lens):
 
     dataset = tf.data.TFRecordDataset(
         filenames=filenames,
@@ -63,14 +63,14 @@ def input_fn(filenames, batch_size, num_epochs, shuffle,
         map_func=compose(
             functools.partial(
                 parse_example,
-                sequence_lengths=sequence_lengths
+                seq_len=np.prod(seq_lens)
             ),
             functools.partial(
                 preprocess,
                 encoding=encoding,
                 image_size=image_size,
                 data_format=data_format,
-                sequence_lengths=sequence_lengths
+                seq_lens=seq_lens
             )
         ),
         num_parallel_calls=os.cpu_count()

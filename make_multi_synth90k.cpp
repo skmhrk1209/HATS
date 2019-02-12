@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
         "output_directory", boost::program_options::value<std::string>(), "directory of output data")(
         "image_width", boost::program_options::value<int>()->default_value(256), "width of image that will be generated")(
         "image_height", boost::program_options::value<int>()->default_value(256), "height of image that will be generated")(
-        "sequence_lengths", boost::program_options::value<std::vector<int>>()->multitoken()->default_value({5, 10}, "5, 10"), "sequence lengths of texts")(
+        "seq_lens", boost::program_options::value<std::vector<int>>()->multitoken()->default_value({5, 10}, "5, 10"), "sequence lengths of texts")(
         "num_data", boost::program_options::value<int>()->default_value(900000), "number of data that will be generated")(
         "num_retries", boost::program_options::value<int>()->default_value(100), "number of retries for locating bounding box");
 
@@ -63,10 +63,10 @@ int main(int argc, char *argv[]) {
             for (auto j = num_data * i; j < num_data * (i + 1); ++j) {
                 boost::gil::rgb8_image_t multi_image(variables_map["image_width"].as<int>(), variables_map["image_height"].as<int>());
                 boost::gil::fill_pixels(boost::gil::view(multi_image), boost::gil::rgb8_pixel_t(0, 0, 0));
-                std::vector<std::pair<std::string, boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>>>> strings;
+                std::vector<std::pair<std::string, boost::geometry::model::box<boost::geometry::model::d2::point_xy<int>>>> words;
 
-                auto sequence_length = std::uniform_int_distribution<int>(1, variables_map["sequence_lengths"].as<std::vector<int>>()[0])(engine);
-                while (strings.size() < sequence_length) {
+                auto seq_len = std::uniform_int_distribution<int>(1, variables_map["seq_lens"].as<std::vector<int>>()[0])(engine);
+                while (words.size() < seq_len) {
                     if (![&]() {
                             for (auto k = 0; k < variables_map["num_retries"].as<int>(); ++k) {
                                 const auto &filename = filenames[std::uniform_int_distribution<int>(0, filenames.size() - 1)(engine)];
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
                                 if (!std::regex_match(string, match, std::regex(R"([0-9]+_([0-9A-Za-z]+))"))) {
                                     continue;
                                 }
-                                if (match.str(1).size() > variables_map["sequence_lengths"].as<std::vector<int>>()[1]) {
+                                if (match.str(1).size() > variables_map["seq_lens"].as<std::vector<int>>()[1]) {
                                     continue;
                                 }
 
@@ -98,10 +98,12 @@ int main(int argc, char *argv[]) {
                                                 boost::geometry::model::d2::point_xy<int>(dx, dy),
                                                 boost::geometry::model::d2::point_xy<int>(dx + image.width(), dy + image.height()));
 
-                                            if (boost::algorithm::all_of(strings, [&](const auto &string) { return boost::geometry::disjoint(string.second, box); })) {
-                                                boost::gil::copy_pixels(boost::gil::view(image),
-                                                                        boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
-                                                strings.emplace_back(match.str(1), box);
+                                            if (boost::algorithm::all_of(
+                                                    words, [&](const auto &word) { return boost::geometry::disjoint(word.second, box); })) {
+                                                boost::gil::copy_pixels(
+                                                    boost::gil::view(image),
+                                                    boost::gil::subimage_view(boost::gil::view(multi_image), dx, dy, image.width(), image.height()));
+                                                words.emplace_back(match.str(1), box);
                                                 return true;
                                             }
                                         }
@@ -116,13 +118,15 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                boost::sort(strings, [](const auto &string1, const auto &string2) {
-                    return (string1.second.min_corner().y() < string2.second.min_corner().y()) ||
-                           ((string1.second.min_corner().y() == string2.second.min_corner().y()) && (string1.second.min_corner().x() < string2.second.min_corner().x()));
+                boost::sort(words, [](const auto &word1, const auto &word2) {
+                    return (word1.second.min_corner().y() < word2.second.min_corner().y()) ||
+                           ((word1.second.min_corner().y() == word2.second.min_corner().y()) &&
+                            (word1.second.min_corner().x() < word2.second.min_corner().x()));
                 });
 
-                auto stem = boost::accumulate(strings, std::to_string(j), [](const auto &acc, const auto &string) { return acc + "_" + string.first; });
-                boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image), boost::gil::jpeg_tag());
+                auto stem = boost::accumulate(words, std::to_string(j), [](const auto &acc, const auto &word) { return acc + "_" + word.first; });
+                boost::gil::write_view(variables_map["output_directory"].as<std::string>() + "/" + stem + ".jpg", boost::gil::view(multi_image),
+                                       boost::gil::jpeg_tag());
 
                 mutex.lock();
                 ++progress_display;

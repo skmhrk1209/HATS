@@ -52,8 +52,8 @@ class AttentionNetwork(object):
             shape = inputs.get_shape().as_list()
 
             inputs = map_innermost_element(
-                function=lambda inputs: tf.layers.flatten(inputs),
-                sequence=inputs
+                func=lambda inputs: tf.layers.flatten(inputs),
+                seq=inputs
             )
 
             feature_maps = inputs
@@ -63,7 +63,7 @@ class AttentionNetwork(object):
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
                     inputs = map_innermost_element(
-                        function=lambda inputs: ops.irnn(
+                        func=lambda inputs: ops.irnn(
                             inputs_sequence=[feature_maps] * rnn_param.sequence_length,
                             hiddens=tf.zeros([
                                 tf.shape(feature_maps)[0],
@@ -72,7 +72,7 @@ class AttentionNetwork(object):
                             hidden_units=rnn_param.hidden_units,
                             output_units=rnn_param.output_units
                         ),
-                        sequence=inputs
+                        seq=inputs
                     )
 
             for i, rnn_param in enumerate(self.rnn_params[1:], i + 1):
@@ -80,18 +80,18 @@ class AttentionNetwork(object):
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
                     inputs = map_innermost_element(
-                        function=lambda inputs: ops.irnn(
+                        func=lambda inputs: ops.irnn(
                             inputs_sequence=[feature_maps] * rnn_param.sequence_length,
                             hiddens=inputs,
                             hidden_units=rnn_param.hidden_units,
                             output_units=rnn_param.output_units
                         ),
-                        sequence=inputs
+                        seq=inputs
                     )
 
             inputs = map_innermost_element(
-                function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
-                sequence=inputs
+                func=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
+                seq=inputs
             )
 
             for i, deconv_param in enumerate(self.deconv_params[:-1]):
@@ -99,7 +99,7 @@ class AttentionNetwork(object):
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
                     inputs = map_innermost_element(
-                        function=compose(
+                        func=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
                                 inputs=inputs,
                                 filters=deconv_param.filters,
@@ -125,7 +125,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.relu(inputs)
                         ),
-                        sequence=inputs
+                        seq=inputs
                     )
 
             for i, deconv_param in enumerate(self.deconv_params[-1:], i + 1):
@@ -133,7 +133,7 @@ class AttentionNetwork(object):
                 with tf.variable_scope("deconv_block_{}".format(i)):
 
                     inputs = map_innermost_element(
-                        function=compose(
+                        func=compose(
                             lambda inputs: tf.layers.conv2d_transpose(
                                 inputs=inputs,
                                 filters=deconv_param.filters,
@@ -159,7 +159,7 @@ class AttentionNetwork(object):
                             ),
                             lambda inputs: tf.nn.sigmoid(inputs)
                         ),
-                        sequence=inputs
+                        seq=inputs
                     )
 
             return inputs

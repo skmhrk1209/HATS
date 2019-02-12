@@ -7,7 +7,7 @@ from tqdm import *
 from algorithms import *
 
 
-def main(input_filename, output_filename, sequence_lengths):
+def main(input_filename, output_filename, seq_lens):
 
     class_ids = {}
     class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
@@ -32,16 +32,16 @@ def main(input_filename, output_filename, sequence_lengths):
                     print("{} at {}".format(error, path))
                     continue
 
-                for i, sequence_length in enumerate(sequence_lengths[::-1]):
+                for i, seq_len in enumerate(seq_lens[::-1]):
 
                     label = map_innermost_list(
-                        function=lambda sequence: np.pad(
-                            array=sequence,
-                            pad_width=[[0, sequence_length - len(sequence)]] + [[0, 0]] * i,
+                        func=lambda seq: np.pad(
+                            array=seq,
+                            pad_width=[[0, seq_len - len(seq)]] + [[0, 0]] * i,
                             mode="constant",
                             constant_values=class_ids[""]
                         ),
-                        sequence=label
+                        seq=label
                     )
 
                 writer.write(
