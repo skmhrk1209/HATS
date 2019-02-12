@@ -62,7 +62,7 @@ class AttentionNetwork(object):
             def get_seq_lens(labels, indices):
 
                 classes = labels.shape[-1]
-                labels = tf.slice(labels, [0] + indices, [-1] + [1] * len(indices))
+                labels = tf.slice(labels, (0,) + indices, (-1) + (1,) * len(indices))
 
                 return tf.count_nonzero(tf.reduce_any(
                     input_tensor=tf.not_equal(labels, classes - 1),
