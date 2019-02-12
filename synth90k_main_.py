@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format,
-                seq_lens=[24]
+                sequence_lengths=[24]
             ),
             max_steps=args.max_steps
         )
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format,
-                seq_lens=[24]
+                sequence_lengths=[24]
             ),
             steps=args.steps
         ))
