@@ -28,7 +28,7 @@ def parse_example(example):
     return path, label
 
 
-def preprocess(path, label, encoding, image_size, data_format, sequence_lengths)
+def preprocess(path, label, encoding, image_size, data_format, sequence_lengths):
 
   image = tf.read_file(features["path"])
    if encoding == "jpeg":
