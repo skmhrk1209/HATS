@@ -191,7 +191,7 @@ class HATS(object):
         loss = tf.contrib.seq2seq.sequence_loss(
             logits=logits,
             targets=labels,
-            weights=sequence_mask,
+            weights=tf.cast(sequence_mask, tf.float32),
             average_across_timesteps=True,
             average_across_batch=True
         )
