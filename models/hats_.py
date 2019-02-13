@@ -9,8 +9,6 @@ from algorithms import *
 
 def sequence_lengths_fn(labels, blank, indices):
 
-    print(labels)
-
     depth = len(labels.shape[1:]) - len(indices)
     begin = [0] + indices + [0] * depth
     size = [-1] + [1] * len(indices) + [-1] * depth
@@ -48,6 +46,8 @@ class HATS(object):
         self.hyper_params = hyper_params
 
     def __call__(self, images, labels, mode):
+
+        print(labels)
 
         feature_maps = self.backbone_network(
             inputs=images,
