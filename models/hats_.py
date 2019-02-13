@@ -9,6 +9,8 @@ from algorithms import *
 
 def sequence_lengths_fn(labels, blank, indices):
 
+    print(labels)
+
     depth = len(labels.shape[1:]) - len(indices)
     begin = [0] + indices + [0] * depth
     size = [-1] + [1] * len(indices) + [-1] * depth
