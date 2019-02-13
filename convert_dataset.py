@@ -27,7 +27,6 @@ def main(input_filename, output_filename, num_words, num_chars):
     class_ids = {}
     class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
     class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
-    class_ids.update({"!": max(class_ids.values()) + 1})
     class_ids.update({"": max(class_ids.values()) + 1})
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
@@ -44,7 +43,6 @@ def main(input_filename, output_filename, num_words, num_chars):
 
                 words = words.split("_")
                 words = map_innermost_list(lambda words: pad(words, num_words, ""), words)
-                words = map_innermost_element(lambda word: word + "!", words)
                 words = map_innermost_element(lambda word: word.upper(), words)
                 chars = map_innermost_element(lambda word: list(word), words)
                 chars = map_innermost_list(lambda chars: pad(chars, num_chars, ""), chars)

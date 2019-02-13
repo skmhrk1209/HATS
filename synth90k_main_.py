@@ -64,7 +64,7 @@ if __name__ == "__main__":
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(max_sequence_length=24, num_units=256),
+                    AttrDict(max_sequence_length=23, num_units=256),
                 ],
                 deconv_params=[
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=None,
                 shuffle=True,
-                sequence_lengths=[24],
+                sequence_lengths=[23],
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format
@@ -132,7 +132,7 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=1,
                 shuffle=False,
-                sequence_lengths=[24],
+                sequence_lengths=[23],
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format
