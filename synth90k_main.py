@@ -135,8 +135,9 @@ if __name__ == "__main__":
                         image_size=[256, 256],
                         data_format=args.data_format
                     ),
-                    every_n_steps=10000,
-                    steps=args.steps
+                    every_n_steps=1000,
+                    steps=args.steps,
+                    name="validation"
                 )
             ]
         )
@@ -155,5 +156,6 @@ if __name__ == "__main__":
                 image_size=[256, 256],
                 data_format=args.data_format
             ),
-            steps=args.steps
+            steps=args.steps,
+            name="test"
         ))
