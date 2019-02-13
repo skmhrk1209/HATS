@@ -7,8 +7,8 @@ from tqdm import *
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--input_directory", type=str, default="multi_mnist/train", help="input multi-mnist directory")
-parser.add_argument("--output_filename", type=str, default="multi_mnist/train.tfrecord", help="output tfrecord filename")
+parser.add_argument("--input_directory", type=str, default="train", help="input multi-mnist directory")
+parser.add_argument("--output_filename", type=str, default="train.tfrecord", help="output tfrecord filename")
 parser.add_argument("--num_digits", type=int, default=5, help="number of digits contained in a instance (include blank)")
 args = parser.parse_args()
 
