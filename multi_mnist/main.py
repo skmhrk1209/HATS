@@ -5,7 +5,7 @@ import functools
 import dataset
 from attrdict import AttrDict
 from models.hats import HATS
-from networks.attention_network_1 import AttentionNetwork
+from networks.attention_network_2 import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
