@@ -63,7 +63,7 @@ class ValidationHook(tf.train.SessionRunHook):
         run_values: A `SessionRunValues` object.
         """
 
-        global_step = run_values.result
+        global_step = run_values.results
         if self.timer.should_trigger_for_step(global_step):
             print(self.estimator.evaluate(self.input_fn, **self.kwargs))
             self.timer.update_last_triggered_step(global_step)
