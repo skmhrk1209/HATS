@@ -6,11 +6,11 @@ import dataset
 from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
-from networks.pyramid_resnet import PyramidResNet
+from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="multi_mnist_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecords for training")
 parser.add_argument('--test_filenames', type=str, nargs="+", default=["test.tfrecord"], help="tfrecords for test")
@@ -31,8 +31,8 @@ if __name__ == "__main__":
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=PyramidResNet(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+            backbone_network=ResNet(
+                conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
                     AttrDict(filters=32, strides=[2, 2], blocks=1),
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             num_classes=11,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=1e-1,
+                attention_decay=1e-3,
                 optimizer=tf.train.AdamOptimizer()
             )
         )(features, labels, mode),
