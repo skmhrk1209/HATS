@@ -196,6 +196,8 @@ class HATS(object):
             average_across_timesteps=True,
             average_across_batch=True
         )
+        # attention decay
+        loss += tf.reduce_mean(attention_maps) * self.hyper_params.attention_decay
         # =========================================================================================
         # 余分なblankを除去した単語の正解率を求める
         word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
