@@ -50,4 +50,4 @@ def main(input_directory, output_filename, num_digits):
 
 if __name__ == "__main__":
 
-    main(*sys.argv[1:3], *list(map(int, sys.argv[3:])))
+    main(args.input_directory, args.output_filename, args.num_digits)
