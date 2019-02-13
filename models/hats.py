@@ -27,6 +27,8 @@ class HATS(object):
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
+        # TODO: sequence_lengthsを渡して冗長な計算を除去
+        # TODO: 若干混み合った計算が必要
         attention_maps = self.attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
