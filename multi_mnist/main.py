@@ -6,7 +6,7 @@ import dataset
 from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
-from networks.pyramid_resnet import PyramidResNet
+from networks.resnet import ResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             num_classes=11,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=0.0,
+                attention_decay=1e-3,
                 optimizer=tf.train.AdamOptimizer()
             )
         )(features, labels, mode),
