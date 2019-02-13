@@ -15,7 +15,7 @@ class AttentionNetwork(object):
         self.deconv_params = deconv_params
         self.data_format = data_format
 
-    def __call__(self, inputs, sequence_lengths_fn, training, name="attention_network", reuse=None):
+    def __call__(self, inputs, training, name="attention_network", reuse=None):
 
         with tf.variable_scope(name, reuse=reuse):
 

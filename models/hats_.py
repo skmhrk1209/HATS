@@ -7,23 +7,6 @@ from networks import ops
 from algorithms import *
 
 
-def sequence_lengths_fn(labels, blank, indices):
-
-    depth = len(labels.shape[1:]) - len(indices)
-    begin = [0] + indices + [0] * depth
-    size = [-1] + [1] * len(indices) + [-1] * depth
-
-    labels = tf.squeeze(
-        input=tf.slice(labels, begin, size),
-        axis=list(range(1, len(indices) + 1))
-    )
-
-    return tf.count_nonzero(tf.reduce_any(
-        input_tensor=tf.not_equal(labels, blank),
-        axis=list(range(2, len(labels.shape)))
-    ), axis=1)
-
-
 def spatial_flatten(inputs, data_format):
 
     inputs_shape = inputs.shape.as_list()
@@ -54,11 +37,6 @@ class HATS(object):
 
         attention_maps = self.attention_network(
             inputs=feature_maps,
-            sequence_lengths_fn=functools.partial(
-                sequence_lengths_fn,
-                labels=labels,
-                blank=self.num_classes - 1
-            ),
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
@@ -194,7 +172,6 @@ class HATS(object):
         # lossがBlankを含まないようにマスク
         sequence_lengths = tf.count_nonzero(tf.not_equal(labels, self.num_classes - 1), axis=1)
         sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[-1], dtype=tf.int32)
-        print(sequence_lengths.shape)
         # cross entropy loss
         loss = tf.contrib.seq2seq.sequence_loss(
             logits=logits,
@@ -215,7 +192,6 @@ class HATS(object):
             sequence_lengths=sequence_lengths,
             normalize=True
         )
-        print(edit_distance[0].shape)
         # =========================================================================================
         # tensorboard用のsummary
         tf.identity(word_accuracy[0], name="word_accuracy")
