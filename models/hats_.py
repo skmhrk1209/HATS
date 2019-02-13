@@ -215,7 +215,7 @@ class HATS(object):
         # tensorboard用のsummary
         tf.identity(word_accuracy[0], name="word_accuracy")
         summary.any(word_accuracy[1], name="word_accuracy")
-        summary.any(images, name="images" data_format=self.data_format, max_outputs=2)
+        summary.any(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.any(
                 tensor=attention_maps,
