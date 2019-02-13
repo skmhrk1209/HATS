@@ -189,10 +189,10 @@ class HATS(object):
         )
         # =========================================================================================
         # tensorboard用のsummary
-        summary.any(word_accuracy, name="word_accuracy")
-        summary.any(images, name="images", data_format=self.data_format, max_outputs=2)
+        summary.scalar(word_accuracy, name="word_accuracy")
+        summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
-            summary.any(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
+            summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
         # =========================================================================================
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
