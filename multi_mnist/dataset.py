@@ -43,14 +43,11 @@ def parse_example(example, sequence_lengths, encoding, image_size, data_format):
 def input_fn(filenames, batch_size, num_epochs, shuffle,
              sequence_lengths, encoding, image_size, data_format):
 
-    dataset = tf.data.TFRecordDataset(
-        filenames=filenames,
-        # num_parallel_reads=os.cpu_count()
-    )
+    dataset = tf.data.TFRecordDataset(filenames)
     if shuffle:
         dataset = dataset.shuffle(
             buffer_size=sum([
-                len(list(tf.io.tf_record_iterator(filename)))
+                len(list(tf.python_io.tf_record_iterator(filename)))
                 for filename in filenames
             ]),
             reshuffle_each_iteration=True
