@@ -21,7 +21,7 @@ import dataset
 from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
-from networks.resnet import ResNet
+from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -30,7 +30,7 @@ parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretra
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
-parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
+parser.add_argument("--max_steps", type=int, default=20000, help="maximum number of training steps")
 parser.add_argument("--steps", type=int, default=None, help="number of evaluation steps")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
