@@ -17,6 +17,7 @@ import tensorflow as tf
 import argparse
 import functools
 import dataset
+import hooks
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
@@ -115,6 +116,22 @@ if __name__ == "__main__":
                 tf.train.LoggingTensorHook(
                     tensors={"word_accuracy": "word_accuracy"},
                     every_n_iter=100
+                ),
+                hooks.ValidationHook(
+                    estimator=estimator,
+                    input_fn=functools.partial(
+                        dataset.input_fn,
+                        filenames=args.val_filenames,
+                        batch_size=args.batch_size,
+                        num_epochs=1,
+                        shuffle=False,
+                        sequence_lengths=[24],
+                        encoding="jpeg",
+                        image_size=[256, 256],
+                        data_format=args.data_format
+                    ),
+                    every_n_steps=10000,
+                    steps=args.steps
                 )
             ]
         )
