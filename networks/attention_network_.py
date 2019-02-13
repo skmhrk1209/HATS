@@ -77,9 +77,7 @@ class AttentionNetwork(object):
                                     values=[indices_inputs[1]] * rnn_param.max_sequence_length,
                                     axis=0
                                 ),
-                                sequence_length=sequence_lengths_fn(
-                                    indices=list(indices_inputs[0])
-                                ),
+                                sequence_length=None,
                                 initial_state=lstm_cell.zero_state(
                                     batch_size=tf.shape(indices_inputs[1])[0],
                                     dtype=tf.float32

@@ -47,8 +47,6 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
-        print(labels.shape)
-
         feature_maps = self.backbone_network(
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
