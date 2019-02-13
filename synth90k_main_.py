@@ -114,7 +114,10 @@ if __name__ == "__main__":
             max_steps=args.max_steps,
             hooks=[
                 tf.train.LoggingTensorHook(
-                    tensors={"word_accuracy": "word_accuracy"},
+                    tensors={
+                        "word_accuracy": "word_accuracy"
+                        "edit_distance": "edit_distance"
+                    },
                     every_n_iter=100
                 )
             ]

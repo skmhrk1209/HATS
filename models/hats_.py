@@ -203,18 +203,25 @@ class HATS(object):
             average_across_batch=True
         )
         # =========================================================================================
-        # Blankを除去
-        labels *= sequence_mask
-        predictions *= sequence_mask
         # Blankを除去した単語の正解率を求める
         word_accuracy = metrics.word_accuracy(
-            labels=labels,
-            predictions=predictions
+            labels=labels * sequence_mask,
+            predictions=predictions * sequence_mask
+        )
+        sequence_lengths = tf.count_nonzero(tf.less(labels, eos), axis=1)
+        edit_distance = metrics.edit_distance(
+            labels=tf.clip_by_value(labels, 0, eos),
+            logits=logits,
+            sequence_lengths=sequence_lengths,
+            normalize=True
         )
         # =========================================================================================
         # tensorboard用のsummary
         tf.identity(word_accuracy[0], name="word_accuracy")
         summary.any(word_accuracy[1], name="word_accuracy")
+        tf.identity(edit_distance[0], name="edit_distance")
+        summary.any(edit_distance[1], name="edit_distance")
+
         summary.any(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.any(
