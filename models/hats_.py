@@ -194,10 +194,10 @@ class HATS(object):
         )
         # =========================================================================================
         # tensorboard用のsummary
-        tf.identity(word_accuracy[0], name="word_accuracy")
-        summary.any(word_accuracy[1], name="word_accuracy")
-        tf.identity(edit_distance[0], name="edit_distance")
-        summary.any(edit_distance[1], name="edit_distance")
+        tf.identity(word_accuracy, name="word_accuracy")
+        summary.any(word_accuracy, name="word_accuracy")
+        tf.identity(edit_distance, name="edit_distance")
+        summary.any(edit_distance, name="edit_distance")
 
         summary.any(
             tensor=images,
@@ -236,8 +236,8 @@ class HATS(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    word_accuracy=word_accuracy,
-                    edit_distance=edit_distance
+                    word_accuracy=tf.metrics.mean(word_accuracy),
+                    edit_distance=tf.metrics.mean(edit_distance)
                 )
             )
         # =========================================================================================

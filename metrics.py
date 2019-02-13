@@ -10,7 +10,7 @@ def dense_to_sparse(tensor, blank):
     return tf.SparseTensor(indices, values, shape)
 
 
-def edit_distance(labels, logits, sequence_lengths, normalize, name="edit_distance"):
+def edit_distance(labels, logits, sequence_lengths, normalize):
 
     predictions = tf.nn.ctc_greedy_decoder(
         inputs=tf.transpose(logits, [1, 0, 2]),
@@ -20,13 +20,13 @@ def edit_distance(labels, logits, sequence_lengths, normalize, name="edit_distan
 
     labels = dense_to_sparse(labels, logits.shape[-1] - 1)
 
-    return tf.metrics.mean(tf.edit_distance(
+    return tf.reduce_mean(tf.edit_distance(
         hypothesis=tf.cast(predictions, tf.int32),
         truth=tf.cast(labels, tf.int32),
         normalize=normalize
-    ), name=name)
+    ))
 
 
-def word_accuracy(labels, predictions, name="word_accuracy"):
+def word_accuracy(labels, predictions):
 
-    return tf.metrics.mean(tf.reduce_all(tf.equal(predictions, labels), axis=1), name=name)
+    return tf.reduce_mean(tf.reduce_all(tf.equal(predictions, labels), axis=1))
