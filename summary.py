@@ -6,7 +6,7 @@ def any(tensor, name=None, data_format=None, **kwargs):
 
     name = name or re.sub(":.*", "", tensor.name)
 
-    if len(tensor.shape) == 1:
+    if len(tensor.shape) == 0:
 
         tf.summary.scalar(name, tensor, **kwargs)
 
