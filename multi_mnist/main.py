@@ -5,7 +5,7 @@ import functools
 import dataset
 from attrdict import AttrDict
 from models.hats import HATS
-from networks.attention_network import AttentionNetwork
+from networks.attention_network_1 import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
@@ -17,7 +17,7 @@ parser.add_argument('--test_filenames', type=str, nargs="+", default=["test.tfre
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
-parser.add_argument("--max_steps", type=int, default=20000, help="maximum number of training steps")
+parser.add_argument("--max_steps", type=int, default=10000, help="maximum number of training steps")
 parser.add_argument("--steps", type=int, default=None, help="number of evaluation steps")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
