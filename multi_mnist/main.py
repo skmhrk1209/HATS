@@ -6,7 +6,7 @@ import dataset
 from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
-from networks.resnet import ResNet
+from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=ResNet(
+            backbone_network=PyramidResNet(
                 conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
@@ -46,7 +46,7 @@ if __name__ == "__main__":
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=5, num_units=256),
+                    AttrDict(sequence_length=5, num_units=16),
                 ],
                 deconv_params=[
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
