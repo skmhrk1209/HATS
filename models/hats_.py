@@ -15,7 +15,7 @@ def sequence_lengths_fn(labels, blank, indices):
     labels = tf.slice(labels, begin, size)
 
     return tf.count_nonzero(tf.reduce_any(
-        input_tensor=tf.not_equal(labels, blank),
+        input_tensor=tf.less(labels, blank),
         axis=list(range(2, len(labels.shape)))
     ), axis=1)
 
@@ -187,8 +187,7 @@ class HATS(object):
         )), axis=0)
         # =========================================================================================
         # EOSとBlankのみ含む単語(つまり存在しない)を削除
-        indices = tf.reduce_any(tf.less(labels, eos), axis=1)
-        indices = tf.where(indices)
+        indices = tf.where(tf.reduce_any(tf.less(labels, eos), axis=1))
         labels = tf.gather_nd(labels, indices)
         logits = tf.gather_nd(logits, indices)
         # =========================================================================================
