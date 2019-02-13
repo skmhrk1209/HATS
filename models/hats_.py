@@ -181,11 +181,10 @@ class HATS(object):
         )
         # =========================================================================================
         # Blankを除去した単語の正解率を求める
-        word_accuracy = metrics.word_accuracy(
-            labels=labels * sequence_mask,
-            predictions=predictions * sequence_mask,
-            name="word_accuracy"
-        )
+        word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
+            x=predictions * sequence_mask,
+            y=labels * sequence_mask
+        ), axis=1), dtype=tf.float32), name="word_accuracy")
         # =========================================================================================
         # tensorboard用のsummary
         summary.scalar(word_accuracy, name="word_accuracy")

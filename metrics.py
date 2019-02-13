@@ -25,11 +25,3 @@ def edit_distance(labels, logits, sequence_lengths, normalize, name="edit_distan
         truth=tf.cast(labels, tf.int32),
         normalize=normalize
     ), name=name)
-
-
-def word_accuracy(labels, predictions, name="word_accuracy"):
-
-    return tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
-        x=predictions,
-        y=labels
-    ), axis=1), dtype=tf.float32), name=name)
