@@ -5,17 +5,12 @@ import functools
 import dataset
 from attrdict import AttrDict
 from models.hats import HATS
-from networks.attention_network_6 import AttentionNetwork
+from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
-# 1: 0.793
-# 2: 0.381
-# 3: 0.779
-# 4: 0.834
-# 5: 0.825
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="hats_model_6", help="model directory")
+parser.add_argument("--model_dir", type=str, default="hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecords for training")
 parser.add_argument('--test_filenames', type=str, nargs="+", default=["test.tfrecord"], help="tfrecords for test")
@@ -63,7 +58,7 @@ if __name__ == "__main__":
             num_classes=11,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay=0.1,
+                attention_decay=0.0,
                 optimizer=tf.train.AdamOptimizer()
             )
         )(features, labels, mode),

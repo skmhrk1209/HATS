@@ -6,6 +6,11 @@ from algorithms import *
 from itertools import *
 
 
+def static_rnn(cell, inputs, initial_state):
+
+    return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
+
+
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, rnn_params, deconv_params, data_format):
@@ -54,12 +59,6 @@ class AttentionNetwork(object):
 
             inputs = tf.layers.flatten(inputs)
 
-            feature_maps = inputs
-
-            def static_rnn(cell, inputs, initial_state):
-
-                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
-
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
@@ -76,49 +75,41 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda indices_inputs: static_rnn(
+                        function=lambda inputs: static_rnn(
                             cell=lstm_cell,
-                            inputs=[feature_maps] * rnn_param.sequence_length,
+                            inputs=[inputs] * rnn_param.sequence_length,
                             initial_state=tf.nn.rnn_cell.LSTMStateTuple(
                                 c=tf.layers.dense(
-                                    inputs=indices_inputs[1].c,
+                                    inputs=inputs.c,
                                     units=rnn_param.num_units,
                                     activation=tf.nn.tanh,
-                                    kernel_initializer=tf.initializers.variance_scaling(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
-                                    ),
+                                    kernel_initializer=tf.initializers.identity(),
                                     bias_initializer=tf.initializers.zeros(),
                                     name="c_projection",
                                     reuse=tf.AUTO_REUSE
                                 ),
                                 h=tf.layers.dense(
-                                    inputs=indices_inputs[1].h,
+                                    inputs=inputs.h,
                                     units=rnn_param.num_units,
                                     activation=tf.nn.tanh,
-                                    kernel_initializer=tf.initializers.variance_scaling(
-                                        scale=1.0,
-                                        mode="fan_avg",
-                                        distribution="normal"
-                                    ),
+                                    kernel_initializer=tf.initializers.identity(),
                                     bias_initializer=tf.initializers.zeros(),
                                     name="h_projection",
                                     reuse=tf.AUTO_REUSE
                                 )
-                            ) if i else lstm_cell.zero_state(
-                                batch_size=tf.shape(indices_inputs[1])[0],
+                            )if i else lstm_cell.zero_state(
+                                batch_size=tf.shape(inputs)[0],
                                 dtype=tf.float32
                             )
                         ),
-                        sequence=enumerate_innermost_element(inputs)
+                        sequence=inputs
                     )
 
             with tf.variable_scope("projection_block"):
 
                 inputs = map_innermost_element(
                     function=lambda inputs: tf.layers.dense(
-                        inputs=inputs.h,
+                        inputs=inputs,
                         units=np.prod(image_shape[1:]),
                         activation=tf.nn.relu,
                         kernel_initializer=tf.initializers.variance_scaling(
