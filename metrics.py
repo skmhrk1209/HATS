@@ -14,7 +14,7 @@ def edit_distance(labels, logits, sequence_lengths, normalize):
 
     predictions = tf.nn.ctc_greedy_decoder(
         inputs=tf.transpose(logits, [1, 0, 2]),
-        sequence_length=sequence_lengths,
+        sequence_length=tf.cast(sequence_lengths, tf.int32),
         merge_repeated=False
     )[0][0]
 

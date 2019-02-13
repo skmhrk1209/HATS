@@ -212,7 +212,7 @@ class HATS(object):
         edit_distance = metrics.edit_distance(
             labels=tf.clip_by_value(labels, 0, eos),
             logits=logits,
-            sequence_lengths=tf.cast(sequence_lengths, tf.int32),
+            sequence_lengths=sequence_lengths,
             normalize=True
         )
         # =========================================================================================
