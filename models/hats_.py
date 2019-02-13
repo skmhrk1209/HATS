@@ -209,15 +209,20 @@ class HATS(object):
         # Blankを除去した単語の正解率を求める
         word_accuracy = metrics.word_accuracy(
             labels=labels,
-            predictions=predictions,
-            name="word_accuracy"
+            predictions=predictions
         )
         # =========================================================================================
         # tensorboard用のsummary
-        summary.any(word_accuracy[0])
-        summary.any(images, data_format=self.data_format, max_outputs=2)
-        for attention_maps in flatten_innermost_element(attention_maps):
-            summary.any(attention_maps, data_format=self.data_format, max_outputs=2)
+        tf.identity(word_accuracy[0], name="word_accuracy")
+        summary.any(word_accuracy[1], name="word_accuracy")
+        summary.any(images, name="images" data_format=self.data_format, max_outputs=2)
+        for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
+            summary.any(
+                tensor=attention_maps,
+                name="attention_maps_{}".format("_".join(map(str, indices))),
+                data_format=self.data_format,
+                max_outputs=2
+            )
         # =========================================================================================
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:

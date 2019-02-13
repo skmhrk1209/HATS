@@ -2,9 +2,9 @@ import tensorflow as tf
 import re
 
 
-def any(tensor, data_format=None, **kwargs):
+def any(tensor, name=None, data_format=None, **kwargs):
 
-    name = re.sub(":.*", "", tensor.name)
+    name = name or re.sub(":.*", "", tensor.name)
 
     if len(tensor.shape) == 1:
 
