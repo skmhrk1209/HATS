@@ -215,7 +215,7 @@ class HATS(object):
             sequence_lengths=sequence_lengths,
             normalize=True
         )
-        print(edit_distance.shape)
+        print(edit_distance[0].shape)
         # =========================================================================================
         # tensorboard用のsummary
         tf.identity(word_accuracy[0], name="word_accuracy")
