@@ -40,11 +40,9 @@ class HATS(object):
         # 空間方向にflattenするための便利関数
 
         def spatial_flatten(inputs, data_format):
-
             inputs_shape = inputs.shape.as_list()
             outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
                              [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
-
             return tf.reshape(inputs, outputs_shape)
         # attention mapによるfeature extraction
         feature_vectors = map_innermost_element(
