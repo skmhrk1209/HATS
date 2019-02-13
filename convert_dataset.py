@@ -1,11 +1,18 @@
 import tensorflow as tf
 import numpy as np
 import skimage
-import glob
+import argparse
 import sys
 import os
 from tqdm import *
 from algorithms import *
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--input_filename", type=str, help="input ground truth filename")
+parser.add_argument("--output_filename", type=str, help="output tfrecord filename")
+parser.add_argument("--num_words", type=int, help="number of words contained in a instance (include eos)")
+parser.add_argument("--num_chars", type=int, help="number of characters contained in a instance (include eos)")
+args = parser.parse_args()
 
 
 def pad(sequence, sequence_length, value):
@@ -36,7 +43,8 @@ def main(input_filename, output_filename, num_words, num_chars):
             for line in tqdm(f):
 
                 path, words = line.split()
-                path = os.path.join(os.path.dirname(sys.argv[1]), path)
+                path = os.path.join(os.path.dirname(input_filename), path)
+
                 if invalid(path):
                     print("invalid file: {}".format(path))
                     continue
@@ -71,4 +79,4 @@ def main(input_filename, output_filename, num_words, num_chars):
 
 if __name__ == "__main__":
 
-    main(*sys.argv[1:3], *list(map(int, sys.argv[3:])))
+    main(args.input_filename, args.output_filename, args.num_words, args.num_chars)

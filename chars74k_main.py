@@ -11,7 +11,6 @@
 # =============================================================
 
 import tensorflow as tf
-import optuna
 import argparse
 import functools
 import dataset
@@ -19,7 +18,6 @@ from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
-from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="chars74k_hats_model", help="model directory")
@@ -88,10 +86,10 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=None,
                 shuffle=True,
+                sequence_lengths=[],
                 encoding="png",
                 image_size=[128, 128],
-                data_format=args.data_format,
-                seq_lens=[]
+                data_format=args.data_format
             ),
             max_steps=args.max_steps
         )
@@ -105,10 +103,10 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=1,
                 shuffle=False,
+                sequence_lengths=[],
                 encoding="png",
                 image_size=[128, 128],
-                data_format=args.data_format,
-                seq_lens=[]
+                data_format=args.data_format
             ),
             steps=args.steps
         ))

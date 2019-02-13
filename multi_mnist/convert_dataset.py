@@ -9,7 +9,7 @@ from tqdm import *
 parser = argparse.ArgumentParser()
 parser.add_argument("--input_directory", type=str, default="train", help="input multi-mnist directory")
 parser.add_argument("--output_filename", type=str, default="train.tfrecord", help="output tfrecord filename")
-parser.add_argument("--sequence_length", type=int, default=5, help="number of digits contained in a instance (include blank)")
+parser.add_argument("--num_digits", type=int, default=5, help="number of digits contained in a instance (include eos)")
 args = parser.parse_args()
 
 
@@ -19,14 +19,14 @@ def pad(sequence, sequence_length, value):
     return sequence
 
 
-def main(input_directory, output_filename, sequence_length):
+def main(input_directory, output_filename, num_digits):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
         for filename in glob.glob(os.path.join(input_directory, "*.jpg")):
 
             label = list(map(int, list(os.path.splitext(os.path.basename(filename))[0])))
-            label = pad(label, sequence_length, 10)
+            label = pad(label, num_digits, 10)
 
             writer.write(
                 record=tf.train.Example(
@@ -50,4 +50,4 @@ def main(input_directory, output_filename, sequence_length):
 
 if __name__ == "__main__":
 
-    main(args.input_directory, args.output_filename, args.sequence_length)
+    main(args.input_directory, args.output_filename, args.num_digits)

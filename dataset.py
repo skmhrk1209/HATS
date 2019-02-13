@@ -1,9 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import functools
-import glob
 import os
-from algorithms import *
 
 
 def parse_example(example, sequence_lengths, encoding, image_size, data_format):

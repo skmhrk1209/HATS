@@ -14,7 +14,6 @@
 # =============================================================
 
 import tensorflow as tf
-import optuna
 import argparse
 import functools
 import dataset
@@ -22,7 +21,6 @@ from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
-from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
