@@ -76,6 +76,7 @@ if __name__ == "__main__":
             num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
+                attention_decay=1e-9,
                 optimizer=tf.train.AdamOptimizer()
             )
         )(features, labels, mode),

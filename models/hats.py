@@ -116,16 +116,6 @@ class HATS(object):
             sequence=logits
         )
         # =========================================================================================
-        # attention mapは可視化のためにチャンネルをマージする
-        attention_maps = map_innermost_element(
-            function=lambda attention_maps: tf.reduce_sum(
-                input_tensor=attention_maps,
-                axis=1 if self.data_format == "channels_first" else 3,
-                keepdims=True
-            ),
-            sequence=attention_maps
-        )
-        # =========================================================================================
         # prediction mode
         if mode == tf.estimator.ModeKeys.PREDICT:
 
@@ -196,6 +186,8 @@ class HATS(object):
             average_across_timesteps=True,
             average_across_batch=True
         )
+        # attention decay
+        loss += tf.reduce_mean(attention_maps) * self.hyper_params.attention_decay
         # =========================================================================================
         # 余分なblankを除去した単語の正解率を求める
         word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
@@ -204,6 +196,16 @@ class HATS(object):
         ), axis=1), dtype=tf.float32), name="word_accuracy")
         # =========================================================================================
         # TODO: なぜかedit distanceのshapeがloggingの際に異なる
+        # =========================================================================================
+        # attention mapは可視化のためにチャンネルをマージする
+        attention_maps = map_innermost_element(
+            function=lambda attention_maps: tf.reduce_sum(
+                input_tensor=attention_maps,
+                axis=1 if self.data_format == "channels_first" else 3,
+                keepdims=True
+            ),
+            sequence=attention_maps
+        )
         # =========================================================================================
         # tensorboard用のsummary
         summary.scalar(word_accuracy, name="word_accuracy")
