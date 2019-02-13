@@ -21,18 +21,23 @@ class HATS(object):
         self.blank = num_classes - 1
 
     def __call__(self, images, labels, mode):
-
+        # =========================================================================================
+        # feature mapを計算
         feature_maps = self.backbone_network(
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
-
+        # =========================================================================================
+        # attention mapを計算
+        # 文字構造がnested listとして出力される
         # TODO: sequence_lengthsを渡して冗長な計算を除去
         # TODO: 若干混み合った計算が必要
         attention_maps = self.attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
+        # =========================================================================================
+        # 空間方向にflattenするための便利関数
 
         def spatial_flatten(inputs, data_format):
 
@@ -41,7 +46,7 @@ class HATS(object):
                              [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
 
             return tf.reshape(inputs, outputs_shape)
-
+        # attention mapによるfeature extraction
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
                 a=spatial_flatten(feature_maps, self.data_format),
@@ -51,7 +56,9 @@ class HATS(object):
             )),
             sequence=attention_maps
         )
-
+        # =========================================================================================
+        # logitの前に何層かFCを入れておく
+        # TODO: 本当に必要?
         for i, num_units in enumerate(self.num_units):
 
             with tf.variable_scope("dense_block_{}".format(i)):
@@ -81,7 +88,9 @@ class HATS(object):
                     ),
                     sequence=feature_vectors
                 )
-
+        # =========================================================================================
+        # logitのinitializationは特に重要ではない?
+        # softmaxだからとりあえずxavier initialization
         logits = map_innermost_element(
             function=lambda feature_vectors: tf.layers.dense(
                 inputs=feature_vectors,
@@ -97,7 +106,7 @@ class HATS(object):
             ),
             sequence=feature_vectors
         )
-
+        # argmaxで文字予測
         predictions = map_innermost_element(
             function=lambda logits: tf.argmax(
                 input=logits,
@@ -144,6 +153,7 @@ class HATS(object):
             )
         # =========================================================================================
         # logits, predictions同様にlabelsもunstackしてnested listにしておく
+        # おそらくtf.reshape([-1, labels.shape[-1]])でも同様だが少し怖い
         while all(flatten_innermost_element(map_innermost_element(lambda labels: len(labels.shape) > 1, labels))):
             labels = map_innermost_element(
                 function=lambda labels: tf.unstack(labels, axis=1),
@@ -173,9 +183,11 @@ class HATS(object):
         # =========================================================================================
         # lossがBlankを含まないようにマスク
         sequence_lengths = tf.count_nonzero(tf.not_equal(labels, self.blank), axis=1)
-        # Blankを1つのみ予測
+        # 最初のBlankはEOSとして残しておく
         sequence_lengths += tf.ones_like(sequence_lengths)
+        # Binary Mask
         sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[-1], dtype=tf.int32)
+        # =========================================================================================
         # cross entropy loss
         loss = tf.contrib.seq2seq.sequence_loss(
             logits=logits,
@@ -185,11 +197,13 @@ class HATS(object):
             average_across_batch=True
         )
         # =========================================================================================
-        # Blankを除去した単語の正解率を求める
+        # 余分なBlankを除去した単語の正解率を求める
         word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
             x=predictions * sequence_mask,
             y=labels * sequence_mask
         ), axis=1), dtype=tf.float32), name="word_accuracy")
+        # =========================================================================================
+        # TODO: なぜかEdit Distanceのshapeがloggingの際に異なる
         # =========================================================================================
         # tensorboard用のsummary
         summary.scalar(word_accuracy, name="word_accuracy")
