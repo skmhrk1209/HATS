@@ -176,16 +176,16 @@ class HATS(object):
             sequence=predictions
         )), axis=0)
         # =========================================================================================
-        # Blankのみ含む単語(つまり存在しない)を削除
+        # blankのみ含む単語(つまり存在しない)を削除
         indices = tf.where(tf.reduce_any(tf.not_equal(labels, self.blank), axis=1))
         labels = tf.gather_nd(labels, indices)
         logits = tf.gather_nd(logits, indices)
         # =========================================================================================
-        # lossがBlankを含まないようにマスク
+        # lossがblankを含まないようにマスク
         sequence_lengths = tf.count_nonzero(tf.not_equal(labels, self.blank), axis=1)
-        # 最初のBlankはEOSとして残しておく
+        # 最初のblankはEOSとして残しておく
         sequence_lengths += tf.ones_like(sequence_lengths)
-        # Binary Mask
+        # binary mask
         sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[-1], dtype=tf.int32)
         # =========================================================================================
         # cross entropy loss
@@ -197,13 +197,13 @@ class HATS(object):
             average_across_batch=True
         )
         # =========================================================================================
-        # 余分なBlankを除去した単語の正解率を求める
+        # 余分なblankを除去した単語の正解率を求める
         word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
             x=predictions * sequence_mask,
             y=labels * sequence_mask
         ), axis=1), dtype=tf.float32), name="word_accuracy")
         # =========================================================================================
-        # TODO: なぜかEdit Distanceのshapeがloggingの際に異なる
+        # TODO: なぜかedit distanceのshapeがloggingの際に異なる
         # =========================================================================================
         # tensorboard用のsummary
         summary.scalar(word_accuracy, name="word_accuracy")
