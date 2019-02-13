@@ -31,7 +31,7 @@ class HATS(object):
         # attention mapを計算
         # 文字構造がnested listとして出力される
         # TODO: sequence_lengthsを渡して冗長な計算を除去
-        # TODO: 若干混み合った計算が必要
+        # TODO: 若干混み合った計算が必要, 出来るだけ抽象的に描きたい
         attention_maps = self.attention_network(
             inputs=feature_maps,
             training=mode == tf.estimator.ModeKeys.TRAIN
