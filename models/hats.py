@@ -8,6 +8,7 @@ from algorithms import *
 
 
 class HATS(object):
+    """ HATS: Hierarchical Attention-based Text Spotter """
 
     def __init__(self, backbone_network, attention_network,
                  num_units, num_classes, data_format, hyper_params):
@@ -30,6 +31,7 @@ class HATS(object):
         # =========================================================================================
         # attention mapを計算
         # 文字構造がnested listとして出力される
+        # nested listはalgorithmsモジュール全般で処理する
         # TODO: sequence_lengthsを渡して冗長な計算を除去
         # TODO: 若干混み合った計算が必要, 出来るだけ抽象的に描きたい
         attention_maps = self.attention_network(
