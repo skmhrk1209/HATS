@@ -186,32 +186,12 @@ class HATS(object):
             labels=labels * sequence_mask,
             predictions=predictions * sequence_mask
         )
-        edit_distance = metrics.edit_distance(
-            labels=labels,
-            logits=logits,
-            sequence_lengths=sequence_lengths,
-            normalize=True
-        )
         # =========================================================================================
         # tensorboard用のsummary
-        tf.identity(word_accuracy, name="word_accuracy")
         summary.any(word_accuracy, name="word_accuracy")
-        tf.identity(edit_distance, name="edit_distance")
-        summary.any(edit_distance, name="edit_distance")
-
-        summary.any(
-            tensor=images,
-            name="images",
-            data_format=self.data_format,
-            max_outputs=2
-        )
+        summary.any(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
-            summary.any(
-                tensor=attention_maps,
-                name="attention_maps_{}".format("_".join(map(str, indices))),
-                data_format=self.data_format,
-                max_outputs=2
-            )
+            summary.any(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
         # =========================================================================================
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
@@ -236,8 +216,7 @@ class HATS(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    word_accuracy=tf.metrics.mean(word_accuracy),
-                    edit_distance=tf.metrics.mean(edit_distance)
+                    word_accuracy=tf.metrics.mean(word_accuracy)
                 )
             )
         # =========================================================================================
