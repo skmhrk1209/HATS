@@ -184,7 +184,8 @@ class HATS(object):
         # Blankを除去した単語の正解率を求める
         word_accuracy = metrics.word_accuracy(
             labels=labels * sequence_mask,
-            predictions=predictions * sequence_mask
+            predictions=predictions * sequence_mask,
+            name="word_accuracy"
         )
         # =========================================================================================
         # tensorboard用のsummary
