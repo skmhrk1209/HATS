@@ -1,11 +1,16 @@
 import tensorflow as tf
 import numpy as np
-import skimage
+import argparse
 import glob
-import sys
 import os
 from tqdm import *
-from algorithms import *
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--input_directory", type=str, default="multi_mnist/train", help="input multi-mnist directory")
+parser.add_argument("--output_filename", type=str, default="multi_mnist/train.tfrecord", help="output tfrecord filename")
+parser.add_argument("--num_digits", type=int, default=5, help="number of digits contained in a instance (include blank)")
+args = parser.parse_args()
 
 
 def pad(sequence, sequence_length, value):
@@ -14,61 +19,35 @@ def pad(sequence, sequence_length, value):
     return sequence
 
 
-def invalid(path):
-    try:
-        skimage.io.imread(path)
-    except:
-        return True
-    return False
-
-
-def main(input_filename, output_filename, num_words, num_chars):
-
-    class_ids = {}
-    class_ids.update({chr(j): i for i, j in enumerate(range(ord("0"), ord("9") + 1), 0)})
-    class_ids.update({chr(j): i for i, j in enumerate(range(ord("A"), ord("Z") + 1), class_ids["9"] + 1)})
-    class_ids.update({"": max(class_ids.values()) + 1})
+def main(input_directory, output_filename, num_digits):
 
     with tf.python_io.TFRecordWriter(output_filename) as writer:
 
-        with open(input_filename) as f:
+        for filename in glob.glob(os.path.join(input_directory, "*.jpg")):
 
-            for line in tqdm(f):
+            label = list(map(int, list(os.path.splitext(os.path.basename(filename))[0])))
+            label = pad(label, num_digits, 10)
 
-                path, words = line.split()
-                path = os.path.join(os.path.dirname(sys.argv[1]), path)
-                if invalid(path):
-                    print("invalid file: {}".format(path))
-                    continue
-
-                words = words.split("_")
-                words = map_innermost_list(lambda words: pad(words, num_words, ""), words)
-                words = map_innermost_element(lambda word: word.upper(), words)
-                chars = map_innermost_element(lambda word: list(word), words)
-                chars = map_innermost_list(lambda chars: pad(chars, num_chars, ""), chars)
-                label = map_innermost_element(lambda char: class_ids[char], chars)
-                label = flatten_innermost_element(label)
-
-                writer.write(
-                    record=tf.train.Example(
-                        features=tf.train.Features(
-                            feature={
-                                "path": tf.train.Feature(
-                                    bytes_list=tf.train.BytesList(
-                                        value=[path.encode("utf-8")]
-                                    )
-                                ),
-                                "label": tf.train.Feature(
-                                    int64_list=tf.train.Int64List(
-                                        value=label
-                                    )
+            writer.write(
+                record=tf.train.Example(
+                    features=tf.train.Features(
+                        feature={
+                            "path": tf.train.Feature(
+                                bytes_list=tf.train.BytesList(
+                                    value=[filename.encode("utf-8")]
                                 )
-                            }
-                        )
-                    ).SerializeToString()
-                )
+                            ),
+                            "label": tf.train.Feature(
+                                int64_list=tf.train.Int64List(
+                                    value=label
+                                )
+                            )
+                        }
+                    )
+                ).SerializeToString()
+            )
 
 
 if __name__ == "__main__":
 
-    main(*sys.argv[1:3], *list(map(int, sys.argv[3:])))
+    main(args.input_directory, args.output_filename, args.num_digits)
