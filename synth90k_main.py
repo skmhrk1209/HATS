@@ -76,7 +76,12 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=1e-9,
-                optimizer=tf.train.AdamOptimizer()
+                optimizer=tf.train.AdamOptimizer(
+                    learning_rate=1e-4,
+                    beta1=0.9,
+                    beta2=0.999,
+                    epsilon=1e-8
+                )
             )
         )(features, labels, mode),
         model_dir=args.model_dir,
