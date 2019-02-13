@@ -78,7 +78,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         function=lambda inputs: ops.irnn(
                             inputs_sequence=[feature_maps] * rnn_param.sequence_length,
-                            hiddens=inputs if i else tf.zeros([tf.shape(inputs)[0]]),
+                            hiddens=inputs if i else tf.zeros([tf.shape(inputs)[0], rnn_param.num_units]),
                             hidden_units=rnn_param.num_units,
                             output_units=rnn_param.num_units
                         ),
