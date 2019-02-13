@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
-            backbone_network=PyramidResNet(
+            backbone_network=ResNet(
                 conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
