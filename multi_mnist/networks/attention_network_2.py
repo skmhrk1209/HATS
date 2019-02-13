@@ -56,6 +56,10 @@ class AttentionNetwork(object):
 
             feature_maps = inputs
 
+            def static_rnn(cell, inputs, initial_state):
+
+                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
+
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
@@ -72,23 +76,13 @@ class AttentionNetwork(object):
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda indices_inputs: tf.unstack(
-                            value=tf.nn.dynamic_rnn(
-                                cell=lstm_cell,
-                                inputs=tf.stack(
-                                    values=[feature_maps] * rnn_param.sequence_length,
-                                    axis=0
-                                ),
-                                sequence_length=None,
-                                initial_state=indices_inputs[1] if i else lstm_cell.zero_state(
-                                    batch_size=tf.shape(indices_inputs[1])[0],
-                                    dtype=tf.float32
-                                ),
-                                parallel_iterations=os.cpu_count(),
-                                swap_memory=True,
-                                time_major=True
-                            )[0],
-                            axis=0
+                        function=lambda indices_inputs: static_rnn(
+                            cell=lstm_cell,
+                            inputs=[feature_maps] * rnn_param.sequence_length,
+                            initial_state=indices_inputs[1] if i else lstm_cell.zero_state(
+                                batch_size=tf.shape(indices_inputs[1])[0],
+                                dtype=tf.float32
+                            )
                         ),
                         sequence=enumerate_innermost_element(inputs)
                     )

@@ -9,6 +9,8 @@ from networks.attention_network_2 import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
+# 1: 0.793
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="hats_model_2", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
