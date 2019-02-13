@@ -1,6 +1,63 @@
 import tensorflow as tf
 
 
+def irnn(inputs_sequence, hiddens, hidden_units,
+         output_units, name="irnn", reuse=None):
+    """ Identity Recurrent Neural Network 
+    composed of ReLUs and initialized with the identity matrix 
+    See [Le et al., 2015](https://arxiv.org/pdf/1504.00941.pdf)
+    """
+
+    with tf.variable_scope(name, reuse=reuse):
+
+        outputs_sequence = []
+
+        for i, inputs in enumerate(inputs_sequence):
+
+            inputs = tf.layers.dense(
+                inputs=inputs,
+                units=hidden_units,
+                kernel_initializer=tf.initializers.variance_scaling(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal"
+                ),
+                bias_initializer=tf.initializers.zeros(),
+                name="input_dense",
+                reuse=tf.AUTO_REUSE
+            )
+
+            hiddens = tf.layers.dense(
+                inputs=hiddens,
+                units=hidden_units,
+                kernel_initializer=tf.initializers.identity(),
+                bias_initializer=tf.initializers.zeros(),
+                name="hidden_dense",
+                reuse=tf.AUTO_REUSE
+            )
+
+            hiddens = tf.nn.relu(inputs + hiddens)
+
+            outputs = tf.layers.dense(
+                inputs=hiddens,
+                units=output_units,
+                kernel_initializer=tf.initializers.variance_scaling(
+                    scale=2.0,
+                    mode="fan_in",
+                    distribution="normal"
+                ),
+                bias_initializer=tf.initializers.zeros(),
+                name="output_dense",
+                reuse=tf.AUTO_REUSE
+            )
+
+            outputs = tf.nn.relu(outputs)
+
+            outputs_sequence.append(outputs)
+
+        return outputs_sequence
+
+
 def spatial_transformer(inputs, params, out_size, name="spatial_transformer"):
     """ Spatial Transformer Layer
     Implements a spatial transformer layer as described in [1].

@@ -6,11 +6,6 @@ from algorithms import *
 from itertools import *
 
 
-def static_rnn(cell, inputs, initial_state):
-
-    return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
-
-
 class AttentionNetwork(object):
 
     def __init__(self, conv_params, rnn_params, deconv_params, data_format):
@@ -40,7 +35,7 @@ class AttentionNetwork(object):
                             kernel_initializer=tf.initializers.variance_scaling(
                                 scale=2.0,
                                 mode="fan_in",
-                                distribution="untruncated_normal"
+                                distribution="normal"
                             ),
                             name="conv2d",
                             reuse=None
@@ -59,6 +54,12 @@ class AttentionNetwork(object):
 
             inputs = tf.layers.flatten(inputs)
 
+            feature_maps = inputs
+
+            def static_rnn(cell, inputs, initial_state):
+
+                return list(accumulate([initial_state] + inputs, lambda state, inputs: cell(inputs, state)[1]))[1:]
+
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
@@ -70,38 +71,16 @@ class AttentionNetwork(object):
                         initializer=tf.initializers.variance_scaling(
                             scale=1.0,
                             mode="fan_avg",
-                            distribution="untruncated_normal"
+                            distribution="normal"
                         )
                     )
 
                     inputs = map_innermost_element(
-                        function=lambda inputs: static_rnn(
-                            cell=lstm_cell,
-                            inputs=[inputs] * rnn_param.sequence_length,
-                            initial_state=tf.nn.rnn_cell.LSTMStateTuple(
-                                c=tf.layers.dense(
-                                    inputs=inputs.c,
-                                    units=rnn_param.num_units,
-                                    activation=tf.nn.tanh,
-                                    kernel_initializer=tf.initializers.identity(),
-                                    bias_initializer=tf.initializers.zeros(),
-                                    name="c_projection",
-                                    reuse=tf.AUTO_REUSE
-                                ),
-                                h=tf.layers.dense(
-                                    inputs=inputs.h,
-                                    units=rnn_param.num_units,
-                                    activation=tf.nn.tanh,
-                                    kernel_initializer=tf.initializers.identity(),
-                                    bias_initializer=tf.initializers.zeros(),
-                                    name="h_projection",
-                                    reuse=tf.AUTO_REUSE
-                                )
-                            )if i elselstm_cell.zero_state(
-                                batch_size=tf.shape(inputs)[0],
-                                dtype=tf.float32
-                            ),
-
+                        function=lambda inputs: ops.irnn(
+                            inputs_sequence=[feature_maps] * rnn_param.sequence_length,
+                            hiddens=inputs if i else tf.zeros([tf.shape(inputs)[0]]),
+                            hidden_units=rnn_param.num_units,
+                            output_units=rnn_param.num_units
                         ),
                         sequence=inputs
                     )
@@ -110,13 +89,13 @@ class AttentionNetwork(object):
 
                 inputs = map_innermost_element(
                     function=lambda inputs: tf.layers.dense(
-                        inputs=inputs,
+                        inputs=inputs.h,
                         units=np.prod(image_shape[1:]),
                         activation=tf.nn.relu,
                         kernel_initializer=tf.initializers.variance_scaling(
                             scale=2.0,
                             mode="fan_in",
-                            distribution="untruncated_normal"
+                            distribution="normal"
                         ),
                         bias_initializer=tf.zeros_initializer(),
                         name="dense",
@@ -147,7 +126,7 @@ class AttentionNetwork(object):
                                 kernel_initializer=tf.initializers.variance_scaling(
                                     scale=2.0,
                                     mode="fan_in",
-                                    distribution="untruncated_normal"
+                                    distribution="normal"
                                 ),
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
@@ -181,7 +160,7 @@ class AttentionNetwork(object):
                                 kernel_initializer=tf.initializers.variance_scaling(
                                     scale=1.0,
                                     mode="fan_avg",
-                                    distribution="untruncated_normal"
+                                    distribution="normal"
                                 ),
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
