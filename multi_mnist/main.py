@@ -5,7 +5,7 @@ import functools
 import dataset
 from attrdict import AttrDict
 from models.hats import HATS
-from networks.attention_network_5 import AttentionNetwork
+from networks.attention_network_6 import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
@@ -15,7 +15,7 @@ from algorithms import *
 # 4: 0.834
 # 5: 0.825
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="hats_model_5", help="model directory")
+parser.add_argument("--model_dir", type=str, default="hats_model_6", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecords for training")
 parser.add_argument('--test_filenames', type=str, nargs="+", default=["test.tfrecord"], help="tfrecords for test")
