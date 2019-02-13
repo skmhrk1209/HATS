@@ -46,6 +46,8 @@ if __name__ == "__main__":
 
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
+            # =========================================================================================
+            # feature extraction
             backbone_network=PyramidResNet(
                 conv_param=Param(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
@@ -57,6 +59,8 @@ if __name__ == "__main__":
                 ],
                 data_format=args.data_format
             ),
+            # =========================================================================================
+            # text detection
             attention_network=AttentionNetwork(
                 conv_params=[
                     Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
@@ -71,11 +75,17 @@ if __name__ == "__main__":
                 ],
                 data_format=args.data_format
             ),
+            # =========================================================================================
+            # text recognition
             num_units=[1024],
             num_classes=37,
+            # =========================================================================================
             data_format=args.data_format,
             hyper_params=Param(
+                # あんまり効果的ではない
                 attention_decay=1e-9,
+                # 最適なepsilonが[1.0, 0.1]とかの時もあるらしい
+                # 意味不明
                 optimizer=tf.train.AdamOptimizer(
                     learning_rate=1e-4,
                     beta1=0.9,
@@ -96,6 +106,7 @@ if __name__ == "__main__":
                 )
             )
         ),
+        # resnetはchars74kで学習させた重みを初期値として用いる
         warm_start_from=tf.estimator.WarmStartSettings(
             ckpt_to_initialize_from=args.pretrained_model_dir,
             vars_to_warm_start=".*pyramid_resnet.*"
@@ -118,10 +129,13 @@ if __name__ == "__main__":
             ),
             max_steps=args.max_steps,
             hooks=[
+                # logging用のhook
                 tf.train.LoggingTensorHook(
                     tensors={"word_accuracy": "word_accuracy"},
                     every_n_iter=100
                 ),
+                # validationのためのcustom hook
+                # session.runの後にestimator.evaluateしてるだけ
                 hooks.ValidationHook(
                     estimator=estimator,
                     input_fn=functools.partial(
