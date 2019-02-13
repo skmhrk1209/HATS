@@ -9,13 +9,17 @@ from algorithms import *
 
 def sequence_lengths_fn(labels, blank, indices):
 
-    begin = [0] + indices + [0] * (len(labels.shape[1:]) - len(indices))
-    size = [-1] + [1] * len(indices) + [-1] * (len(labels.shape[1:]) - len(indices))
+    depth = len(labels.shape[1:]) - len(indices)
+    begin = [0] + indices + [0] * depth
+    size = [-1] + [1] * len(indices) + [-1] * depth
 
-    labels = tf.slice(labels, begin, size)
+    labels = tf.squeeze(
+        input=tf.slice(labels, begin, size),
+        axis=list(range(1, len(indices) + 1))
+    )
 
     return tf.count_nonzero(tf.reduce_any(
-        input_tensor=tf.less(labels, blank),
+        input_tensor=tf.not_equal(labels, blank),
         axis=list(range(2, len(labels.shape)))
     ), axis=1)
 
@@ -43,9 +47,6 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
-        eos = self.num_classes - 1
-        blank = self.num_classes
-
         feature_maps = self.backbone_network(
             inputs=images,
             training=mode == tf.estimator.ModeKeys.TRAIN
@@ -56,7 +57,7 @@ class HATS(object):
             sequence_lengths_fn=functools.partial(
                 sequence_lengths_fn,
                 labels=labels,
-                blank=blank
+                blank=self.num_classes - 1
             ),
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
@@ -128,13 +129,12 @@ class HATS(object):
         # =========================================================================================
         # attention mapは可視化のためにチャンネルをマージする
         attention_maps = map_innermost_element(
-            function=lambda indices_attention_maps: tf.reduce_sum(
-                input_tensor=indices_attention_maps[1],
+            function=lambda attention_maps: tf.reduce_sum(
+                input_tensor=attention_maps,
                 axis=1 if self.data_format == "channels_first" else 3,
-                keepdims=True,
-                name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0])))
+                keepdims=True
             ),
-            sequence=enumerate_innermost_element(attention_maps)
+            sequence=attention_maps
         )
         # =========================================================================================
         # prediction mode
@@ -186,14 +186,15 @@ class HATS(object):
             sequence=predictions
         )), axis=0)
         # =========================================================================================
-        # EOSとBlankのみ含む単語(つまり存在しない)を削除
-        indices = tf.where(tf.reduce_any(tf.less(labels, eos), axis=1))
+        # Blankのみ含む単語(つまり存在しない)を削除
+        indices = tf.where(tf.reduce_any(tf.not_equal(labels, self.num_classes - 1), axis=1))
         labels = tf.gather_nd(labels, indices)
         logits = tf.gather_nd(logits, indices)
         # =========================================================================================
         # lossがBlankを含まないようにマスク
-        sequence_lengths = tf.count_nonzero(tf.less(labels, blank), axis=1)
+        sequence_lengths = tf.count_nonzero(tf.not_equal(labels, self.num_classes - 1), axis=1)
         sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[-1], dtype=tf.int32)
+        print(sequence_lengths.shape)
         # cross entropy loss
         loss = tf.contrib.seq2seq.sequence_loss(
             logits=logits,
@@ -208,9 +209,8 @@ class HATS(object):
             labels=labels * sequence_mask,
             predictions=predictions * sequence_mask
         )
-        sequence_lengths = tf.count_nonzero(tf.less(labels, eos), axis=1)
         edit_distance = metrics.edit_distance(
-            labels=tf.clip_by_value(labels, 0, eos),
+            labels=labels,
             logits=logits,
             sequence_lengths=sequence_lengths,
             normalize=True
@@ -222,7 +222,12 @@ class HATS(object):
         tf.identity(edit_distance[0], name="edit_distance")
         summary.any(edit_distance[1], name="edit_distance")
 
-        summary.any(images, name="images", data_format=self.data_format, max_outputs=2)
+        summary.any(
+            tensor=images, 
+            name="images", 
+            data_format=self.data_format, 
+            max_outputs=2
+        )
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.any(
                 tensor=attention_maps,
@@ -254,7 +259,8 @@ class HATS(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    word_accuracy=word_accuracy
+                    word_accuracy=word_accuracy,
+                    edit_distance=edit_distance
                 )
             )
         # =========================================================================================
