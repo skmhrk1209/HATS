@@ -1,18 +1,3 @@
-# =============================================================
-# dataset details
-# dataset: synth90k
-# download: http://www.robots.ox.ac.uk/~vgg/data/text/
-# train: 7224612
-# val: 802734
-# test: 891927
-# max num chars: 23
-# classes: [0-9A-Z!(eos)](case-insensitive)
-# word accuracy:
-# edit distance:
-# pretrained model: chars74k classifier
-# max steps: 100000 batch size: 128
-# =============================================================
-
 import tensorflow as tf
 import optuna
 import argparse
@@ -25,10 +10,10 @@ from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_dir", type=str, default="mnist_hats_model", help="model directory")
+parser.add_argument("--model_dir", type=str, default="multi_mnist_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
-parser.add_argument('--train_filenames', type=str, nargs="+", default=["multi_mnist/train.tfrecord"], help="tfrecords for training")
-parser.add_argument('--test_filenames', type=str, nargs="+", default=["multi_mnist/test.tfrecord"], help="tfrecords for test")
+parser.add_argument('--train_filenames', type=str, nargs="+", default=["train.tfrecord"], help="tfrecords for training")
+parser.add_argument('--test_filenames', type=str, nargs="+", default=["test.tfrecord"], help="tfrecords for test")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")

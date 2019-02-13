@@ -22,8 +22,8 @@ parser.add_argument("--train_num_instances", type=int, default=60000, help="numb
 parser.add_argument("--test_num_instances", type=int, default=10000, help="number of test instances")
 parser.add_argument("--train_image_size", type=int, nargs="+", default=[256, 256], help="image_size of a train instance")
 parser.add_argument("--test_image_size", type=int, nargs="+", default=[256, 256], help="image_size of a test instance")
-parser.add_argument("--train_data_dir", type=str, default="multi_mnist/train", help="train data directory")
-parser.add_argument("--test_data_dir", type=str, default="multi_mnist/test", help="test data directory")
+parser.add_argument("--train_data_dir", type=str, default="train", help="train data directory")
+parser.add_argument("--test_data_dir", type=str, default="test", help="test data directory")
 args = parser.parse_args()
 
 
