@@ -89,7 +89,7 @@ class AttentionNetwork(object):
 
                 inputs = map_innermost_element(
                     function=lambda inputs: tf.layers.dense(
-                        inputs=inputs.h,
+                        inputs=inputs,
                         units=np.prod(image_shape[1:]),
                         activation=tf.nn.relu,
                         kernel_initializer=tf.initializers.variance_scaling(
