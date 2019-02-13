@@ -3,11 +3,11 @@ import optuna
 import argparse
 import functools
 import dataset
-from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from algorithms import *
+from attrdict import AttrDict as Param
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="hats_model", help="model directory")
@@ -32,32 +32,32 @@ if __name__ == "__main__":
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
             backbone_network=ResNet(
-                conv_param=AttrDict(filters=32, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=Param(filters=32, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=32, strides=[2, 2], blocks=1),
-                    AttrDict(filters=64, strides=[2, 2], blocks=1),
+                    Param(filters=32, strides=[2, 2], blocks=1),
+                    Param(filters=64, strides=[2, 2], blocks=1),
                 ],
                 data_format=args.data_format
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=5, num_units=128),
+                    Param(sequence_length=5, num_units=128),
                 ],
                 deconv_params=[
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 data_format=args.data_format
             ),
             num_units=[128],
             num_classes=11,
             data_format=args.data_format,
-            hyper_params=AttrDict(
+            hyper_params=Param(
                 attention_decay=1e-1,
                 optimizer=tf.train.AdamOptimizer()
             )

@@ -4,7 +4,7 @@
 # download: http://www.ee.surrey.ac.uk/CVSSP/demos/chars74k/
 # train: 11252
 # test: 1251
-# classes: [0-9A-Z](case-insensitive)
+# classes: 37 [0-9A-Z](case-insensitive)
 # accuracy: 0.894
 # pretrained model: chars74k classifier
 # max steps: 10000 batch size: 128
@@ -14,10 +14,10 @@ import tensorflow as tf
 import argparse
 import functools
 import dataset
-from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
+from attrdict import AttrDict as Param
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="chars74k_hats_model", help="model directory")
@@ -43,19 +43,19 @@ if __name__ == "__main__":
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: Classifier(
             backbone_network=PyramidResNet(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=Param(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[2, 2], blocks=2),
-                    AttrDict(filters=512, strides=[2, 2], blocks=2),
+                    Param(filters=64, strides=[2, 2], blocks=2),
+                    Param(filters=128, strides=[2, 2], blocks=2),
+                    Param(filters=256, strides=[2, 2], blocks=2),
+                    Param(filters=512, strides=[2, 2], blocks=2),
                 ],
                 data_format=args.data_format
             ),
             num_classes=37,
             data_format=args.data_format,
-            hyper_params=AttrDict(
+            hyper_params=Param(
                 optimizer=tf.train.AdamOptimizer()
             )
         )(features, labels, mode),

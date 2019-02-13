@@ -6,21 +6,21 @@
 # val: 802734
 # test: 891927
 # max num chars: 23
-# classes: [0-9A-Z!(eos)](case-insensitive)
+# classes: 37 [0-9A-Z](case-insensitive)
 # word accuracy:
 # edit distance:
 # pretrained model: chars74k classifier
-# max steps: 100000 batch size: 128
+# max steps: 50000 batch size: 128
 # =============================================================
 
 import tensorflow as tf
 import argparse
 import functools
 import dataset
-from attrdict import AttrDict
 from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
+from attrdict import AttrDict as Param
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
@@ -46,34 +46,34 @@ if __name__ == "__main__":
     estimator = tf.estimator.Estimator(
         model_fn=lambda features, labels, mode: HATS(
             backbone_network=PyramidResNet(
-                conv_param=AttrDict(filters=64, kernel_size=[7, 7], strides=[2, 2]),
+                conv_param=Param(filters=64, kernel_size=[7, 7], strides=[2, 2]),
                 pool_param=None,
                 residual_params=[
-                    AttrDict(filters=64, strides=[2, 2], blocks=2),
-                    AttrDict(filters=128, strides=[2, 2], blocks=2),
-                    AttrDict(filters=256, strides=[2, 2], blocks=2),
-                    AttrDict(filters=512, strides=[2, 2], blocks=2),
+                    Param(filters=64, strides=[2, 2], blocks=2),
+                    Param(filters=128, strides=[2, 2], blocks=2),
+                    Param(filters=256, strides=[2, 2], blocks=2),
+                    Param(filters=512, strides=[2, 2], blocks=2),
                 ],
                 data_format=args.data_format
             ),
             attention_network=AttentionNetwork(
                 conv_params=[
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=24, num_units=256),
+                    Param(sequence_length=24, num_units=256),
                 ],
                 deconv_params=[
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
-                    AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
+                    Param(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 data_format=args.data_format
             ),
             num_units=[1024],
             num_classes=37,
             data_format=args.data_format,
-            hyper_params=AttrDict(
+            hyper_params=Param(
                 attention_decay=1e-9,
                 optimizer=tf.train.AdamOptimizer()
             )
@@ -113,9 +113,7 @@ if __name__ == "__main__":
             max_steps=args.max_steps,
             hooks=[
                 tf.train.LoggingTensorHook(
-                    tensors={
-                        "word_accuracy": "word_accuracy"
-                    },
+                    tensors={"word_accuracy": "word_accuracy"},
                     every_n_iter=100
                 )
             ]
