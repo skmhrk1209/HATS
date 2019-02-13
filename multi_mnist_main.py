@@ -27,6 +27,8 @@ from algorithms import *
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="mnist_hats_model", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
+parser.add_argument('--train_filenames', type=str, nargs="+", default=["multi_mnist/train.tfrecord"], help="tfrecords for training")
+parser.add_argument('--test_filenames', type=str, nargs="+", default=["multi_mnist/test.tfrecord"], help="tfrecords for test")
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
