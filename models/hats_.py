@@ -223,9 +223,9 @@ class HATS(object):
         summary.any(edit_distance[1], name="edit_distance")
 
         summary.any(
-            tensor=images, 
-            name="images", 
-            data_format=self.data_format, 
+            tensor=images,
+            name="images",
+            data_format=self.data_format,
             max_outputs=2
         )
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
