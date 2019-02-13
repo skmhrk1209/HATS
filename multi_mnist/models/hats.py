@@ -72,7 +72,7 @@ class HATS(object):
                             kernel_initializer=tf.initializers.variance_scaling(
                                 scale=2.0,
                                 mode="fan_in",
-                                distribution="untruncated_normal"
+                                distribution="normal"
                             ),
                             name="dense",
                             reuse=tf.AUTO_REUSE
@@ -98,7 +98,7 @@ class HATS(object):
                 kernel_initializer=tf.initializers.variance_scaling(
                     scale=1.0,
                     mode="fan_avg",
-                    distribution="untruncated_normal"
+                    distribution="normal"
                 ),
                 bias_initializer=tf.initializers.zeros(),
                 name="logits",

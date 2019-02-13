@@ -29,7 +29,7 @@ class PyramidResNet(object):
                     kernel_initializer=tf.initializers.variance_scaling(
                         scale=2.0,
                         mode="fan_in",
-                        distribution="untruncated_normal"
+                        distribution="normal"
                     )
                 )
 
@@ -98,7 +98,7 @@ class PyramidResNet(object):
                     kernel_initializer=tf.initializers.variance_scaling(
                         scale=2.0,
                         mode="fan_in",
-                        distribution="untruncated_normal"
+                        distribution="normal"
                     )
                 )
 
@@ -146,7 +146,7 @@ class PyramidResNet(object):
                     kernel_initializer=tf.initializers.variance_scaling(
                         scale=2.0,
                         mode="fan_in",
-                        distribution="untruncated_normal"
+                        distribution="normal"
                     )
                 )
 
@@ -167,7 +167,7 @@ class PyramidResNet(object):
                 kernel_initializer=tf.initializers.variance_scaling(
                     scale=2.0,
                     mode="fan_in",
-                    distribution="untruncated_normal"
+                    distribution="normal"
                 )
             )
 
@@ -190,7 +190,7 @@ class PyramidResNet(object):
                 kernel_initializer=tf.initializers.variance_scaling(
                     scale=2.0,
                     mode="fan_in",
-                    distribution="untruncated_normal"
+                    distribution="normal"
                 )
             )
 

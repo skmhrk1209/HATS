@@ -35,7 +35,7 @@ class AttentionNetwork(object):
                             kernel_initializer=tf.initializers.variance_scaling(
                                 scale=2.0,
                                 mode="fan_in",
-                                distribution="untruncated_normal"
+                                distribution="normal"
                             ),
                             name="conv2d",
                             reuse=None
@@ -65,7 +65,7 @@ class AttentionNetwork(object):
                         initializer=tf.initializers.variance_scaling(
                             scale=1.0,
                             mode="fan_avg",
-                            distribution="untruncated_normal"
+                            distribution="normal"
                         )
                     )
 
@@ -101,7 +101,7 @@ class AttentionNetwork(object):
                         kernel_initializer=tf.initializers.variance_scaling(
                             scale=2.0,
                             mode="fan_in",
-                            distribution="untruncated_normal"
+                            distribution="normal"
                         ),
                         bias_initializer=tf.zeros_initializer(),
                         name="dense",
@@ -132,7 +132,7 @@ class AttentionNetwork(object):
                                 kernel_initializer=tf.initializers.variance_scaling(
                                     scale=2.0,
                                     mode="fan_in",
-                                    distribution="untruncated_normal"
+                                    distribution="normal"
                                 ),
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
@@ -166,7 +166,7 @@ class AttentionNetwork(object):
                                 kernel_initializer=tf.initializers.variance_scaling(
                                     scale=1.0,
                                     mode="fan_avg",
-                                    distribution="untruncated_normal"
+                                    distribution="normal"
                                 ),
                                 name="deconv2d",
                                 reuse=tf.AUTO_REUSE
