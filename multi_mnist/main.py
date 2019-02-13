@@ -13,6 +13,7 @@ from algorithms import *
 # 2: 0.381
 # 3: 0.779
 # 4: 0.834
+# 5: 0.825
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="hats_model_5", help="model directory")
 parser.add_argument("--pretrained_model_dir", type=str, default="", help="pretrained model directory")
