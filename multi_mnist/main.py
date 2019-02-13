@@ -58,10 +58,11 @@ if __name__ == "__main__":
             num_classes=11,
             data_format=args.data_format,
             hyper_params=AttrDict(
-                attention_decay_fn=lambda global_step:  tf.train.cosine_decay(
+                attention_decay_fn=lambda global_step:  tf.train.exponential_decay(
                     learning_rate=0.1,
                     global_step=global_step,
-                    decay_steps=args.max_steps
+                    decay_steps=args.max_steps // 2,
+                    decay_rate=0.1
                 ),
                 optimizer=tf.train.AdamOptimizer()
             )
