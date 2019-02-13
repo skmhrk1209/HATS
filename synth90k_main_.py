@@ -111,7 +111,13 @@ if __name__ == "__main__":
                 image_size=[256, 256],
                 data_format=args.data_format
             ),
-            max_steps=args.max_steps
+            max_steps=args.max_steps,
+            hooks=[
+                tf.train.LoggingTensorHook(
+                    tensors={"word_accuracy": "word_accuracy"},
+                    every_n_iter=100
+                )
+            ]
         )
 
     if args.eval:
