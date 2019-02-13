@@ -47,7 +47,7 @@ class HATS(object):
 
     def __call__(self, images, labels, mode):
 
-        print(labels)
+        print(labels.shape)
 
         feature_maps = self.backbone_network(
             inputs=images,
