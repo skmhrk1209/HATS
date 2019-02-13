@@ -46,7 +46,7 @@ if __name__ == "__main__":
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=5, num_units=16),
+                    AttrDict(sequence_length=5, num_units=128),
                 ],
                 deconv_params=[
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
