@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import os
 from . import ops
 from algorithms import *
 from itertools import *
@@ -49,48 +50,68 @@ class AttentionNetwork(object):
                         lambda inputs: tf.nn.relu(inputs)
                     )(inputs)
 
-            shape = inputs.get_shape().as_list()
+            image_shape = inputs.shape.as_list()
 
-            inputs = map_innermost_element(
-                function=lambda inputs: tf.layers.flatten(inputs),
-                sequence=inputs
-            )
+            inputs = tf.layers.flatten(inputs)
 
-            feature_maps = inputs
-
-            for i, rnn_param in enumerate(self.rnn_params[:1]):
+            for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
 
-                    inputs = map_innermost_element(
-                        function=lambda inputs: ops.irnn(
-                            inputs_sequence=[feature_maps] * rnn_param.sequence_length,
-                            hiddens=tf.zeros([
-                                tf.shape(feature_maps)[0],
-                                rnn_param.hidden_units
-                            ]),
-                            hidden_units=rnn_param.hidden_units,
-                            output_units=rnn_param.output_units
-                        ),
-                        sequence=inputs
+                    lstm_cell = tf.nn.rnn_cell.LSTMCell(
+                        num_units=rnn_param.num_units,
+                        use_peepholes=False,
+                        activation=tf.nn.tanh,
+                        initializer=tf.initializers.variance_scaling(
+                            scale=1.0,
+                            mode="fan_avg",
+                            distribution="untruncated_normal"
+                        )
                     )
 
-            for i, rnn_param in enumerate(self.rnn_params[1:], i + 1):
-
-                with tf.variable_scope("rnn_block_{}".format(i)):
-
                     inputs = map_innermost_element(
-                        function=lambda inputs: ops.irnn(
-                            inputs_sequence=[feature_maps] * rnn_param.sequence_length,
-                            hiddens=inputs,
-                            hidden_units=rnn_param.hidden_units,
-                            output_units=rnn_param.output_units
+                        function=lambda indices_inputs: tf.unstack(
+                            value=tf.nn.dynamic_rnn(
+                                cell=lstm_cell,
+                                inputs=tf.stack(
+                                    values=[indices_inputs[1]] * rnn_param.max_sequence_length,
+                                    axis=0
+                                ),
+                                sequence_length=None,
+                                initial_state=lstm_cell.zero_state(
+                                    batch_size=tf.shape(indices_inputs[1])[0],
+                                    dtype=tf.float32
+                                ),
+                                parallel_iterations=os.cpu_count(),
+                                swap_memory=True,
+                                time_major=True
+                            )[0],
+                            axis=0
                         ),
-                        sequence=inputs
+                        sequence=enumerate_innermost_element(inputs)
                     )
+
+            with tf.variable_scope("projection_block"):
+
+                inputs = map_innermost_element(
+                    function=lambda inputs: tf.layers.dense(
+                        inputs=inputs,
+                        units=np.prod(image_shape[1:]),
+                        activation=tf.nn.relu,
+                        kernel_initializer=tf.initializers.variance_scaling(
+                            scale=2.0,
+                            mode="fan_in",
+                            distribution="untruncated_normal"
+                        ),
+                        bias_initializer=tf.zeros_initializer(),
+                        name="dense",
+                        reuse=tf.AUTO_REUSE
+                    ),
+                    sequence=inputs
+                )
 
             inputs = map_innermost_element(
-                function=lambda inputs: tf.reshape(inputs, [-1] + shape[1:]),
+                function=lambda inputs: tf.reshape(inputs, [-1] + image_shape[1:]),
                 sequence=inputs
             )
 

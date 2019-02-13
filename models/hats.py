@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import functools
 import metrics
 import summary
 from networks import ops
@@ -9,14 +10,15 @@ from algorithms import *
 class HATS(object):
 
     def __init__(self, backbone_network, attention_network,
-                 units, classes, data_format, hyper_params):
+                 num_units, num_classes, data_format, hyper_params):
 
         self.backbone_network = backbone_network
         self.attention_network = attention_network
-        self.units = units
-        self.classes = classes
+        self.num_units = num_units
+        self.num_classes = num_classes
         self.data_format = data_format
         self.hyper_params = hyper_params
+        self.blank = num_classes - 1
 
     def __call__(self, images, labels, mode):
 
@@ -27,7 +29,6 @@ class HATS(object):
 
         attention_maps = self.attention_network(
             inputs=feature_maps,
-            labels=labels,
             training=mode == tf.estimator.ModeKeys.TRAIN
         )
 
@@ -49,7 +50,7 @@ class HATS(object):
             sequence=attention_maps
         )
 
-        for i, units in enumerate(self.units):
+        for i, num_units in enumerate(self.num_units):
 
             with tf.variable_scope("dense_block_{}".format(i)):
 
@@ -57,7 +58,7 @@ class HATS(object):
                     function=compose(
                         lambda inputs: tf.layers.dense(
                             inputs=inputs,
-                            units=units,
+                            units=num_units,
                             use_bias=False,
                             kernel_initializer=tf.initializers.variance_scaling(
                                 scale=2.0,
@@ -82,7 +83,7 @@ class HATS(object):
         logits = map_innermost_element(
             function=lambda feature_vectors: tf.layers.dense(
                 inputs=feature_vectors,
-                units=self.classes,
+                units=self.num_classes,
                 kernel_initializer=tf.initializers.variance_scaling(
                     scale=1.0,
                     mode="fan_avg",
@@ -96,10 +97,15 @@ class HATS(object):
         )
 
         predictions = map_innermost_element(
-            function=lambda logits: tf.argmax(logits, axis=-1),
+            function=lambda logits: tf.argmax(
+                input=logits,
+                axis=-1,
+                output_type=tf.int32
+            ),
             sequence=logits
         )
-
+        # =========================================================================================
+        # attention mapは可視化のためにチャンネルをマージする
         attention_maps = map_innermost_element(
             function=lambda attention_maps: tf.reduce_sum(
                 input_tensor=attention_maps,
@@ -108,15 +114,8 @@ class HATS(object):
             ),
             sequence=attention_maps
         )
-
-        attention_maps = map_innermost_element(
-            function=lambda indices_attention_maps: tf.identity(
-                input=indices_attention_maps[1],
-                name="attention_maps_{}".format("_".join(map(str, indices_attention_maps[0])))
-            ),
-            sequence=enumerate_innermost_element(attention_maps)
-        )
-
+        # =========================================================================================
+        # prediction mode
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             while isinstance(predictions, list):
@@ -141,75 +140,62 @@ class HATS(object):
                     attention_maps=attention_maps
                 )
             )
-
+        # =========================================================================================
+        # logits, predictions同様にlabelsもunstackしてnested listにしておく
         while all(flatten_innermost_element(map_innermost_element(lambda labels: len(labels.shape) > 1, labels))):
-
             labels = map_innermost_element(
                 function=lambda labels: tf.unstack(labels, axis=1),
                 sequence=labels
             )
-
-        losses = map_innermost_element(
-            function=lambda labels_logits: tf.losses.sparse_softmax_cross_entropy(
-                labels=labels_logits[0],
-                logits=labels_logits[1]
-            ),
-            sequence=zip_innermost_element(labels, logits)
-        )
-
-        losses = map_innermost_element(
-            function=lambda indices_loss: tf.identity(
-                input=indices_loss[1],
-                name="loss_{}".format("_".join(map(str, indices_loss[0])))
-            ),
-            sequence=enumerate_innermost_element(losses)
-        )
-
-        loss = tf.reduce_mean(losses)
-
+        # =========================================================================================
+        # 簡単のため，単語構造のみを残して残りはバッチ方向に展開
+        # [batch_size, max_sequence_length_0, ..., max_equence_length_N, ...] =>
+        # [batch_size * max_sequence_length_0 * ..., max_equence_length_N, ...]
         labels = tf.concat(flatten_innermost_element(map_innermost_list(
             function=lambda labels: tf.stack(labels, axis=1),
             sequence=labels
         )), axis=0)
-
         logits = tf.concat(flatten_innermost_element(map_innermost_list(
             function=lambda logits: tf.stack(logits, axis=1),
             sequence=logits
         )), axis=0)
-
-        indices = tf.not_equal(labels, self.classes - 1)
-        indices = tf.where(tf.reduce_any(indices, axis=1))
-
+        predictions = tf.concat(flatten_innermost_element(map_innermost_list(
+            function=lambda predictions: tf.stack(predictions, axis=1),
+            sequence=predictions
+        )), axis=0)
+        # =========================================================================================
+        # Blankのみ含む単語(つまり存在しない)を削除
+        indices = tf.where(tf.reduce_any(tf.not_equal(labels, self.blank), axis=1))
         labels = tf.gather_nd(labels, indices)
         logits = tf.gather_nd(logits, indices)
-
-        word_accuracy = metrics.word_accuracy(
-            labels=labels,
-            logits=logits
-        )
-        word_accuracy = tf.identity(
-            input=word_accuracy,
-            name="word_accuracy"
-        )
-
-        edit_distance = metrics.edit_distance(
-            labels=labels,
+        # =========================================================================================
+        # lossがBlankを含まないようにマスク
+        sequence_lengths = tf.count_nonzero(tf.not_equal(labels, self.blank), axis=1)
+        # Blankを1つのみ予測
+        sequence_lengths += tf.ones_like(sequence_lengths)
+        sequence_mask = tf.sequence_mask(sequence_lengths, labels.shape[-1], dtype=tf.int32)
+        # cross entropy loss
+        loss = tf.contrib.seq2seq.sequence_loss(
             logits=logits,
-            normalize=True
+            targets=labels,
+            weights=tf.cast(sequence_mask, tf.float32),
+            average_across_timesteps=True,
+            average_across_batch=True
         )
-        edit_distance = tf.identity(
-            input=edit_distance,
-            name="edit_distance"
-        )
-
-        summary.any(images, data_format=self.data_format, max_outputs=2)
-        for attention_maps in flatten_innermost_element(attention_maps):
-            summary.any(attention_maps, data_format=self.data_format, max_outputs=2)
-        for loss in flatten_innermost_element(losses):
-            summary.any(loss)
-        summary.any(word_accuracy)
-        summary.any(edit_distance)
-
+        # =========================================================================================
+        # Blankを除去した単語の正解率を求める
+        word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
+            x=predictions * sequence_mask,
+            y=labels * sequence_mask
+        ), axis=1), dtype=tf.float32), name="word_accuracy")
+        # =========================================================================================
+        # tensorboard用のsummary
+        summary.scalar(word_accuracy, name="word_accuracy")
+        summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
+        for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
+            summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
+        # =========================================================================================
+        # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
@@ -224,14 +210,15 @@ class HATS(object):
                 loss=loss,
                 train_op=train_op
             )
-
+        # =========================================================================================
+        # evaluation mode
         if mode == tf.estimator.ModeKeys.EVAL:
 
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    word_accuracy=word_accuracy,
-                    edit_distance=edit_distance
+                    word_accuracy=tf.metrics.mean(word_accuracy)
                 )
             )
+        # =========================================================================================

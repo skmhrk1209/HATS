@@ -6,7 +6,7 @@
 # val: 802734
 # test: 891927
 # max num chars: 23
-# classes: [0-9A-Z](case-insensitive)
+# classes: [0-9A-Z!(eos)](case-insensitive)
 # word accuracy:
 # edit distance:
 # pretrained model: chars74k classifier
@@ -64,7 +64,7 @@ if __name__ == "__main__":
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    AttrDict(sequence_length=23, hidden_units=256, output_units=(256 >> 4) ** 2 * 8),
+                    AttrDict(max_sequence_length=24, num_units=256),
                 ],
                 deconv_params=[
                     AttrDict(filters=8, kernel_size=[3, 3], strides=[2, 2]),
@@ -72,8 +72,8 @@ if __name__ == "__main__":
                 ],
                 data_format=args.data_format
             ),
-            units=[1024],
-            classes=37,
+            num_units=[1024],
+            num_classes=37,
             data_format=args.data_format,
             hyper_params=AttrDict(
                 optimizer=tf.train.AdamOptimizer()
@@ -106,12 +106,20 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=None,
                 shuffle=True,
+                sequence_lengths=[24],
                 encoding="jpeg",
                 image_size=[256, 256],
-                data_format=args.data_format,
-                seq_lens=[23]
+                data_format=args.data_format
             ),
-            max_steps=args.max_steps
+            max_steps=args.max_steps,
+            hooks=[
+                tf.train.LoggingTensorHook(
+                    tensors={
+                        "word_accuracy": "word_accuracy"
+                    },
+                    every_n_iter=100
+                )
+            ]
         )
 
     if args.eval:
@@ -123,10 +131,10 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 num_epochs=1,
                 shuffle=False,
+                sequence_lengths=[24],
                 encoding="jpeg",
                 image_size=[256, 256],
-                data_format=args.data_format,
-                seq_lens=[23]
+                data_format=args.data_format
             ),
             steps=args.steps
         ))
