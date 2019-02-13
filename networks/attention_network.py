@@ -59,6 +59,8 @@ class AttentionNetwork(object):
 
             inputs = tf.layers.flatten(inputs)
 
+            feature_maps = inputs
+
             for i, rnn_param in enumerate(self.rnn_params):
 
                 with tf.variable_scope("rnn_block_{}".format(i)):
@@ -77,7 +79,7 @@ class AttentionNetwork(object):
                     inputs = map_innermost_element(
                         function=lambda inputs: static_rnn(
                             cell=lstm_cell,
-                            inputs=[inputs] * rnn_param.sequence_length,
+                            inputs=[feature_maps] * rnn_param.sequence_length,
                             initial_state=tf.nn.rnn_cell.LSTMStateTuple(
                                 c=tf.layers.dense(
                                     inputs=inputs.c,
@@ -97,8 +99,8 @@ class AttentionNetwork(object):
                                     name="h_projection",
                                     reuse=tf.AUTO_REUSE
                                 )
-                            )if i elselstm_cell.zero_state(
-                                batch_size=tf.shape(inputs)[0],
+                            ) if i else lstm_cell.zero_state(
+                                batch_size=tf.shape(feature_maps)[0],
                                 dtype=tf.float32
                             ),
 
@@ -110,7 +112,7 @@ class AttentionNetwork(object):
 
                 inputs = map_innermost_element(
                     function=lambda inputs: tf.layers.dense(
-                        inputs=inputs,
+                        inputs=inputs.h,
                         units=np.prod(image_shape[1:]),
                         activation=tf.nn.relu,
                         kernel_initializer=tf.initializers.variance_scaling(
