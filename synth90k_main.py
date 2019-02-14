@@ -129,11 +129,12 @@ if __name__ == "__main__":
             hooks=[
                 # logging用のhook
                 tf.train.LoggingTensorHook(
-                    tensors={"word_accuracy": "word_accuracy"},
+                    tensors={"word_accuracy": "word_accuracy_"},
                     every_n_iter=100
                 ),
                 # validationのためのcustom hook
-                # session.runの後にestimator.evaluateしてるだけ
+                # lossが一定期間下がらないとlearning rateをdecay
+                # 内部でestimator.evaluateしている
                 hooks.ValidationHook(
                     estimator=Estimator(params=dict(training=True)),
                     input_fn=functools.partial(

@@ -193,7 +193,7 @@ class HATS(object):
         word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
             x=predictions * sequence_mask,
             y=labels * sequence_mask
-        ), axis=1), dtype=tf.float32), name="word_accuracy")
+        ), axis=1), dtype=tf.float32), name="word_accuracy_")
         # =========================================================================================
         # TODO: なぜかedit distanceのshapeがloggingの際に異なる
         # =========================================================================================
