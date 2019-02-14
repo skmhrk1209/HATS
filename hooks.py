@@ -101,7 +101,7 @@ class LearningRateDecayHook(tf.train.SessionRunHook):
             tf.logging.info(eval_result)
             print("==================================================")
 
-            if self.min_validation_loss is None or eval_result["loss"] < self.min_validation_loss:
+            if (self.min_validation_loss is None) or (eval_result["loss"] < self.min_validation_loss):
 
                 self.min_validation_loss = eval_result["loss"]
                 self.min_global_step = global_step
