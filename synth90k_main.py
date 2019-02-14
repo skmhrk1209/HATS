@@ -83,10 +83,7 @@ if __name__ == "__main__":
             # =========================================================================================
             data_format=args.data_format,
             hyper_params=Param(
-                # あんまり効果的ではない
                 attention_decay=0.0,
-                # 最適なepsilonが[1.0, 0.1]とかの時もあるらしい
-                # 意味不明
                 optimizer=tf.train.AdamOptimizer(
                     learning_rate=1e-3,
                     beta1=0.9,

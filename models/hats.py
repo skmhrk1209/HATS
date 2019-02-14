@@ -26,7 +26,7 @@ class HATS(object):
         # feature mapを計算
         feature_maps = self.backbone_network(
             inputs=images,
-            training=mode == tf.estimator.ModeKeys.TRAIN or params.training
+            training=params.training
         )
         # =========================================================================================
         # attention mapを計算
@@ -36,7 +36,7 @@ class HATS(object):
         # TODO: 若干混み合った計算が必要, 出来るだけ抽象的に描きたい
         attention_maps = self.attention_network(
             inputs=feature_maps,
-            training=mode == tf.estimator.ModeKeys.TRAIN or params.training
+            training=params.training
         )
         # =========================================================================================
         # 空間方向にflattenするための便利関数
@@ -80,7 +80,7 @@ class HATS(object):
                         lambda inputs: ops.batch_normalization(
                             inputs=inputs,
                             data_format=self.data_format,
-                            training=mode == tf.estimator.ModeKeys.TRAIN or params.training,
+                            training=params.training,
                             name="batch_normalization",
                             reuse=tf.AUTO_REUSE
                         ),
