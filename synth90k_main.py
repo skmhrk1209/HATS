@@ -44,8 +44,9 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 if __name__ == "__main__":
 
-    estimator = tf.estimator.Estimator(
-        model_fn=lambda features, labels, mode: HATS(
+    Estimator = functools.partial(
+        tf.estimator.Estimator
+        model_fn=lambda features, labels, mode, params: HATS(
             # =========================================================================================
             # feature extraction
             backbone_network=PyramidResNet(
@@ -93,7 +94,7 @@ if __name__ == "__main__":
                     epsilon=1e-8
                 )
             )
-        )(features, labels, mode),
+        )(features, labels, mode, params),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
@@ -115,7 +116,7 @@ if __name__ == "__main__":
 
     if args.train:
 
-        estimator.train(
+        Estimator(params=Param(training=True)).train(
             input_fn=functools.partial(
                 dataset.input_fn,
                 filenames=args.train_filenames,
@@ -137,7 +138,7 @@ if __name__ == "__main__":
                 # validationのためのcustom hook
                 # session.runの後にestimator.evaluateしてるだけ
                 hooks.ValidationHook(
-                    estimator=estimator,
+                    estimator=Estimator(params=Param(training=True)),
                     input_fn=functools.partial(
                         dataset.input_fn,
                         filenames=args.val_filenames,
@@ -158,7 +159,7 @@ if __name__ == "__main__":
 
     if args.eval:
 
-        print(estimator.evaluate(
+        print(Estimator(params=Param(training=False)).evaluate(
             input_fn=functools.partial(
                 dataset.input_fn,
                 filenames=args.test_filenames,
