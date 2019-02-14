@@ -29,7 +29,7 @@ parser.add_argument("--pretrained_model_dir", type=str, default="chars74k_classi
 parser.add_argument('--train_filenames', type=str, nargs="+", default=["synth90k_train.tfrecord"], help="tfrecords for training")
 parser.add_argument('--val_filenames', type=str, nargs="+", default=["synth90k_val.tfrecord"], help="tfrecords for validation")
 parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_test.tfrecord"], help="tfrecords for test")
-parser.add_argument("--batch_size", type=int, default=64, help="batch size")
+parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
@@ -88,7 +88,7 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                learning_rate=0.1,
+                learning_rate=1.0,
                 momentum=0.9
             )
         )(features, labels, mode, Param(params)),
