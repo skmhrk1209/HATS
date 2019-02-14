@@ -2,16 +2,24 @@ import tensorflow as tf
 
 
 class ValidationHook(tf.train.SessionRunHook):
+    """ Hook to extend calls to MonitoredSession.run(). """
 
-    def __init__(self, estimator, input_fn, every_n_secs=None, every_n_steps=None, **kwargs):
+    def __init__(self, estimator, input_fn, learning_rate_name, decay_rate, max_steps,
+                 every_n_secs=None, every_n_steps=None, **kwargs):
 
         self.timer = tf.train.SecondOrStepTimer(every_n_secs, every_n_steps)
+        self.learning_rate_name = learning_rate_name
+        self.decay_rate = decay_rate
+        self.max_steps = max_steps
         self.estimator = estimator
         self.input_fn = input_fn
         self.kwargs = kwargs
 
+        self.min_validation_loss = None
+        self.min_global_step = None
+
     def begin(self):
-        """Called once before using the session.
+        """ Called once before using the session.
 
         When called, the default graph is the one that will be launched in the
         session.  The hook can modify the graph by adding new operations to it.
@@ -19,12 +27,33 @@ class ValidationHook(tf.train.SessionRunHook):
         can not modify the graph anymore. Second call of `begin()` on the same
         graph, should not change the graph.
         """
-
         self.timer.reset()
         self.global_step = tf.train.get_global_step()
 
+        tf.get_variable_scope().reuse_variables()
+        self.learning_rate = tf.get_variable(self.learning_rate_name)
+        self.decayed_learning_rate = tf.placeholder(dtype=tf.float32, shape=[])
+        self.assign_op = self.learning_rate.assign(self.decayed_learning_rate)
+
+    def after_create_session(self, session, coord):
+        """ Called when new TensorFlow session is created.
+
+        This is called to signal the hooks that a new session has been created. This
+        has two essential differences with the situation in which `begin` is called:
+
+        * When this is called, the graph is finalized and ops can no longer be added
+            to the graph.
+        * This method will also be called as a result of recovering a wrapped
+            session, not only at the beginning of the overall session.
+
+        Args:
+          session: A TensorFlow Session that has been created.
+          coord: A Coordinator object which keeps track of all threads.
+        """
+        pass
+
     def before_run(self, run_context):
-        """Called before each call to run().
+        """ Called before each call to run().
 
         You can return from this call a `SessionRunArgs` object indicating ops or
         tensors to add to the upcoming `run()` call.  These ops/tensors will be run
@@ -39,16 +68,15 @@ class ValidationHook(tf.train.SessionRunHook):
         At this point graph is finalized and you can not add ops.
 
         Args:
-        run_context: A `SessionRunContext` object.
+          run_context: A `SessionRunContext` object.
 
         Returns:
-        None or a `SessionRunArgs` object.
+          None or a `SessionRunArgs` object.
         """
-
-        return tf.train.SessionRunArgs(self.global_step)
+        return tf.train.SessionRunArgs([self.global_step, self.learning_rate])
 
     def after_run(self, run_context, run_values):
-        """Called after each call to run().
+        """ Called after each call to run().
 
         The `run_values` argument contains results of requested ops/tensors by
         `before_run()`.
@@ -59,11 +87,52 @@ class ValidationHook(tf.train.SessionRunHook):
         If `session.run()` raises any exceptions then `after_run()` is not called.
 
         Args:
-        run_context: A `SessionRunContext` object.
-        run_values: A `SessionRunValues` object.
+          run_context: A `SessionRunContext` object.
+          run_values: A `SessionRunValues` object.
         """
+        global_step, learning_rate = run_values.results
 
-        global_step = run_values.results
         if self.timer.should_trigger_for_step(global_step):
-            print(self.estimator.evaluate(self.input_fn, **self.kwargs))
+
+            eval_result = self.estimator.evaluate(self.input_fn, **self.kwargs)
+
+            print("==================================================")
+            tf.logging.info("validation result")
+            tf.logging.info(eval_result)
+            print("==================================================")
+
+            if self.min_validation_loss is None or eval_result["loss"] < self.min_validation_loss:
+
+                self.min_validation_loss = eval_result["loss"]
+                self.min_global_step = global_step
+
+            if (global_step - self.min_global_step) > self.max_steps:
+
+                print("==================================================")
+                tf.logging.info("loss didn't decrease in {} steps".format(self.max_steps))
+                tf.logging.info("decay learning rate (decay rate: {})".format(self.decay_rate))
+                print("==================================================")
+
+                run_context.session.run(
+                    fetches=[self.assign_op],
+                    feed_dict={self.decayed_learning_rate: learning_rate * self.decay_rate}
+                )
+
             self.timer.update_last_triggered_step(global_step)
+
+    def end(self, session):
+        """ Called at the end of session.
+
+        The `session` argument can be used in case the hook wants to run final ops,
+        such as saving a last checkpoint.
+
+        If `session.run()` raises exception other than OutOfRangeError or
+        StopIteration then `end()` is not called.
+        Note the difference between `end()` and `after_run()` behavior when
+        `session.run()` raises OutOfRangeError or StopIteration. In that case
+        `end()` is called but `after_run()` is not called.
+
+        Args:
+          session: A TensorFlow Session that will be soon closed.
+        """
+        pass

@@ -44,6 +44,10 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 if __name__ == "__main__":
 
+    # validation時のbatch normalizationの統計は
+    # ミニバッチの統計か移動統計どちらを使用するべき？
+    # ミニバッチの統計を使う場合に備えてEstimatorのparams以外を一度固定
+    # estimator.train, estimator.evaluateの呼び出し時にparamsとしてtrainingを与える
     Estimator = functools.partial(
         tf.estimator.Estimator,
         model_fn=lambda features, labels, mode, params: HATS(
@@ -84,12 +88,8 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                optimizer=tf.train.AdamOptimizer(
-                    learning_rate=1e-3,
-                    beta1=0.9,
-                    beta2=0.999,
-                    epsilon=1e-8
-                )
+                initial_lerning_rate=0.1,
+                momentum=0.9
             )
         )(features, labels, mode, Param(params)),
         model_dir=args.model_dir,

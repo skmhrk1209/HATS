@@ -216,9 +216,21 @@ class HATS(object):
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
 
+            optimizer = tf.train.MomentumOptimizer(
+                learning_rate=tf.get_variable(
+                    name="learning_rate",
+                    shape=[],
+                    trainable=False,
+                    initializer=tf.initializers.constant(
+                        value=self.hyper_params.initial_learning_rate
+                    )
+                ),
+                momentum=self.hyper_params.momentum
+            )
+
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
-                train_op = self.hyper_params.optimizer.minimize(
+                train_op = optimizer.minimize(
                     loss=loss,
                     global_step=tf.train.get_global_step()
                 )
