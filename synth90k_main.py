@@ -45,7 +45,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 if __name__ == "__main__":
 
     Estimator = functools.partial(
-        tf.estimator.Estimator
+        tf.estimator.Estimator,
         model_fn=lambda features, labels, mode, params: HATS(
             # =========================================================================================
             # feature extraction
