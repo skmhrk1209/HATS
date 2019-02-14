@@ -88,7 +88,7 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                initial_lerning_rate=0.1,
+                initial_learning_rate=0.1,
                 momentum=0.9
             )
         )(features, labels, mode, Param(params)),
