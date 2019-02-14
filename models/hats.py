@@ -193,7 +193,7 @@ class HATS(object):
         word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
             x=predictions * sequence_mask,
             y=labels * sequence_mask
-        ), axis=1), dtype=tf.float32), name="word_accuracy")
+        ), axis=1), dtype=tf.float32), name="word_accuracy_")
         # =========================================================================================
         # TODO: なぜかedit distanceのshapeがloggingの際に異なる
         # =========================================================================================
@@ -206,26 +206,20 @@ class HATS(object):
             ),
             sequence=attention_maps
         )
+        # =========================================================================================
+        # learning rateはvalidation lossによってdecayされる
         learning_rate = tf.get_variable(
-            name="learning_rate",
+            name="learning_rate_",
             shape=[],
             trainable=False,
             initializer=tf.initializers.constant(
                 value=self.hyper_params.learning_rate
             )
         )
-        momentum = tf.get_variable(
-            name="momentum",
-            shape=[],
-            trainable=False,
-            initializer=tf.initializers.constant(
-                value=self.hyper_params.momentum
-            )
-        )
         # =========================================================================================
         # tensorboard用のsummary
-        summary.scalar(word_accuracy, name="word_accuracy_")
-        summary.scalar(learning_rate, name="learning_rate_")
+        summary.scalar(word_accuracy, name="word_accuracy")
+        summary.scalar(learning_rate, name="learning_rate")
         summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
@@ -235,7 +229,7 @@ class HATS(object):
 
             optimizer = tf.train.MomentumOptimizer(
                 learning_rate=learning_rate,
-                momentum=momentum,
+                momentum=self.hyper_params.momentum,
                 use_nesterov=True
             )
 
