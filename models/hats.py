@@ -193,7 +193,7 @@ class HATS(object):
         word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
             x=predictions * sequence_mask,
             y=labels * sequence_mask
-        ), axis=1), dtype=tf.float32), name="word_accuracy_")
+        ), axis=1), dtype=tf.float32), name="word_accuracy")
         # =========================================================================================
         # TODO: なぜかedit distanceのshapeがloggingの際に異なる
         # =========================================================================================
@@ -206,9 +206,26 @@ class HATS(object):
             ),
             sequence=attention_maps
         )
+        learning_rate = tf.get_variable(
+            name="learning_rate",
+            shape=[],
+            trainable=False,
+            initializer=tf.initializers.constant(
+                value=self.hyper_params.learning_rate
+            )
+        )
+        momentum = tf.get_variable(
+            name="momentum",
+            shape=[],
+            trainable=False,
+            initializer=tf.initializers.constant(
+                value=self.hyper_params.momentum
+            )
+        )
         # =========================================================================================
         # tensorboard用のsummary
-        summary.scalar(word_accuracy, name="word_accuracy")
+        summary.scalar(word_accuracy, name="word_accuracy_")
+        summary.scalar(learning_rate, name="learning_rate_")
         summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
@@ -217,15 +234,9 @@ class HATS(object):
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             optimizer = tf.train.MomentumOptimizer(
-                learning_rate=tf.get_variable(
-                    name="learning_rate",
-                    shape=[],
-                    trainable=False,
-                    initializer=tf.initializers.constant(
-                        value=self.hyper_params.initial_learning_rate
-                    )
-                ),
-                momentum=self.hyper_params.momentum
+                learning_rate=learning_rate,
+                momentum=momentum,
+                use_nesterov=True
             )
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):

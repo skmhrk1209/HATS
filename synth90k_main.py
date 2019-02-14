@@ -88,7 +88,7 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                initial_learning_rate=0.1,
+                learning_rate=0.1,
                 momentum=0.9
             )
         )(features, labels, mode, Param(params)),
@@ -129,13 +129,13 @@ if __name__ == "__main__":
             hooks=[
                 # logging用のhook
                 tf.train.LoggingTensorHook(
-                    tensors={"word_accuracy": "word_accuracy_"},
+                    tensors={"word_accuracy": "word_accuracy"},
                     every_n_iter=100
                 ),
                 # validationのためのcustom hook
                 # lossが一定期間下がらないとlearning rateをdecay
                 # 内部でestimator.evaluateしている
-                hooks.ValidationHook(
+                hooks.LearningRateDecayHook(
                     estimator=Estimator(params=dict(training=True)),
                     input_fn=functools.partial(
                         dataset.input_fn,

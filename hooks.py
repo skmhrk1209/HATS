@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-class ValidationHook(tf.train.SessionRunHook):
+class LearningRateDecayHook(tf.train.SessionRunHook):
     """ Hook to extend calls to MonitoredSession.run(). """
 
     def __init__(self, estimator, input_fn, learning_rate_name, decay_rate, max_steps,
