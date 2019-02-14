@@ -33,7 +33,7 @@ parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
 parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
-parser.add_argument("--steps", type=int, default=1000, help="number of validation steps")
+parser.add_argument("--steps", type=int, default=None, help="number of test steps")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
 parser.add_argument("--gpu", type=str, default="0", help="gpu id")
@@ -147,8 +147,11 @@ if __name__ == "__main__":
                         image_size=[256, 256],
                         data_format=args.data_format
                     ),
+                    learning_rate_name="learning_rate",
+                    decay_rate=0.1,
+                    max_steps=10000,
                     every_n_steps=1000,
-                    steps=args.steps,
+                    steps=1000,
                     name="validation"
                 )
             ]
@@ -168,5 +171,6 @@ if __name__ == "__main__":
                 image_size=[256, 256],
                 data_format=args.data_format
             ),
+            steps=args.steps,
             name="test"
         ))
