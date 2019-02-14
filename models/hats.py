@@ -190,10 +190,10 @@ class HATS(object):
         loss += tf.reduce_mean(attention_maps) * self.hyper_params.attention_decay
         # =========================================================================================
         # 余分なblankを除去した単語の正解率を求める
-        word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
+        accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
             x=predictions * sequence_mask,
             y=labels * sequence_mask
-        ), axis=1), dtype=tf.float32), name="word_accuracy_")
+        ), axis=1), dtype=tf.float32), name="acc")
         # =========================================================================================
         # TODO: なぜかedit distanceのshapeがloggingの際に異なる
         # =========================================================================================
@@ -209,16 +209,13 @@ class HATS(object):
         # =========================================================================================
         # learning rateはvalidation lossによってdecayされる
         learning_rate = tf.get_variable(
-            name="learning_rate_",
-            shape=[],
-            trainable=False,
-            initializer=tf.initializers.constant(
-                value=self.hyper_params.learning_rate
-            )
+            name="lr",
+            initializer=self.hyper_params.learning_rate,
+            trainable=False
         )
         # =========================================================================================
         # tensorboard用のsummary
-        summary.scalar(word_accuracy, name="word_accuracy")
+        summary.scalar(accuracy, name="accuracy")
         summary.scalar(learning_rate, name="learning_rate")
         summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
@@ -253,7 +250,7 @@ class HATS(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    word_accuracy=tf.metrics.mean(word_accuracy)
+                    accuracy=tf.metrics.mean(accuracy)
                 )
             )
         # =========================================================================================

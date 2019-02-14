@@ -4,19 +4,19 @@ import tensorflow as tf
 class LearningRateDecayHook(tf.train.SessionRunHook):
     """ Hook to extend calls to MonitoredSession.run(). """
 
-    def __init__(self, estimator, input_fn, learning_rate_name, decay_rate, max_steps,
+    def __init__(self, estimator, input_fn, learning_rate_name, decay_steps, decay_rate,
                  every_n_secs=None, every_n_steps=None, **kwargs):
 
         self.timer = tf.train.SecondOrStepTimer(every_n_secs, every_n_steps)
         self.learning_rate_name = learning_rate_name
+        self.decay_steps = decay_steps
         self.decay_rate = decay_rate
-        self.max_steps = max_steps
         self.estimator = estimator
         self.input_fn = input_fn
         self.kwargs = kwargs
 
-        self.min_validation_loss = None
-        self.min_global_step = None
+        self.min_loss = None
+        self.min_step = None
 
     def begin(self):
         """ Called once before using the session.
@@ -101,15 +101,15 @@ class LearningRateDecayHook(tf.train.SessionRunHook):
             tf.logging.info(eval_result)
             print("==================================================")
 
-            if (self.min_validation_loss is None) or (eval_result["loss"] < self.min_validation_loss):
+            if (self.min_loss is None) or (eval_result["loss"] < self.min_loss):
 
-                self.min_validation_loss = eval_result["loss"]
-                self.min_global_step = global_step
+                self.min_loss = eval_result["loss"]
+                self.min_step = global_step
 
-            if (global_step - self.min_global_step) >= self.max_steps:
+            if (global_step - self.min_step) >= self.decay_steps:
 
                 print("==================================================")
-                tf.logging.info("loss didn't decrease in {} steps".format(self.max_steps))
+                tf.logging.info("loss didn't decrease in {} steps".format(self.decay_steps))
                 tf.logging.info("decay learning rate (decay rate: {})".format(self.decay_rate))
                 print("==================================================")
 

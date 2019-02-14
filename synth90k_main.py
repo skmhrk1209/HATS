@@ -129,7 +129,10 @@ if __name__ == "__main__":
             hooks=[
                 # logging用のhook
                 tf.train.LoggingTensorHook(
-                    tensors={"word_accuracy": "word_accuracy_"},
+                    tensors=dict(
+                        word_accuracy="acc",
+                        learning_rate="lr"
+                    ),
                     every_n_iter=100
                 ),
                 # validationのためのcustom hook
@@ -148,9 +151,9 @@ if __name__ == "__main__":
                         image_size=[256, 256],
                         data_format=args.data_format
                     ),
-                    learning_rate_name="learning_rate_",
+                    learning_rate_name="lr",
+                    decay_steps=1000,
                     decay_rate=0.1,
-                    max_steps=1000,
                     every_n_steps=1000,
                     steps=1000,
                     name="validation"
