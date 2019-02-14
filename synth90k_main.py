@@ -94,7 +94,7 @@ if __name__ == "__main__":
                     epsilon=1e-8
                 )
             )
-        )(features, labels, mode, params),
+        )(features, labels, mode, Param(params)),
         model_dir=args.model_dir,
         config=tf.estimator.RunConfig(
             tf_random_seed=args.random_seed,
@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     if args.train:
 
-        Estimator(params=Param(training=True)).train(
+        Estimator(params=dict(training=True)).train(
             input_fn=functools.partial(
                 dataset.input_fn,
                 filenames=args.train_filenames,
@@ -138,7 +138,7 @@ if __name__ == "__main__":
                 # validationのためのcustom hook
                 # session.runの後にestimator.evaluateしてるだけ
                 hooks.ValidationHook(
-                    estimator=Estimator(params=Param(training=True)),
+                    estimator=Estimator(params=dict(training=True)),
                     input_fn=functools.partial(
                         dataset.input_fn,
                         filenames=args.val_filenames,
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
     if args.eval:
 
-        print(Estimator(params=Param(training=False)).evaluate(
+        print(Estimator(params=dict(training=False)).evaluate(
             input_fn=functools.partial(
                 dataset.input_fn,
                 filenames=args.test_filenames,
