@@ -87,7 +87,7 @@ if __name__ == "__main__":
                 # 最適なepsilonが[1.0, 0.1]とかの時もあるらしい
                 # 意味不明
                 optimizer=tf.train.AdamOptimizer(
-                    learning_rate=5e-4,
+                    learning_rate=1e-3,
                     beta1=0.9,
                     beta2=0.999,
                     epsilon=1e-8
