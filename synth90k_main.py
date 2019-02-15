@@ -82,13 +82,13 @@ if __name__ == "__main__":
             ),
             # =========================================================================================
             # text recognition
-            num_units=[256],
+            num_units=[1024],
             num_classes=37,
             # =========================================================================================
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                learning_rate=0.1,
+                learning_rate=0.01,
                 momentum=0.9
             )
         )(features, labels, mode, Param(params)),
