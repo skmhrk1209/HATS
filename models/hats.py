@@ -207,7 +207,6 @@ class HATS(object):
             ),
             sequence=attention_maps
         )
-        '''
         # =========================================================================================
         # learning rateはvalidation lossによってdecayされる
         learning_rate = tf.get_variable(
@@ -219,11 +218,10 @@ class HATS(object):
             ),
             trainable=False
         )
-        '''
         # =========================================================================================
         # tensorboard用のsummary
         summary.scalar(accuracy, name="accuracy")
-        # summary.scalar(learning_rate, name="learning_rate")
+        summary.scalar(learning_rate, name="learning_rate")
         summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
@@ -231,15 +229,11 @@ class HATS(object):
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
 
-            optimizer = tf.train.AdamOptimizer()
-
-            '''
             optimizer = QHMOptimizer(
                 learning_rate=learning_rate,
                 momentum=self.hyper_params.momentum,
                 nu=self.hyper_params.nu
             )
-            '''
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
