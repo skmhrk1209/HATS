@@ -88,7 +88,7 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                learning_rate=10.0,
+                learning_rate=1.0,
                 momentum=0.999,
                 nu=0.7
             )
@@ -136,6 +136,7 @@ if __name__ == "__main__":
                     ),
                     every_n_iter=100
                 ),
+                '''
                 # validationのためのcustom hook
                 # lossが一定期間下がらないとlearning rateをdecay
                 # 内部でestimator.evaluateしている
@@ -159,6 +160,7 @@ if __name__ == "__main__":
                     steps=1000,
                     name="validation"
                 )
+                '''
             ]
         )
 

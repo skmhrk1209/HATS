@@ -207,6 +207,7 @@ class HATS(object):
             ),
             sequence=attention_maps
         )
+        '''
         # =========================================================================================
         # learning rateはvalidation lossによってdecayされる
         learning_rate = tf.get_variable(
@@ -218,6 +219,7 @@ class HATS(object):
             ),
             trainable=False
         )
+        '''
         # =========================================================================================
         # tensorboard用のsummary
         summary.scalar(accuracy, name="accuracy")
@@ -234,6 +236,14 @@ class HATS(object):
                 momentum=self.hyper_params.momentum,
                 nu=self.hyper_params.nu
             )
+
+            '''
+            optimizer = QHMOptimizer(
+                learning_rate=learning_rate,
+                momentum=self.hyper_params.momentum,
+                nu=self.hyper_params.nu
+            )
+            '''
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
