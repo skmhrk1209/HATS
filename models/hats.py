@@ -211,7 +211,12 @@ class HATS(object):
         # learning rateはvalidation lossによってdecayされる
         learning_rate = tf.get_variable(
             name="lr",
-            initializer=self.hyper_params.learning_rate,
+            shape=[],
+            dtype=tf.float64,
+            initializer=tf.initializers.constant(
+                value=self.hyper_params.learning_rate,
+                dtype=tf.float64
+            ),
             trainable=False
         )
         # =========================================================================================
