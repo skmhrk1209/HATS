@@ -31,8 +31,8 @@ class LearningRateDecayHook(tf.train.SessionRunHook):
         self.global_step = tf.train.get_global_step()
 
         tf.get_variable_scope().reuse_variables()
-        self.learning_rate = tf.get_variable(self.learning_rate_name)
-        self.decayed_learning_rate = tf.placeholder(dtype=tf.float32, shape=[])
+        self.learning_rate = tf.get_variable(name=self.learning_rate_name, dtype=tf.float64)
+        self.decayed_learning_rate = tf.placeholder(dtype=tf.float64, shape=[])
         self.assign_op = self.learning_rate.assign(self.decayed_learning_rate)
 
     def after_create_session(self, session, coord):
