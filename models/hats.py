@@ -223,7 +223,7 @@ class HATS(object):
         # =========================================================================================
         # tensorboard用のsummary
         summary.scalar(accuracy, name="accuracy")
-        summary.scalar(learning_rate, name="learning_rate")
+        # summary.scalar(learning_rate, name="learning_rate")
         summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
