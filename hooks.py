@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-class ValidationHook(tf.train.SessionRunHook):
+class ValidationMonitorHook(tf.train.SessionRunHook):
     """ Hook to extend calls to MonitoredSession.run(). """
 
     def __init__(self, estimator, input_fn, every_n_secs=None, every_n_steps=None, **kwargs):

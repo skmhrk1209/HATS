@@ -136,7 +136,7 @@ if __name__ == "__main__":
                 # validationのためのcustom hook
                 # lossが一定期間下がらないとlearning rateをdecay
                 # 内部でestimator.evaluateしている
-                hooks.ValidationHook(
+                hooks.ValidationMonitorHook(
                     estimator=Estimator(params=dict(training=True)),
                     input_fn=functools.partial(
                         dataset.input_fn,
