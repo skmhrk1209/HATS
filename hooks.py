@@ -4,13 +4,13 @@ import tensorflow as tf
 class LearningRateDecayHook(tf.train.SessionRunHook):
     """ Hook to extend calls to MonitoredSession.run(). """
 
-    def __init__(self, estimator, input_fn, learning_rate_name, decay_steps, decay_rate,
+    def __init__(self, estimator, input_fn, learning_rate_name, decay_rate, decay_steps,
                  every_n_secs=None, every_n_steps=None, **kwargs):
 
         self.timer = tf.train.SecondOrStepTimer(every_n_secs, every_n_steps)
         self.learning_rate_name = learning_rate_name
-        self.decay_steps = decay_steps
         self.decay_rate = decay_rate
+        self.decay_steps = decay_steps
         self.estimator = estimator
         self.input_fn = input_fn
         self.kwargs = kwargs
