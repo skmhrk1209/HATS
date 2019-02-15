@@ -136,11 +136,10 @@ if __name__ == "__main__":
                     ),
                     every_n_iter=100
                 ),
-                '''
                 # validationのためのcustom hook
                 # lossが一定期間下がらないとlearning rateをdecay
                 # 内部でestimator.evaluateしている
-                hooks.LearningRateDecayHook(
+                hooks.ValidationHook(
                     estimator=Estimator(params=dict(training=True)),
                     input_fn=functools.partial(
                         dataset.input_fn,
@@ -153,14 +152,10 @@ if __name__ == "__main__":
                         image_size=[256, 256],
                         data_format=args.data_format
                     ),
-                    learning_rate_name="lr",
-                    decay_rate=0.1,
-                    decay_steps=1000,
                     every_n_steps=1000,
                     steps=1000,
                     name="validation"
                 )
-                '''
             ]
         )
 
