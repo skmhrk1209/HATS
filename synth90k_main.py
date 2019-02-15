@@ -155,8 +155,8 @@ if __name__ == "__main__":
                     learning_rate_name="lr",
                     decay_rate=0.1,
                     decay_steps=1000,
-                    every_n_steps=100,
-                    steps=100,
+                    every_n_steps=1000,
+                    steps=1000,
                     name="validation"
                 )
             ]
