@@ -231,7 +231,7 @@ class HATS(object):
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
 
-            optimizer = tf.train.AdamOptimizer(learning_rate=0.005)
+            optimizer = tf.train.AdamOptimizer()
 
             '''
             optimizer = QHMOptimizer(
