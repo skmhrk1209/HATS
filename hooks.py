@@ -61,7 +61,7 @@ class ValidationHook(tf.train.SessionRunHook):
         Returns:
           None or a `SessionRunArgs` object.
         """
-        return tf.train.SessionRunArgs([self.global_step])
+        return tf.train.SessionRunArgs(self.global_step)
 
     def after_run(self, run_context, run_values):
         """ Called after each call to run().
