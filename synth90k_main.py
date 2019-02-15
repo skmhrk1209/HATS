@@ -88,9 +88,9 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                learning_rate=1.0,
-                nu=0.7,
-                momentum=0.999
+                learning_rate=10.0,
+                momentum=0.999,
+                nu=0.7
             )
         )(features, labels, mode, Param(params)),
         model_dir=args.model_dir,
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                     ),
                     learning_rate_name="lr",
                     decay_rate=0.1,
-                    decay_steps=200,
+                    decay_steps=1000,
                     every_n_steps=100,
                     steps=100,
                     name="validation"

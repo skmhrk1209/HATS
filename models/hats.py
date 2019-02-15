@@ -231,8 +231,8 @@ class HATS(object):
 
             optimizer = QHMOptimizer(
                 learning_rate=learning_rate,
-                nu=self.hyper_params.nu,
                 momentum=self.hyper_params.momentum,
+                nu=self.hyper_params.nu
             )
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
