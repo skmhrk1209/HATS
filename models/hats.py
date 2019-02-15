@@ -5,6 +5,7 @@ import metrics
 import summary
 from networks import ops
 from algorithms import *
+from qhoptim.tf import QHMOptimizer
 
 
 class HATS(object):
@@ -224,10 +225,10 @@ class HATS(object):
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
 
-            optimizer = tf.train.MomentumOptimizer(
+            optimizer = QHMOptimizer(
                 learning_rate=learning_rate,
+                nu=self.hyper_params.nu,
                 momentum=self.hyper_params.momentum,
-                use_nesterov=True
             )
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
