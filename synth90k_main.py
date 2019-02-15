@@ -7,10 +7,10 @@
 # test: 891927
 # max num chars: 23
 # classes: 37 [0-9A-Z](case-insensitive)
-# word accuracy:
+# word accuracy: 85.7 %
 # edit distance:
 # pretrained model: chars74k classifier
-# max steps: 50000 batch size: 128
+# max steps: 50000 batch size: 100
 # =============================================================
 
 import tensorflow as tf
