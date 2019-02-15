@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
     if args.eval:
 
-        print(Estimator(params=dict(training=False)).evaluate(
+        print(Estimator(params=dict(training=True)).evaluate(
             input_fn=functools.partial(
                 dataset.input_fn,
                 filenames=args.test_filenames,
