@@ -214,8 +214,7 @@ class HATS(object):
             shape=[],
             dtype=tf.float64,
             initializer=tf.initializers.constant(
-                value=self.hyper_params.learning_rate,
-                dtype=tf.float64
+                value=self.hyper_params.learning_rate
             ),
             trainable=False
         )
