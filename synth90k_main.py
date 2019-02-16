@@ -14,7 +14,8 @@
 # =============================================================
 
 import tensorflow as tf
-import scipy.io
+import numpy as np
+import skimage
 import argparse
 import functools
 import dataset
@@ -203,18 +204,15 @@ if __name__ == "__main__":
             name="test"
         )
 
-        tf.enable_eager_execution()
-
         for i, predict_result in enumerate(predict_results):
 
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
-            prediction = predict_result["predictions"]
 
-            attention_maps = tf.reshape(attention_maps, shape=[-1, 64, 64, 16])
-            attention_maps = tf.reduce_sum(attention_maps, axis=-1, keepdims=True)
-            attention_maps = tf.image.resize_images(attention_maps, size=[256, 256])
-            attention_maps = tf.pad(attention_maps, paddings=[[0, 0], [0, 0], [0, 0], [0, 2]])
+            attention_maps = np.reshape(attention_maps, [-1, 64, 64, 16])
+            attention_maps = np.sum(attention_maps, axis=-1, keepdims=True)
+            attention_maps = np.pad(attention_maps, [[0, 0], [0, 0], [0, 0], [0, 2]])
+            attention_maps = skimage.transform.resize(attention_maps, [256, 256])
 
             for j, attention_map in enumerate(attention_maps):
-                scipy.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
+                skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
