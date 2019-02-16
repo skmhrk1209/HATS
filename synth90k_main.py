@@ -208,9 +208,9 @@ if __name__ == "__main__":
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
 
-            attention_maps = np.reshape(attention_maps, [-1, 64, 64, 16])
+            attention_maps = np.reshape(attention_maps, newshape=[-1, 64, 64, 16])
             attention_maps = np.sum(attention_maps, axis=-1, keepdims=True)
-            attention_maps = np.pad(attention_maps, [[0, 0], [0, 0], [0, 0], [0, 2]])
+            attention_maps = np.pad(attention_maps, pad_width=[[0, 0], [0, 0], [0, 0], [0, 2]], mode="constant")
             attention_maps = skimage.transform.resize(attention_maps, [256, 256])
 
             for j, attention_map in enumerate(attention_maps):
