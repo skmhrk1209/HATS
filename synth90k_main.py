@@ -210,7 +210,7 @@ if __name__ == "__main__":
 
             if args.data_format == "channels_first":
                 attention_maps = np.reshape(attention_maps, newshape=[-1, 16, 64, 64])
-                attention_maps = np.transpose(attention_maps, axis=[0, 2, 3, 1])
+                attention_maps = np.transpose(attention_maps, axes=[0, 2, 3, 1])
             else:
                 attention_maps = np.reshape(attention_maps, newshape=[-1, 64, 64, 16])
             attention_maps = np.sum(attention_maps, axis=-1, keepdims=True)
