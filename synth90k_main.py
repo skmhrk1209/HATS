@@ -217,4 +217,4 @@ if __name__ == "__main__":
             attention_maps = tf.pad(attention_maps, paddings=[[0, 0], [0, 0], [0, 0], [0, 2]])
 
             for j, attention_map in enumerate(attention_maps):
-                scipy.io.imsave("attention_map_{}.jpg".format(i, j), image + attention_map)
+                scipy.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
