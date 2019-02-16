@@ -15,7 +15,7 @@
 
 import tensorflow as tf
 import numpy as np
-import skimage
+import cv2
 import argparse
 import functools
 import itertools
@@ -218,13 +218,12 @@ if __name__ == "__main__":
             attention_maps = np.pad(attention_maps, pad_width=[[0, 0], [0, 0], [0, 0], [0, 2]], mode="constant")
 
             for j, attention_map in enumerate(attention_maps):
-                attention_map = skimage.transform.resize(attention_map, [256, 256, 3])
+                attention_map = cv2.resize(attention_map, image.shape[:-1])
                 attention_map = attention_map + image
                 attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
-                skimage.io.imshow(attention_map)
-                skimage.io.show()
+                cv2.imshow("attention_map", attention_map)
                 if input("save image ? (y or n) >>").lower() == "y":
-                    skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), attention_map)
+                    cv2.imwrite("images/attention_map_{}.jpg".format(i, j), attention_map)
 
             if input("continue ? (y or n) >>").lower() == "n":
                 break
