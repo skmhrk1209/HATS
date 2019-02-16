@@ -7,7 +7,7 @@
 # test: 891927
 # max num chars: 23
 # classes: 37 [0-9A-Z](case-insensitive)
-# word accuracy: 85.7 %
+# word accuracy: 88.48 %
 # edit distance:
 # pretrained model: chars74k classifier
 # max steps: 50000 batch size: 100
@@ -15,7 +15,7 @@
 
 import tensorflow as tf
 import numpy as np
-import cv2
+import skimage
 import argparse
 import functools
 import itertools
@@ -93,9 +93,13 @@ if __name__ == "__main__":
             data_format=args.data_format,
             hyper_params=Param(
                 attention_decay=0.0,
-                learning_rate=1.0,
-                momentum=0.999,
-                nu=0.7
+                learning_rate_fn=lambda global_step: tf.train.exponential_decay(
+                    learning_rate=1e-3,
+                    global_step=global_step,
+                    decay_steps=25000,
+                    decay_rate=1e-1,
+                    staircase=True
+                )
             )
         )(features, labels, mode, Param(params)),
         model_dir=args.model_dir,
@@ -139,7 +143,6 @@ if __name__ == "__main__":
                     every_n_iter=100
                 ),
                 # validationのためのcustom hook
-                # lossが一定期間下がらないとlearning rateをdecay
                 # 内部でestimator.evaluateしている
                 hooks.ValidationMonitorHook(
                     estimator=Estimator(params=dict(training=True)),
@@ -154,9 +157,6 @@ if __name__ == "__main__":
                         image_size=[256, 256],
                         data_format=args.data_format
                     ),
-                    # learning_rate_name="lr",
-                    # decay_rate=0.1,
-                    # decay_steps=1000,
                     every_n_steps=1000,
                     steps=1000,
                     name="validation"
@@ -218,12 +218,8 @@ if __name__ == "__main__":
             attention_maps = np.pad(attention_maps, pad_width=[[0, 0], [0, 0], [0, 0], [0, 2]], mode="constant")
 
             for j, attention_map in enumerate(attention_maps):
-                attention_map = cv2.resize(attention_map, image.shape[:-1])
-                attention_map = attention_map + image
+                attention_map = skimage.transform.resize(attention_map, image.shape)
                 attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
-                cv2.imshow("attention_map", attention_map)
-                if input("save image ? (y or n) >>").lower() == "y":
-                    cv2.imwrite("images/attention_map_{}.jpg".format(i, j), attention_map)
-
-            if input("continue ? (y or n) >>").lower() == "n":
-                break
+                attention_map = attention_map + image
+                attention_map = np.clip(attention_map, 0.0, 1.0)
+                skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), attention_map)

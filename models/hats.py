@@ -5,7 +5,6 @@ import metrics
 import summary
 from networks import ops
 from algorithms import *
-from qhoptim.tf import QHMOptimizer
 
 
 class HATS(object):
@@ -206,23 +205,9 @@ class HATS(object):
             ),
             sequence=attention_maps
         )
-        '''
         # =========================================================================================
-        # learning rateはvalidation lossによってdecayされる
-        learning_rate = tf.get_variable(
-            name="lr",
-            shape=[],
-            dtype=tf.float64,
-            initializer=tf.initializers.constant(
-                value=self.hyper_params.learning_rate
-            ),
-            trainable=False
-        )
-        # =========================================================================================
-        '''
         # tensorboard用のsummary
         summary.scalar(accuracy, name="accuracy")
-        # summary.scalar(learning_rate, name="learning_rate")
         summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
@@ -230,21 +215,17 @@ class HATS(object):
         # training mode
         if mode == tf.estimator.ModeKeys.TRAIN:
 
-            optimizer = tf.train.AdamOptimizer()
+            global_step = tf.train.get_global_step()
 
-            '''
-            optimizer = QHMOptimizer(
-                learning_rate=learning_rate,
-                momentum=self.hyper_params.momentum,
-                nu=self.hyper_params.nu
+            optimizer = tf.train.AdamOptimizer(
+                learning_rate=self.hyper_params.learning_rate_fn(global_step)
             )
-            '''
 
             with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
                 train_op = optimizer.minimize(
                     loss=loss,
-                    global_step=tf.train.get_global_step()
+                    global_step=global_step
                 )
 
             return tf.estimator.EstimatorSpec(
