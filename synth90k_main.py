@@ -18,6 +18,7 @@ import numpy as np
 import skimage
 import argparse
 import functools
+import itertools
 import dataset
 import hooks
 from models.hats import HATS
@@ -188,7 +189,7 @@ if __name__ == "__main__":
 
     if args.predict:
 
-        predict_results = Estimator(params=dict(training=True)).evaluate(
+        predict_results = Estimator(params=dict(training=True)).predict(
             input_fn=functools.partial(
                 dataset.input_fn,
                 filenames=args.test_filenames,
@@ -199,14 +200,10 @@ if __name__ == "__main__":
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format
-            ),
-            steps=args.steps,
-            name="test"
+            )
         )
 
         for i, predict_result in enumerate(predict_results):
-
-            print(predict_result)
 
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
@@ -217,4 +214,9 @@ if __name__ == "__main__":
             attention_maps = skimage.transform.resize(attention_maps, [256, 256])
 
             for j, attention_map in enumerate(attention_maps):
-                skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
+                skimage.io.imshow(attention_map)
+                if input("save image ? (y or n) >>").lower() == "y":
+                    skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
+
+            if input("continue ? (y or n) >>").lower() == "n":
+                break
