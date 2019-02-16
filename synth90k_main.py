@@ -205,19 +205,20 @@ if __name__ == "__main__":
 
         for i, predict_result in enumerate(predict_results):
 
-            image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
+            image = predict_result["images"]
 
             if args.data_format == "channels_first":
                 attention_maps = np.reshape(attention_maps, newshape=[-1, 16, 64, 64])
                 attention_maps = np.transpose(attention_maps, axes=[0, 2, 3, 1])
+                image = np.transpose(image, axes=[1, 2, 0])
             else:
                 attention_maps = np.reshape(attention_maps, newshape=[-1, 64, 64, 16])
             attention_maps = np.sum(attention_maps, axis=-1, keepdims=True)
             attention_maps = np.pad(attention_maps, pad_width=[[0, 0], [0, 0], [0, 0], [0, 2]], mode="constant")
 
             for j, attention_map in enumerate(attention_maps):
-                attention_maps = skimage.transform.resize(attention_maps, [256, 256, 3])
+                attention_map = skimage.transform.resize(attention_map, [256, 256, 3])
                 skimage.io.imshow(image + attention_map)
                 if input("save image ? (y or n) >>").lower() == "y":
                     skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
