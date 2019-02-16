@@ -211,7 +211,7 @@ if __name__ == "__main__":
             attention_maps = np.reshape(attention_maps, newshape=[-1, 64, 64, 16])
             attention_maps = np.sum(attention_maps, axis=-1, keepdims=True)
             attention_maps = np.pad(attention_maps, pad_width=[[0, 0], [0, 0], [0, 0], [0, 2]], mode="constant")
-            attention_maps = skimage.transform.resize(attention_maps, [256, 256])
+            attention_maps = skimage.transform.resize(attention_maps, [256, 256, 3])
 
             for j, attention_map in enumerate(attention_maps):
                 skimage.io.imshow(image + attention_map)
