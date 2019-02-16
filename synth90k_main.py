@@ -14,6 +14,7 @@
 # =============================================================
 
 import tensorflow as tf
+import scipy.io
 import argparse
 import functools
 import dataset
@@ -22,6 +23,7 @@ from models.hats import HATS
 from networks.attention_network import AttentionNetwork
 from networks.pyramid_resnet import PyramidResNet
 from attrdict import AttrDict as Param
+from algorithms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_dir", type=str, default="synth90k_hats_model", help="model directory")
@@ -36,6 +38,7 @@ parser.add_argument("--max_steps", type=int, default=50000, help="maximum number
 parser.add_argument("--steps", type=int, default=None, help="number of test steps")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
+parser.add_argument('--predict', action="store_true", help="with prediction")
 parser.add_argument("--gpu", type=str, default="0", help="gpu id")
 args = parser.parse_args()
 
@@ -161,7 +164,7 @@ if __name__ == "__main__":
 
     if args.eval:
 
-        print(Estimator(params=dict(training=True)).evaluate(
+        eval_result = Estimator(params=dict(training=True)).evaluate(
             input_fn=functools.partial(
                 dataset.input_fn,
                 filenames=args.test_filenames,
@@ -175,4 +178,43 @@ if __name__ == "__main__":
             ),
             steps=args.steps,
             name="test"
-        ))
+        )
+
+        print("==================================================")
+        tf.logging.info("test result")
+        tf.logging.info(eval_result)
+        print("==================================================")
+
+    if args.predict:
+
+        predict_results = Estimator(params=dict(training=True)).evaluate(
+            input_fn=functools.partial(
+                dataset.input_fn,
+                filenames=args.test_filenames,
+                batch_size=args.batch_size,
+                num_epochs=1,
+                shuffle=False,
+                sequence_lengths=[24],
+                encoding="jpeg",
+                image_size=[256, 256],
+                data_format=args.data_format
+            ),
+            steps=args.steps,
+            name="test"
+        )
+
+        tf.enable_eager_execution()
+
+        for i, predict_result in enumerate(predict_results):
+
+            image = predict_result["images"]
+            attention_maps = predict_result["attention_maps"]
+            prediction = predict_result["predictions"]
+
+            attention_maps = tf.reshape(attention_maps, shape=[-1, 64, 64, 16])
+            attention_maps = tf.reduce_sum(attention_maps, axis=-1, keepdims=True)
+            attention_maps = tf.image.resize_images(attention_maps, size=[256, 256])
+            attention_maps = tf.pad(attention_maps, paddings=[[0, 0], [0, 0], [0, 0], [0, 2]])
+
+            for j, attention_map in enumerate(attention_maps):
+                scipy.io.imsave("attention_map_{}.jpg".format(i, j), image + attention_map)

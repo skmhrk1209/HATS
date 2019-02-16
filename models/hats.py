@@ -120,13 +120,6 @@ class HATS(object):
         # prediction mode
         if mode == tf.estimator.ModeKeys.PREDICT:
 
-            while isinstance(predictions, list):
-
-                predictions = map_innermost_list(
-                    function=lambda predictions: tf.stack(predictions, axis=1),
-                    sequence=predictions
-                )
-
             while isinstance(attention_maps, list):
 
                 attention_maps = map_innermost_list(
@@ -134,17 +127,23 @@ class HATS(object):
                     sequence=attention_maps
                 )
 
+            while isinstance(predictions, list):
+
+                predictions = map_innermost_list(
+                    function=lambda predictions: tf.stack(predictions, axis=1),
+                    sequence=predictions
+                )
+
             return tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions=dict(
                     images=images,
-                    predictions=predictions,
-                    attention_maps=attention_maps
+                    attention_maps=attention_maps,
+                    predictions=predictions
                 )
             )
         # =========================================================================================
         # logits, predictions同様にlabelsもunstackしてnested listにしておく
-        # おそらくtf.reshape([-1, labels.shape[-1]])でも同様だが少し怖い
         while all(flatten_innermost_element(map_innermost_element(lambda labels: len(labels.shape) > 1, labels))):
             labels = map_innermost_element(
                 function=lambda labels: tf.unstack(labels, axis=1),
