@@ -222,6 +222,7 @@ if __name__ == "__main__":
                 attention_map = attention_map + image
                 attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
                 skimage.io.imshow(attention_map)
+                skimage.io.show()
                 if input("save image ? (y or n) >>").lower() == "y":
                     skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), attention_map)
 
