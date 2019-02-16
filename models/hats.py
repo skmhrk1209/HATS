@@ -46,6 +46,7 @@ class HATS(object):
             outputs_shape = ([-1, inputs_shape[1], np.prod(inputs_shape[2:])] if data_format == "channels_first" else
                              [-1, np.prod(inputs_shape[1:-1]), inputs_shape[-1]])
             return tf.reshape(inputs, outputs_shape)
+
         # attention mapによるfeature extraction
         feature_vectors = map_innermost_element(
             function=lambda attention_maps: tf.layers.flatten(tf.matmul(
@@ -120,14 +121,12 @@ class HATS(object):
         if mode == tf.estimator.ModeKeys.PREDICT:
 
             while isinstance(attention_maps, list):
-
                 attention_maps = map_innermost_list(
                     function=lambda attention_maps: tf.stack(attention_maps, axis=1),
                     sequence=attention_maps
                 )
 
             while isinstance(predictions, list):
-
                 predictions = map_innermost_list(
                     function=lambda predictions: tf.stack(predictions, axis=1),
                     sequence=predictions
@@ -188,13 +187,19 @@ class HATS(object):
         # attention decay
         loss += tf.reduce_mean(attention_maps) * self.hyper_params.attention_decay
         # =========================================================================================
-        # 余分なblankを除去した単語の正解率を求める
-        accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
+        # 単語のaccuracyを求める
+        word_accuracy = tf.reduce_mean(tf.cast(tf.reduce_all(tf.equal(
             x=predictions * sequence_mask,
             y=labels * sequence_mask
-        ), axis=1), dtype=tf.float32), name="acc")
-        # =========================================================================================
-        # TODO: なぜかedit distanceのshapeがloggingの際に異なる
+        ), axis=1), dtype=tf.float32), name="accuracy")
+        # 単語のedit distanceを求める
+        edit_distance = metrics.edit_distance(
+            labels=labels,
+            logits=logits,
+            sequence_lengths=sequence_lengths,
+            normalize=True,
+            name="distance"
+        )
         # =========================================================================================
         # attention mapは可視化のためにチャンネルをマージする
         attention_maps = map_innermost_element(
@@ -207,7 +212,8 @@ class HATS(object):
         )
         # =========================================================================================
         # tensorboard用のsummary
-        summary.scalar(accuracy, name="accuracy")
+        summary.scalar(word_accuracy, name="word_accuracy")
+        summary.scalar(edit_distance, name="edit_distance")
         summary.image(images, name="images", data_format=self.data_format, max_outputs=2)
         for indices, attention_maps in flatten_innermost_element(enumerate_innermost_element(attention_maps)):
             summary.image(attention_maps, name="attention_maps_{}".format("_".join(map(str, indices))), data_format=self.data_format, max_outputs=2)
@@ -241,7 +247,8 @@ class HATS(object):
                 mode=mode,
                 loss=loss,
                 eval_metric_ops=dict(
-                    accuracy=tf.metrics.mean(accuracy)
+                    word_accuracy=tf.metrics.mean(word_accuracy),
+                    edit_distance=tf.metrics.mean(edit_distance)
                 )
             )
         # =========================================================================================

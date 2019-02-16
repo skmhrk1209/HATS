@@ -139,7 +139,10 @@ if __name__ == "__main__":
             hooks=[
                 # logging用のhook
                 tf.train.LoggingTensorHook(
-                    tensors=dict(accuracy="acc"),
+                    tensors=dict(
+                        word_accuracy="accuracy",
+                        edit_distance="distance"
+                    ),
                     every_n_iter=100
                 ),
                 # validationのためのcustom hook
