@@ -206,6 +206,8 @@ if __name__ == "__main__":
 
         for i, predict_result in enumerate(predict_results):
 
+            print(predict_result)
+
             image = predict_result["images"]
             attention_maps = predict_result["attention_maps"]
 
