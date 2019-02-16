@@ -214,7 +214,7 @@ if __name__ == "__main__":
             attention_maps = skimage.transform.resize(attention_maps, [256, 256])
 
             for j, attention_map in enumerate(attention_maps):
-                skimage.io.imshow(attention_map)
+                skimage.io.imshow(image + attention_map)
                 if input("save image ? (y or n) >>").lower() == "y":
                     skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
 
