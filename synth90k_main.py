@@ -220,9 +220,9 @@ if __name__ == "__main__":
             for j, attention_map in enumerate(attention_maps):
                 attention_map = skimage.transform.resize(attention_map, [256, 256, 3])
                 skimage.io.imshow(image + attention_map)
+                skimage.io.show()
                 if input("save image ? (y or n) >>").lower() == "y":
                     skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), image + attention_map)
-                    skimage.io.show()
 
             if input("continue ? (y or n) >>").lower() == "n":
                 break
