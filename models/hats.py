@@ -168,6 +168,7 @@ class HATS(object):
         indices = tf.where(tf.reduce_any(tf.not_equal(labels, self.blank), axis=1))
         labels = tf.gather_nd(labels, indices)
         logits = tf.gather_nd(logits, indices)
+        predictions = tf.gather_nd(predictions, indices)
         # =========================================================================================
         # lossがblankを含まないようにマスク
         sequence_lengths = tf.count_nonzero(tf.not_equal(labels, self.blank), axis=1)
