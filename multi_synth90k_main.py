@@ -95,7 +95,7 @@ if __name__ == "__main__":
             hyper_params=Param(
                 attention_decay=0.0,
                 learning_rate_fn=lambda global_step: tf.train.exponential_decay(
-                    learning_rate=1e-4,
+                    learning_rate=5e-4,
                     global_step=global_step,
                     decay_steps=25000,
                     decay_rate=1e-1,
