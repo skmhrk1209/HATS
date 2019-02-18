@@ -7,10 +7,10 @@
 # test: 891927
 # max num chars: 23
 # classes: 37 [0-9A-Z](case-insensitive)
-# word accuracy: 88.56 %
-# edit distance:
+# word accuracy: 79.24 %
+# edit distance: 6.603 %
 # pretrained model: chars74k classifier
-# max steps: 50000 batch size: 100
+# max steps: 100000 batch size: 50
 # =============================================================
 
 import tensorflow as tf
@@ -95,7 +95,7 @@ if __name__ == "__main__":
             hyper_params=Param(
                 attention_decay=0.0,
                 learning_rate_fn=lambda global_step: tf.train.exponential_decay(
-                    learning_rate=1e-3,
+                    learning_rate=1e-4,
                     global_step=global_step,
                     decay_steps=25000,
                     decay_rate=1e-1,

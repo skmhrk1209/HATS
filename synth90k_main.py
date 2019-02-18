@@ -10,7 +10,7 @@
 # word accuracy: 88.56 %
 # edit distance:
 # pretrained model: chars74k classifier
-# max steps: 50000 batch size: 100
+# max steps: 100000 batch size: 100
 # =============================================================
 
 import tensorflow as tf
