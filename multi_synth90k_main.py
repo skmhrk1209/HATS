@@ -77,7 +77,7 @@ if __name__ == "__main__":
                     Param(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    Param(sequence_length=5, num_units=256),
+                    Param(sequence_length=5, num_units=512),
                     Param(sequence_length=11, num_units=256),
                 ],
                 deconv_params=[
