@@ -77,7 +77,7 @@ if __name__ == "__main__":
                     Param(filters=16, kernel_size=[3, 3], strides=[2, 2]),
                 ],
                 rnn_params=[
-                    Param(sequence_length=5, num_units=512),
+                    Param(sequence_length=5, num_units=256),
                     Param(sequence_length=11, num_units=256),
                 ],
                 deconv_params=[
@@ -93,7 +93,7 @@ if __name__ == "__main__":
             # =========================================================================================
             data_format=args.data_format,
             hyper_params=Param(
-                attention_decay=1e-6,
+                attention_decay=0.0,
                 learning_rate_fn=lambda global_step: tf.train.exponential_decay(
                     learning_rate=1e-3,
                     global_step=global_step,
