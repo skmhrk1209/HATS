@@ -8,7 +8,7 @@
 # max num chars: 23
 # classes: 37 [0-9A-Z](case-insensitive)
 # word accuracy: 88.56 %
-# edit distance:
+# edit distance: 3.163 %
 # pretrained model: chars74k classifier
 # max steps: 100000 batch size: 100
 # =============================================================
