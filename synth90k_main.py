@@ -203,8 +203,7 @@ if __name__ == "__main__":
                 encoding="jpeg",
                 image_size=[256, 256],
                 data_format=args.data_format
-            ),
-            steps=args.steps
+            )
         )
 
         for i, predict_result in enumerate(predict_results):
