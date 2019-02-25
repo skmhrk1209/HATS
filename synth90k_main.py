@@ -206,7 +206,7 @@ if __name__ == "__main__":
             )
         )
 
-        for i, predict_result in enumerate(predict_results):
+        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
 
             attention_maps = predict_result["attention_maps"]
             image = predict_result["images"]
