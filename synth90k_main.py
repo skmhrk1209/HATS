@@ -226,4 +226,4 @@ if __name__ == "__main__":
                 attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
                 attention_map = attention_map + image
                 attention_map = np.clip(attention_map, 0.0, 1.0)
-                skimage.io.imsave("images/attention_map_{}.jpg".format(i, j), attention_map)
+                skimage.io.imsave("images/synth90k/attention_map_{}.jpg".format(i, j), attention_map)
