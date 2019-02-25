@@ -36,7 +36,7 @@ parser.add_argument('--test_filenames', type=str, nargs="+", default=["synth90k_
 parser.add_argument("--batch_size", type=int, default=100, help="batch size")
 parser.add_argument("--random_seed", type=int, default=1209, help="random seed")
 parser.add_argument("--data_format", type=str, default="channels_first", help="data format")
-parser.add_argument("--max_steps", type=int, default=50000, help="maximum number of training steps")
+parser.add_argument("--max_steps", type=int, default=100000, help="maximum number of training steps")
 parser.add_argument("--steps", type=int, default=None, help="number of test steps")
 parser.add_argument('--train', action="store_true", help="with training")
 parser.add_argument('--eval', action="store_true", help="with evaluation")
@@ -189,40 +189,3 @@ if __name__ == "__main__":
         tf.logging.info("test result")
         tf.logging.info(eval_result)
         print("==================================================")
-
-    if args.predict:
-
-        predict_results = Estimator(params=dict(training=True)).predict(
-            input_fn=functools.partial(
-                dataset.input_fn,
-                filenames=args.test_filenames,
-                batch_size=args.batch_size,
-                num_epochs=1,
-                shuffle=False,
-                sequence_lengths=[24],
-                encoding="jpeg",
-                image_size=[256, 256],
-                data_format=args.data_format
-            )
-        )
-
-        for i, predict_result in enumerate(itertools.islice(predict_results, 10)):
-
-            attention_maps = predict_result["attention_maps"]
-            image = predict_result["images"]
-
-            if args.data_format == "channels_first":
-                attention_maps = np.reshape(attention_maps, newshape=[-1, 16, 64, 64])
-                attention_maps = np.transpose(attention_maps, axes=[0, 2, 3, 1])
-                image = np.transpose(image, axes=[1, 2, 0])
-            else:
-                attention_maps = np.reshape(attention_maps, newshape=[-1, 64, 64, 16])
-            attention_maps = np.sum(attention_maps, axis=-1, keepdims=True)
-            attention_maps = np.pad(attention_maps, pad_width=[[0, 0], [0, 0], [0, 0], [0, 2]], mode="constant")
-
-            for j, attention_map in enumerate(attention_maps):
-                attention_map = skimage.transform.resize(attention_map, image.shape)
-                attention_map = (attention_map - attention_map.min()) / (attention_map.max() - attention_map.min())
-                attention_map = attention_map + image
-                attention_map = np.clip(attention_map, 0.0, 1.0)
-                skimage.io.imsave("images/synth90k/attention_map_{}.jpg".format(i, j), attention_map)
