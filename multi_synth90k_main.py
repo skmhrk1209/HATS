@@ -1,6 +1,6 @@
 # =============================================================
 # dataset details
-# dataset: multi-synth90k
+# dataset: Multi-Synth90k
 # download: made by make_multi_synth90k.cpp
 # train: 800000
 # val: 100000
@@ -10,7 +10,7 @@
 # classes: 37 [0-9A-Z](case-insensitive)
 # word accuracy: 79.24 %
 # edit distance: 6.603 %
-# pretrained model: chars74k classifier
+# pretrained model: Chars74k classifier
 # max steps: 100000 batch size: 50
 # =============================================================
 

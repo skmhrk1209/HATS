@@ -1,6 +1,6 @@
 # =============================================================
 # dataset details
-# dataset: synth90k
+# dataset: Synth90k
 # download: http://www.robots.ox.ac.uk/~vgg/data/text/
 # train: 7224612
 # val: 802734
@@ -9,7 +9,7 @@
 # classes: 37 [0-9A-Z](case-insensitive)
 # word accuracy: 88.56 %
 # edit distance: 3.163 %
-# pretrained model: chars74k classifier
+# pretrained model: Chars74k classifier
 # max steps: 100000 batch size: 100
 # =============================================================
 
